@@ -17,7 +17,6 @@ import { useGetCategories, useCreateListing, useGetRegions, useGetDistricts } fr
 import { useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
 import { useAuth } from '@/context/AuthContext';
-import { KeyboardAwareScrollViewCompat } from 'react-native-keyboard-controller';
 
 export default function CreateScreen() {
   const colors = useColors();
@@ -100,7 +99,7 @@ export default function CreateScreen() {
         <Text style={[styles.headerTitle, { color: colors.text }]}>E'lon joylash</Text>
       </View>
 
-      <KeyboardAwareScrollViewCompat
+      <ScrollView
         style={{ flex: 1 }}
         contentContainerStyle={[styles.content, { paddingBottom: Platform.OS === 'web' ? 84 + 34 : 100 }]}
         keyboardShouldPersistTaps="handled"
@@ -299,7 +298,7 @@ export default function CreateScreen() {
             </>
           )}
         </TouchableOpacity>
-      </KeyboardAwareScrollViewCompat>
+      </ScrollView>
     </View>
   );
 }

@@ -15,7 +15,7 @@ import { useColors } from '@/hooks/useColors';
 import { useRegister, useGetRegions, useGetDistricts } from '@workspace/api-client-react';
 import { useAuth, type UserProfile } from '@/context/AuthContext';
 import { useRouter } from 'expo-router';
-import { KeyboardAwareScrollViewCompat } from 'react-native-keyboard-controller';
+import { ScrollView } from 'react-native';
 
 type Role = 'buyer' | 'seller' | 'driver';
 
@@ -105,7 +105,7 @@ export default function RegisterScreen() {
         <View style={[styles.stepDot, { backgroundColor: step === 2 ? colors.primary : colors.border }]} />
       </View>
 
-      <KeyboardAwareScrollViewCompat
+      <ScrollView
         style={{ flex: 1 }}
         contentContainerStyle={[styles.content, { paddingBottom: botPad + 30 }]}
         keyboardShouldPersistTaps="handled"
@@ -279,7 +279,7 @@ export default function RegisterScreen() {
             <Text style={[styles.loginLink, { color: colors.primary }]}>Kirish</Text>
           </TouchableOpacity>
         </View>
-      </KeyboardAwareScrollViewCompat>
+      </ScrollView>
     </View>
   );
 }

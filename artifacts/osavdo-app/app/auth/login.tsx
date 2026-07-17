@@ -15,7 +15,7 @@ import { useColors } from '@/hooks/useColors';
 import { useLogin } from '@workspace/api-client-react';
 import { useAuth, type UserProfile } from '@/context/AuthContext';
 import { useRouter } from 'expo-router';
-import { KeyboardAwareScrollViewCompat } from 'react-native-keyboard-controller';
+import { ScrollView } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 
 export default function LoginScreen() {
@@ -52,7 +52,7 @@ export default function LoginScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <KeyboardAwareScrollViewCompat
+      <ScrollView
         style={{ flex: 1 }}
         contentContainerStyle={[
           styles.content,
@@ -144,7 +144,7 @@ export default function LoginScreen() {
             </Text>
           </TouchableOpacity>
         </View>
-      </KeyboardAwareScrollViewCompat>
+      </ScrollView>
     </View>
   );
 }
