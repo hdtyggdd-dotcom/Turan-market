@@ -71,6 +71,7 @@ export default function HomeScreen() {
 
       {/* Categories */}
       <View style={[styles.categoriesBar, { backgroundColor: colors.card, borderBottomColor: colors.border }]}>
+        <Text style={[styles.categoriesLabel, { color: colors.mutedForeground }]}>Kategoriyalar</Text>
         <CategoryGrid
           categories={categories ?? []}
           selected={selectedCategory}
@@ -167,6 +168,15 @@ const styles = StyleSheet.create({
   },
   categoriesBar: {
     borderBottomWidth: StyleSheet.hairlineWidth,
+    paddingTop: 8,
+  },
+  categoriesLabel: {
+    fontSize: 12,
+    fontFamily: 'Inter_500Medium',
+    paddingHorizontal: 16,
+    marginBottom: 2,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
   list: {
     paddingHorizontal: 16,
