@@ -3,8 +3,8 @@ import {
   View,
   Text,
   TouchableOpacity,
-  ScrollView,
   StyleSheet,
+  useWindowDimensions,
 } from 'react-native';
 import { useColors } from '@/hooks/useColors';
 
@@ -20,94 +20,93 @@ interface CategoryGridProps {
   onSelect: (id: string | null) => void;
 }
 
+const COLS = 5;
+const H_PAD = 12;
+const GAP = 8;
+
 export function CategoryGrid({ categories, selected, onSelect }: CategoryGridProps) {
   const colors = useColors();
+  const { width } = useWindowDimensions();
+  const itemSize = (width - H_PAD * 2 - GAP * (COLS - 1)) / COLS;
+
+  const all = [{ id: '__all__', name: 'Hammasi', icon: '🏪' }, ...categories];
 
   return (
-    <ScrollView
-      horizontal
-      showsHorizontalScrollIndicator={false}
-      contentContainerStyle={styles.container}
-    >
-      {/* All */}
-      <TouchableOpacity
-        style={[
-          styles.chip,
-          {
-            backgroundColor: selected === null ? colors.primary : colors.card,
-            borderColor: selected === null ? colors.primary : colors.border,
-          },
-        ]}
-        onPress={() => onSelect(null)}
-      >
-        <Text style={styles.icon}>🏪</Text>
-        <Text
-          style={[
-            styles.label,
-            { color: selected === null ? colors.primaryForeground : colors.text },
-          ]}
-        >
-          Hammasi
-        </Text>
-      </TouchableOpacity>
+    <View style={[styles.grid, { paddingHorizontal: H_PAD, gap: GAP }]}>
+      {all.map((cat) => {
+        const isSelected = cat.id === '__all__' ? selected === null : selected === cat.id;
+        const handlePress = () => onSelect(cat.id === '__all__' ? null : (isSelected ? null : cat.id));
 
-      {categories.map((cat) => {
-        const isSelected = selected === cat.id;
+        // short label: first word, max 8 chars
+        const label = cat.name.split(' ')[0].slice(0, 9);
+
         return (
           <TouchableOpacity
             key={cat.id}
+            onPress={handlePress}
+            activeOpacity={0.75}
             style={[
-              styles.chip,
+              styles.item,
               {
-                backgroundColor: isSelected ? colors.primary : colors.card,
+                width: itemSize,
+                backgroundColor: isSelected ? colors.primary + '15' : colors.card,
                 borderColor: isSelected ? colors.primary : colors.border,
               },
             ]}
-            onPress={() => onSelect(isSelected ? null : cat.id)}
           >
-            <Text style={styles.icon}>{cat.icon}</Text>
+            <View style={[
+              styles.iconWrap,
+              {
+                backgroundColor: isSelected ? colors.primary : colors.secondary,
+              }
+            ]}>
+              <Text style={styles.icon}>{cat.icon}</Text>
+            </View>
             <Text
               style={[
                 styles.label,
-                { color: isSelected ? colors.primaryForeground : colors.text },
+                { color: isSelected ? colors.primary : colors.text },
               ]}
-              numberOfLines={1}
+              numberOfLines={2}
             >
-              {cat.name.split(' ')[0]}
+              {label}
             </Text>
           </TouchableOpacity>
         );
       })}
-    </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    gap: 8,
+  grid: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
+    paddingVertical: 10,
   },
-  chip: {
-    flexDirection: 'row',
+  item: {
     alignItems: 'center',
-    gap: 6,
-    paddingHorizontal: 14,
     paddingVertical: 8,
-    borderRadius: 100,
+    paddingHorizontal: 4,
+    borderRadius: 12,
     borderWidth: 1,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 1,
+    gap: 5,
+    marginBottom: GAP,
+  },
+  iconWrap: {
+    width: 40,
+    height: 40,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   icon: {
-    fontSize: 15,
+    fontSize: 20,
   },
   label: {
-    fontSize: 13,
+    fontSize: 10,
     fontFamily: 'Inter_500Medium',
+    textAlign: 'center',
+    lineHeight: 13,
   },
 });
