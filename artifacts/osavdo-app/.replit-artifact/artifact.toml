@@ -1,0 +1,23 @@
+kind = "mobile"
+previewPath = "/"
+title = "O'Savdo"
+version = "1.0.0"
+id = "artifacts/osavdo-app"
+router = "expo-domain"
+
+[[services]]
+name = "expo"
+ensurePreviewReachable = "/status"
+paths = [ "/" ]
+localPort = 24490
+
+[services.development]
+run = "pnpm --filter @workspace/osavdo-app run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/osavdo-app", "run", "build" ]
+run = [ "pnpm", "--filter", "@workspace/osavdo-app", "run", "serve" ]
+
+[services.env]
+PORT = "24490"
+BASE_PATH = "/"

@@ -6,6 +6,9 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export interface HealthStatus {
-  status: string;
+export interface UpdateUserRequest {
+  name?: string;
+  regionId?: string;
+  districtId?: string;
+  neighborhoodId?: string;
 }

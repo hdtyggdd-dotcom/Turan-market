@@ -3,20 +3,36 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: O'Savdo local marketplace API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: auth
+    description: Authentication
+  - name: users
+    description: User profiles
+  - name: listings
+    description: Product listings
+  - name: categories
+    description: Categories
+  - name: locations
+    description: Location hierarchy
+  - name: orders
+    description: Orders
+  - name: delivery
+    description: Delivery estimation
+  - name: sellers
+    description: Seller management
+
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,7 +40,511 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /auth/register:
+    post:
+      operationId: register
+      tags: [auth]
+      summary: Register new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterRequest"
+      responses:
+        "201":
+          description: User created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "400":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /auth/login:
+    post:
+      operationId: login
+      tags: [auth]
+      summary: Login user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+      responses:
+        "200":
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "401":
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /auth/me:
+    get:
+      operationId: getMe
+      tags: [auth]
+      summary: Get current user
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Current user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+
+  /users/{id}:
+    get:
+      operationId: getUser
+      tags: [users]
+      summary: Get user by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: User found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "404":
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    put:
+      operationId: updateUser
+      tags: [users]
+      summary: Update user profile
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateUserRequest"
+      responses:
+        "200":
+          description: User updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+
+  /locations/regions:
+    get:
+      operationId: getRegions
+      tags: [locations]
+      summary: Get all regions (viloyatlar)
+      responses:
+        "200":
+          description: List of regions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Region"
+
+  /locations/districts:
+    get:
+      operationId: getDistricts
+      tags: [locations]
+      summary: Get districts by region
+      parameters:
+        - name: regionId
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of districts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/District"
+
+  /locations/neighborhoods:
+    get:
+      operationId: getNeighborhoods
+      tags: [locations]
+      summary: Get neighborhoods by district
+      parameters:
+        - name: districtId
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of neighborhoods
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Neighborhood"
+
+  /categories:
+    get:
+      operationId: getCategories
+      tags: [categories]
+      summary: Get all categories and subcategories
+      responses:
+        "200":
+          description: List of categories
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Category"
+
+  /listings:
+    get:
+      operationId: getListings
+      tags: [listings]
+      summary: Get listings with filters
+      parameters:
+        - name: categoryId
+          in: query
+          schema:
+            type: string
+        - name: subcategoryId
+          in: query
+          schema:
+            type: string
+        - name: regionId
+          in: query
+          schema:
+            type: string
+        - name: districtId
+          in: query
+          schema:
+            type: string
+        - name: neighborhoodId
+          in: query
+          schema:
+            type: string
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: minPrice
+          in: query
+          schema:
+            type: number
+        - name: maxPrice
+          in: query
+          schema:
+            type: number
+        - name: sellerLat
+          in: query
+          schema:
+            type: number
+        - name: sellerLng
+          in: query
+          schema:
+            type: number
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        "200":
+          description: Paginated listings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ListingsResponse"
+    post:
+      operationId: createListing
+      tags: [listings]
+      summary: Create a new listing
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateListingRequest"
+      responses:
+        "201":
+          description: Listing created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Listing"
+
+  /listings/{id}:
+    get:
+      operationId: getListing
+      tags: [listings]
+      summary: Get listing by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Listing found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Listing"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    put:
+      operationId: updateListing
+      tags: [listings]
+      summary: Update listing
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateListingRequest"
+      responses:
+        "200":
+          description: Listing updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Listing"
+    delete:
+      operationId: deleteListing
+      tags: [listings]
+      summary: Delete listing
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Deleted
+
+  /listings/user/{userId}:
+    get:
+      operationId: getUserListings
+      tags: [listings]
+      summary: Get listings by user
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: User listings
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Listing"
+
+  /sellers/{id}/verify:
+    post:
+      operationId: requestSellerVerification
+      tags: [sellers]
+      summary: Submit verification request (manufacturer badge)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/VerificationRequest"
+      responses:
+        "200":
+          description: Verification submitted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VerificationResponse"
+
+  /delivery/estimate:
+    post:
+      operationId: estimateDelivery
+      tags: [delivery]
+      summary: Estimate delivery cost and options
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DeliveryEstimateRequest"
+      responses:
+        "200":
+          description: Delivery estimates
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DeliveryEstimateResponse"
+
+  /orders:
+    get:
+      operationId: getOrders
+      tags: [orders]
+      summary: Get current user's orders
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Orders list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Order"
+    post:
+      operationId: createOrder
+      tags: [orders]
+      summary: Create a new order
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateOrderRequest"
+      responses:
+        "201":
+          description: Order created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
+
+  /orders/{id}:
+    get:
+      operationId: getOrder
+      tags: [orders]
+      summary: Get order by ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Order found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
+
+  /orders/{id}/status:
+    put:
+      operationId: updateOrderStatus
+      tags: [orders]
+      summary: Update order status
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateOrderStatusRequest"
+      responses:
+        "200":
+          description: Order updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
+
+  /stats/summary:
+    get:
+      operationId: getStatsSummary
+      tags: [listings]
+      summary: Get platform stats summary
+      responses:
+        "200":
+          description: Stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StatsSummary"
+
 components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
   schemas:
     HealthStatus:
       type: object
@@ -34,3 +554,566 @@ components:
       required:
         - status
 
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+      required:
+        - error
+
+    AuthResponse:
+      type: object
+      properties:
+        token:
+          type: string
+        user:
+          $ref: "#/components/schemas/User"
+      required:
+        - token
+        - user
+
+    RegisterRequest:
+      type: object
+      properties:
+        phone:
+          type: string
+        name:
+          type: string
+        password:
+          type: string
+        role:
+          type: string
+          enum: [buyer, seller, driver]
+        regionId:
+          type: string
+        districtId:
+          type: string
+        neighborhoodId:
+          type: string
+      required:
+        - phone
+        - name
+        - password
+        - role
+
+    LoginRequest:
+      type: object
+      properties:
+        phone:
+          type: string
+        password:
+          type: string
+      required:
+        - phone
+        - password
+
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+        phone:
+          type: string
+        name:
+          type: string
+        role:
+          type: string
+          enum: [buyer, seller, driver, admin]
+        sellerBadge:
+          type: string
+          nullable: true
+          enum: [manufacturer, reseller]
+        verificationStatus:
+          type: string
+          enum: [none, pending, approved, rejected]
+        regionId:
+          type: string
+          nullable: true
+        districtId:
+          type: string
+          nullable: true
+        neighborhoodId:
+          type: string
+          nullable: true
+        region:
+          $ref: "#/components/schemas/Region"
+          nullable: true
+        district:
+          $ref: "#/components/schemas/District"
+          nullable: true
+        neighborhood:
+          $ref: "#/components/schemas/Neighborhood"
+          nullable: true
+        rating:
+          type: number
+          nullable: true
+        totalSales:
+          type: integer
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - phone
+        - name
+        - role
+        - verificationStatus
+        - createdAt
+
+    UpdateUserRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        regionId:
+          type: string
+        districtId:
+          type: string
+        neighborhoodId:
+          type: string
+
+    Region:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        nameRu:
+          type: string
+      required:
+        - id
+        - name
+        - nameRu
+
+    District:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        nameRu:
+          type: string
+        regionId:
+          type: string
+        lat:
+          type: number
+          nullable: true
+        lng:
+          type: number
+          nullable: true
+      required:
+        - id
+        - name
+        - nameRu
+        - regionId
+
+    Neighborhood:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        nameRu:
+          type: string
+        districtId:
+          type: string
+      required:
+        - id
+        - name
+        - nameRu
+        - districtId
+
+    Category:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        nameRu:
+          type: string
+        icon:
+          type: string
+        subcategories:
+          type: array
+          items:
+            $ref: "#/components/schemas/Subcategory"
+      required:
+        - id
+        - name
+        - nameRu
+        - icon
+        - subcategories
+
+    Subcategory:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        nameRu:
+          type: string
+        categoryId:
+          type: string
+        bookingMode:
+          type: string
+          enum: [full, showcase]
+          nullable: true
+      required:
+        - id
+        - name
+        - nameRu
+        - categoryId
+
+    Listing:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        titleRu:
+          type: string
+          nullable: true
+        description:
+          type: string
+          nullable: true
+        price:
+          type: number
+        priceUnit:
+          type: string
+          nullable: true
+        images:
+          type: array
+          items:
+            type: string
+        categoryId:
+          type: string
+        subcategoryId:
+          type: string
+          nullable: true
+        userId:
+          type: string
+        user:
+          $ref: "#/components/schemas/User"
+        regionId:
+          type: string
+        districtId:
+          type: string
+        neighborhoodId:
+          type: string
+          nullable: true
+        region:
+          $ref: "#/components/schemas/Region"
+        district:
+          $ref: "#/components/schemas/District"
+        neighborhood:
+          $ref: "#/components/schemas/Neighborhood"
+          nullable: true
+        lat:
+          type: number
+          nullable: true
+        lng:
+          type: number
+          nullable: true
+        distanceKm:
+          type: number
+          nullable: true
+        distanceColor:
+          type: string
+          nullable: true
+          enum: [green, yellow, red]
+        status:
+          type: string
+          enum: [active, sold, paused]
+        viewCount:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - title
+        - price
+        - images
+        - categoryId
+        - userId
+        - user
+        - regionId
+        - districtId
+        - region
+        - district
+        - status
+        - viewCount
+        - createdAt
+
+    CreateListingRequest:
+      type: object
+      properties:
+        title:
+          type: string
+        titleRu:
+          type: string
+        description:
+          type: string
+        price:
+          type: number
+        priceUnit:
+          type: string
+        images:
+          type: array
+          items:
+            type: string
+        categoryId:
+          type: string
+        subcategoryId:
+          type: string
+        regionId:
+          type: string
+        districtId:
+          type: string
+        neighborhoodId:
+          type: string
+        lat:
+          type: number
+        lng:
+          type: number
+      required:
+        - title
+        - price
+        - categoryId
+        - regionId
+        - districtId
+
+    ListingsResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/Listing"
+        total:
+          type: integer
+        page:
+          type: integer
+        limit:
+          type: integer
+        totalPages:
+          type: integer
+      required:
+        - items
+        - total
+        - page
+        - limit
+        - totalPages
+
+    VerificationRequest:
+      type: object
+      properties:
+        isManufacturer:
+          type: boolean
+        productionImages:
+          type: array
+          items:
+            type: string
+        description:
+          type: string
+      required:
+        - isManufacturer
+
+    VerificationResponse:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+      required:
+        - status
+        - message
+
+    DeliveryEstimateRequest:
+      type: object
+      properties:
+        fromDistrictId:
+          type: string
+        toDistrictId:
+          type: string
+        fromLat:
+          type: number
+        fromLng:
+          type: number
+        toLat:
+          type: number
+        toLng:
+          type: number
+        weight:
+          type: number
+          description: Weight in kg
+        cargoType:
+          type: string
+          enum: [standard, livestock, heavy]
+      required:
+        - fromDistrictId
+        - toDistrictId
+        - cargoType
+
+    DeliveryEstimateResponse:
+      type: object
+      properties:
+        distanceKm:
+          type: number
+        options:
+          type: array
+          items:
+            $ref: "#/components/schemas/DeliveryOption"
+        distanceColor:
+          type: string
+          enum: [green, yellow, red]
+      required:
+        - distanceKm
+        - options
+        - distanceColor
+
+    DeliveryOption:
+      type: object
+      properties:
+        vehicleType:
+          type: string
+          enum: [small, medium, large, livestock]
+        vehicleName:
+          type: string
+        vehicleNameRu:
+          type: string
+        price:
+          type: number
+        platformFee:
+          type: number
+        driverFee:
+          type: number
+        estimatedMinutes:
+          type: integer
+      required:
+        - vehicleType
+        - vehicleName
+        - vehicleNameRu
+        - price
+        - platformFee
+        - driverFee
+        - estimatedMinutes
+
+    Order:
+      type: object
+      properties:
+        id:
+          type: string
+        listingId:
+          type: string
+        listing:
+          $ref: "#/components/schemas/Listing"
+        buyerId:
+          type: string
+        buyer:
+          $ref: "#/components/schemas/User"
+        sellerId:
+          type: string
+        seller:
+          $ref: "#/components/schemas/User"
+        quantity:
+          type: integer
+        totalPrice:
+          type: number
+        deliveryOption:
+          type: string
+          nullable: true
+        deliveryPrice:
+          type: number
+          nullable: true
+        status:
+          type: string
+          enum: [pending, confirmed, delivering, delivered, cancelled]
+        notes:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - listingId
+        - listing
+        - buyerId
+        - buyer
+        - sellerId
+        - seller
+        - quantity
+        - totalPrice
+        - status
+        - createdAt
+
+    CreateOrderRequest:
+      type: object
+      properties:
+        listingId:
+          type: string
+        quantity:
+          type: integer
+        deliveryOption:
+          type: string
+        deliveryPrice:
+          type: number
+        notes:
+          type: string
+      required:
+        - listingId
+        - quantity
+
+    UpdateOrderStatusRequest:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [pending, confirmed, delivering, delivered, cancelled]
+      required:
+        - status
+
+    StatsSummary:
+      type: object
+      properties:
+        totalListings:
+          type: integer
+        totalUsers:
+          type: integer
+        totalOrders:
+          type: integer
+        activeListings:
+          type: integer
+        topCategories:
+          type: array
+          items:
+            type: object
+            properties:
+              categoryId:
+                type: string
+              name:
+                type: string
+              count:
+                type: integer
+            required:
+              - categoryId
+              - name
+              - count
+      required:
+        - totalListings
+        - totalUsers
+        - totalOrders
+        - activeListings
+        - topCategories

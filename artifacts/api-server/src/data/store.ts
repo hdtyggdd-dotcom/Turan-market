@@ -1,0 +1,689 @@
+// O'Savdo in-memory store with full Uzbekistan seed data
+
+export interface StoredRegion {
+  id: string;
+  name: string;
+  nameRu: string;
+  lat: number;
+  lng: number;
+}
+
+export interface StoredDistrict {
+  id: string;
+  name: string;
+  nameRu: string;
+  regionId: string;
+  lat: number;
+  lng: number;
+}
+
+export interface StoredNeighborhood {
+  id: string;
+  name: string;
+  nameRu: string;
+  districtId: string;
+}
+
+export interface StoredSubcategory {
+  id: string;
+  name: string;
+  nameRu: string;
+  categoryId: string;
+  bookingMode?: 'full' | 'showcase' | null;
+}
+
+export interface StoredCategory {
+  id: string;
+  name: string;
+  nameRu: string;
+  icon: string;
+  subcategories: StoredSubcategory[];
+}
+
+export interface StoredUser {
+  id: string;
+  phone: string;
+  name: string;
+  password: string;
+  role: 'buyer' | 'seller' | 'driver' | 'admin';
+  sellerBadge: 'manufacturer' | 'reseller' | null;
+  verificationStatus: 'none' | 'pending' | 'approved' | 'rejected';
+  regionId: string | null;
+  districtId: string | null;
+  neighborhoodId: string | null;
+  rating: number | null;
+  totalSales: number;
+  createdAt: string;
+}
+
+export interface StoredListing {
+  id: string;
+  title: string;
+  titleRu: string | null;
+  description: string | null;
+  price: number;
+  priceUnit: string | null;
+  images: string[];
+  categoryId: string;
+  subcategoryId: string | null;
+  userId: string;
+  regionId: string;
+  districtId: string;
+  neighborhoodId: string | null;
+  lat: number | null;
+  lng: number | null;
+  status: 'active' | 'sold' | 'paused';
+  viewCount: number;
+  createdAt: string;
+}
+
+export interface StoredOrder {
+  id: string;
+  listingId: string;
+  buyerId: string;
+  sellerId: string;
+  quantity: number;
+  totalPrice: number;
+  deliveryOption: string | null;
+  deliveryPrice: number | null;
+  status: 'pending' | 'confirmed' | 'delivering' | 'delivered' | 'cancelled';
+  notes: string | null;
+  createdAt: string;
+}
+
+// ─── REGIONS ──────────────────────────────────────────────────────────────────
+export const regions: StoredRegion[] = [
+  { id: 'r1', name: "Toshkent shahri", nameRu: "Ташкент (город)", lat: 41.2995, lng: 69.2401 },
+  { id: 'r2', name: "Toshkent viloyati", nameRu: "Ташкентская область", lat: 41.1145, lng: 69.2900 },
+  { id: 'r3', name: "Andijon", nameRu: "Андижанская", lat: 40.7821, lng: 72.3442 },
+  { id: 'r4', name: "Farg'ona", nameRu: "Ферганская", lat: 40.3834, lng: 71.7855 },
+  { id: 'r5', name: "Namangan", nameRu: "Наманганская", lat: 41.0011, lng: 71.6683 },
+  { id: 'r6', name: "Samarqand", nameRu: "Самаркандская", lat: 39.6542, lng: 66.9597 },
+  { id: 'r7', name: "Buxoro", nameRu: "Бухарская", lat: 39.7681, lng: 64.4556 },
+  { id: 'r8', name: "Navoiy", nameRu: "Навоийская", lat: 40.1000, lng: 65.3790 },
+  { id: 'r9', name: "Qashqadaryo", nameRu: "Кашкадарьинская", lat: 38.8671, lng: 65.7917 },
+  { id: 'r10', name: "Surxondaryo", nameRu: "Сурхандарьинская", lat: 37.9402, lng: 67.5601 },
+  { id: 'r11', name: "Jizzax", nameRu: "Джизакская", lat: 40.1158, lng: 67.8422 },
+  { id: 'r12', name: "Sirdaryo", nameRu: "Сырдарьинская", lat: 40.8376, lng: 68.6632 },
+  { id: 'r13', name: "Xorazm", nameRu: "Хорезмская", lat: 41.5500, lng: 60.6167 },
+  { id: 'r14', name: "Qoraqalpog'iston", nameRu: "Каракалпакстан", lat: 43.7681, lng: 59.0400 },
+];
+
+// ─── DISTRICTS ────────────────────────────────────────────────────────────────
+export const districts: StoredDistrict[] = [
+  // Toshkent shahri
+  { id: 'd1', name: "Yunusobod", nameRu: "Юнусабад", regionId: 'r1', lat: 41.3337, lng: 69.2795 },
+  { id: 'd2', name: "Chilonzor", nameRu: "Чиланзар", regionId: 'r1', lat: 41.2794, lng: 69.2014 },
+  { id: 'd3', name: "Yakkasaroy", nameRu: "Яккасарай", regionId: 'r1', lat: 41.2930, lng: 69.2581 },
+  { id: 'd4', name: "Mirzo Ulug'bek", nameRu: "Мирзо-Улугбек", regionId: 'r1', lat: 41.3200, lng: 69.3100 },
+  { id: 'd5', name: "Uchtepa", nameRu: "Учтепа", regionId: 'r1', lat: 41.3050, lng: 69.2100 },
+  // Toshkent viloyati
+  { id: 'd6', name: "Chirchiq", nameRu: "Чирчик", regionId: 'r2', lat: 41.4700, lng: 69.5800 },
+  { id: 'd7', name: "Angren", nameRu: "Ангрен", regionId: 'r2', lat: 41.0130, lng: 70.1440 },
+  { id: 'd8', name: "Almaliq", nameRu: "Алмалык", regionId: 'r2', lat: 40.8523, lng: 69.6057 },
+  { id: 'd9', name: "Bekabad", nameRu: "Бекабад", regionId: 'r2', lat: 40.2200, lng: 69.2300 },
+  { id: 'd10', name: "Yangiyo'l", nameRu: "Янгиюль", regionId: 'r2', lat: 41.1100, lng: 69.0400 },
+  // Andijon
+  { id: 'd11', name: "Andijon", nameRu: "Андижан", regionId: 'r3', lat: 40.7821, lng: 72.3442 },
+  { id: 'd12', name: "Asaka", nameRu: "Асака", regionId: 'r3', lat: 40.6430, lng: 72.2360 },
+  { id: 'd13', name: "Xo'jaobod", nameRu: "Ходжаабад", regionId: 'r3', lat: 40.9300, lng: 72.5500 },
+  { id: 'd14', name: "Baliqchi", nameRu: "Балыкчи", regionId: 'r3', lat: 40.5800, lng: 72.0100 },
+  // Farg'ona
+  { id: 'd15', name: "Farg'ona", nameRu: "Фергана", regionId: 'r4', lat: 40.3834, lng: 71.7855 },
+  { id: 'd16', name: "Marg'ilon", nameRu: "Маргилан", regionId: 'r4', lat: 40.4700, lng: 71.7300 },
+  { id: 'd17', name: "Qo'qon", nameRu: "Коканд", regionId: 'r4', lat: 40.5280, lng: 70.9430 },
+  { id: 'd18', name: "Quva", nameRu: "Кува", regionId: 'r4', lat: 40.5200, lng: 72.0700 },
+  // Namangan
+  { id: 'd19', name: "Namangan", nameRu: "Наманган", regionId: 'r5', lat: 41.0011, lng: 71.6683 },
+  { id: 'd20', name: "Kosonsoy", nameRu: "Касансай", regionId: 'r5', lat: 41.2200, lng: 71.5300 },
+  { id: 'd21', name: "Uchqo'rg'on", nameRu: "Учкурган", regionId: 'r5', lat: 41.1100, lng: 72.0800 },
+  // Samarqand
+  { id: 'd22', name: "Samarqand", nameRu: "Самарканд", regionId: 'r6', lat: 39.6542, lng: 66.9597 },
+  { id: 'd23', name: "Kattaqo'rg'on", nameRu: "Каттакурган", regionId: 'r6', lat: 39.9000, lng: 66.2600 },
+  { id: 'd24', name: "Ishtixon", nameRu: "Иштихан", regionId: 'r6', lat: 39.9800, lng: 66.4800 },
+  // Buxoro
+  { id: 'd25', name: "Buxoro", nameRu: "Бухара", regionId: 'r7', lat: 39.7681, lng: 64.4556 },
+  { id: 'd26', name: "G'ijduvon", nameRu: "Гиждуван", regionId: 'r7', lat: 40.1000, lng: 64.6800 },
+  { id: 'd27', name: "Kogon", nameRu: "Каган", regionId: 'r7', lat: 39.7300, lng: 64.5500 },
+  // Navoiy
+  { id: 'd28', name: "Navoiy", nameRu: "Навои", regionId: 'r8', lat: 40.1000, lng: 65.3790 },
+  { id: 'd29', name: "Zarafshon", nameRu: "Зарафшан", regionId: 'r8', lat: 41.5700, lng: 64.2000 },
+  // Qashqadaryo
+  { id: 'd30', name: "Qarshi", nameRu: "Карши", regionId: 'r9', lat: 38.8671, lng: 65.7917 },
+  { id: 'd31', name: "Shahrisabz", nameRu: "Шахрисабз", regionId: 'r9', lat: 39.0590, lng: 66.8350 },
+  // Surxondaryo
+  { id: 'd32', name: "Termiz", nameRu: "Термез", regionId: 'r10', lat: 37.2244, lng: 67.2783 },
+  { id: 'd33', name: "Denov", nameRu: "Денау", regionId: 'r10', lat: 38.2700, lng: 67.8900 },
+  // Jizzax
+  { id: 'd34', name: "Jizzax", nameRu: "Джизак", regionId: 'r11', lat: 40.1158, lng: 67.8422 },
+  { id: 'd35', name: "G'allaorol", nameRu: "Галляарал", regionId: 'r11', lat: 40.0300, lng: 68.8300 },
+  // Sirdaryo
+  { id: 'd36', name: "Guliston", nameRu: "Гулистан", regionId: 'r12', lat: 40.4900, lng: 68.7800 },
+  { id: 'd37', name: "Yangiyer", nameRu: "Янгиер", regionId: 'r12', lat: 40.2900, lng: 68.8300 },
+  // Xorazm
+  { id: 'd38', name: "Urganch", nameRu: "Ургенч", regionId: 'r13', lat: 41.5500, lng: 60.6167 },
+  { id: 'd39', name: "Xiva", nameRu: "Хива", regionId: 'r13', lat: 41.3780, lng: 60.3630 },
+  // Qoraqalpog'iston
+  { id: 'd40', name: "No'kis", nameRu: "Нукус", regionId: 'r14', lat: 42.4603, lng: 59.6166 },
+  { id: 'd41', name: "Taxtako'pir", nameRu: "Тахтакупыр", regionId: 'r14', lat: 42.8000, lng: 60.1900 },
+];
+
+// ─── NEIGHBORHOODS ────────────────────────────────────────────────────────────
+export const neighborhoods: StoredNeighborhood[] = [
+  { id: 'n1', name: "Yunusobod-1", nameRu: "Юнусабад-1", districtId: 'd1' },
+  { id: 'n2', name: "Yunusobod-2", nameRu: "Юнусабад-2", districtId: 'd1' },
+  { id: 'n3', name: "Olmazar", nameRu: "Олмазар", districtId: 'd1' },
+  { id: 'n4', name: "Chilonzor-1", nameRu: "Чиланзар-1", districtId: 'd2' },
+  { id: 'n5', name: "Chilonzor-7", nameRu: "Чиланзар-7", districtId: 'd2' },
+  { id: 'n6', name: "Sebzor", nameRu: "Себзар", districtId: 'd3' },
+  { id: 'n7', name: "Andijon markazi", nameRu: "Центр Андижана", districtId: 'd11' },
+  { id: 'n8', name: "Farg'ona markazi", nameRu: "Центр Ферганы", districtId: 'd15' },
+  { id: 'n9', name: "Registon", nameRu: "Регистан", districtId: 'd22' },
+  { id: 'n10', name: "Qarshi markazi", nameRu: "Центр Карши", districtId: 'd30' },
+];
+
+// ─── CATEGORIES ───────────────────────────────────────────────────────────────
+export const categories: StoredCategory[] = [
+  {
+    id: 'cat1',
+    name: "Qishloq xo'jaligi",
+    nameRu: "Сельское хозяйство",
+    icon: "🌾",
+    subcategories: [
+      { id: 'sub1', name: "Chorva mollari", nameRu: "Скот", categoryId: 'cat1' },
+      { id: 'sub2', name: "Parranda", nameRu: "Птица", categoryId: 'cat1' },
+      { id: 'sub3', name: "Asalari va qo'shimcha", nameRu: "Пчелы и прочее", categoryId: 'cat1' },
+    ],
+  },
+  {
+    id: 'cat2',
+    name: "Qurilish mollari",
+    nameRu: "Строительные материалы",
+    icon: "🏗️",
+    subcategories: [
+      { id: 'sub4', name: "Shifer", nameRu: "Шифер", categoryId: 'cat2' },
+      { id: 'sub5', name: "G'isht", nameRu: "Кирпич", categoryId: 'cat2' },
+      { id: 'sub6', name: "Sement", nameRu: "Цемент", categoryId: 'cat2' },
+      { id: 'sub7', name: "Armatura", nameRu: "Арматура", categoryId: 'cat2' },
+      { id: 'sub8', name: "Boshqa qurilish", nameRu: "Прочие материалы", categoryId: 'cat2' },
+    ],
+  },
+  {
+    id: 'cat3',
+    name: "Avto ehtiyot qismlar",
+    nameRu: "Автозапчасти",
+    icon: "🔧",
+    subcategories: [
+      { id: 'sub9', name: "Skuter qismlari", nameRu: "Запчасти для скутера", categoryId: 'cat3' },
+      { id: 'sub10', name: "Traktor qismlari", nameRu: "Запчасти для трактора", categoryId: 'cat3' },
+      { id: 'sub11', name: "Yuk mashina qismlari", nameRu: "Запчасти для грузовика", categoryId: 'cat3' },
+    ],
+  },
+  {
+    id: 'cat4',
+    name: "Yangi/Eski tovarlar",
+    nameRu: "Новые/Б/У товары",
+    icon: "📦",
+    subcategories: [
+      { id: 'sub12', name: "Antikvar buyumlar", nameRu: "Антиквариат", categoryId: 'cat4' },
+      { id: 'sub13', name: "Mashinalar", nameRu: "Автомобили", categoryId: 'cat4' },
+      { id: 'sub14', name: "Uy-ro'zg'or buyumlari", nameRu: "Товары для дома", categoryId: 'cat4' },
+    ],
+  },
+  {
+    id: 'cat5',
+    name: "Mavsumiy xizmatlar",
+    nameRu: "Сезонные услуги",
+    icon: "🛠️",
+    subcategories: [
+      { id: 'sub15', name: "Texnika ijarasi", nameRu: "Аренда техники", categoryId: 'cat5', bookingMode: 'full' },
+      { id: 'sub16', name: "Maishiy xizmat", nameRu: "Бытовые услуги", categoryId: 'cat5', bookingMode: 'showcase' },
+      { id: 'sub17', name: "Savdo do'konlari", nameRu: "Магазины", categoryId: 'cat5', bookingMode: 'showcase' },
+    ],
+  },
+];
+
+// ─── USERS ────────────────────────────────────────────────────────────────────
+export const users: StoredUser[] = [
+  {
+    id: 'u1',
+    phone: '+998901234567',
+    name: 'Aziz Karimov',
+    password: 'test123',
+    role: 'seller',
+    sellerBadge: 'manufacturer',
+    verificationStatus: 'approved',
+    regionId: 'r3',
+    districtId: 'd11',
+    neighborhoodId: null,
+    rating: 4.8,
+    totalSales: 47,
+    createdAt: '2024-01-15T08:00:00.000Z',
+  },
+  {
+    id: 'u2',
+    phone: '+998901112233',
+    name: 'Dilnoza Yusupova',
+    password: 'test123',
+    role: 'seller',
+    sellerBadge: 'reseller',
+    verificationStatus: 'approved',
+    regionId: 'r4',
+    districtId: 'd15',
+    neighborhoodId: null,
+    rating: 4.5,
+    totalSales: 23,
+    createdAt: '2024-02-20T09:00:00.000Z',
+  },
+  {
+    id: 'u3',
+    phone: '+998909876543',
+    name: 'Jasur Toshmatov',
+    password: 'test123',
+    role: 'seller',
+    sellerBadge: 'manufacturer',
+    verificationStatus: 'approved',
+    regionId: 'r6',
+    districtId: 'd22',
+    neighborhoodId: null,
+    rating: 4.9,
+    totalSales: 112,
+    createdAt: '2023-11-10T10:00:00.000Z',
+  },
+  {
+    id: 'u4',
+    phone: '+998905551234',
+    name: 'Malika Rahimova',
+    password: 'test123',
+    role: 'buyer',
+    sellerBadge: null,
+    verificationStatus: 'none',
+    regionId: 'r1',
+    districtId: 'd2',
+    neighborhoodId: null,
+    rating: null,
+    totalSales: 0,
+    createdAt: '2024-03-05T11:00:00.000Z',
+  },
+];
+
+// ─── LISTINGS ─────────────────────────────────────────────────────────────────
+export const listings: StoredListing[] = [
+  {
+    id: 'l1',
+    title: "Sut sigir sotiladi (Jersey zoti)",
+    titleRu: "Продается молочная корова породы Джерси",
+    description: "Yoshi 3 yosh, kuniga 18-20 litr sut beradi. Barcha emlashlar qilingan. Sog'lom va tinch hayvon.",
+    price: 9500000,
+    priceUnit: "dona",
+    images: [],
+    categoryId: 'cat1',
+    subcategoryId: 'sub1',
+    userId: 'u1',
+    regionId: 'r3',
+    districtId: 'd11',
+    neighborhoodId: null,
+    lat: 40.7821,
+    lng: 72.3442,
+    status: 'active',
+    viewCount: 142,
+    createdAt: '2024-06-01T08:00:00.000Z',
+  },
+  {
+    id: 'l2',
+    title: "Qurilish g'ishtlari (M150)",
+    titleRu: "Строительный кирпич М150",
+    description: "Sifatli M150 g'isht. Narx 1000 donadan ko'p xarid qilishda chegirma bor.",
+    price: 1400,
+    priceUnit: "dona",
+    images: [],
+    categoryId: 'cat2',
+    subcategoryId: 'sub5',
+    userId: 'u3',
+    regionId: 'r6',
+    districtId: 'd22',
+    neighborhoodId: null,
+    lat: 39.6542,
+    lng: 66.9597,
+    status: 'active',
+    viewCount: 89,
+    createdAt: '2024-06-05T09:00:00.000Z',
+  },
+  {
+    id: 'l3',
+    title: "Broiler tovuqlar (40 kunlik)",
+    titleRu: "Бройлеры 40-дневные",
+    description: "O'rtacha og'irligi 2.0-2.2 kg. 500 donadan boshlab sotiladi.",
+    price: 38000,
+    priceUnit: "dona",
+    images: [],
+    categoryId: 'cat1',
+    subcategoryId: 'sub2',
+    userId: 'u2',
+    regionId: 'r4',
+    districtId: 'd15',
+    neighborhoodId: null,
+    lat: 40.3834,
+    lng: 71.7855,
+    status: 'active',
+    viewCount: 215,
+    createdAt: '2024-06-08T07:00:00.000Z',
+  },
+  {
+    id: 'l4',
+    title: "Sement M400 (Qo'ng'irot)",
+    titleRu: "Цемент М400 Кунгиратский",
+    description: "Yangi partiya keldi. Qop narxi ulgurji xaridda arzonroq.",
+    price: 92000,
+    priceUnit: "qop (50 kg)",
+    images: [],
+    categoryId: 'cat2',
+    subcategoryId: 'sub6',
+    userId: 'u3',
+    regionId: 'r6',
+    districtId: 'd22',
+    neighborhoodId: null,
+    lat: 39.6500,
+    lng: 66.9500,
+    status: 'active',
+    viewCount: 178,
+    createdAt: '2024-06-10T10:00:00.000Z',
+  },
+  {
+    id: 'l5',
+    title: "Traktor (MTZ-80) ehtiyot qismlari",
+    titleRu: "Запчасти для трактора МТЗ-80",
+    description: "Original va analog ehtiyot qismlari. Barcha qismlar mavjud, narxlar kelishiladi.",
+    price: 450000,
+    priceUnit: "to'plam",
+    images: [],
+    categoryId: 'cat3',
+    subcategoryId: 'sub10',
+    userId: 'u1',
+    regionId: 'r3',
+    districtId: 'd12',
+    neighborhoodId: null,
+    lat: 40.6430,
+    lng: 72.2360,
+    status: 'active',
+    viewCount: 67,
+    createdAt: '2024-06-12T11:00:00.000Z',
+  },
+  {
+    id: 'l6',
+    title: "Ekskavator ijarasi (HYUNDAI R210)",
+    titleRu: "Аренда экскаватора Hyundai R210",
+    description: "Tajribali operator bilan. Har qanday ish turlari uchun. Minimal ijara muddati 1 soat.",
+    price: 850000,
+    priceUnit: "soat",
+    images: [],
+    categoryId: 'cat5',
+    subcategoryId: 'sub15',
+    userId: 'u3',
+    regionId: 'r6',
+    districtId: 'd22',
+    neighborhoodId: null,
+    lat: 39.6600,
+    lng: 67.0000,
+    status: 'active',
+    viewCount: 43,
+    createdAt: '2024-06-14T12:00:00.000Z',
+  },
+  {
+    id: 'l7',
+    title: "Armatura 12mm (A400 GOST)",
+    titleRu: "Арматура 12мм А400 ГОСТ",
+    description: "Sertifikatlangan armatura. Tonnasiga chegirma mavjud. O'z transportimiz bilan yetkazib beramiz.",
+    price: 12500,
+    priceUnit: "metr",
+    images: [],
+    categoryId: 'cat2',
+    subcategoryId: 'sub7',
+    userId: 'u2',
+    regionId: 'r4',
+    districtId: 'd16',
+    neighborhoodId: null,
+    lat: 40.4700,
+    lng: 71.7300,
+    status: 'active',
+    viewCount: 124,
+    createdAt: '2024-06-15T08:00:00.000Z',
+  },
+  {
+    id: 'l8',
+    title: "Qo'y sotiladi (Qorako'l zoti)",
+    titleRu: "Продаются каракульские овцы",
+    description: "2 yoshli, sog'lom qo'ylar. Boshiga narx. Ko'p xaridda chegirma.",
+    price: 3800000,
+    priceUnit: "bosh",
+    images: [],
+    categoryId: 'cat1',
+    subcategoryId: 'sub1',
+    userId: 'u3',
+    regionId: 'r9',
+    districtId: 'd30',
+    neighborhoodId: null,
+    lat: 38.8671,
+    lng: 65.7917,
+    status: 'active',
+    viewCount: 98,
+    createdAt: '2024-06-16T09:00:00.000Z',
+  },
+  {
+    id: 'l9',
+    title: "Agro-dron ijarasi (DJI Agras T40)",
+    titleRu: "Аренда агро-дрона DJI Agras T40",
+    description: "Ekin dalalarini ishlov berish uchun professional agro-dron. 1 soatda 80 gektargacha.",
+    price: 1500000,
+    priceUnit: "soat",
+    images: [],
+    categoryId: 'cat5',
+    subcategoryId: 'sub15',
+    userId: 'u2',
+    regionId: 'r4',
+    districtId: 'd15',
+    neighborhoodId: null,
+    lat: 40.3900,
+    lng: 71.7900,
+    status: 'active',
+    viewCount: 77,
+    createdAt: '2024-06-17T10:00:00.000Z',
+  },
+  {
+    id: 'l10',
+    title: "Antik xorazm gilami (XIX asr)",
+    titleRu: "Антикварный хорезмский ковёр XIX века",
+    description: "Noyob qo'l to'qilgan gilam. Holati juda yaxshi. Ekspertiza hujjati mavjud.",
+    price: 4500000,
+    priceUnit: "dona",
+    images: [],
+    categoryId: 'cat4',
+    subcategoryId: 'sub12',
+    userId: 'u1',
+    regionId: 'r13',
+    districtId: 'd38',
+    neighborhoodId: null,
+    lat: 41.5500,
+    lng: 60.6167,
+    status: 'active',
+    viewCount: 56,
+    createdAt: '2024-06-18T11:00:00.000Z',
+  },
+  {
+    id: 'l11',
+    title: "Shifer (7 to'lqinli, 1.75m)",
+    titleRu: "Шифер 7-волновой 1.75м",
+    description: "Ombordan to'g'ridan-to'g'ri. Sifat belgisi bilan. Yetkazib berish mumkin.",
+    price: 95000,
+    priceUnit: "dona",
+    images: [],
+    categoryId: 'cat2',
+    subcategoryId: 'sub4',
+    userId: 'u1',
+    regionId: 'r3',
+    districtId: 'd11',
+    neighborhoodId: null,
+    lat: 40.7900,
+    lng: 72.3500,
+    status: 'active',
+    viewCount: 133,
+    createdAt: '2024-06-19T08:00:00.000Z',
+  },
+  {
+    id: 'l12',
+    title: "Asalari oilalari (Karnik zoti)",
+    titleRu: "Пчелосемьи породы Карника",
+    description: "Ko'p asalchi oilalari. Har bir oila 7-8 ramkali. O'z joyimizda ko'rib xarid qilish mumkin.",
+    price: 950000,
+    priceUnit: "oila",
+    images: [],
+    categoryId: 'cat1',
+    subcategoryId: 'sub3',
+    userId: 'u2',
+    regionId: 'r10',
+    districtId: 'd32',
+    neighborhoodId: null,
+    lat: 37.2244,
+    lng: 67.2783,
+    status: 'active',
+    viewCount: 61,
+    createdAt: '2024-06-20T09:00:00.000Z',
+  },
+  {
+    id: 'l13',
+    title: "Skuter (Honda PCX 150) qismlari",
+    titleRu: "Запчасти скутер Honda PCX 150",
+    description: "Original Honda ehtiyot qismlari. Dvigatel, tormoz, filtr va boshqalar.",
+    price: 180000,
+    priceUnit: "dona",
+    images: [],
+    categoryId: 'cat3',
+    subcategoryId: 'sub9',
+    userId: 'u3',
+    regionId: 'r6',
+    districtId: 'd23',
+    neighborhoodId: null,
+    lat: 39.9000,
+    lng: 66.2600,
+    status: 'active',
+    viewCount: 45,
+    createdAt: '2024-06-21T10:00:00.000Z',
+  },
+  {
+    id: 'l14',
+    title: "Hovuz uchun plevka (500 mkm)",
+    titleRu: "Плёнка для бассейна 500 мкм",
+    description: "Suv o'tkazmaydigan maxsus qoplama. Kenglik 6m, uzunlik 50m. Yaxshi narx.",
+    price: 2800000,
+    priceUnit: "rulon",
+    images: [],
+    categoryId: 'cat2',
+    subcategoryId: 'sub8',
+    userId: 'u1',
+    regionId: 'r3',
+    districtId: 'd11',
+    neighborhoodId: null,
+    lat: 40.7800,
+    lng: 72.3400,
+    status: 'active',
+    viewCount: 38,
+    createdAt: '2024-06-22T11:00:00.000Z',
+  },
+  {
+    id: 'l15',
+    title: "O'rdak sotiladi (Pekin zoti)",
+    titleRu: "Утки породы Пекин",
+    description: "Sog'lom pekin o'rdaqlari. 3 oylik, 1.5-2 kg. Bozor narxidan arzon.",
+    price: 45000,
+    priceUnit: "dona",
+    images: [],
+    categoryId: 'cat1',
+    subcategoryId: 'sub2',
+    userId: 'u2',
+    regionId: 'r5',
+    districtId: 'd19',
+    neighborhoodId: null,
+    lat: 41.0011,
+    lng: 71.6683,
+    status: 'active',
+    viewCount: 92,
+    createdAt: '2024-06-23T08:00:00.000Z',
+  },
+];
+
+// ─── ORDERS ───────────────────────────────────────────────────────────────────
+export const orders: StoredOrder[] = [
+  {
+    id: 'o1',
+    listingId: 'l1',
+    buyerId: 'u4',
+    sellerId: 'u1',
+    quantity: 1,
+    totalPrice: 9500000,
+    deliveryOption: 'livestock',
+    deliveryPrice: 350000,
+    status: 'confirmed',
+    notes: "Toshkentga yetkazib bering",
+    createdAt: '2024-06-25T14:00:00.000Z',
+  },
+  {
+    id: 'o2',
+    listingId: 'l2',
+    buyerId: 'u4',
+    sellerId: 'u3',
+    quantity: 2000,
+    totalPrice: 2800000,
+    deliveryOption: 'large',
+    deliveryPrice: 550000,
+    status: 'delivering',
+    notes: null,
+    createdAt: '2024-06-26T10:00:00.000Z',
+  },
+];
+
+// ─── HELPERS ──────────────────────────────────────────────────────────────────
+export function generateId(): string {
+  return Date.now().toString() + Math.random().toString(36).slice(2, 9);
+}
+
+export function generateToken(userId: string): string {
+  const payload = { id: userId, exp: Date.now() + 86400000 * 30 };
+  return Buffer.from(JSON.stringify(payload)).toString('base64');
+}
+
+export function verifyToken(token: string): string | null {
+  try {
+    const payload = JSON.parse(Buffer.from(token, 'base64').toString('utf8'));
+    if (payload.exp < Date.now()) return null;
+    return payload.id;
+  } catch {
+    return null;
+  }
+}
+
+export function calculateDistance(lat1: number, lng1: number, lat2: number, lng2: number): number {
+  const R = 6371;
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLng = ((lng2 - lng1) * Math.PI) / 180;
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos((lat1 * Math.PI) / 180) *
+      Math.cos((lat2 * Math.PI) / 180) *
+      Math.sin(dLng / 2) *
+      Math.sin(dLng / 2);
+  return Math.round(2 * R * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)));
+}
+
+export function getDistanceColor(km: number): 'green' | 'yellow' | 'red' {
+  if (km < 20) return 'green';
+  if (km < 80) return 'yellow';
+  return 'red';
+}
+
+export function sanitizeUser(user: StoredUser) {
+  const { password: _pw, ...rest } = user;
+  const region = regions.find(r => r.id === user.regionId) || null;
+  const district = districts.find(d => d.id === user.districtId) || null;
+  const neighborhood = neighborhoods.find(n => n.id === user.neighborhoodId) || null;
+  return { ...rest, region, district, neighborhood };
+}
