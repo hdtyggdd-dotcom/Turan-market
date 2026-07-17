@@ -18,8 +18,8 @@ import { setBaseUrl, setAuthTokenGetter } from '@workspace/api-client-react';
 import { AuthProvider } from '@/context/AuthContext';
 import { LocationProvider } from '@/context/LocationContext';
 
-// Configure API client — API server is mounted at /api path
-setBaseUrl(`https://${process.env.EXPO_PUBLIC_DOMAIN}/api`);
+// Configure API client — generated paths already include /api prefix
+setBaseUrl(`https://${process.env.EXPO_PUBLIC_DOMAIN}`);
 setAuthTokenGetter(() => AsyncStorage.getItem('osavdo_token'));
 
 SplashScreen.preventAutoHideAsync();
