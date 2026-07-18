@@ -201,6 +201,12 @@ export const categories: StoredCategory[] = [
       { id: 'sub9',  name: "Zotli itlar",    nameRu: "Породистые собаки", categoryId: 'cat1' },
       { id: 'sub10', name: "Mushuk",         nameRu: "Кошка",           categoryId: 'cat1' },
       { id: 'sub11', name: "Boshqa hayvon",  nameRu: "Другие животные", categoryId: 'cat1' },
+      { id: 'sub67', name: "Ho'kiz",         nameRu: "Бык/Вол",         categoryId: 'cat1' },
+      { id: 'sub68', name: "Buzoq",          nameRu: "Телёнок",         categoryId: 'cat1' },
+      { id: 'sub69', name: "Ot",             nameRu: "Лошадь",          categoryId: 'cat1' },
+      { id: 'sub70', name: "Eshak",          nameRu: "Осёл",            categoryId: 'cat1' },
+      { id: 'sub71', name: "Kabutar",        nameRu: "Голубь",          categoryId: 'cat1' },
+      { id: 'sub72', name: "Baliq",          nameRu: "Рыба",            categoryId: 'cat1' },
     ],
   },
   {
@@ -224,17 +230,17 @@ export const categories: StoredCategory[] = [
   },
   {
     id: 'cat3',
-    name: "Traktor & Texnika",
-    nameRu: "Тракторы и техника",
-    icon: "🚜",
+    name: "Transport & Texnika",
+    nameRu: "Транспорт и техника",
+    icon: "🚗",
     subcategories: [
-      { id: 'sub23', name: "Traktor",             nameRu: "Трактор",          categoryId: 'cat3' },
-      { id: 'sub24', name: "Kombain",             nameRu: "Комбайн",          categoryId: 'cat3' },
-      { id: 'sub25', name: "Shudgor & yig'uvchi", nameRu: "Плуг и жатка",     categoryId: 'cat3' },
-      { id: 'sub26', name: "Mini texnika",        nameRu: "Минитехника",      categoryId: 'cat3' },
-      { id: 'sub27', name: "Suv nasosi",          nameRu: "Водяной насос",    categoryId: 'cat3' },
-      { id: 'sub28', name: "Agro dron",           nameRu: "Агродрон",         categoryId: 'cat3' },
-      { id: 'sub29', name: "Boshqa texnika",      nameRu: "Другая техника",   categoryId: 'cat3' },
+      { id: 'sub23', name: "Avtomobil",          nameRu: "Автомобиль",          categoryId: 'cat3' },
+      { id: 'sub24', name: "Traktor",            nameRu: "Трактор",             categoryId: 'cat3' },
+      { id: 'sub25', name: "Kombain",            nameRu: "Комбайн",             categoryId: 'cat3' },
+      { id: 'sub26', name: "Skuter",             nameRu: "Скутер",              categoryId: 'cat3' },
+      { id: 'sub27', name: "Muravey",            nameRu: "Муравей",             categoryId: 'cat3' },
+      { id: 'sub28', name: "Velosiped",          nameRu: "Велосипед",           categoryId: 'cat3' },
+      { id: 'sub29', name: "Maxsus texnika",     nameRu: "Спецтехника",         categoryId: 'cat3', bookingMode: 'full' },
     ],
   },
   {
@@ -263,6 +269,11 @@ export const categories: StoredCategory[] = [
       { id: 'sub39', name: "Don va em-xashak",       nameRu: "Зерно и корм",         categoryId: 'cat5' },
       { id: 'sub40', name: "Asalari mahsulotlari",   nameRu: "Пчелопродукция",       categoryId: 'cat5' },
       { id: 'sub41', name: "Boshqa",                 nameRu: "Прочее",               categoryId: 'cat5' },
+      { id: 'sub73', name: "Paxta",                  nameRu: "Хлопок",               categoryId: 'cat5' },
+      { id: 'sub74', name: "Kartoshka",              nameRu: "Картошка",             categoryId: 'cat5' },
+      { id: 'sub75', name: "Piyoz",                  nameRu: "Лук",                  categoryId: 'cat5' },
+      { id: 'sub76', name: "Makkajo'xori",           nameRu: "Кукуруза",             categoryId: 'cat5' },
+      { id: 'sub77', name: "Pestitsid & dori",       nameRu: "Пестициды",            categoryId: 'cat5' },
     ],
   },
   {
@@ -274,8 +285,10 @@ export const categories: StoredCategory[] = [
       { id: 'sub42', name: "Uy-ro'zg'or",   nameRu: "Товары для дома", categoryId: 'cat6' },
       { id: 'sub43', name: "Kiyim-kechak",  nameRu: "Одежда",          categoryId: 'cat6' },
       { id: 'sub44', name: "Elektronika",   nameRu: "Электроника",     categoryId: 'cat6' },
-      { id: 'sub45', name: "Avtomobil",     nameRu: "Автомобиль",      categoryId: 'cat6' },
+      { id: 'sub45', name: "Mebel",         nameRu: "Мебель",          categoryId: 'cat6' },
       { id: 'sub46', name: "Antikvar",      nameRu: "Антиквариат",     categoryId: 'cat6' },
+      { id: 'sub78', name: "Sport anjomlar",nameRu: "Спортинвентарь",  categoryId: 'cat6' },
+      { id: 'sub79', name: "O'yinchoq",     nameRu: "Игрушки",         categoryId: 'cat6' },
       { id: 'sub47', name: "Boshqa",        nameRu: "Прочее",          categoryId: 'cat6' },
     ],
   },
@@ -300,26 +313,16 @@ export const categories: StoredCategory[] = [
     nameRu: "Недвижимость",
     icon: "🏠",
     subcategories: [
-      { id: 'sub55', name: "Uy sotiladi",       nameRu: "Продажа дома",        categoryId: 'cat8' },
-      { id: 'sub56', name: "Kvartira sotiladi", nameRu: "Продажа квартиры",    categoryId: 'cat8' },
-      { id: 'sub57', name: "Yer sotiladi",      nameRu: "Продажа земли",       categoryId: 'cat8' },
-      { id: 'sub58', name: "Uy ijarasi",        nameRu: "Аренда дома",         categoryId: 'cat8' },
-      { id: 'sub59', name: "Kvartira ijarasi",  nameRu: "Аренда квартиры",     categoryId: 'cat8' },
-      { id: 'sub60', name: "Boshqa uy-joy",     nameRu: "Другая недвижимость", categoryId: 'cat8' },
-    ],
-  },
-  {
-    id: 'cat9',
-    name: "Magazin & Do'kon",
-    nameRu: "Магазины",
-    icon: "🏪",
-    subcategories: [
-      { id: 'sub61', name: "Oziq-ovqat do'koni",  nameRu: "Продуктовый магазин",     categoryId: 'cat9', bookingMode: 'showcase' },
-      { id: 'sub62', name: "Qurilish do'koni",    nameRu: "Строительный магазин",    categoryId: 'cat9', bookingMode: 'showcase' },
-      { id: 'sub63', name: "Kiyim do'koni",       nameRu: "Магазин одежды",          categoryId: 'cat9', bookingMode: 'showcase' },
-      { id: 'sub64', name: "Elektronika do'koni", nameRu: "Магазин электроники",     categoryId: 'cat9', bookingMode: 'showcase' },
-      { id: 'sub65', name: "Fermer do'koni",      nameRu: "Фермерский магазин",      categoryId: 'cat9', bookingMode: 'showcase' },
-      { id: 'sub66', name: "Boshqa do'kon",       nameRu: "Другой магазин",          categoryId: 'cat9', bookingMode: 'showcase' },
+      { id: 'sub55', name: "Hovli (sotiladi)",      nameRu: "Продажа двора",       categoryId: 'cat8' },
+      { id: 'sub56', name: "Kvartira sotiladi",    nameRu: "Продажа квартиры",    categoryId: 'cat8' },
+      { id: 'sub57', name: "Uchastka (sotiladi)",  nameRu: "Продажа участка",     categoryId: 'cat8' },
+      { id: 'sub58', name: "Uy ijarasi",           nameRu: "Аренда дома",         categoryId: 'cat8' },
+      { id: 'sub59', name: "Kvartira ijarasi",     nameRu: "Аренда квартиры",     categoryId: 'cat8' },
+      { id: 'sub80', name: "Magazin/do'kon",       nameRu: "Магазин/торговая точка", categoryId: 'cat8' },
+      { id: 'sub81', name: "Ombor",                nameRu: "Склад",               categoryId: 'cat8' },
+      { id: 'sub82', name: "Garaj",                nameRu: "Гараж",               categoryId: 'cat8' },
+      { id: 'sub83', name: "Ofis",                 nameRu: "Офис",                categoryId: 'cat8' },
+      { id: 'sub60', name: "Boshqa uy-joy",        nameRu: "Другая недвижимость", categoryId: 'cat8' },
     ],
   },
 ];
@@ -758,6 +761,81 @@ export function calculateDistance(lat1: number, lng1: number, lat2: number, lng2
 export function getDistanceColor(km: number): 'green' | 'yellow' | 'red' {
   if (km < 20) return 'green';
   if (km < 80) return 'yellow';
+  return 'red';
+}
+
+// ─── NARX CHEGARALARI (subcategoryId bo'yicha, so'm) ──────────────────────────
+const PRICE_THRESHOLDS: Record<string, { arzon: number; qimmat: number }> = {
+  // Chorva mollari
+  sub1:  { arzon: 5_000_000,   qimmat: 25_000_000  }, // Sigir
+  sub2:  { arzon: 1_000_000,   qimmat: 5_000_000   }, // Qo'y
+  sub3:  { arzon: 800_000,     qimmat: 4_000_000   }, // Echki
+  sub4:  { arzon: 8_000_000,   qimmat: 30_000_000  }, // Tuya
+  sub5:  { arzon: 200_000,     qimmat: 1_000_000   }, // Kurka
+  sub6:  { arzon: 25_000,      qimmat: 120_000     }, // Tovuq
+  sub7:  { arzon: 50_000,      qimmat: 200_000     }, // O'rdak
+  sub8:  { arzon: 80_000,      qimmat: 350_000     }, // G'oz
+  sub67: { arzon: 4_000_000,   qimmat: 20_000_000  }, // Ho'kiz
+  sub68: { arzon: 1_500_000,   qimmat: 6_000_000   }, // Buzoq
+  sub69: { arzon: 3_000_000,   qimmat: 20_000_000  }, // Ot
+  sub70: { arzon: 500_000,     qimmat: 3_000_000   }, // Eshak
+  sub71: { arzon: 50_000,      qimmat: 300_000     }, // Kabutar
+  sub72: { arzon: 20_000,      qimmat: 100_000     }, // Baliq (kg)
+  // Qurilish mollari
+  sub12: { arzon: 800_000,     qimmat: 8_000_000   }, // Armatura
+  sub13: { arzon: 500_000,     qimmat: 3_000_000   }, // G'isht
+  sub14: { arzon: 200_000,     qimmat: 1_500_000   }, // Shpagilovka
+  sub15: { arzon: 250_000,     qimmat: 1_500_000   }, // Sement
+  sub16: { arzon: 150_000,     qimmat: 800_000     }, // Shifer
+  sub17: { arzon: 200_000,     qimmat: 1_200_000   }, // Reka tosh
+  sub18: { arzon: 400_000,     qimmat: 4_000_000   }, // Pol taxta
+  sub19: { arzon: 500_000,     qimmat: 5_000_000   }, // Mis
+  sub20: { arzon: 200_000,     qimmat: 1_500_000   }, // Qum va shag'al
+  sub21: { arzon: 100_000,     qimmat: 600_000     }, // Ohak
+  // Transport & Texnika
+  sub23: { arzon: 30_000_000,  qimmat: 150_000_000 }, // Avtomobil
+  sub24: { arzon: 40_000_000,  qimmat: 200_000_000 }, // Traktor
+  sub25: { arzon: 60_000_000,  qimmat: 300_000_000 }, // Kombain
+  sub26: { arzon: 3_000_000,   qimmat: 15_000_000  }, // Skuter
+  sub27: { arzon: 8_000_000,   qimmat: 40_000_000  }, // Muravey
+  sub28: { arzon: 500_000,     qimmat: 4_000_000   }, // Velosiped
+  sub29: { arzon: 100_000,     qimmat: 500_000     }, // Maxsus texnika (soat narxi)
+  // Ehtiyot zapchastlar
+  sub30: { arzon: 200_000,     qimmat: 3_000_000   }, // Traktor zapchast
+  sub31: { arzon: 100_000,     qimmat: 2_000_000   }, // Avto zapchast
+  sub34: { arzon: 50_000,      qimmat: 800_000     }, // Skuter/moto
+  // Qishloq xo'jaligi
+  sub36: { arzon: 50_000,      qimmat: 500_000     }, // Urug'
+  sub37: { arzon: 100_000,     qimmat: 1_000_000   }, // O'g'it
+  sub38: { arzon: 20_000,      qimmat: 200_000     }, // Sabzavot/meva (kg)
+  sub39: { arzon: 50_000,      qimmat: 500_000     }, // Don/em-xashak
+  sub40: { arzon: 100_000,     qimmat: 800_000     }, // Asalari mahsulotlari
+  sub73: { arzon: 3_000,       qimmat: 15_000      }, // Paxta (kg)
+  sub74: { arzon: 2_000,       qimmat: 10_000      }, // Kartoshka (kg)
+  sub75: { arzon: 1_500,       qimmat: 8_000       }, // Piyoz (kg)
+  sub76: { arzon: 1_000,       qimmat: 5_000       }, // Makkajo'xori (kg)
+  // Uy-joy (sotish)
+  sub55: { arzon: 100_000_000, qimmat: 500_000_000 }, // Hovli
+  sub56: { arzon: 80_000_000,  qimmat: 300_000_000 }, // Kvartira sotiladi
+  sub57: { arzon: 20_000_000,  qimmat: 150_000_000 }, // Uchastka
+  sub58: { arzon: 1_000_000,   qimmat: 5_000_000   }, // Uy ijarasi (oylik)
+  sub59: { arzon: 800_000,     qimmat: 4_000_000   }, // Kvartira ijarasi (oylik)
+  sub80: { arzon: 5_000_000,   qimmat: 30_000_000  }, // Magazin/do'kon
+  sub81: { arzon: 3_000_000,   qimmat: 20_000_000  }, // Ombor
+  sub82: { arzon: 2_000_000,   qimmat: 15_000_000  }, // Garaj
+  // Maxsus xizmatlar (soat/kun narxi)
+  sub48: { arzon: 300_000,     qimmat: 1_500_000   }, // Agro dron xizmati
+  sub49: { arzon: 500_000,     qimmat: 2_000_000   }, // Ekskavator xizmati
+  sub50: { arzon: 200_000,     qimmat: 1_000_000   }, // Traktor xizmati
+};
+
+const DEFAULT_THRESHOLD = { arzon: 500_000, qimmat: 5_000_000 };
+
+export function getPriceColor(subcategoryId: string | null, price: number): 'green' | 'yellow' | 'red' {
+  if (price <= 0) return 'green';
+  const th = subcategoryId ? (PRICE_THRESHOLDS[subcategoryId] ?? DEFAULT_THRESHOLD) : DEFAULT_THRESHOLD;
+  if (price <= th.arzon) return 'green';
+  if (price <= th.qimmat) return 'yellow';
   return 'red';
 }
 

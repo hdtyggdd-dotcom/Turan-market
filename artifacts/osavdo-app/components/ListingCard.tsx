@@ -19,6 +19,7 @@ interface Listing {
   images: string[];
   distanceKm?: number | null;
   distanceColor?: 'green' | 'yellow' | 'red' | null;
+  priceColor?: 'green' | 'yellow' | 'red' | null;
   district?: { name: string } | null;
   region?: { name: string } | null;
   user?: {
@@ -119,14 +120,27 @@ export function ListingCard({ listing }: ListingCardProps) {
           {listing.title}
         </Text>
 
-        <Text style={[styles.price, { color: colors.primary }]}>
-          {formatPrice(listing.price)} so'm
-          {listing.priceUnit ? (
-            <Text style={[styles.priceUnit, { color: colors.mutedForeground }]}>
-              {' '}/{listing.priceUnit}
-            </Text>
-          ) : null}
-        </Text>
+        <View style={styles.priceRow}>
+          {listing.priceColor && (
+            <View style={[
+              styles.priceDot,
+              {
+                backgroundColor:
+                  listing.priceColor === 'green' ? colors.distanceGreen
+                  : listing.priceColor === 'yellow' ? colors.distanceYellow
+                  : colors.distanceRed,
+              },
+            ]} />
+          )}
+          <Text style={[styles.price, { color: colors.primary }]}>
+            {formatPrice(listing.price)} so'm
+            {listing.priceUnit ? (
+              <Text style={[styles.priceUnit, { color: colors.mutedForeground }]}>
+                {' '}/{listing.priceUnit}
+              </Text>
+            ) : null}
+          </Text>
+        </View>
 
         {/* Location */}
         <View style={styles.locationRow}>
@@ -201,9 +215,20 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter_600SemiBold',
     lineHeight: 18,
   },
+  priceRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+  },
+  priceDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+  },
   price: {
     fontSize: 14,
     fontFamily: 'Inter_700Bold',
+    flex: 1,
   },
   priceUnit: {
     fontSize: 11,

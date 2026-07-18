@@ -9,6 +9,7 @@ import {
   sanitizeUser,
   calculateDistance,
   getDistanceColor,
+  getPriceColor,
 } from "../data/store.js";
 import { authenticateToken, type AuthRequest } from "../middleware/auth.js";
 
@@ -47,6 +48,8 @@ function hydrateListing(
     distanceColor = null;
   }
 
+  const priceColor = getPriceColor(listing.subcategoryId, listing.price);
+
   return {
     ...listing,
     user: user ? sanitizeUser(user) : null,
@@ -55,6 +58,7 @@ function hydrateListing(
     neighborhood,
     distanceKm,
     distanceColor,
+    priceColor,
   };
 }
 
