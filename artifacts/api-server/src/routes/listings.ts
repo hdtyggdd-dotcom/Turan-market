@@ -5,6 +5,7 @@ import {
   regions,
   districts,
   neighborhoods,
+  categories,
   generateId,
   sanitizeUser,
   calculateDistance,
@@ -61,6 +62,92 @@ function hydrateListing(
     priceColor,
   };
 }
+
+// GET /listings/:id/analyse — bozor tahlili
+router.get("/listings/:id/analyse", (req, res) => {
+  const listing = listings.find((l) => l.id === req.params.id);
+  if (!listing) {
+    res.status(404).json({ error: "Topilmadi" });
+    return;
+  }
+
+  // Shu subkategoriyada barcha aktiv e'lonlar
+  const sameSub = listings.filter(
+    (l) => l.status === "active" && l.subcategoryId === listing.subcategoryId && l.price > 0 && l.id !== listing.id,
+  );
+
+  // Shu viloyatda raqobatchilar
+  const regional = sameSub.filter((l) => l.regionId === listing.regionId);
+
+  // Top kategoriyalar
+  const catCount: Record<string, { name: string; count: number }> = {};
+  listings.filter((l) => l.status === "active").forEach((l) => {
+    if (!catCount[l.categoryId]) {
+      const cat = categories.find((c) => c.id === l.categoryId);
+      catCount[l.categoryId] = { name: cat?.name ?? l.categoryId, count: 0 };
+    }
+    catCount[l.categoryId].count++;
+  });
+
+  // Narx tahlili
+  let pricePosition: string = "malumot_yoq";
+  let avgPrice = 0;
+  let minPrice = 0;
+  let maxPrice = 0;
+  let advice: string | null = null;
+
+  if (sameSub.length > 0) {
+    const prices = sameSub.map((l) => l.price);
+    avgPrice = Math.round(prices.reduce((a, b) => a + b, 0) / prices.length);
+    minPrice = Math.min(...prices);
+    maxPrice = Math.max(...prices);
+
+    if (listing.price <= 0) {
+      pricePosition = "kelishiladi";
+    } else if (listing.price < avgPrice * 0.8) {
+      pricePosition = "juda_arzon";
+    } else if (listing.price < avgPrice * 0.95) {
+      pricePosition = "arzon";
+    } else if (listing.price <= avgPrice * 1.05) {
+      pricePosition = "orta";
+    } else if (listing.price <= avgPrice * 1.2) {
+      pricePosition = "qimmatroq";
+    } else {
+      pricePosition = "juda_qimmat";
+    }
+
+    // Oddiy maslahat (AI yo'q bo'lganda)
+    const adviceMap: Record<string, string> = {
+      juda_arzon: `✅ Narxingiz bozordan ${Math.round((1 - listing.price / avgPrice) * 100)}% arzon. ${Math.round(avgPrice * 0.88).toLocaleString()} so'mga oshirishingiz mumkin — savdo tezligi bir xil bo'ladi.`,
+      arzon: `✅ Narxingiz yaxshi — bozor o'rtachasidan (${avgPrice.toLocaleString()} so'm) arzonroq. Tez sotilishi ehtimoli yuqori.`,
+      orta: `🟡 Narxingiz bozorga mos — ${avgPrice.toLocaleString()} so'm. Tavsifingizni to'ldiring va rasmlar qo'shing, ko'rinish oshadi.`,
+      qimmatroq: `⚠️ Narxingiz o'rtachadan yuqori (bozor: ${avgPrice.toLocaleString()} so'm). Chegirma yoki bonus qo'shing yoki ${Math.round(avgPrice * 1.05).toLocaleString()} so'mga tushiring.`,
+      juda_qimmat: `🔴 Narxingiz juda yuqori. Bozor o'rtachasi ${avgPrice.toLocaleString()} so'm, siz ${listing.price.toLocaleString()} so'm so'rayapsiz. Kamida ${Math.round(avgPrice * 1.1).toLocaleString()} so'mga tushiring.`,
+      kelishiladi: `🤝 Narx kelishiladi deb belgilangansiz. Taxminiy narx ko'rsatsangiz ko'proq xaridorlar murojaat qiladi.`,
+    };
+    advice = adviceMap[pricePosition] ?? null;
+  } else {
+    advice = "Bu subkategoriyada hali e'lonlar kam. Siz dastlabki sotuvchilardan birisiz — bu katta afzallik!";
+  }
+
+  // Top kategoriyalar
+  const topCategories = Object.values(catCount)
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 5);
+
+  res.json({
+    listingId: listing.id,
+    subcategoryId: listing.subcategoryId,
+    totalCompetitors: sameSub.length,
+    regionalCompetitors: regional.length,
+    avgPrice,
+    minPrice,
+    maxPrice,
+    pricePosition,
+    topCategories,
+    advice,
+  });
+});
 
 // GET /listings
 router.get("/listings", (req, res) => {

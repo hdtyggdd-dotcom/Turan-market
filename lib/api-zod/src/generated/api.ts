@@ -697,6 +697,30 @@ export const DeleteListingResponse = zod.void()
 
 
 /**
+ * @summary Get market analysis for a listing
+ */
+export const AnalyseListingMarketParams = zod.object({
+  "id": zod.coerce.string()
+})
+
+export const AnalyseListingMarketResponse = zod.object({
+  "listingId": zod.string(),
+  "subcategoryId": zod.string().nullish(),
+  "totalCompetitors": zod.number(),
+  "regionalCompetitors": zod.number(),
+  "avgPrice": zod.number(),
+  "minPrice": zod.number(),
+  "maxPrice": zod.number(),
+  "pricePosition": zod.enum(['juda_arzon', 'arzon', 'orta', 'qimmatroq', 'juda_qimmat', 'kelishiladi', 'malumot_yoq']),
+  "topCategories": zod.array(zod.object({
+  "name": zod.string(),
+  "count": zod.number()
+})),
+  "advice": zod.string().nullish()
+})
+
+
+/**
  * @summary Get listings by user
  */
 export const GetUserListingsParams = zod.object({

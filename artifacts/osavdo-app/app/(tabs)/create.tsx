@@ -17,6 +17,7 @@ import { useGetCategories, useCreateListing, useGetRegions, useGetDistricts } fr
 import { useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
 import { useAuth } from '@/context/AuthContext';
+import { MarketAnalysisModal } from '@/components/MarketAnalysisModal';
 
 export default function CreateScreen() {
   const colors = useColors();
@@ -35,6 +36,7 @@ export default function CreateScreen() {
   const [selectedSubcategoryId, setSelectedSubcategoryId] = useState('');
   const [regionId, setRegionId] = useState(user?.regionId ?? '');
   const [districtId, setDistrictId] = useState(user?.districtId ?? '');
+  const [analysisListingId, setAnalysisListingId] = useState<string | null>(null);
 
   const { data: categories } = useGetCategories();
   const { data: regions } = useGetRegions();
@@ -45,11 +47,10 @@ export default function CreateScreen() {
 
   const createMutation = useCreateListing({
     mutation: {
-      onSuccess: () => {
+      onSuccess: (data) => {
         queryClient.invalidateQueries({ queryKey: ['getListings'] });
-        Alert.alert("Muvaffaqiyat!", "E'lon joylashtirildi", [
-          { text: "OK", onPress: () => router.push('/(tabs)') },
-        ]);
+        // Show market analysis modal after successful listing creation
+        setAnalysisListingId(data.id);
       },
       onError: () => {
         Alert.alert("Xato", "E'lon joylashtirishda xato yuz berdi");
@@ -98,6 +99,15 @@ export default function CreateScreen() {
       <View style={[styles.header, { paddingTop: topPadding + 12, backgroundColor: colors.card, borderBottomColor: colors.border }]}>
         <Text style={[styles.headerTitle, { color: colors.text }]}>E'lon joylash</Text>
       </View>
+
+      <MarketAnalysisModal
+        visible={!!analysisListingId}
+        listingId={analysisListingId}
+        onClose={() => {
+          setAnalysisListingId(null);
+          router.push('/(tabs)');
+        }}
+      />
 
       <ScrollView
         style={{ flex: 1 }}

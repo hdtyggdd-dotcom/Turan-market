@@ -374,6 +374,31 @@ paths:
         "204":
           description: Deleted
 
+  /listings/{id}/analyse:
+    get:
+      operationId: analyseListingMarket
+      tags: [listings]
+      summary: Get market analysis for a listing
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Market analysis result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MarketAnalysis"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
   /listings/user/{userId}:
     get:
       operationId: getUserListings
@@ -1084,6 +1109,42 @@ components:
           enum: [pending, confirmed, delivering, delivered, cancelled]
       required:
         - status
+
+    MarketAnalysis:
+      type: object
+      required: [listingId, totalCompetitors, regionalCompetitors, avgPrice, minPrice, maxPrice, pricePosition, topCategories]
+      properties:
+        listingId:
+          type: string
+        subcategoryId:
+          type: string
+          nullable: true
+        totalCompetitors:
+          type: integer
+        regionalCompetitors:
+          type: integer
+        avgPrice:
+          type: integer
+        minPrice:
+          type: integer
+        maxPrice:
+          type: integer
+        pricePosition:
+          type: string
+          enum: [juda_arzon, arzon, orta, qimmatroq, juda_qimmat, kelishiladi, malumot_yoq]
+        topCategories:
+          type: array
+          items:
+            type: object
+            required: [name, count]
+            properties:
+              name:
+                type: string
+              count:
+                type: integer
+        advice:
+          type: string
+          nullable: true
 
     StatsSummary:
       type: object

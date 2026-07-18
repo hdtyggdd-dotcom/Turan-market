@@ -35,6 +35,7 @@ import type {
   Listing,
   ListingsResponse,
   LoginRequest,
+  MarketAnalysis,
   Neighborhood,
   Order,
   Region,
@@ -1215,6 +1216,83 @@ export const useDeleteListing = <TError = ErrorType<unknown>,
       > => {
       return useMutation(getDeleteListingMutationOptions(options));
     }
+
+export const getAnalyseListingMarketUrl = (id: string,) => {
+
+
+
+
+  return `/api/listings/${id}/analyse`
+}
+
+/**
+ * @summary Get market analysis for a listing
+ */
+export const analyseListingMarket = async (id: string, options?: RequestInit): Promise<MarketAnalysis> => {
+
+  return customFetch<MarketAnalysis>(getAnalyseListingMarketUrl(id),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getAnalyseListingMarketQueryKey = (id: string,) => {
+    return [
+    `/api/listings/${id}/analyse`
+    ] as const;
+    }
+
+
+export const getAnalyseListingMarketQueryOptions = <TData = Awaited<ReturnType<typeof analyseListingMarket>>, TError = ErrorType<ErrorResponse>>(id: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof analyseListingMarket>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getAnalyseListingMarketQueryKey(id);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof analyseListingMarket>>> = ({ signal }) => analyseListingMarket(id, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: id !== null && id !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof analyseListingMarket>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type AnalyseListingMarketQueryResult = NonNullable<Awaited<ReturnType<typeof analyseListingMarket>>>
+export type AnalyseListingMarketQueryError = ErrorType<ErrorResponse>
+
+
+/**
+ * @summary Get market analysis for a listing
+ */
+
+export function useAnalyseListingMarket<TData = Awaited<ReturnType<typeof analyseListingMarket>>, TError = ErrorType<ErrorResponse>>(
+ id: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof analyseListingMarket>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getAnalyseListingMarketQueryOptions(id,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
 
 export const getGetUserListingsUrl = (userId: string,) => {
 

@@ -329,6 +329,37 @@ export interface UpdateOrderStatusRequest {
   status: UpdateOrderStatusRequestStatus;
 }
 
+export type MarketAnalysisPricePosition = typeof MarketAnalysisPricePosition[keyof typeof MarketAnalysisPricePosition];
+
+
+export const MarketAnalysisPricePosition = {
+  juda_arzon: 'juda_arzon',
+  arzon: 'arzon',
+  orta: 'orta',
+  qimmatroq: 'qimmatroq',
+  juda_qimmat: 'juda_qimmat',
+  kelishiladi: 'kelishiladi',
+  malumot_yoq: 'malumot_yoq',
+} as const;
+
+export type MarketAnalysisTopCategoriesItem = {
+  name: string;
+  count: number;
+};
+
+export interface MarketAnalysis {
+  listingId: string;
+  subcategoryId?: string | null;
+  totalCompetitors: number;
+  regionalCompetitors: number;
+  avgPrice: number;
+  minPrice: number;
+  maxPrice: number;
+  pricePosition: MarketAnalysisPricePosition;
+  topCategories: MarketAnalysisTopCategoriesItem[];
+  advice?: string | null;
+}
+
 export type StatsSummaryTopCategoriesItem = {
   categoryId: string;
   name: string;
