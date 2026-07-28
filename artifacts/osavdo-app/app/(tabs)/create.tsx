@@ -18,6 +18,7 @@ import { ImageUploader } from '@/components/ImageUploader';
 import { useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
 import { useAuth } from '@/context/AuthContext';
+import { useLocation } from '@/context/LocationContext';
 import { MarketAnalysisModal } from '@/components/MarketAnalysisModal';
 
 export default function CreateScreen() {
@@ -25,6 +26,7 @@ export default function CreateScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const { user } = useAuth();
+  const { countryId } = useLocation();
   const queryClient = useQueryClient();
   const topPadding = Platform.OS === 'web' ? 67 : insets.top;
 
@@ -45,7 +47,9 @@ export default function CreateScreen() {
   const [analysisListingId, setAnalysisListingId] = useState<string | null>(null);
 
   const { data: categories } = useGetCategories();
-  const { data: regions } = useGetRegions();
+  const { data: regions } = useGetRegions(
+    { countryId: countryId ?? 'uz' },
+  );
   const { data: districtsData } = useGetDistricts(
     { regionId: regionId || undefined },
     { query: { enabled: !!regionId } },
