@@ -11,7 +11,7 @@ import { useAuth, type UserProfile } from '@/context/AuthContext';
 import { useRouter } from 'expo-router';
 import { useI18n } from '@/context/I18nContext';
 import { useLocation } from '@/context/LocationContext';
-import { PHONE_FORMATS, formatPhoneDigits, buildFullPhone, type LangCode } from '@/constants/i18n';
+import { PHONE_FORMATS, buildFullPhone, type LangCode } from '@/constants/i18n';
 
 export default function LoginScreen() {
   const colors = useColors();
@@ -48,7 +48,6 @@ export default function LoginScreen() {
   });
 
   function handlePhoneChange(raw: string) {
-    // Keep only digits, limit to maxDigits
     const digits = raw.replace(/\D/g, '').slice(0, fmt.maxDigits);
     setPhoneDigits(digits);
   }
@@ -69,7 +68,8 @@ export default function LoginScreen() {
     setShowCountryPicker(false);
   }
 
-  const formattedDisplay = formatPhoneDigits(phoneDigits, fmt.mask);
+  // formattedDisplay faqat placeholder ko'rinishi uchun (input value = raw digits)
+  const formattedPlaceholder = fmt.placeholder;
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
@@ -131,13 +131,13 @@ export default function LoginScreen() {
               </View>
               <TextInput
                 style={[styles.input, { color: colors.text }]}
-                placeholder={fmt.placeholder}
+                placeholder={formattedPlaceholder}
                 placeholderTextColor={colors.mutedForeground}
-                value={formattedDisplay}
+                value={phoneDigits}
                 onChangeText={handlePhoneChange}
                 keyboardType="phone-pad"
                 autoCapitalize="none"
-                maxLength={fmt.mask.length}
+                maxLength={fmt.maxDigits}
               />
             </View>
           </View>

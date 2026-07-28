@@ -11,7 +11,7 @@ import { useAuth, type UserProfile } from '@/context/AuthContext';
 import { useRouter } from 'expo-router';
 import { useI18n } from '@/context/I18nContext';
 import { useLocation } from '@/context/LocationContext';
-import { PHONE_FORMATS, formatPhoneDigits, buildFullPhone, type LangCode } from '@/constants/i18n';
+import { PHONE_FORMATS, buildFullPhone, type LangCode } from '@/constants/i18n';
 
 type Role = 'buyer' | 'seller' | 'driver';
 
@@ -98,7 +98,7 @@ export default function RegisterScreen() {
     setShowCountryPicker(false);
   }
 
-  const formattedDisplay = formatPhoneDigits(phoneDigits, fmt.mask);
+  const formattedPlaceholder = fmt.placeholder;
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
@@ -181,12 +181,12 @@ export default function RegisterScreen() {
                 </View>
                 <TextInput
                   style={[styles.input, { color: colors.text }]}
-                  placeholder={fmt.placeholder}
+                  placeholder={formattedPlaceholder}
                   placeholderTextColor={colors.mutedForeground}
-                  value={formattedDisplay}
+                  value={phoneDigits}
                   onChangeText={handlePhoneChange}
                   keyboardType="phone-pad"
-                  maxLength={fmt.mask.length}
+                  maxLength={fmt.maxDigits}
                 />
               </View>
             </View>
