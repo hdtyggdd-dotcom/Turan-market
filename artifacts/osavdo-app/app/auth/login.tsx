@@ -1,34 +1,39 @@
 import React, { useState } from 'react';
 import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
-  ActivityIndicator,
-  Alert,
-  Platform,
-  Image,
+  View, Text, TextInput, TouchableOpacity,
+  StyleSheet, ActivityIndicator, Alert, Platform, ScrollView,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Feather } from '@expo/vector-icons';
 import { useColors } from '@/hooks/useColors';
-import { useLogin } from '@workspace/api-client-react';
+import { useLogin, useGetCountries } from '@workspace/api-client-react';
 import { useAuth, type UserProfile } from '@/context/AuthContext';
 import { useRouter } from 'expo-router';
-import { ScrollView } from 'react-native';
-import { Feather } from '@expo/vector-icons';
+import { useI18n } from '@/context/I18nContext';
+import { useLocation } from '@/context/LocationContext';
+import { PHONE_FORMATS, formatPhoneDigits, buildFullPhone, type LangCode } from '@/constants/i18n';
 
 export default function LoginScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const { signIn } = useAuth();
   const router = useRouter();
+  const { t, lang, setLangByCountry, phoneFormat } = useI18n();
+  const { setLocation, countryFlag, countryId } = useLocation();
   const topPad = Platform.OS === 'web' ? 67 : insets.top;
   const botPad = Platform.OS === 'web' ? 34 : insets.bottom;
 
-  const [phone, setPhone] = useState('');
+  const [phoneDigits, setPhoneDigits] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [showCountryPicker, setShowCountryPicker] = useState(false);
+
+  const { data: countries } = useGetCountries();
+
+  // Current country info from i18n (lang = countryId for 1:1 mapping)
+  const selectedCountryId = countryId ?? 'uz';
+  const fmt = PHONE_FORMATS[selectedCountryId as LangCode] ?? PHONE_FORMATS.uz;
+  const selectedCountry = countries?.find(c => c.id === selectedCountryId);
 
   const loginMutation = useLogin({
     mutation: {
@@ -37,64 +42,109 @@ export default function LoginScreen() {
         router.replace('/(tabs)');
       },
       onError: () => {
-        Alert.alert('Xato', 'Telefon raqam yoki parol noto\'g\'ri');
+        Alert.alert(t('login'), t('wrongCredentials'));
       },
     },
   });
 
+  function handlePhoneChange(raw: string) {
+    // Keep only digits, limit to maxDigits
+    const digits = raw.replace(/\D/g, '').slice(0, fmt.maxDigits);
+    setPhoneDigits(digits);
+  }
+
   function handleLogin() {
-    if (!phone.trim() || !password) {
-      Alert.alert('Xato', 'Barcha maydonlarni to\'ldiring');
+    if (!phoneDigits.trim() || !password) {
+      Alert.alert(t('login'), t('fillAllFields'));
       return;
     }
-    loginMutation.mutate({ data: { phone: phone.trim(), password } });
+    const fullPhone = buildFullPhone(fmt.dialCode, phoneDigits);
+    loginMutation.mutate({ data: { phone: fullPhone, password } });
   }
+
+  function handleSelectCountry(c: { id: string; name: string; flag: string; currency: string; dialCode: string }) {
+    setLocation({ countryId: c.id, countryName: c.name, countryFlag: c.flag, currency: c.currency });
+    setLangByCountry(c.id);
+    setPhoneDigits('');
+    setShowCountryPicker(false);
+  }
+
+  const formattedDisplay = formatPhoneDigits(phoneDigits, fmt.mask);
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <ScrollView
         style={{ flex: 1 }}
-        contentContainerStyle={[
-          styles.content,
-          { paddingTop: topPad + 40, paddingBottom: botPad + 30 },
-        ]}
+        contentContainerStyle={[styles.content, { paddingTop: topPad + 40, paddingBottom: botPad + 30 }]}
         keyboardShouldPersistTaps="handled"
       >
-        {/* Logo & Title */}
+        {/* Logo */}
         <View style={styles.logoSection}>
           <View style={[styles.logoCircle, { backgroundColor: colors.primary }]}>
             <Text style={styles.logoText}>O</Text>
           </View>
           <Text style={[styles.appName, { color: colors.primary }]}>O'Savdo</Text>
-          <Text style={[styles.tagline, { color: colors.mutedForeground }]}>
-            Mahalliy bozor — tumandagi eng yaxshi narxlar
-          </Text>
+          <Text style={[styles.tagline, { color: colors.mutedForeground }]}>{t('appTagline')}</Text>
         </View>
+
+        {/* Country selector */}
+        <TouchableOpacity
+          style={[styles.countrySelector, { backgroundColor: colors.card, borderColor: colors.border }]}
+          onPress={() => setShowCountryPicker(!showCountryPicker)}
+        >
+          <Text style={{ fontSize: 22 }}>{selectedCountry?.flag ?? '🌍'}</Text>
+          <View style={{ flex: 1 }}>
+            <Text style={[styles.countrySelectorLabel, { color: colors.mutedForeground }]}>{t('country')}</Text>
+            <Text style={[styles.countrySelectorName, { color: colors.text }]}>{selectedCountry?.name ?? "O'zbekiston"}</Text>
+          </View>
+          <Text style={{ color: colors.mutedForeground, fontSize: 13 }}>{fmt.dialCode}</Text>
+          <Feather name={showCountryPicker ? 'chevron-up' : 'chevron-down'} size={16} color={colors.mutedForeground} />
+        </TouchableOpacity>
+
+        {/* Country picker dropdown */}
+        {showCountryPicker && (
+          <View style={[styles.pickerDropdown, { backgroundColor: colors.card, borderColor: colors.border }]}>
+            {(countries ?? []).map((c) => (
+              <TouchableOpacity
+                key={c.id}
+                style={[styles.pickerRow, { borderBottomColor: colors.border }]}
+                onPress={() => handleSelectCountry(c as { id: string; name: string; flag: string; currency: string; dialCode: string })}
+              >
+                <Text style={{ fontSize: 22 }}>{c.flag}</Text>
+                <Text style={[styles.pickerName, { color: colors.text }]}>{c.name}</Text>
+                <Text style={[styles.pickerCode, { color: colors.mutedForeground }]}>{c.dialCode}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        )}
 
         {/* Form card */}
         <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
-          <Text style={[styles.cardTitle, { color: colors.text }]}>Kirish</Text>
+          <Text style={[styles.cardTitle, { color: colors.text }]}>{t('welcomeBack')}</Text>
 
-          {/* Phone */}
+          {/* Phone with dial code prefix */}
           <View style={styles.fieldGroup}>
-            <Text style={[styles.label, { color: colors.mutedForeground }]}>Telefon raqam</Text>
+            <Text style={[styles.label, { color: colors.mutedForeground }]}>{t('phone')}</Text>
             <View style={[styles.inputRow, { borderColor: colors.border, backgroundColor: colors.muted }]}>
-              <Feather name="phone" size={16} color={colors.mutedForeground} />
+              <View style={[styles.dialCodeBadge, { backgroundColor: colors.primary + '20' }]}>
+                <Text style={[styles.dialCodeText, { color: colors.primary }]}>{fmt.dialCode}</Text>
+              </View>
               <TextInput
                 style={[styles.input, { color: colors.text }]}
-                placeholder="+998 90 123 45 67"
+                placeholder={fmt.placeholder}
                 placeholderTextColor={colors.mutedForeground}
-                value={phone}
-                onChangeText={setPhone}
+                value={formattedDisplay}
+                onChangeText={handlePhoneChange}
                 keyboardType="phone-pad"
                 autoCapitalize="none"
+                maxLength={fmt.mask.length}
               />
             </View>
           </View>
 
           {/* Password */}
           <View style={styles.fieldGroup}>
-            <Text style={[styles.label, { color: colors.mutedForeground }]}>Parol</Text>
+            <Text style={[styles.label, { color: colors.mutedForeground }]}>{t('password')}</Text>
             <View style={[styles.inputRow, { borderColor: colors.border, backgroundColor: colors.muted }]}>
               <Feather name="lock" size={16} color={colors.mutedForeground} />
               <TextInput
@@ -117,31 +167,24 @@ export default function LoginScreen() {
             onPress={handleLogin}
             disabled={loginMutation.isPending}
           >
-            {loginMutation.isPending ? (
-              <ActivityIndicator color="#fff" />
-            ) : (
-              <Text style={styles.loginBtnText}>Kirish</Text>
-            )}
+            {loginMutation.isPending
+              ? <ActivityIndicator color="#fff" />
+              : <Text style={styles.loginBtnText}>{t('loginBtn')}</Text>
+            }
           </TouchableOpacity>
 
           {/* Demo hint */}
           <View style={[styles.demoHint, { backgroundColor: colors.secondary }]}>
             <Feather name="info" size={13} color={colors.primary} />
-            <Text style={[styles.demoText, { color: colors.primary }]}>
-              Demo: +998901234567 / test123
-            </Text>
+            <Text style={[styles.demoText, { color: colors.primary }]}>{t('demoHint')}</Text>
           </View>
         </View>
 
         {/* Register link */}
         <View style={styles.registerRow}>
-          <Text style={[styles.registerText, { color: colors.mutedForeground }]}>
-            Hisobingiz yo'qmi?
-          </Text>
+          <Text style={[styles.registerText, { color: colors.mutedForeground }]}>{t('dontHaveAccount')}</Text>
           <TouchableOpacity onPress={() => router.push('/auth/register')}>
-            <Text style={[styles.registerLink, { color: colors.primary }]}>
-              Ro'yxatdan o'ting
-            </Text>
+            <Text style={[styles.registerLink, { color: colors.primary }]}>{t('register')}</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
@@ -151,102 +194,49 @@ export default function LoginScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  content: {
-    paddingHorizontal: 24,
-    gap: 24,
-    justifyContent: 'center',
-    minHeight: '100%',
+  content: { paddingHorizontal: 20, gap: 14 },
+  logoSection: { alignItems: 'center', gap: 8, marginBottom: 6 },
+  logoCircle: { width: 64, height: 64, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
+  logoText: { fontSize: 32, fontFamily: 'Inter_700Bold', color: '#fff' },
+  appName: { fontSize: 26, fontFamily: 'Inter_700Bold' },
+  tagline: { fontSize: 13, fontFamily: 'Inter_400Regular', textAlign: 'center' },
+  countrySelector: {
+    flexDirection: 'row', alignItems: 'center', gap: 10,
+    borderWidth: 1, borderRadius: 14, paddingHorizontal: 14, paddingVertical: 12,
   },
-  logoSection: {
-    alignItems: 'center',
-    gap: 8,
+  countrySelectorLabel: { fontSize: 11, fontFamily: 'Inter_400Regular' },
+  countrySelectorName: { fontSize: 14, fontFamily: 'Inter_600SemiBold' },
+  pickerDropdown: {
+    borderWidth: 1, borderRadius: 14, overflow: 'hidden', marginTop: -8,
   },
-  logoCircle: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 4,
+  pickerRow: {
+    flexDirection: 'row', alignItems: 'center', gap: 10,
+    paddingHorizontal: 14, paddingVertical: 11, borderBottomWidth: StyleSheet.hairlineWidth,
   },
-  logoText: {
-    fontSize: 36,
-    fontFamily: 'Inter_700Bold',
-    color: '#fff',
-  },
-  appName: {
-    fontSize: 28,
-    fontFamily: 'Inter_700Bold',
-  },
-  tagline: {
-    fontSize: 14,
-    fontFamily: 'Inter_400Regular',
-    textAlign: 'center',
-  },
-  card: {
-    borderRadius: 20,
-    borderWidth: 1,
-    padding: 20,
-    gap: 16,
-  },
-  cardTitle: {
-    fontSize: 20,
-    fontFamily: 'Inter_700Bold',
-  },
+  pickerName: { flex: 1, fontSize: 14, fontFamily: 'Inter_500Medium' },
+  pickerCode: { fontSize: 13, fontFamily: 'Inter_400Regular' },
+  card: { borderWidth: 1, borderRadius: 16, padding: 20, gap: 14 },
+  cardTitle: { fontSize: 18, fontFamily: 'Inter_700Bold', marginBottom: 2 },
   fieldGroup: { gap: 6 },
-  label: {
-    fontSize: 13,
-    fontFamily: 'Inter_500Medium',
-  },
+  label: { fontSize: 13, fontFamily: 'Inter_500Medium' },
   inputRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    borderWidth: 1,
-    borderRadius: 12,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
+    flexDirection: 'row', alignItems: 'center', gap: 10,
+    borderWidth: 1, borderRadius: 12, paddingHorizontal: 12, paddingVertical: 12,
   },
-  input: {
-    flex: 1,
-    fontSize: 15,
-    fontFamily: 'Inter_400Regular',
-  },
+  dialCodeBadge: { paddingHorizontal: 8, paddingVertical: 4, borderRadius: 8 },
+  dialCodeText: { fontSize: 14, fontFamily: 'Inter_700Bold' },
+  input: { flex: 1, fontSize: 15, fontFamily: 'Inter_400Regular' },
   loginBtn: {
-    paddingVertical: 15,
-    borderRadius: 14,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 4,
+    paddingVertical: 15, borderRadius: 14,
+    alignItems: 'center', justifyContent: 'center', marginTop: 4,
   },
-  loginBtnText: {
-    fontSize: 16,
-    fontFamily: 'Inter_600SemiBold',
-    color: '#fff',
-  },
+  loginBtnText: { fontSize: 16, fontFamily: 'Inter_600SemiBold', color: '#fff' },
   demoHint: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    padding: 10,
-    borderRadius: 10,
+    flexDirection: 'row', alignItems: 'center', gap: 6,
+    padding: 10, borderRadius: 10,
   },
-  demoText: {
-    fontSize: 12,
-    fontFamily: 'Inter_500Medium',
-  },
-  registerRow: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: 6,
-  },
-  registerText: {
-    fontSize: 14,
-    fontFamily: 'Inter_400Regular',
-  },
-  registerLink: {
-    fontSize: 14,
-    fontFamily: 'Inter_600SemiBold',
-  },
+  demoText: { fontSize: 12, fontFamily: 'Inter_500Medium' },
+  registerRow: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 6 },
+  registerText: { fontSize: 14, fontFamily: 'Inter_400Regular' },
+  registerLink: { fontSize: 14, fontFamily: 'Inter_600SemiBold' },
 });
