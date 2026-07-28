@@ -115,6 +115,7 @@ export const countries: StoredCountry[] = [
   { id: 'af', name: "Afg'oniston",   nameRu: "Афганистан",    flag: '🇦🇫', dialCode: '+93',  currency: 'AFN' },
   { id: 'ru', name: "Rossiya",       nameRu: "Россия",        flag: '🇷🇺', dialCode: '+7',   currency: 'RUB' },
   { id: 'cn', name: "Xitoy",         nameRu: "Китай",         flag: '🇨🇳', dialCode: '+86',  currency: 'CNY' },
+  { id: 'ir', name: "Eron",          nameRu: "Иран",          flag: '🇮🇷', dialCode: '+98',  currency: 'IRR' },
 ];
 
 // ─── REGIONS ──────────────────────────────────────────────────────────────────
@@ -195,6 +196,17 @@ export const regions: StoredRegion[] = [
   { id: 'cn5', countryId: 'cn', name: "Chengdu",            nameRu: "Чэнду",                  lat: 30.5728, lng: 104.0668 },
   { id: 'cn6', countryId: 'cn', name: "Si'an",              nameRu: "Сиань",                  lat: 34.2658, lng: 108.9541 },
   { id: 'cn7', countryId: 'cn', name: "Wuhan",              nameRu: "Ухань",                  lat: 30.5928, lng: 114.3055 },
+  // ── Eron ────────────────────────────────────────────────────────────────────
+  { id: 'ir1',  countryId: 'ir', name: "Tehron",           nameRu: "Тегеран",                lat: 35.6892, lng: 51.3890 },
+  { id: 'ir2',  countryId: 'ir', name: "Mashhad",          nameRu: "Мешхед",                 lat: 36.2605, lng: 59.6168 },
+  { id: 'ir3',  countryId: 'ir', name: "Isfahon",          nameRu: "Исфахан",                lat: 32.6546, lng: 51.6680 },
+  { id: 'ir4',  countryId: 'ir', name: "Tabriz",           nameRu: "Тебриз",                 lat: 38.0962, lng: 46.2738 },
+  { id: 'ir5',  countryId: 'ir', name: "Karaj",            nameRu: "Карадж",                 lat: 35.8400, lng: 50.9391 },
+  { id: 'ir6',  countryId: 'ir', name: "Sheroz",           nameRu: "Шираз",                  lat: 29.5918, lng: 52.5837 },
+  { id: 'ir7',  countryId: 'ir', name: "Ahvoz",            nameRu: "Ахваз",                  lat: 31.3183, lng: 48.6706 },
+  { id: 'ir8',  countryId: 'ir', name: "Qum",              nameRu: "Кум",                    lat: 34.6401, lng: 50.8764 },
+  { id: 'ir9',  countryId: 'ir', name: "Kirmonshoh",       nameRu: "Керманшах",              lat: 34.3277, lng: 47.0780 },
+  { id: 'ir10', countryId: 'ir', name: "Urmiya",           nameRu: "Урмия",                  lat: 37.5527, lng: 45.0760 },
 ];
 
 // ─── DISTRICTS ────────────────────────────────────────────────────────────────
@@ -581,6 +593,47 @@ export const districts: StoredDistrict[] = [
   { id: 'cn6_2',  name: "Si'an Beilin tumani",     nameRu: "Бэйлинь район",             regionId: 'cn6',  lat: 34.2700, lng: 108.9400 },
   { id: 'cn7_1',  name: "Wuhan markazi",           nameRu: "Центр Уханя",               regionId: 'cn7',  lat: 30.5928, lng: 114.3055 },
   { id: 'cn7_2',  name: "Wuhan Jiang'an tumani",   nameRu: "Цзян'ань район",            regionId: 'cn7',  lat: 30.6100, lng: 114.2900 },
+
+  // ── Eron ─────────────────────────────────────────────────────────────────────
+  // Tehran (ir1)
+  { id: 'ir1_1',  name: "Shimoliy (Tajrish)",      nameRu: "Северный (Таджриш)",        regionId: 'ir1',  lat: 35.8013, lng: 51.4316 },
+  { id: 'ir1_2',  name: "Vanak",                   nameRu: "Ванак",                     regionId: 'ir1',  lat: 35.7548, lng: 51.4090 },
+  { id: 'ir1_3',  name: "Ekbatan",                 nameRu: "Экбатан",                   regionId: 'ir1',  lat: 35.7220, lng: 51.3120 },
+  { id: 'ir1_4',  name: "Enghelab",                nameRu: "Энгелаб",                   regionId: 'ir1',  lat: 35.7009, lng: 51.3925 },
+  { id: 'ir1_5',  name: "Tehran-Pars",             nameRu: "Тегеран-Парс",              regionId: 'ir1',  lat: 35.7350, lng: 51.5380 },
+  { id: 'ir1_6',  name: "Narmak",                  nameRu: "Нармак",                    regionId: 'ir1',  lat: 35.7300, lng: 51.4900 },
+  { id: 'ir1_7',  name: "Tehransar",               nameRu: "Тегерансар",                regionId: 'ir1',  lat: 35.6900, lng: 51.2800 },
+  { id: 'ir1_8',  name: "Shahrak-e G'arb",         nameRu: "Шахрак-э-Гарб",             regionId: 'ir1',  lat: 35.7600, lng: 51.3600 },
+  // Mashhad (ir2)
+  { id: 'ir2_1',  name: "Mashhad markazi",         nameRu: "Центр Мешхеда",             regionId: 'ir2',  lat: 36.2605, lng: 59.6168 },
+  { id: 'ir2_2',  name: "Ahmadabad",               nameRu: "Ахмадабад",                 regionId: 'ir2',  lat: 36.2800, lng: 59.5900 },
+  { id: 'ir2_3',  name: "Samen",                   nameRu: "Самен",                     regionId: 'ir2',  lat: 36.2900, lng: 59.6000 },
+  { id: 'ir2_4',  name: "Imam Rizo shahri",        nameRu: "Шахрак Имам Реза",          regionId: 'ir2',  lat: 36.2400, lng: 59.6500 },
+  // Isfahan (ir3)
+  { id: 'ir3_1',  name: "Isfahon markazi",         nameRu: "Центр Исфахана",            regionId: 'ir3',  lat: 32.6546, lng: 51.6680 },
+  { id: 'ir3_2',  name: "Jolfa",                   nameRu: "Джольфа",                   regionId: 'ir3',  lat: 32.6400, lng: 51.6500 },
+  { id: 'ir3_3',  name: "Shahreza",                nameRu: "Шахреза",                   regionId: 'ir3',  lat: 32.0100, lng: 51.8600 },
+  { id: 'ir3_4',  name: "Xomeyni Shahr",           nameRu: "Хомейни-Шахр",              regionId: 'ir3',  lat: 32.6900, lng: 51.5200 },
+  // Tabriz (ir4)
+  { id: 'ir4_1',  name: "Tabriz markazi",          nameRu: "Центр Тебриза",             regionId: 'ir4',  lat: 38.0962, lng: 46.2738 },
+  { id: 'ir4_2',  name: "Elgoli",                  nameRu: "Эльгёли",                   regionId: 'ir4',  lat: 38.0600, lng: 46.3200 },
+  { id: 'ir4_3',  name: "Bag'misha",               nameRu: "Баг-Мише",                  regionId: 'ir4',  lat: 38.1300, lng: 46.2500 },
+  // Karaj (ir5)
+  { id: 'ir5_1',  name: "Karaj markazi",           nameRu: "Центр Карадж",              regionId: 'ir5',  lat: 35.8400, lng: 50.9391 },
+  { id: 'ir5_2',  name: "Mehr Villa",              nameRu: "Мехр Вилла",                regionId: 'ir5',  lat: 35.8600, lng: 50.9200 },
+  // Shiraz (ir6)
+  { id: 'ir6_1',  name: "Sheroz markazi",          nameRu: "Центр Шираза",              regionId: 'ir6',  lat: 29.5918, lng: 52.5837 },
+  { id: 'ir6_2',  name: "Zand ko'chasi",           nameRu: "Улица Занд",                regionId: 'ir6',  lat: 29.6100, lng: 52.5600 },
+  // Ahvaz (ir7)
+  { id: 'ir7_1',  name: "Ahvoz markazi",           nameRu: "Центр Ахваза",              regionId: 'ir7',  lat: 31.3183, lng: 48.6706 },
+  { id: 'ir7_2',  name: "Kianpars",                nameRu: "Кианпарс",                  regionId: 'ir7',  lat: 31.3400, lng: 48.6800 },
+  // Qolgan IR shaharlar
+  { id: 'ir8_1',  name: "Qum markazi",             nameRu: "Центр Кума",                regionId: 'ir8',  lat: 34.6401, lng: 50.8764 },
+  { id: 'ir8_2',  name: "Qum G'arb tumani",        nameRu: "Западный район Кума",       regionId: 'ir8',  lat: 34.6500, lng: 50.8500 },
+  { id: 'ir9_1',  name: "Kirmonshoh markazi",      nameRu: "Центр Керманшаха",          regionId: 'ir9',  lat: 34.3277, lng: 47.0780 },
+  { id: 'ir9_2',  name: "Kirmonshoh Sharq",        nameRu: "Восточный Керманшах",       regionId: 'ir9',  lat: 34.3400, lng: 47.1000 },
+  { id: 'ir10_1', name: "Urmiya markazi",          nameRu: "Центр Урмии",               regionId: 'ir10', lat: 37.5527, lng: 45.0760 },
+  { id: 'ir10_2', name: "Urmiya G'arb",            nameRu: "Западная Урмия",            regionId: 'ir10', lat: 37.5600, lng: 45.0500 },
 ];
 
 // ─── NEIGHBORHOODS ────────────────────────────────────────────────────────────

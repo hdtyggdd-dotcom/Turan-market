@@ -1,7 +1,7 @@
 // O'Savdo — Multi-language translations
-// 8 countries: uz, kz, kg, tj, tm, af, ru, cn
+// 9 countries: uz, kz, kg, tj, tm, af, ru, cn, ir
 
-export type LangCode = 'uz' | 'kz' | 'kg' | 'tj' | 'tm' | 'af' | 'ru' | 'cn';
+export type LangCode = 'uz' | 'kz' | 'kg' | 'tj' | 'tm' | 'af' | 'ru' | 'cn' | 'ir';
 
 export interface PhoneFormat {
   dialCode: string;
@@ -19,6 +19,7 @@ export const PHONE_FORMATS: Record<LangCode, PhoneFormat> = {
   af: { dialCode: '+93',  maxDigits: 9,  placeholder: '70 123 4567',   mask: 'XX XXX XXXX'   },
   ru: { dialCode: '+7',   maxDigits: 10, placeholder: '912 345 67 89', mask: 'XXX XXX XX XX' },
   cn: { dialCode: '+86',  maxDigits: 11, placeholder: '138 0013 8000', mask: 'XXX XXXX XXXX' },
+  ir: { dialCode: '+98',  maxDigits: 10, placeholder: '912 345 6789',  mask: 'XXX XXX XXXX'  },
 };
 
 /** Apply mask formatting to raw digits */
@@ -245,10 +246,33 @@ const cn: Translations = {
   welcomeBack: "欢迎回来！", createAccount: "创建新账户",
 };
 
-export const TRANSLATIONS: Record<LangCode, Translations> = { uz, kz, kg, tj, tm, af, ru, cn };
+const ir: Translations = {
+  appTagline: "بازار محلی — بهترین قیمت‌ها در منطقه",
+  login: "ورود", register: "ثبت‌نام", logout: "خروج",
+  phone: "شماره موبایل", password: "رمز عبور", name: "نام",
+  selectCountry: "کشور را انتخاب کنید", country: "کشور", region: "استان/شهر", district: "منطقه",
+  enterPhone: "شماره را وارد کنید", enterPassword: "رمز عبور را وارد کنید", enterName: "نام خود را وارد کنید",
+  loginBtn: "ورود", registerBtn: "ثبت‌نام", nextBtn: "بعدی", saveBtn: "ذخیره", cancelBtn: "لغو", confirmBtn: "تأیید",
+  dontHaveAccount: "حساب ندارید؟", haveAccount: "حساب دارید؟",
+  buyer: "خریدار", seller: "فروشنده", driver: "راننده",
+  buyerDesc: "محصول می‌خرم", sellerDesc: "آگهی می‌گذارم", driverDesc: "تحویل می‌دهم",
+  locationStep: "موقعیت مکانی", infoStep: "اطلاعات",
+  home: "خانه", search: "جستجو", addListing: "آگهی", orders: "سفارش‌ها", profile: "پروفایل",
+  category: "دسته‌بندی", subcategory: "زیردسته", price: "قیمت", description: "توضیحات", title: "عنوان", images: "تصاویر",
+  publish: "انتشار آگهی", publishing: "در حال انتشار...",
+  wrongCredentials: "شماره یا رمز اشتباه است", fillAllFields: "لطفاً همه فیلدها را پر کنید",
+  passwordTooShort: "رمز باید حداقل ۶ کاراکتر باشد", selectRegion: "استان و منطقه را انتخاب کنید",
+  role: "نقش", detectLocation: "موقعیتم را تشخیص بده", detecting: "در حال تشخیص موقعیت...",
+  locationPermissionDenied: "دسترسی به موقعیت مکانی رد شد",
+  countryDetected: "موقعیت شما تشخیص داده شد", correctLocation: "بله، درسته", reDetect: "دوباره تشخیص بده", skipUz: "ازبکستان — پیش‌فرض ادامه",
+  demoHint: "Demo: +998901234567 / test123",
+  welcomeBack: "خوش برگشتید!", createAccount: "حساب جدید بسازید",
+};
+
+export const TRANSLATIONS: Record<LangCode, Translations> = { uz, kz, kg, tj, tm, af, ru, cn, ir };
 
 /** Map countryId → default language */
 export const COUNTRY_LANG: Record<string, LangCode> = {
   uz: 'uz', kz: 'kz', kg: 'kg', tj: 'tj',
-  tm: 'tm', af: 'af', ru: 'ru', cn: 'cn',
+  tm: 'tm', af: 'af', ru: 'ru', cn: 'cn', ir: 'ir',
 };

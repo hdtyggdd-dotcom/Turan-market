@@ -16,7 +16,7 @@ function haversine(lat1: number, lng1: number, lat2: number, lng2: number): numb
 // ISO country_code → our country IDs
 const ISO_MAP: Record<string, string> = {
   uz: 'uz', kz: 'kz', kg: 'kg', tj: 'tj',
-  tm: 'tm', af: 'af', ru: 'ru', cn: 'cn',
+  tm: 'tm', af: 'af', ru: 'ru', cn: 'cn', ir: 'ir',
 };
 
 // GET /locations/countries
