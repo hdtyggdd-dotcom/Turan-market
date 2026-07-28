@@ -391,13 +391,30 @@ export const categories: StoredCategory[] = [
     nameRu: "Транспорт и техника",
     icon: "🚗",
     subcategories: [
-      { id: 'sub23', name: "Avtomobil",          nameRu: "Автомобиль",          categoryId: 'cat3' },
-      { id: 'sub24', name: "Traktor",            nameRu: "Трактор",             categoryId: 'cat3' },
-      { id: 'sub25', name: "Kombain",            nameRu: "Комбайн",             categoryId: 'cat3' },
-      { id: 'sub26', name: "Skuter",             nameRu: "Скутер",              categoryId: 'cat3' },
-      { id: 'sub27', name: "Muravey",            nameRu: "Муравей",             categoryId: 'cat3' },
-      { id: 'sub28', name: "Velosiped",          nameRu: "Велосипед",           categoryId: 'cat3' },
-      { id: 'sub29', name: "Maxsus texnika",     nameRu: "Спецтехника",         categoryId: 'cat3', bookingMode: 'full' },
+      // --- Avtomobillar ---
+      { id: 'sub3_01', name: "Engil avtomobil",            nameRu: "Легковой автомобиль",      categoryId: 'cat3' },
+      { id: 'sub3_02', name: "Mikroavtobus / Minivan",     nameRu: "Микроавтобус / Минивэн",   categoryId: 'cat3' },
+      { id: 'sub3_03', name: "Avtobus",                    nameRu: "Автобус",                  categoryId: 'cat3' },
+      // --- Yuk mashinalar ---
+      { id: 'sub3_04', name: "Yuk mashinasi (gazel)",      nameRu: "Грузовик (газель)",        categoryId: 'cat3' },
+      { id: 'sub3_05', name: "Yuk mashinasi (katta)",      nameRu: "Большой грузовик",         categoryId: 'cat3' },
+      { id: 'sub3_06', name: "Yarim pricep (fura)",        nameRu: "Полуприцеп (фура)",        categoryId: 'cat3' },
+      { id: 'sub3_07', name: "Samosval",                   nameRu: "Самосвал",                 categoryId: 'cat3' },
+      { id: 'sub3_08', name: "Muravey / Uch g'ildirakli",  nameRu: "Муравей / Трёхколёсный",   categoryId: 'cat3' },
+      // --- Spes texnikalar ---
+      { id: 'sub3_09', name: "Traktor",                    nameRu: "Трактор",                  categoryId: 'cat3' },
+      { id: 'sub3_10', name: "Kombain",                    nameRu: "Комбайн",                  categoryId: 'cat3' },
+      { id: 'sub3_11', name: "Ekskavator",                 nameRu: "Экскаватор",               categoryId: 'cat3', bookingMode: 'full' },
+      { id: 'sub3_12', name: "Buldozer / Greyfer",         nameRu: "Бульдозер / Грейфер",      categoryId: 'cat3', bookingMode: 'full' },
+      { id: 'sub3_13', name: "Kran / Manipulyator",        nameRu: "Кран / Манипулятор",       categoryId: 'cat3', bookingMode: 'full' },
+      { id: 'sub3_14', name: "Pograchik",                  nameRu: "Погрузчик",                categoryId: 'cat3', bookingMode: 'full' },
+      { id: 'sub3_15', name: "Boshqa spes texnika",        nameRu: "Прочая спецтехника",       categoryId: 'cat3', bookingMode: 'full' },
+      // --- Mototsikl & Skuter ---
+      { id: 'sub3_16', name: "Mototsikl",                  nameRu: "Мотоцикл",                 categoryId: 'cat3' },
+      { id: 'sub3_17', name: "Skuter",                     nameRu: "Скутер",                   categoryId: 'cat3' },
+      { id: 'sub3_18', name: "Velosiped / E-bike",         nameRu: "Велосипед / Э-байк",       categoryId: 'cat3' },
+      // --- Boshqa ---
+      { id: 'sub3_19', name: "Boshqa transport",           nameRu: "Прочий транспорт",         categoryId: 'cat3' },
     ],
   },
   {
