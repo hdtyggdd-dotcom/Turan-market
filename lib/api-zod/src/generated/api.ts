@@ -44,7 +44,8 @@ export const RegisterResponse = zod.object({
   "region": zod.object({
   "id": zod.string(),
   "name": zod.string(),
-  "nameRu": zod.string()
+  "nameRu": zod.string(),
+  "countryId": zod.string()
 }).nullish(),
   "district": zod.object({
   "id": zod.string(),
@@ -90,7 +91,8 @@ export const LoginResponse = zod.object({
   "region": zod.object({
   "id": zod.string(),
   "name": zod.string(),
-  "nameRu": zod.string()
+  "nameRu": zod.string(),
+  "countryId": zod.string()
 }).nullish(),
   "district": zod.object({
   "id": zod.string(),
@@ -129,7 +131,8 @@ export const GetMeResponse = zod.object({
   "region": zod.object({
   "id": zod.string(),
   "name": zod.string(),
-  "nameRu": zod.string()
+  "nameRu": zod.string(),
+  "countryId": zod.string()
 }).nullish(),
   "district": zod.object({
   "id": zod.string(),
@@ -171,7 +174,8 @@ export const GetUserResponse = zod.object({
   "region": zod.object({
   "id": zod.string(),
   "name": zod.string(),
-  "nameRu": zod.string()
+  "nameRu": zod.string(),
+  "countryId": zod.string()
 }).nullish(),
   "district": zod.object({
   "id": zod.string(),
@@ -220,7 +224,8 @@ export const UpdateUserResponse = zod.object({
   "region": zod.object({
   "id": zod.string(),
   "name": zod.string(),
-  "nameRu": zod.string()
+  "nameRu": zod.string(),
+  "countryId": zod.string()
 }).nullish(),
   "district": zod.object({
   "id": zod.string(),
@@ -243,12 +248,51 @@ export const UpdateUserResponse = zod.object({
 
 
 /**
- * @summary Get all regions (viloyatlar)
+ * @summary Get supported countries
  */
+export const GetCountriesResponseItem = zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "nameRu": zod.string(),
+  "flag": zod.string(),
+  "dialCode": zod.string(),
+  "currency": zod.string()
+})
+export const GetCountriesResponse = zod.array(GetCountriesResponseItem)
+
+
+/**
+ * @summary Auto-detect country and nearest city from GPS coordinates
+ */
+export const DetectLocationBody = zod.object({
+  "lat": zod.number(),
+  "lng": zod.number()
+})
+
+export const DetectLocationResponse = zod.object({
+  "countryId": zod.string(),
+  "countryName": zod.string(),
+  "countryFlag": zod.string(),
+  "dialCode": zod.string(),
+  "currency": zod.string(),
+  "regionId": zod.string(),
+  "regionName": zod.string(),
+  "distanceKm": zod.number()
+})
+
+
+/**
+ * @summary Get regions filtered by country
+ */
+export const GetRegionsQueryParams = zod.object({
+  "countryId": zod.coerce.string().optional()
+})
+
 export const GetRegionsResponseItem = zod.object({
   "id": zod.string(),
   "name": zod.string(),
-  "nameRu": zod.string()
+  "nameRu": zod.string(),
+  "countryId": zod.string()
 })
 export const GetRegionsResponse = zod.array(GetRegionsResponseItem)
 
@@ -355,7 +399,8 @@ export const GetListingsResponse = zod.object({
   "region": zod.object({
   "id": zod.string(),
   "name": zod.string(),
-  "nameRu": zod.string()
+  "nameRu": zod.string(),
+  "countryId": zod.string()
 }).nullish(),
   "district": zod.object({
   "id": zod.string(),
@@ -381,7 +426,8 @@ export const GetListingsResponse = zod.object({
   "region": zod.object({
   "id": zod.string(),
   "name": zod.string(),
-  "nameRu": zod.string()
+  "nameRu": zod.string(),
+  "countryId": zod.string()
 }),
   "district": zod.object({
   "id": zod.string(),
@@ -467,7 +513,8 @@ export const CreateListingResponse = zod.object({
   "region": zod.object({
   "id": zod.string(),
   "name": zod.string(),
-  "nameRu": zod.string()
+  "nameRu": zod.string(),
+  "countryId": zod.string()
 }).nullish(),
   "district": zod.object({
   "id": zod.string(),
@@ -493,7 +540,8 @@ export const CreateListingResponse = zod.object({
   "region": zod.object({
   "id": zod.string(),
   "name": zod.string(),
-  "nameRu": zod.string()
+  "nameRu": zod.string(),
+  "countryId": zod.string()
 }),
   "district": zod.object({
   "id": zod.string(),
@@ -558,7 +606,8 @@ export const GetListingResponse = zod.object({
   "region": zod.object({
   "id": zod.string(),
   "name": zod.string(),
-  "nameRu": zod.string()
+  "nameRu": zod.string(),
+  "countryId": zod.string()
 }).nullish(),
   "district": zod.object({
   "id": zod.string(),
@@ -584,7 +633,8 @@ export const GetListingResponse = zod.object({
   "region": zod.object({
   "id": zod.string(),
   "name": zod.string(),
-  "nameRu": zod.string()
+  "nameRu": zod.string(),
+  "countryId": zod.string()
 }),
   "district": zod.object({
   "id": zod.string(),
@@ -669,7 +719,8 @@ export const UpdateListingResponse = zod.object({
   "region": zod.object({
   "id": zod.string(),
   "name": zod.string(),
-  "nameRu": zod.string()
+  "nameRu": zod.string(),
+  "countryId": zod.string()
 }).nullish(),
   "district": zod.object({
   "id": zod.string(),
@@ -695,7 +746,8 @@ export const UpdateListingResponse = zod.object({
   "region": zod.object({
   "id": zod.string(),
   "name": zod.string(),
-  "nameRu": zod.string()
+  "nameRu": zod.string(),
+  "countryId": zod.string()
 }),
   "district": zod.object({
   "id": zod.string(),
@@ -794,7 +846,8 @@ export const GetUserListingsResponseItem = zod.object({
   "region": zod.object({
   "id": zod.string(),
   "name": zod.string(),
-  "nameRu": zod.string()
+  "nameRu": zod.string(),
+  "countryId": zod.string()
 }).nullish(),
   "district": zod.object({
   "id": zod.string(),
@@ -820,7 +873,8 @@ export const GetUserListingsResponseItem = zod.object({
   "region": zod.object({
   "id": zod.string(),
   "name": zod.string(),
-  "nameRu": zod.string()
+  "nameRu": zod.string(),
+  "countryId": zod.string()
 }),
   "district": zod.object({
   "id": zod.string(),
@@ -933,7 +987,8 @@ export const GetOrdersResponseItem = zod.object({
   "region": zod.object({
   "id": zod.string(),
   "name": zod.string(),
-  "nameRu": zod.string()
+  "nameRu": zod.string(),
+  "countryId": zod.string()
 }).nullish(),
   "district": zod.object({
   "id": zod.string(),
@@ -959,7 +1014,8 @@ export const GetOrdersResponseItem = zod.object({
   "region": zod.object({
   "id": zod.string(),
   "name": zod.string(),
-  "nameRu": zod.string()
+  "nameRu": zod.string(),
+  "countryId": zod.string()
 }),
   "district": zod.object({
   "id": zod.string(),
@@ -1002,7 +1058,8 @@ export const GetOrdersResponseItem = zod.object({
   "region": zod.object({
   "id": zod.string(),
   "name": zod.string(),
-  "nameRu": zod.string()
+  "nameRu": zod.string(),
+  "countryId": zod.string()
 }).nullish(),
   "district": zod.object({
   "id": zod.string(),
@@ -1036,7 +1093,8 @@ export const GetOrdersResponseItem = zod.object({
   "region": zod.object({
   "id": zod.string(),
   "name": zod.string(),
-  "nameRu": zod.string()
+  "nameRu": zod.string(),
+  "countryId": zod.string()
 }).nullish(),
   "district": zod.object({
   "id": zod.string(),
@@ -1108,7 +1166,8 @@ export const CreateOrderResponse = zod.object({
   "region": zod.object({
   "id": zod.string(),
   "name": zod.string(),
-  "nameRu": zod.string()
+  "nameRu": zod.string(),
+  "countryId": zod.string()
 }).nullish(),
   "district": zod.object({
   "id": zod.string(),
@@ -1134,7 +1193,8 @@ export const CreateOrderResponse = zod.object({
   "region": zod.object({
   "id": zod.string(),
   "name": zod.string(),
-  "nameRu": zod.string()
+  "nameRu": zod.string(),
+  "countryId": zod.string()
 }),
   "district": zod.object({
   "id": zod.string(),
@@ -1177,7 +1237,8 @@ export const CreateOrderResponse = zod.object({
   "region": zod.object({
   "id": zod.string(),
   "name": zod.string(),
-  "nameRu": zod.string()
+  "nameRu": zod.string(),
+  "countryId": zod.string()
 }).nullish(),
   "district": zod.object({
   "id": zod.string(),
@@ -1211,7 +1272,8 @@ export const CreateOrderResponse = zod.object({
   "region": zod.object({
   "id": zod.string(),
   "name": zod.string(),
-  "nameRu": zod.string()
+  "nameRu": zod.string(),
+  "countryId": zod.string()
 }).nullish(),
   "district": zod.object({
   "id": zod.string(),
@@ -1278,7 +1340,8 @@ export const GetOrderResponse = zod.object({
   "region": zod.object({
   "id": zod.string(),
   "name": zod.string(),
-  "nameRu": zod.string()
+  "nameRu": zod.string(),
+  "countryId": zod.string()
 }).nullish(),
   "district": zod.object({
   "id": zod.string(),
@@ -1304,7 +1367,8 @@ export const GetOrderResponse = zod.object({
   "region": zod.object({
   "id": zod.string(),
   "name": zod.string(),
-  "nameRu": zod.string()
+  "nameRu": zod.string(),
+  "countryId": zod.string()
 }),
   "district": zod.object({
   "id": zod.string(),
@@ -1347,7 +1411,8 @@ export const GetOrderResponse = zod.object({
   "region": zod.object({
   "id": zod.string(),
   "name": zod.string(),
-  "nameRu": zod.string()
+  "nameRu": zod.string(),
+  "countryId": zod.string()
 }).nullish(),
   "district": zod.object({
   "id": zod.string(),
@@ -1381,7 +1446,8 @@ export const GetOrderResponse = zod.object({
   "region": zod.object({
   "id": zod.string(),
   "name": zod.string(),
-  "nameRu": zod.string()
+  "nameRu": zod.string(),
+  "countryId": zod.string()
 }).nullish(),
   "district": zod.object({
   "id": zod.string(),
@@ -1452,7 +1518,8 @@ export const UpdateOrderStatusResponse = zod.object({
   "region": zod.object({
   "id": zod.string(),
   "name": zod.string(),
-  "nameRu": zod.string()
+  "nameRu": zod.string(),
+  "countryId": zod.string()
 }).nullish(),
   "district": zod.object({
   "id": zod.string(),
@@ -1478,7 +1545,8 @@ export const UpdateOrderStatusResponse = zod.object({
   "region": zod.object({
   "id": zod.string(),
   "name": zod.string(),
-  "nameRu": zod.string()
+  "nameRu": zod.string(),
+  "countryId": zod.string()
 }),
   "district": zod.object({
   "id": zod.string(),
@@ -1521,7 +1589,8 @@ export const UpdateOrderStatusResponse = zod.object({
   "region": zod.object({
   "id": zod.string(),
   "name": zod.string(),
-  "nameRu": zod.string()
+  "nameRu": zod.string(),
+  "countryId": zod.string()
 }).nullish(),
   "district": zod.object({
   "id": zod.string(),
@@ -1555,7 +1624,8 @@ export const UpdateOrderStatusResponse = zod.object({
   "region": zod.object({
   "id": zod.string(),
   "name": zod.string(),
-  "nameRu": zod.string()
+  "nameRu": zod.string(),
+  "countryId": zod.string()
 }).nullish(),
   "district": zod.object({
   "id": zod.string(),

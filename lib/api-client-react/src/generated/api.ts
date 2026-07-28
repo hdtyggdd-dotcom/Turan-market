@@ -22,15 +22,19 @@ import type {
 import type {
   AuthResponse,
   Category,
+  Country,
   CreateListingRequest,
   CreateOrderRequest,
   DeliveryEstimateRequest,
   DeliveryEstimateResponse,
+  DetectLocationRequest,
+  DetectedLocation,
   District,
   ErrorResponse,
   GetDistrictsParams,
   GetListingsParams,
   GetNeighborhoodsParams,
+  GetRegionsParams,
   HealthStatus,
   Listing,
   ListingsResponse,
@@ -520,20 +524,20 @@ export const useUpdateUser = <TError = ErrorType<unknown>,
       return useMutation(getUpdateUserMutationOptions(options));
     }
 
-export const getGetRegionsUrl = () => {
+export const getGetCountriesUrl = () => {
 
 
 
 
-  return `/api/locations/regions`
+  return `/api/locations/countries`
 }
 
 /**
- * @summary Get all regions (viloyatlar)
+ * @summary Get supported countries
  */
-export const getRegions = async ( options?: RequestInit): Promise<Region[]> => {
+export const getCountries = async ( options?: RequestInit): Promise<Country[]> => {
 
-  return customFetch<Region[]>(getGetRegionsUrl(),
+  return customFetch<Country[]>(getGetCountriesUrl(),
   {
     ...options,
     method: 'GET'
@@ -546,23 +550,178 @@ export const getRegions = async ( options?: RequestInit): Promise<Region[]> => {
 
 
 
-export const getGetRegionsQueryKey = () => {
+export const getGetCountriesQueryKey = () => {
     return [
-    `/api/locations/regions`
+    `/api/locations/countries`
     ] as const;
     }
 
 
-export const getGetRegionsQueryOptions = <TData = Awaited<ReturnType<typeof getRegions>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getRegions>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+export const getGetCountriesQueryOptions = <TData = Awaited<ReturnType<typeof getCountries>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getCountries>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getGetRegionsQueryKey();
+  const queryKey =  queryOptions?.queryKey ?? getGetCountriesQueryKey();
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getRegions>>> = ({ signal }) => getRegions({ signal, ...requestOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getCountries>>> = ({ signal }) => getCountries({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getCountries>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetCountriesQueryResult = NonNullable<Awaited<ReturnType<typeof getCountries>>>
+export type GetCountriesQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Get supported countries
+ */
+
+export function useGetCountries<TData = Awaited<ReturnType<typeof getCountries>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getCountries>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetCountriesQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getDetectLocationUrl = () => {
+
+
+
+
+  return `/api/locations/detect`
+}
+
+/**
+ * @summary Auto-detect country and nearest city from GPS coordinates
+ */
+export const detectLocation = async (detectLocationRequest: DetectLocationRequest, options?: RequestInit): Promise<DetectedLocation> => {
+
+  return customFetch<DetectedLocation>(getDetectLocationUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(detectLocationRequest)
+  }
+);}
+
+
+
+
+
+export const getDetectLocationMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof detectLocation>>, TError,{data: BodyType<DetectLocationRequest>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof detectLocation>>, TError,{data: BodyType<DetectLocationRequest>}, TContext> => {
+
+const mutationKey = ['detectLocation'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof detectLocation>>, {data: BodyType<DetectLocationRequest>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  detectLocation(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DetectLocationMutationResult = NonNullable<Awaited<ReturnType<typeof detectLocation>>>
+    export type DetectLocationMutationBody = BodyType<DetectLocationRequest>
+    export type DetectLocationMutationError = ErrorType<void>
+
+    /**
+ * @summary Auto-detect country and nearest city from GPS coordinates
+ */
+export const useDetectLocation = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof detectLocation>>, TError,{data: BodyType<DetectLocationRequest>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof detectLocation>>,
+        TError,
+        {data: BodyType<DetectLocationRequest>},
+        TContext
+      > => {
+      return useMutation(getDetectLocationMutationOptions(options));
+    }
+
+export const getGetRegionsUrl = (params?: GetRegionsParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/locations/regions?${stringifiedParams}` : `/api/locations/regions`
+}
+
+/**
+ * @summary Get regions filtered by country
+ */
+export const getRegions = async (params?: GetRegionsParams, options?: RequestInit): Promise<Region[]> => {
+
+  return customFetch<Region[]>(getGetRegionsUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetRegionsQueryKey = (params?: GetRegionsParams,) => {
+    return [
+    `/api/locations/regions`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetRegionsQueryOptions = <TData = Awaited<ReturnType<typeof getRegions>>, TError = ErrorType<unknown>>(params?: GetRegionsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getRegions>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetRegionsQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getRegions>>> = ({ signal }) => getRegions(params, { signal, ...requestOptions });
 
 
 
@@ -576,15 +735,15 @@ export type GetRegionsQueryError = ErrorType<unknown>
 
 
 /**
- * @summary Get all regions (viloyatlar)
+ * @summary Get regions filtered by country
  */
 
 export function useGetRegions<TData = Awaited<ReturnType<typeof getRegions>>, TError = ErrorType<unknown>>(
-  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getRegions>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+ params?: GetRegionsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getRegions>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
 
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
-  const queryOptions = getGetRegionsQueryOptions(options)
+  const queryOptions = getGetRegionsQueryOptions(params,options)
 
   const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 

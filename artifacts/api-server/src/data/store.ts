@@ -1,9 +1,19 @@
 // O'Savdo in-memory store with full Uzbekistan seed data
 
+export interface StoredCountry {
+  id: string;        // ISO 2-letter: uz, kz, kg, ...
+  name: string;      // Uzbek name
+  nameRu: string;    // Russian name
+  flag: string;      // emoji
+  dialCode: string;  // e.g. +998
+  currency: string;  // e.g. UZS
+}
+
 export interface StoredRegion {
   id: string;
   name: string;
   nameRu: string;
+  countryId: string;
   lat: number;
   lng: number;
 }
@@ -95,22 +105,96 @@ export interface StoredOrder {
   createdAt: string;
 }
 
+// ─── COUNTRIES ────────────────────────────────────────────────────────────────
+export const countries: StoredCountry[] = [
+  { id: 'uz', name: "O'zbekiston",   nameRu: "Узбекистан",    flag: '🇺🇿', dialCode: '+998', currency: 'UZS' },
+  { id: 'kz', name: "Qozog'iston",   nameRu: "Казахстан",     flag: '🇰🇿', dialCode: '+7',   currency: 'KZT' },
+  { id: 'kg', name: "Qirg'iziston",  nameRu: "Кыргызстан",    flag: '🇰🇬', dialCode: '+996', currency: 'KGS' },
+  { id: 'tj', name: "Tojikiston",    nameRu: "Таджикистан",   flag: '🇹🇯', dialCode: '+992', currency: 'TJS' },
+  { id: 'tm', name: "Turkmaniston",  nameRu: "Туркменистан",  flag: '🇹🇲', dialCode: '+993', currency: 'TMT' },
+  { id: 'af', name: "Afg'oniston",   nameRu: "Афганистан",    flag: '🇦🇫', dialCode: '+93',  currency: 'AFN' },
+  { id: 'ru', name: "Rossiya",       nameRu: "Россия",        flag: '🇷🇺', dialCode: '+7',   currency: 'RUB' },
+  { id: 'cn', name: "Xitoy",         nameRu: "Китай",         flag: '🇨🇳', dialCode: '+86',  currency: 'CNY' },
+];
+
 // ─── REGIONS ──────────────────────────────────────────────────────────────────
 export const regions: StoredRegion[] = [
-  { id: 'r1', name: "Toshkent shahri", nameRu: "Ташкент (город)", lat: 41.2995, lng: 69.2401 },
-  { id: 'r2', name: "Toshkent viloyati", nameRu: "Ташкентская область", lat: 41.1145, lng: 69.2900 },
-  { id: 'r3', name: "Andijon", nameRu: "Андижанская", lat: 40.7821, lng: 72.3442 },
-  { id: 'r4', name: "Farg'ona", nameRu: "Ферганская", lat: 40.3834, lng: 71.7855 },
-  { id: 'r5', name: "Namangan", nameRu: "Наманганская", lat: 41.0011, lng: 71.6683 },
-  { id: 'r6', name: "Samarqand", nameRu: "Самаркандская", lat: 39.6542, lng: 66.9597 },
-  { id: 'r7', name: "Buxoro", nameRu: "Бухарская", lat: 39.7681, lng: 64.4556 },
-  { id: 'r8', name: "Navoiy", nameRu: "Навоийская", lat: 40.1000, lng: 65.3790 },
-  { id: 'r9', name: "Qashqadaryo", nameRu: "Кашкадарьинская", lat: 38.8671, lng: 65.7917 },
-  { id: 'r10', name: "Surxondaryo", nameRu: "Сурхандарьинская", lat: 37.9402, lng: 67.5601 },
-  { id: 'r11', name: "Jizzax", nameRu: "Джизакская", lat: 40.1158, lng: 67.8422 },
-  { id: 'r12', name: "Sirdaryo", nameRu: "Сырдарьинская", lat: 40.8376, lng: 68.6632 },
-  { id: 'r13', name: "Xorazm", nameRu: "Хорезмская", lat: 41.5500, lng: 60.6167 },
-  { id: 'r14', name: "Qoraqalpog'iston", nameRu: "Каракалпакстан", lat: 43.7681, lng: 59.0400 },
+  // ── O'zbekiston ─────────────────────────────────────────────────────────────
+  { id: 'r1',  countryId: 'uz', name: "Toshkent shahri",    nameRu: "Ташкент (город)",        lat: 41.2995, lng: 69.2401 },
+  { id: 'r2',  countryId: 'uz', name: "Toshkent viloyati",  nameRu: "Ташкентская область",    lat: 41.1145, lng: 69.2900 },
+  { id: 'r3',  countryId: 'uz', name: "Andijon",            nameRu: "Андижанская",            lat: 40.7821, lng: 72.3442 },
+  { id: 'r4',  countryId: 'uz', name: "Farg'ona",           nameRu: "Ферганская",             lat: 40.3834, lng: 71.7855 },
+  { id: 'r5',  countryId: 'uz', name: "Namangan",           nameRu: "Наманганская",           lat: 41.0011, lng: 71.6683 },
+  { id: 'r6',  countryId: 'uz', name: "Samarqand",          nameRu: "Самаркандская",          lat: 39.6542, lng: 66.9597 },
+  { id: 'r7',  countryId: 'uz', name: "Buxoro",             nameRu: "Бухарская",              lat: 39.7681, lng: 64.4556 },
+  { id: 'r8',  countryId: 'uz', name: "Navoiy",             nameRu: "Навоийская",             lat: 40.1000, lng: 65.3790 },
+  { id: 'r9',  countryId: 'uz', name: "Qashqadaryo",        nameRu: "Кашкадарьинская",        lat: 38.8671, lng: 65.7917 },
+  { id: 'r10', countryId: 'uz', name: "Surxondaryo",        nameRu: "Сурхандарьинская",       lat: 37.9402, lng: 67.5601 },
+  { id: 'r11', countryId: 'uz', name: "Jizzax",             nameRu: "Джизакская",             lat: 40.1158, lng: 67.8422 },
+  { id: 'r12', countryId: 'uz', name: "Sirdaryo",           nameRu: "Сырдарьинская",          lat: 40.8376, lng: 68.6632 },
+  { id: 'r13', countryId: 'uz', name: "Xorazm",             nameRu: "Хорезмская",             lat: 41.5500, lng: 60.6167 },
+  { id: 'r14', countryId: 'uz', name: "Qoraqalpog'iston",   nameRu: "Каракалпакстан",         lat: 43.7681, lng: 59.0400 },
+  // ── Qozog'iston ─────────────────────────────────────────────────────────────
+  { id: 'kz1', countryId: 'kz', name: "Almati",             nameRu: "Алматы",                 lat: 43.2220, lng: 76.8512 },
+  { id: 'kz2', countryId: 'kz', name: "Astana",             nameRu: "Астана",                 lat: 51.1801, lng: 71.4460 },
+  { id: 'kz3', countryId: 'kz', name: "Shymkent",           nameRu: "Шымкент",                lat: 42.3000, lng: 69.5900 },
+  { id: 'kz4', countryId: 'kz', name: "Qaragandy",          nameRu: "Караганда",              lat: 49.8028, lng: 73.1094 },
+  { id: 'kz5', countryId: 'kz', name: "Aktobe",             nameRu: "Актобе",                 lat: 50.2797, lng: 57.2073 },
+  { id: 'kz6', countryId: 'kz', name: "Taraz",              nameRu: "Тараз",                  lat: 42.9000, lng: 71.3667 },
+  { id: 'kz7', countryId: 'kz', name: "Pavlodar",           nameRu: "Павлодар",               lat: 52.2873, lng: 76.9674 },
+  { id: 'kz8', countryId: 'kz', name: "O'skemen",           nameRu: "Усть-Каменогорск",       lat: 49.9500, lng: 82.6167 },
+  { id: 'kz9', countryId: 'kz', name: "Atyrau",             nameRu: "Атырау",                 lat: 47.1164, lng: 51.9026 },
+  { id: 'kz10',countryId: 'kz', name: "Qostanay",           nameRu: "Костанай",               lat: 53.2144, lng: 63.6245 },
+  // ── Qirg'iziston ────────────────────────────────────────────────────────────
+  { id: 'kg1', countryId: 'kg', name: "Bishkek",            nameRu: "Бишкек",                 lat: 42.8700, lng: 74.5900 },
+  { id: 'kg2', countryId: 'kg', name: "O'sh",               nameRu: "Ош",                     lat: 40.5133, lng: 72.7985 },
+  { id: 'kg3', countryId: 'kg', name: "Jalal-Obod",         nameRu: "Джалал-Абад",            lat: 40.9333, lng: 72.9833 },
+  { id: 'kg4', countryId: 'kg', name: "Karakol",            nameRu: "Каракол",                lat: 42.4892, lng: 78.3937 },
+  { id: 'kg5', countryId: 'kg', name: "Tokmok",             nameRu: "Токмок",                 lat: 42.8401, lng: 75.2907 },
+  { id: 'kg6', countryId: 'kg', name: "Naryn",              nameRu: "Нарын",                  lat: 41.4286, lng: 76.0061 },
+  { id: 'kg7', countryId: 'kg', name: "Batken",             nameRu: "Баткен",                 lat: 40.0643, lng: 70.8188 },
+  // ── Tojikiston ──────────────────────────────────────────────────────────────
+  { id: 'tj1', countryId: 'tj', name: "Dushanbe",           nameRu: "Душанбе",                lat: 38.5598, lng: 68.7739 },
+  { id: 'tj2', countryId: 'tj', name: "Xo'jand",            nameRu: "Худжанд",                lat: 40.2825, lng: 69.6215 },
+  { id: 'tj3', countryId: 'tj', name: "Kulob",              nameRu: "Куляб",                  lat: 37.9125, lng: 69.7798 },
+  { id: 'tj4', countryId: 'tj', name: "Bokhtar",            nameRu: "Бохтар",                 lat: 37.8333, lng: 68.7833 },
+  { id: 'tj5', countryId: 'tj', name: "Istaravshan",        nameRu: "Истаравшан",             lat: 39.9139, lng: 69.0025 },
+  { id: 'tj6', countryId: 'tj', name: "Konibodom",          nameRu: "Канибадам",              lat: 40.2847, lng: 70.4281 },
+  { id: 'tj7', countryId: 'tj', name: "Panjakent",          nameRu: "Пенджикент",             lat: 39.4942, lng: 67.6097 },
+  // ── Turkmaniston ────────────────────────────────────────────────────────────
+  { id: 'tm1', countryId: 'tm', name: "Ashxabad",           nameRu: "Ашхабад",                lat: 37.9601, lng: 58.3261 },
+  { id: 'tm2', countryId: 'tm', name: "Turkmenabat",        nameRu: "Туркменабат",            lat: 39.0833, lng: 63.5667 },
+  { id: 'tm3', countryId: 'tm', name: "Mary",               nameRu: "Мары",                   lat: 37.5933, lng: 61.8300 },
+  { id: 'tm4', countryId: 'tm', name: "Balkanabat",         nameRu: "Балканабад",             lat: 39.5100, lng: 54.3700 },
+  { id: 'tm5', countryId: 'tm', name: "Dashhoguz",          nameRu: "Дашогуз",                lat: 41.8369, lng: 59.9669 },
+  { id: 'tm6', countryId: 'tm', name: "Türkmenbaşy",        nameRu: "Туркменбаши",            lat: 40.0181, lng: 52.9795 },
+  // ── Afg'oniston ─────────────────────────────────────────────────────────────
+  { id: 'af1', countryId: 'af', name: "Kobul",              nameRu: "Кабул",                  lat: 34.5280, lng: 69.1724 },
+  { id: 'af2', countryId: 'af', name: "Hirot",              nameRu: "Герат",                  lat: 34.3482, lng: 62.2040 },
+  { id: 'af3', countryId: 'af', name: "Mozori Sharif",      nameRu: "Мазари-Шариф",           lat: 36.7069, lng: 67.1115 },
+  { id: 'af4', countryId: 'af', name: "Qandahor",           nameRu: "Кандагар",               lat: 31.6131, lng: 65.7100 },
+  { id: 'af5', countryId: 'af', name: "Jalalabad",          nameRu: "Джалалабад",             lat: 34.4211, lng: 70.4514 },
+  { id: 'af6', countryId: 'af', name: "Kunduz",             nameRu: "Кундуз",                 lat: 36.7281, lng: 68.8670 },
+  { id: 'af7', countryId: 'af', name: "G'azna",             nameRu: "Газни",                  lat: 33.5500, lng: 68.4167 },
+  // ── Rossiya ─────────────────────────────────────────────────────────────────
+  { id: 'ru1', countryId: 'ru', name: "Moskva",             nameRu: "Москва",                 lat: 55.7558, lng: 37.6173 },
+  { id: 'ru2', countryId: 'ru', name: "Sankt-Peterburg",    nameRu: "Санкт-Петербург",        lat: 59.9343, lng: 30.3351 },
+  { id: 'ru3', countryId: 'ru', name: "Novosibirsk",        nameRu: "Новосибирск",            lat: 54.9833, lng: 82.8964 },
+  { id: 'ru4', countryId: 'ru', name: "Yekaterinburg",      nameRu: "Екатеринбург",           lat: 56.8356, lng: 60.6128 },
+  { id: 'ru5', countryId: 'ru', name: "Kazan",              nameRu: "Казань",                 lat: 55.7887, lng: 49.1221 },
+  { id: 'ru6', countryId: 'ru', name: "Omsk",               nameRu: "Омск",                   lat: 54.9924, lng: 73.3686 },
+  { id: 'ru7', countryId: 'ru', name: "Chelyabinsk",        nameRu: "Челябинск",              lat: 55.1644, lng: 61.4368 },
+  { id: 'ru8', countryId: 'ru', name: "Ufa",                nameRu: "Уфа",                    lat: 54.7388, lng: 55.9721 },
+  { id: 'ru9', countryId: 'ru', name: "Krasnodar",          nameRu: "Краснодар",              lat: 45.0328, lng: 38.9769 },
+  { id: 'ru10',countryId: 'ru', name: "Saratov",            nameRu: "Саратов",                lat: 51.5924, lng: 46.0267 },
+  // ── Xitoy ───────────────────────────────────────────────────────────────────
+  { id: 'cn1', countryId: 'cn', name: "Pekin",              nameRu: "Пекин",                  lat: 39.9042, lng: 116.4074 },
+  { id: 'cn2', countryId: 'cn', name: "Shanxay",            nameRu: "Шанхай",                 lat: 31.2304, lng: 121.4737 },
+  { id: 'cn3', countryId: 'cn', name: "Urumqi (Sinszyan)",  nameRu: "Урумчи (Синьцзян)",      lat: 43.8225, lng: 87.6125 },
+  { id: 'cn4', countryId: 'cn', name: "Guangzhou",          nameRu: "Гуанчжоу",              lat: 23.1291, lng: 113.2644 },
+  { id: 'cn5', countryId: 'cn', name: "Chengdu",            nameRu: "Чэнду",                  lat: 30.5728, lng: 104.0668 },
+  { id: 'cn6', countryId: 'cn', name: "Si'an",              nameRu: "Сиань",                  lat: 34.2658, lng: 108.9541 },
+  { id: 'cn7', countryId: 'cn', name: "Wuhan",              nameRu: "Ухань",                  lat: 30.5928, lng: 114.3055 },
 ];
 
 // ─── DISTRICTS ────────────────────────────────────────────────────────────────

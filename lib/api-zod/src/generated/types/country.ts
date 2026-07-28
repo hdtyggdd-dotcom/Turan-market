@@ -6,9 +6,11 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export interface Region {
+export interface Country {
   id: string;
   name: string;
   nameRu: string;
-  countryId: string;
+  flag: string;
+  dialCode: string;
+  currency: string;
 }

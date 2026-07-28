@@ -156,11 +156,52 @@ paths:
               schema:
                 $ref: "#/components/schemas/User"
 
+  /locations/countries:
+    get:
+      operationId: getCountries
+      tags: [locations]
+      summary: Get supported countries
+      responses:
+        "200":
+          description: List of countries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Country"
+
+  /locations/detect:
+    post:
+      operationId: detectLocation
+      tags: [locations]
+      summary: Auto-detect country and nearest city from GPS coordinates
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DetectLocationRequest"
+      responses:
+        "200":
+          description: Detected location
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DetectedLocation"
+        "422":
+          description: Country not supported
+
   /locations/regions:
     get:
       operationId: getRegions
       tags: [locations]
-      summary: Get all regions (viloyatlar)
+      summary: Get regions filtered by country
+      parameters:
+        - name: countryId
+          in: query
+          schema:
+            type: string
       responses:
         "200":
           description: List of regions
@@ -701,6 +742,69 @@ components:
         neighborhoodId:
           type: string
 
+    Country:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        nameRu:
+          type: string
+        flag:
+          type: string
+        dialCode:
+          type: string
+        currency:
+          type: string
+      required:
+        - id
+        - name
+        - nameRu
+        - flag
+        - dialCode
+        - currency
+
+    DetectLocationRequest:
+      type: object
+      properties:
+        lat:
+          type: number
+        lng:
+          type: number
+      required:
+        - lat
+        - lng
+
+    DetectedLocation:
+      type: object
+      properties:
+        countryId:
+          type: string
+        countryName:
+          type: string
+        countryFlag:
+          type: string
+        dialCode:
+          type: string
+        currency:
+          type: string
+        regionId:
+          type: string
+        regionName:
+          type: string
+        distanceKm:
+          type: number
+      required:
+        - countryId
+        - countryName
+        - countryFlag
+        - dialCode
+        - currency
+        - regionId
+        - regionName
+        - distanceKm
+
     Region:
       type: object
       properties:
@@ -710,10 +814,13 @@ components:
           type: string
         nameRu:
           type: string
+        countryId:
+          type: string
       required:
         - id
         - name
         - nameRu
+        - countryId
 
     District:
       type: object

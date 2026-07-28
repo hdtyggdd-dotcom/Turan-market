@@ -2,6 +2,10 @@ import React, { createContext, useContext, useState, useCallback } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface LocationState {
+  countryId: string | null;
+  countryName: string | null;
+  countryFlag: string | null;
+  currency: string | null;
   regionId: string | null;
   regionName: string | null;
   districtId: string | null;
@@ -11,7 +15,7 @@ interface LocationState {
 }
 
 interface LocationContextType extends LocationState {
-  setLocation: (loc: LocationState) => void;
+  setLocation: (loc: Partial<LocationState>) => void;
   clearLocation: () => void;
 }
 
@@ -20,6 +24,10 @@ const LocationContext = createContext<LocationContextType | null>(null);
 const LOCATION_KEY = 'osavdo_location';
 
 const defaultState: LocationState = {
+  countryId: null,
+  countryName: null,
+  countryFlag: null,
+  currency: null,
   regionId: null,
   regionName: null,
   districtId: null,
@@ -31,9 +39,12 @@ const defaultState: LocationState = {
 export function LocationProvider({ children }: { children: React.ReactNode }) {
   const [location, setLocationState] = useState<LocationState>(defaultState);
 
-  const setLocation = useCallback((loc: LocationState) => {
-    setLocationState(loc);
-    AsyncStorage.setItem(LOCATION_KEY, JSON.stringify(loc)).catch(() => {});
+  const setLocation = useCallback((loc: Partial<LocationState>) => {
+    setLocationState(prev => {
+      const next = { ...prev, ...loc };
+      AsyncStorage.setItem(LOCATION_KEY, JSON.stringify(next)).catch(() => {});
+      return next;
+    });
   }, []);
 
   const clearLocation = useCallback(() => {

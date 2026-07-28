@@ -8,6 +8,7 @@
 
 export * from './authResponse';
 export * from './category';
+export * from './country';
 export * from './createListingRequest';
 export * from './createListingRequestElanTur';
 export * from './createListingRequestListingType';
@@ -19,11 +20,14 @@ export * from './deliveryEstimateResponse';
 export * from './deliveryEstimateResponseDistanceColor';
 export * from './deliveryOption';
 export * from './deliveryOptionVehicleType';
+export * from './detectedLocation';
+export * from './detectLocationRequest';
 export * from './district';
 export * from './errorResponse';
 export * from './getDistrictsParams';
 export * from './getListingsParams';
 export * from './getNeighborhoodsParams';
+export * from './getRegionsParams';
 export * from './healthStatus';
 export * from './listing';
 export * from './listingAdminStatus';

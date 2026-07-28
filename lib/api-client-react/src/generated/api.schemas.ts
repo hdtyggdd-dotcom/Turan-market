@@ -46,6 +46,7 @@ export interface Region {
   id: string;
   name: string;
   nameRu: string;
+  countryId: string;
 }
 
 export interface District {
@@ -116,6 +117,31 @@ export interface UpdateUserRequest {
   regionId?: string;
   districtId?: string;
   neighborhoodId?: string;
+}
+
+export interface Country {
+  id: string;
+  name: string;
+  nameRu: string;
+  flag: string;
+  dialCode: string;
+  currency: string;
+}
+
+export interface DetectLocationRequest {
+  lat: number;
+  lng: number;
+}
+
+export interface DetectedLocation {
+  countryId: string;
+  countryName: string;
+  countryFlag: string;
+  dialCode: string;
+  currency: string;
+  regionId: string;
+  regionName: string;
+  distanceKm: number;
 }
 
 export type SubcategoryBookingMode = typeof SubcategoryBookingMode[keyof typeof SubcategoryBookingMode] | null;
@@ -448,6 +474,10 @@ export interface StatsSummary {
   activeListings: number;
   topCategories: StatsSummaryTopCategoriesItem[];
 }
+
+export type GetRegionsParams = {
+countryId?: string;
+};
 
 export type GetDistrictsParams = {
 regionId?: string;
