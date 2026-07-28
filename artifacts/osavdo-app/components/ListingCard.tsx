@@ -103,15 +103,8 @@ export function ListingCard({ listing }: ListingCardProps) {
           </View>
         )}
 
-        {/* VIP badge — top left */}
-        {listing.elanTur === 'vip' && (
-          <View style={styles.vipBadge}>
-            <Text style={styles.vipText}>⭐ VIP</Text>
-          </View>
-        )}
-
-        {/* Xizmat badge — top left (if not vip) */}
-        {listing.listingType === 'xizmat' && listing.elanTur !== 'vip' && (
+        {/* Xizmat badge — top left */}
+        {listing.listingType === 'xizmat' && (
           <View style={[styles.vipBadge, styles.xizmatBadge]}>
             <Text style={styles.vipText}>🛠️ Xizmat</Text>
           </View>

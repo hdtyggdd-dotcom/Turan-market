@@ -233,7 +233,6 @@ router.post("/listings", authenticateToken, (req: AuthRequest, res) => {
     lng?: number;
     sellerType?: 'sotuvchi' | 'ishlab_chiqaruvchi';
     listingType?: 'savdo' | 'xizmat';
-    elanTur?: 'oddiy' | 'vip';
     customSubcategoryName?: string;
   };
 
@@ -269,7 +268,7 @@ router.post("/listings", authenticateToken, (req: AuthRequest, res) => {
     status: "active" as const,
     sellerType: body.sellerType ?? null,
     listingType: (body.listingType ?? 'savdo') as 'savdo' | 'xizmat',
-    elanTur: (body.elanTur ?? 'oddiy') as 'oddiy' | 'vip',
+    elanTur: 'oddiy' as const,
     adminStatus: isManufacturer ? ('pending' as const) : null,
     viewCount: 0,
     createdAt: new Date().toISOString(),

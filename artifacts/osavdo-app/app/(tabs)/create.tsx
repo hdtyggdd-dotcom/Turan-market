@@ -39,20 +39,10 @@ export default function CreateScreen() {
   const [districtId, setDistrictId] = useState(user?.districtId ?? '');
   const [listingType, setListingType] = useState<'savdo' | 'xizmat'>('savdo');
   const [sellerType, setSellerType] = useState<'sotuvchi' | 'ishlab_chiqaruvchi'>('sotuvchi');
-  const [elanTur, setElanTur] = useState<'oddiy' | 'vip'>('oddiy');
   const [images, setImages] = useState<string[]>([]);
   const [customSubcategoryName, setCustomSubcategoryName] = useState('');
   const [showCustomSubcat, setShowCustomSubcat] = useState(false);
   const [analysisListingId, setAnalysisListingId] = useState<string | null>(null);
-
-  // Bepul davr: ro'yxatdan o'tganidan 30 kun ichida birinchi e'lon bepul
-  const BEPUL_KUN = 30;
-  const freeDaysLeft = React.useMemo(() => {
-    if (!user?.createdAt) return 0;
-    const diff = Math.floor((Date.now() - new Date(user.createdAt).getTime()) / 86400000);
-    return Math.max(0, BEPUL_KUN - diff);
-  }, [user?.createdAt]);
-  const isBepul = freeDaysLeft > 0;
 
   const { data: categories } = useGetCategories();
   const { data: regions } = useGetRegions();
@@ -108,7 +98,6 @@ export default function CreateScreen() {
         images,
         listingType,
         sellerType,
-        elanTur,
         customSubcategoryName: showCustomSubcat && customSubcategoryName.trim()
           ? customSubcategoryName.trim()
           : undefined,
@@ -444,71 +433,6 @@ export default function CreateScreen() {
             </View>
           </>
         )}
-
-        {/* ─── E'lon turi: VIP / Oddiy ─── */}
-        <FieldLabel label="E'lon darajasi" colors={colors} />
-
-        {/* Bepul davr banneri */}
-        {isBepul && (
-          <View style={[styles.freeBanner, { backgroundColor: '#16a34a18', borderColor: '#16a34a40' }]}>
-            <Text style={{ fontSize: 16 }}>🎁</Text>
-            <View style={{ flex: 1 }}>
-              <Text style={{ fontSize: 13, fontFamily: 'Inter_700Bold', color: '#16a34a' }}>
-                Bepul davr: {freeDaysLeft} kun qoldi
-              </Text>
-              <Text style={{ fontSize: 12, fontFamily: 'Inter_400Regular', color: '#16a34a' }}>
-                Oddiy e'lon hozir bepul
-              </Text>
-            </View>
-          </View>
-        )}
-
-        <View style={styles.twoChipRow}>
-          {([
-            {
-              val: 'oddiy' as const,
-              icon: '📄',
-              label: "Oddiy e'lon",
-              price: isBepul ? 'BEPUL' : "5 000 so'm",
-              priceColor: isBepul ? '#16a34a' : undefined,
-            },
-            {
-              val: 'vip' as const,
-              icon: '⭐',
-              label: "VIP e'lon",
-              price: isBepul ? "5 000 so'm" : "10 000 so'm",
-              priceColor: '#f59e0b',
-            },
-          ]).map(({ val, icon, label, price, priceColor }) => (
-            <TouchableOpacity
-              key={val}
-              style={[
-                styles.sellerTypeChip,
-                {
-                  backgroundColor: elanTur === val ? (val === 'vip' ? '#f59e0b18' : colors.primary + '15') : colors.card,
-                  borderColor: elanTur === val ? (val === 'vip' ? '#f59e0b' : colors.primary) : colors.border,
-                  borderWidth: elanTur === val ? 2 : 1,
-                },
-              ]}
-              onPress={() => setElanTur(val)}
-            >
-              <Text style={{ fontSize: 22 }}>{icon}</Text>
-              <Text style={{ fontSize: 13, fontFamily: 'Inter_700Bold', color: elanTur === val ? (val === 'vip' ? '#f59e0b' : colors.primary) : colors.text }}>
-                {label}
-              </Text>
-              <Text style={{ fontSize: 12, fontFamily: 'Inter_600SemiBold', color: priceColor ?? colors.mutedForeground }}>
-                {price}
-              </Text>
-              {val === 'vip' && (
-                <View style={[styles.adminNote, { backgroundColor: '#f59e0b18' }]}>
-                  <Text style={{ fontSize: 10, fontFamily: 'Inter_400Regular', color: '#f59e0b' }}>
-                    Tepada ko'rinadi 🚀
-                  </Text>
-                </View>
-              )}
-            </TouchableOpacity>
-          ))}
-        </View>
 
         {/* Submit */}
         <TouchableOpacity
