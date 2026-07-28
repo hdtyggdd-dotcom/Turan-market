@@ -942,6 +942,9 @@ components:
         elanTur:
           type: string
           enum: [oddiy, vip]
+        customSubcategoryName:
+          type: string
+          description: Ro'yhatda yo'q xizmat/tovar nomi — AI avtomatik kategoriya ochadi
       required:
         - title
         - price

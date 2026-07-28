@@ -41,6 +41,8 @@ export default function CreateScreen() {
   const [sellerType, setSellerType] = useState<'sotuvchi' | 'ishlab_chiqaruvchi'>('sotuvchi');
   const [elanTur, setElanTur] = useState<'oddiy' | 'vip'>('oddiy');
   const [images, setImages] = useState<string[]>([]);
+  const [customSubcategoryName, setCustomSubcategoryName] = useState('');
+  const [showCustomSubcat, setShowCustomSubcat] = useState(false);
   const [analysisListingId, setAnalysisListingId] = useState<string | null>(null);
 
   // Bepul davr: ro'yxatdan o'tganidan 30 kun ichida birinchi e'lon bepul
@@ -107,6 +109,9 @@ export default function CreateScreen() {
         listingType,
         sellerType,
         elanTur,
+        customSubcategoryName: showCustomSubcat && customSubcategoryName.trim()
+          ? customSubcategoryName.trim()
+          : undefined,
       },
     });
   }
@@ -300,7 +305,7 @@ export default function CreateScreen() {
         </View>
 
         {/* Subcategory */}
-        {selectedCategory && selectedCategory.subcategories.length > 0 && (
+        {selectedCategory && (
           <>
             <FieldLabel label="Kichik kategoriya" colors={colors} />
             <View style={styles.chipGrid}>
@@ -310,22 +315,77 @@ export default function CreateScreen() {
                   style={[
                     styles.catChip,
                     {
-                      backgroundColor: selectedSubcategoryId === sub.id ? colors.secondary : colors.card,
-                      borderColor: selectedSubcategoryId === sub.id ? colors.primary : colors.border,
+                      backgroundColor: (!showCustomSubcat && selectedSubcategoryId === sub.id) ? colors.secondary : colors.card,
+                      borderColor: (!showCustomSubcat && selectedSubcategoryId === sub.id) ? colors.primary : colors.border,
                     },
                   ]}
-                  onPress={() => setSelectedSubcategoryId(sub.id)}
+                  onPress={() => {
+                    setSelectedSubcategoryId(sub.id);
+                    setShowCustomSubcat(false);
+                    setCustomSubcategoryName('');
+                  }}
                 >
                   <Text style={{
                     fontSize: 12,
                     fontFamily: 'Inter_500Medium',
-                    color: selectedSubcategoryId === sub.id ? colors.primary : colors.text,
+                    color: (!showCustomSubcat && selectedSubcategoryId === sub.id) ? colors.primary : colors.text,
                   }}>
                     {sub.name}
                   </Text>
                 </TouchableOpacity>
               ))}
+
+              {/* Ro'yhatda yo'q — yangi xizmat */}
+              <TouchableOpacity
+                style={[
+                  styles.catChip,
+                  {
+                    backgroundColor: showCustomSubcat ? '#8b5cf615' : colors.card,
+                    borderColor: showCustomSubcat ? '#8b5cf6' : colors.border,
+                    borderStyle: showCustomSubcat ? 'solid' : 'dashed',
+                  },
+                ]}
+                onPress={() => {
+                  setShowCustomSubcat(true);
+                  setSelectedSubcategoryId('');
+                }}
+              >
+                <Text style={{ fontSize: 12 }}>✨</Text>
+                <Text style={{
+                  fontSize: 12,
+                  fontFamily: 'Inter_500Medium',
+                  color: showCustomSubcat ? '#8b5cf6' : colors.mutedForeground,
+                }}>
+                  Ro'yhatda yo'q
+                </Text>
+              </TouchableOpacity>
             </View>
+
+            {/* Yangi xizmat nomi kiriting */}
+            {showCustomSubcat && (
+              <View style={{ marginTop: 8 }}>
+                <TextInput
+                  style={[
+                    styles.input,
+                    {
+                      borderColor: '#8b5cf6',
+                      color: colors.text,
+                      backgroundColor: colors.card,
+                      borderWidth: 1.5,
+                    },
+                  ]}
+                  placeholder="Masalan: Tikuvchi, Ustoz, Kompyuter ta'miri..."
+                  placeholderTextColor={colors.mutedForeground}
+                  value={customSubcategoryName}
+                  onChangeText={setCustomSubcategoryName}
+                  maxLength={60}
+                  autoFocus
+                />
+                <Text style={{ fontSize: 11, fontFamily: 'Inter_400Regular', color: '#8b5cf6', marginTop: 4 }}>
+                  ✨ AI avtomatik mos kategoriyaga joylaydi
+                </Text>
+              </View>
+            )}
           </>
         )}
 

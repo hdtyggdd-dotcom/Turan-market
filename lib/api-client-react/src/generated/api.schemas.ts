@@ -274,6 +274,8 @@ export interface CreateListingRequest {
   sellerType?: CreateListingRequestSellerType;
   listingType?: CreateListingRequestListingType;
   elanTur?: CreateListingRequestElanTur;
+  /** Ro'yhatda yo'q xizmat/tovar nomi — AI avtomatik kategoriya ochadi */
+  customSubcategoryName?: string;
 }
 
 export interface ListingsResponse {

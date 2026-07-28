@@ -436,7 +436,8 @@ export const CreateListingBody = zod.object({
   "lng": zod.number().optional(),
   "sellerType": zod.enum(['sotuvchi', 'ishlab_chiqaruvchi']).optional(),
   "listingType": zod.enum(['savdo', 'xizmat']).optional(),
-  "elanTur": zod.enum(['oddiy', 'vip']).optional()
+  "elanTur": zod.enum(['oddiy', 'vip']).optional(),
+  "customSubcategoryName": zod.string().optional().describe('Ro\'yhatda yo\'q xizmat\/tovar nomi — AI avtomatik kategoriya ochadi')
 })
 
 export const createListingResponseListingTypeDefault = `savdo`;
@@ -637,7 +638,8 @@ export const UpdateListingBody = zod.object({
   "lng": zod.number().optional(),
   "sellerType": zod.enum(['sotuvchi', 'ishlab_chiqaruvchi']).optional(),
   "listingType": zod.enum(['savdo', 'xizmat']).optional(),
-  "elanTur": zod.enum(['oddiy', 'vip']).optional()
+  "elanTur": zod.enum(['oddiy', 'vip']).optional(),
+  "customSubcategoryName": zod.string().optional().describe('Ro\'yhatda yo\'q xizmat\/tovar nomi — AI avtomatik kategoriya ochadi')
 })
 
 export const updateListingResponseListingTypeDefault = `savdo`;

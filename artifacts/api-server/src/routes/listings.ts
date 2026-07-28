@@ -14,6 +14,7 @@ import {
 } from "../data/store.js";
 import { authenticateToken, type AuthRequest } from "../middleware/auth.js";
 import { scoreSearch, FUZZY_THRESHOLD } from "../utils/fuzzy.js";
+import { ensureSubcategory, findBestCategory } from "../utils/autoCategory.js";
 
 const router = Router();
 
@@ -233,7 +234,18 @@ router.post("/listings", authenticateToken, (req: AuthRequest, res) => {
     sellerType?: 'sotuvchi' | 'ishlab_chiqaruvchi';
     listingType?: 'savdo' | 'xizmat';
     elanTur?: 'oddiy' | 'vip';
+    customSubcategoryName?: string;
   };
+
+  // Ro'yhatda yo'q xizmat — AI avtomatik subkategoriya yaratadi
+  let resolvedSubcategoryId = body.subcategoryId ?? null;
+  let resolvedCategoryId = body.categoryId;
+
+  if (body.customSubcategoryName?.trim()) {
+    const sub = ensureSubcategory(body.customSubcategoryName.trim(), body.categoryId);
+    resolvedSubcategoryId = sub.id;
+    resolvedCategoryId = sub.categoryId; // AI boshqa kategoriyaga o'tkazgan bo'lishi mumkin
+  }
 
   // Ishlab chiqaruvchi bo'lsa admin tasdiqlashiga yuboriladi
   const isManufacturer = body.sellerType === 'ishlab_chiqaruvchi';
@@ -246,8 +258,8 @@ router.post("/listings", authenticateToken, (req: AuthRequest, res) => {
     price: body.price,
     priceUnit: body.priceUnit ?? null,
     images: body.images ?? [],
-    categoryId: body.categoryId,
-    subcategoryId: body.subcategoryId ?? null,
+    categoryId: resolvedCategoryId,
+    subcategoryId: resolvedSubcategoryId,
     userId: req.userId!,
     regionId: body.regionId,
     districtId: body.districtId,
