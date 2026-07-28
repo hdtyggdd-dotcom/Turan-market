@@ -9,6 +9,7 @@ import ordersRouter from "./orders.js";
 import statsRouter from "./stats.js";
 import sellersRouter from "./sellers.js";
 import uploadsRouter from "./uploads.js";
+import aiRouter from "./ai.js";
 
 const router: IRouter = Router();
 
@@ -22,5 +23,6 @@ router.use(ordersRouter);
 router.use(statsRouter);
 router.use(sellersRouter);
 router.use(uploadsRouter);
+router.use(aiRouter);
 
 export default router;

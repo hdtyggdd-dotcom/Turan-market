@@ -17,6 +17,7 @@ import { CategoryGrid } from '@/components/CategoryGrid';
 import { ListingCard } from '@/components/ListingCard';
 import { EmptyState } from '@/components/EmptyState';
 import { LocationPicker } from '@/components/LocationPicker';
+import { AIMaslahatModal } from '@/components/AIMaslahatModal';
 import { useLocation } from '@/context/LocationContext';
 import { useAuth } from '@/context/AuthContext';
 
@@ -27,6 +28,7 @@ export default function HomeScreen() {
   const { user } = useAuth();
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [showLocationPicker, setShowLocationPicker] = useState(false);
+  const [showAI, setShowAI] = useState(false);
 
   const { data: categories } = useGetCategories();
 
@@ -126,6 +128,18 @@ export default function HomeScreen() {
         visible={showLocationPicker}
         onClose={() => setShowLocationPicker(false)}
       />
+
+      {/* AI Maslahat floating button */}
+      <TouchableOpacity
+        style={[styles.fab, { backgroundColor: colors.primary, bottom: (Platform.OS === 'web' ? 84 : 90) + insets.bottom }]}
+        onPress={() => setShowAI(true)}
+        activeOpacity={0.85}
+      >
+        <Text style={styles.fabEmoji}>🤖</Text>
+        <Text style={[styles.fabText, { color: colors.primaryForeground }]}>AI Maslahat</Text>
+      </TouchableOpacity>
+
+      <AIMaslahatModal visible={showAI} onClose={() => setShowAI(false)} />
     </View>
   );
 }
@@ -200,4 +214,21 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: 'Inter_400Regular',
   },
+  fab: {
+    position: 'absolute',
+    right: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: 100,
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+  },
+  fabEmoji: { fontSize: 16 },
+  fabText: { fontSize: 13, fontFamily: 'Inter_600SemiBold' },
 });
