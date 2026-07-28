@@ -59,6 +59,10 @@ function hydrateListing(
     neighborhood,
     distanceKm,
     distanceColor,
+    sellerType: listing.sellerType ?? null,
+    listingType: listing.listingType ?? 'savdo',
+    elanTur: listing.elanTur ?? 'oddiy',
+    adminStatus: listing.adminStatus ?? null,
     priceColor,
   };
 }
@@ -215,7 +219,13 @@ router.post("/listings", authenticateToken, (req: AuthRequest, res) => {
     neighborhoodId?: string;
     lat?: number;
     lng?: number;
+    sellerType?: 'sotuvchi' | 'ishlab_chiqaruvchi';
+    listingType?: 'savdo' | 'xizmat';
+    elanTur?: 'oddiy' | 'vip';
   };
+
+  // Ishlab chiqaruvchi bo'lsa admin tasdiqlashiga yuboriladi
+  const isManufacturer = body.sellerType === 'ishlab_chiqaruvchi';
 
   const newListing = {
     id: generateId(),
@@ -234,6 +244,10 @@ router.post("/listings", authenticateToken, (req: AuthRequest, res) => {
     lat: body.lat ?? null,
     lng: body.lng ?? null,
     status: "active" as const,
+    sellerType: body.sellerType ?? null,
+    listingType: (body.listingType ?? 'savdo') as 'savdo' | 'xizmat',
+    elanTur: (body.elanTur ?? 'oddiy') as 'oddiy' | 'vip',
+    adminStatus: isManufacturer ? ('pending' as const) : null,
     viewCount: 0,
     createdAt: new Date().toISOString(),
   };

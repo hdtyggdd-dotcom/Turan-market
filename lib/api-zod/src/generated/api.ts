@@ -327,6 +327,9 @@ export const GetListingsQueryParams = zod.object({
   "limit": zod.coerce.number().default(getListingsQueryLimitDefault)
 })
 
+export const getListingsResponseItemsItemListingTypeDefault = `savdo`;
+export const getListingsResponseItemsItemElanTurDefault = `oddiy`;
+
 export const GetListingsResponse = zod.object({
   "items": zod.array(zod.object({
   "id": zod.string(),
@@ -399,6 +402,11 @@ export const GetListingsResponse = zod.object({
   "distanceKm": zod.number().nullish(),
   "distanceColor": zod.enum(['green', 'yellow', 'red']).nullish(),
   "status": zod.enum(['active', 'sold', 'paused']),
+  "sellerType": zod.enum(['sotuvchi', 'ishlab_chiqaruvchi']).nullish(),
+  "listingType": zod.enum(['savdo', 'xizmat']).default(getListingsResponseItemsItemListingTypeDefault),
+  "elanTur": zod.enum(['oddiy', 'vip']).default(getListingsResponseItemsItemElanTurDefault),
+  "adminStatus": zod.enum(['pending', 'approved']).nullish(),
+  "priceColor": zod.enum(['green', 'yellow', 'red']).nullish(),
   "viewCount": zod.number(),
   "createdAt": zod.coerce.date()
 })),
@@ -425,8 +433,14 @@ export const CreateListingBody = zod.object({
   "districtId": zod.string(),
   "neighborhoodId": zod.string().optional(),
   "lat": zod.number().optional(),
-  "lng": zod.number().optional()
+  "lng": zod.number().optional(),
+  "sellerType": zod.enum(['sotuvchi', 'ishlab_chiqaruvchi']).optional(),
+  "listingType": zod.enum(['savdo', 'xizmat']).optional(),
+  "elanTur": zod.enum(['oddiy', 'vip']).optional()
 })
+
+export const createListingResponseListingTypeDefault = `savdo`;
+export const createListingResponseElanTurDefault = `oddiy`;
 
 export const CreateListingResponse = zod.object({
   "id": zod.string(),
@@ -499,6 +513,11 @@ export const CreateListingResponse = zod.object({
   "distanceKm": zod.number().nullish(),
   "distanceColor": zod.enum(['green', 'yellow', 'red']).nullish(),
   "status": zod.enum(['active', 'sold', 'paused']),
+  "sellerType": zod.enum(['sotuvchi', 'ishlab_chiqaruvchi']).nullish(),
+  "listingType": zod.enum(['savdo', 'xizmat']).default(createListingResponseListingTypeDefault),
+  "elanTur": zod.enum(['oddiy', 'vip']).default(createListingResponseElanTurDefault),
+  "adminStatus": zod.enum(['pending', 'approved']).nullish(),
+  "priceColor": zod.enum(['green', 'yellow', 'red']).nullish(),
   "viewCount": zod.number(),
   "createdAt": zod.coerce.date()
 })
@@ -510,6 +529,9 @@ export const CreateListingResponse = zod.object({
 export const GetListingParams = zod.object({
   "id": zod.coerce.string()
 })
+
+export const getListingResponseListingTypeDefault = `savdo`;
+export const getListingResponseElanTurDefault = `oddiy`;
 
 export const GetListingResponse = zod.object({
   "id": zod.string(),
@@ -582,6 +604,11 @@ export const GetListingResponse = zod.object({
   "distanceKm": zod.number().nullish(),
   "distanceColor": zod.enum(['green', 'yellow', 'red']).nullish(),
   "status": zod.enum(['active', 'sold', 'paused']),
+  "sellerType": zod.enum(['sotuvchi', 'ishlab_chiqaruvchi']).nullish(),
+  "listingType": zod.enum(['savdo', 'xizmat']).default(getListingResponseListingTypeDefault),
+  "elanTur": zod.enum(['oddiy', 'vip']).default(getListingResponseElanTurDefault),
+  "adminStatus": zod.enum(['pending', 'approved']).nullish(),
+  "priceColor": zod.enum(['green', 'yellow', 'red']).nullish(),
   "viewCount": zod.number(),
   "createdAt": zod.coerce.date()
 })
@@ -607,8 +634,14 @@ export const UpdateListingBody = zod.object({
   "districtId": zod.string(),
   "neighborhoodId": zod.string().optional(),
   "lat": zod.number().optional(),
-  "lng": zod.number().optional()
+  "lng": zod.number().optional(),
+  "sellerType": zod.enum(['sotuvchi', 'ishlab_chiqaruvchi']).optional(),
+  "listingType": zod.enum(['savdo', 'xizmat']).optional(),
+  "elanTur": zod.enum(['oddiy', 'vip']).optional()
 })
+
+export const updateListingResponseListingTypeDefault = `savdo`;
+export const updateListingResponseElanTurDefault = `oddiy`;
 
 export const UpdateListingResponse = zod.object({
   "id": zod.string(),
@@ -681,6 +714,11 @@ export const UpdateListingResponse = zod.object({
   "distanceKm": zod.number().nullish(),
   "distanceColor": zod.enum(['green', 'yellow', 'red']).nullish(),
   "status": zod.enum(['active', 'sold', 'paused']),
+  "sellerType": zod.enum(['sotuvchi', 'ishlab_chiqaruvchi']).nullish(),
+  "listingType": zod.enum(['savdo', 'xizmat']).default(updateListingResponseListingTypeDefault),
+  "elanTur": zod.enum(['oddiy', 'vip']).default(updateListingResponseElanTurDefault),
+  "adminStatus": zod.enum(['pending', 'approved']).nullish(),
+  "priceColor": zod.enum(['green', 'yellow', 'red']).nullish(),
   "viewCount": zod.number(),
   "createdAt": zod.coerce.date()
 })
@@ -726,6 +764,9 @@ export const AnalyseListingMarketResponse = zod.object({
 export const GetUserListingsParams = zod.object({
   "userId": zod.coerce.string()
 })
+
+export const getUserListingsResponseListingTypeDefault = `savdo`;
+export const getUserListingsResponseElanTurDefault = `oddiy`;
 
 export const GetUserListingsResponseItem = zod.object({
   "id": zod.string(),
@@ -798,6 +839,11 @@ export const GetUserListingsResponseItem = zod.object({
   "distanceKm": zod.number().nullish(),
   "distanceColor": zod.enum(['green', 'yellow', 'red']).nullish(),
   "status": zod.enum(['active', 'sold', 'paused']),
+  "sellerType": zod.enum(['sotuvchi', 'ishlab_chiqaruvchi']).nullish(),
+  "listingType": zod.enum(['savdo', 'xizmat']).default(getUserListingsResponseListingTypeDefault),
+  "elanTur": zod.enum(['oddiy', 'vip']).default(getUserListingsResponseElanTurDefault),
+  "adminStatus": zod.enum(['pending', 'approved']).nullish(),
+  "priceColor": zod.enum(['green', 'yellow', 'red']).nullish(),
   "viewCount": zod.number(),
   "createdAt": zod.coerce.date()
 })
@@ -855,6 +901,9 @@ export const EstimateDeliveryResponse = zod.object({
 /**
  * @summary Get current user's orders
  */
+export const getOrdersResponseListingListingTypeDefault = `savdo`;
+export const getOrdersResponseListingElanTurDefault = `oddiy`;
+
 export const GetOrdersResponseItem = zod.object({
   "id": zod.string(),
   "listingId": zod.string(),
@@ -929,6 +978,11 @@ export const GetOrdersResponseItem = zod.object({
   "distanceKm": zod.number().nullish(),
   "distanceColor": zod.enum(['green', 'yellow', 'red']).nullish(),
   "status": zod.enum(['active', 'sold', 'paused']),
+  "sellerType": zod.enum(['sotuvchi', 'ishlab_chiqaruvchi']).nullish(),
+  "listingType": zod.enum(['savdo', 'xizmat']).default(getOrdersResponseListingListingTypeDefault),
+  "elanTur": zod.enum(['oddiy', 'vip']).default(getOrdersResponseListingElanTurDefault),
+  "adminStatus": zod.enum(['pending', 'approved']).nullish(),
+  "priceColor": zod.enum(['green', 'yellow', 'red']).nullish(),
   "viewCount": zod.number(),
   "createdAt": zod.coerce.date()
 }),
@@ -1022,6 +1076,9 @@ export const CreateOrderBody = zod.object({
   "notes": zod.string().optional()
 })
 
+export const createOrderResponseListingListingTypeDefault = `savdo`;
+export const createOrderResponseListingElanTurDefault = `oddiy`;
+
 export const CreateOrderResponse = zod.object({
   "id": zod.string(),
   "listingId": zod.string(),
@@ -1096,6 +1153,11 @@ export const CreateOrderResponse = zod.object({
   "distanceKm": zod.number().nullish(),
   "distanceColor": zod.enum(['green', 'yellow', 'red']).nullish(),
   "status": zod.enum(['active', 'sold', 'paused']),
+  "sellerType": zod.enum(['sotuvchi', 'ishlab_chiqaruvchi']).nullish(),
+  "listingType": zod.enum(['savdo', 'xizmat']).default(createOrderResponseListingListingTypeDefault),
+  "elanTur": zod.enum(['oddiy', 'vip']).default(createOrderResponseListingElanTurDefault),
+  "adminStatus": zod.enum(['pending', 'approved']).nullish(),
+  "priceColor": zod.enum(['green', 'yellow', 'red']).nullish(),
   "viewCount": zod.number(),
   "createdAt": zod.coerce.date()
 }),
@@ -1184,6 +1246,9 @@ export const GetOrderParams = zod.object({
   "id": zod.coerce.string()
 })
 
+export const getOrderResponseListingListingTypeDefault = `savdo`;
+export const getOrderResponseListingElanTurDefault = `oddiy`;
+
 export const GetOrderResponse = zod.object({
   "id": zod.string(),
   "listingId": zod.string(),
@@ -1258,6 +1323,11 @@ export const GetOrderResponse = zod.object({
   "distanceKm": zod.number().nullish(),
   "distanceColor": zod.enum(['green', 'yellow', 'red']).nullish(),
   "status": zod.enum(['active', 'sold', 'paused']),
+  "sellerType": zod.enum(['sotuvchi', 'ishlab_chiqaruvchi']).nullish(),
+  "listingType": zod.enum(['savdo', 'xizmat']).default(getOrderResponseListingListingTypeDefault),
+  "elanTur": zod.enum(['oddiy', 'vip']).default(getOrderResponseListingElanTurDefault),
+  "adminStatus": zod.enum(['pending', 'approved']).nullish(),
+  "priceColor": zod.enum(['green', 'yellow', 'red']).nullish(),
   "viewCount": zod.number(),
   "createdAt": zod.coerce.date()
 }),
@@ -1350,6 +1420,9 @@ export const UpdateOrderStatusBody = zod.object({
   "status": zod.enum(['pending', 'confirmed', 'delivering', 'delivered', 'cancelled'])
 })
 
+export const updateOrderStatusResponseListingListingTypeDefault = `savdo`;
+export const updateOrderStatusResponseListingElanTurDefault = `oddiy`;
+
 export const UpdateOrderStatusResponse = zod.object({
   "id": zod.string(),
   "listingId": zod.string(),
@@ -1424,6 +1497,11 @@ export const UpdateOrderStatusResponse = zod.object({
   "distanceKm": zod.number().nullish(),
   "distanceColor": zod.enum(['green', 'yellow', 'red']).nullish(),
   "status": zod.enum(['active', 'sold', 'paused']),
+  "sellerType": zod.enum(['sotuvchi', 'ishlab_chiqaruvchi']).nullish(),
+  "listingType": zod.enum(['savdo', 'xizmat']).default(updateOrderStatusResponseListingListingTypeDefault),
+  "elanTur": zod.enum(['oddiy', 'vip']).default(updateOrderStatusResponseListingElanTurDefault),
+  "adminStatus": zod.enum(['pending', 'approved']).nullish(),
+  "priceColor": zod.enum(['green', 'yellow', 'red']).nullish(),
   "viewCount": zod.number(),
   "createdAt": zod.coerce.date()
 }),

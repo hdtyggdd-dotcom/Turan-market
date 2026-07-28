@@ -6,7 +6,12 @@
  * OpenAPI spec version: 0.1.0
  */
 import type { District } from './district';
+import type { ListingAdminStatus } from './listingAdminStatus';
 import type { ListingDistanceColor } from './listingDistanceColor';
+import type { ListingElanTur } from './listingElanTur';
+import type { ListingListingType } from './listingListingType';
+import type { ListingPriceColor } from './listingPriceColor';
+import type { ListingSellerType } from './listingSellerType';
 import type { ListingStatus } from './listingStatus';
 import type { Neighborhood } from './neighborhood';
 import type { Region } from './region';
@@ -35,6 +40,11 @@ export interface Listing {
   distanceKm?: number | null;
   distanceColor?: ListingDistanceColor;
   status: ListingStatus;
+  sellerType?: ListingSellerType;
+  listingType: ListingListingType;
+  elanTur: ListingElanTur;
+  adminStatus?: ListingAdminStatus;
+  priceColor?: ListingPriceColor;
   viewCount: number;
   createdAt: Date;
 }

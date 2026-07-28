@@ -5,6 +5,9 @@
  * O'Savdo local marketplace API
  * OpenAPI spec version: 0.1.0
  */
+import type { CreateListingRequestElanTur } from './createListingRequestElanTur';
+import type { CreateListingRequestListingType } from './createListingRequestListingType';
+import type { CreateListingRequestSellerType } from './createListingRequestSellerType';
 
 export interface CreateListingRequest {
   title: string;
@@ -20,4 +23,7 @@ export interface CreateListingRequest {
   neighborhoodId?: string;
   lat?: number;
   lng?: number;
+  sellerType?: CreateListingRequestSellerType;
+  listingType?: CreateListingRequestListingType;
+  elanTur?: CreateListingRequestElanTur;
 }

@@ -160,6 +160,47 @@ export const ListingStatus = {
   paused: 'paused',
 } as const;
 
+export type ListingSellerType = typeof ListingSellerType[keyof typeof ListingSellerType] | null;
+
+
+export const ListingSellerType = {
+  sotuvchi: 'sotuvchi',
+  ishlab_chiqaruvchi: 'ishlab_chiqaruvchi',
+} as const;
+
+export type ListingListingType = typeof ListingListingType[keyof typeof ListingListingType];
+
+
+export const ListingListingType = {
+  savdo: 'savdo',
+  xizmat: 'xizmat',
+} as const;
+
+export type ListingElanTur = typeof ListingElanTur[keyof typeof ListingElanTur];
+
+
+export const ListingElanTur = {
+  oddiy: 'oddiy',
+  vip: 'vip',
+} as const;
+
+export type ListingAdminStatus = typeof ListingAdminStatus[keyof typeof ListingAdminStatus] | null;
+
+
+export const ListingAdminStatus = {
+  pending: 'pending',
+  approved: 'approved',
+} as const;
+
+export type ListingPriceColor = typeof ListingPriceColor[keyof typeof ListingPriceColor] | null;
+
+
+export const ListingPriceColor = {
+  green: 'green',
+  yellow: 'yellow',
+  red: 'red',
+} as const;
+
 export interface Listing {
   id: string;
   title: string;
@@ -183,9 +224,38 @@ export interface Listing {
   distanceKm?: number | null;
   distanceColor?: ListingDistanceColor;
   status: ListingStatus;
+  sellerType?: ListingSellerType;
+  listingType: ListingListingType;
+  elanTur: ListingElanTur;
+  adminStatus?: ListingAdminStatus;
+  priceColor?: ListingPriceColor;
   viewCount: number;
   createdAt: string;
 }
+
+export type CreateListingRequestSellerType = typeof CreateListingRequestSellerType[keyof typeof CreateListingRequestSellerType];
+
+
+export const CreateListingRequestSellerType = {
+  sotuvchi: 'sotuvchi',
+  ishlab_chiqaruvchi: 'ishlab_chiqaruvchi',
+} as const;
+
+export type CreateListingRequestListingType = typeof CreateListingRequestListingType[keyof typeof CreateListingRequestListingType];
+
+
+export const CreateListingRequestListingType = {
+  savdo: 'savdo',
+  xizmat: 'xizmat',
+} as const;
+
+export type CreateListingRequestElanTur = typeof CreateListingRequestElanTur[keyof typeof CreateListingRequestElanTur];
+
+
+export const CreateListingRequestElanTur = {
+  oddiy: 'oddiy',
+  vip: 'vip',
+} as const;
 
 export interface CreateListingRequest {
   title: string;
@@ -201,6 +271,9 @@ export interface CreateListingRequest {
   neighborhoodId?: string;
   lat?: number;
   lng?: number;
+  sellerType?: CreateListingRequestSellerType;
+  listingType?: CreateListingRequestListingType;
+  elanTur?: CreateListingRequestElanTur;
 }
 
 export interface ListingsResponse {

@@ -859,6 +859,26 @@ components:
         status:
           type: string
           enum: [active, sold, paused]
+        sellerType:
+          type: string
+          nullable: true
+          enum: [sotuvchi, ishlab_chiqaruvchi]
+        listingType:
+          type: string
+          enum: [savdo, xizmat]
+          default: savdo
+        elanTur:
+          type: string
+          enum: [oddiy, vip]
+          default: oddiy
+        adminStatus:
+          type: string
+          nullable: true
+          enum: [pending, approved]
+        priceColor:
+          type: string
+          nullable: true
+          enum: [green, yellow, red]
         viewCount:
           type: integer
         createdAt:
@@ -877,6 +897,8 @@ components:
         - region
         - district
         - status
+        - listingType
+        - elanTur
         - viewCount
         - createdAt
 
@@ -911,6 +933,15 @@ components:
           type: number
         lng:
           type: number
+        sellerType:
+          type: string
+          enum: [sotuvchi, ishlab_chiqaruvchi]
+        listingType:
+          type: string
+          enum: [savdo, xizmat]
+        elanTur:
+          type: string
+          enum: [oddiy, vip]
       required:
         - title
         - price

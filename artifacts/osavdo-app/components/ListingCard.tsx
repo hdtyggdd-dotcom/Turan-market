@@ -26,6 +26,9 @@ interface Listing {
     name: string;
     sellerBadge?: 'manufacturer' | 'reseller' | null;
   } | null;
+  sellerType?: 'sotuvchi' | 'ishlab_chiqaruvchi' | null;
+  listingType?: 'savdo' | 'xizmat' | null;
+  elanTur?: 'oddiy' | 'vip' | null;
   viewCount: number;
   createdAt: string;
 }
@@ -100,6 +103,20 @@ export function ListingCard({ listing }: ListingCardProps) {
           </View>
         )}
 
+        {/* VIP badge — top left */}
+        {listing.elanTur === 'vip' && (
+          <View style={styles.vipBadge}>
+            <Text style={styles.vipText}>⭐ VIP</Text>
+          </View>
+        )}
+
+        {/* Xizmat badge — top left (if not vip) */}
+        {listing.listingType === 'xizmat' && listing.elanTur !== 'vip' && (
+          <View style={[styles.vipBadge, styles.xizmatBadge]}>
+            <Text style={styles.vipText}>🛠️ Xizmat</Text>
+          </View>
+        )}
+
         {/* Distance dot */}
         <View style={styles.distanceCorner}>
           <DistanceDot color={listing.distanceColor} />
@@ -150,10 +167,14 @@ export function ListingCard({ listing }: ListingCardProps) {
           </Text>
         </View>
 
-        {/* Seller badge */}
-        {listing.user?.sellerBadge && (
+        {/* Seller badge — ishlab chiqaruvchi */}
+        {listing.sellerType === 'ishlab_chiqaruvchi' ? (
+          <View style={[styles.badgeContainer, { backgroundColor: '#7c3aed20' }]}>
+            <Text style={[styles.badgeText, { color: '#7c3aed' }]}>🏭 Ishlab chiqaruvchi</Text>
+          </View>
+        ) : listing.user?.sellerBadge ? (
           <SellerBadge badge={listing.user.sellerBadge} />
-        )}
+        ) : null}
       </View>
     </TouchableOpacity>
   );
@@ -254,5 +275,22 @@ const styles = StyleSheet.create({
   badgeText: {
     fontSize: 10,
     fontFamily: 'Inter_500Medium',
+  },
+  vipBadge: {
+    position: 'absolute',
+    top: 6,
+    left: 6,
+    backgroundColor: '#f59e0b',
+    borderRadius: 6,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+  },
+  xizmatBadge: {
+    backgroundColor: '#6366f1',
+  },
+  vipText: {
+    fontSize: 10,
+    fontFamily: 'Inter_700Bold',
+    color: '#fff',
   },
 });

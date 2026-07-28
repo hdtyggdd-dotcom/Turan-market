@@ -36,7 +36,19 @@ export default function CreateScreen() {
   const [selectedSubcategoryId, setSelectedSubcategoryId] = useState('');
   const [regionId, setRegionId] = useState(user?.regionId ?? '');
   const [districtId, setDistrictId] = useState(user?.districtId ?? '');
+  const [listingType, setListingType] = useState<'savdo' | 'xizmat'>('savdo');
+  const [sellerType, setSellerType] = useState<'sotuvchi' | 'ishlab_chiqaruvchi'>('sotuvchi');
+  const [elanTur, setElanTur] = useState<'oddiy' | 'vip'>('oddiy');
   const [analysisListingId, setAnalysisListingId] = useState<string | null>(null);
+
+  // Bepul davr: ro'yxatdan o'tganidan 30 kun ichida birinchi e'lon bepul
+  const BEPUL_KUN = 30;
+  const freeDaysLeft = React.useMemo(() => {
+    if (!user?.createdAt) return 0;
+    const diff = Math.floor((Date.now() - new Date(user.createdAt).getTime()) / 86400000);
+    return Math.max(0, BEPUL_KUN - diff);
+  }, [user?.createdAt]);
+  const isBepul = freeDaysLeft > 0;
 
   const { data: categories } = useGetCategories();
   const { data: regions } = useGetRegions();
@@ -90,6 +102,9 @@ export default function CreateScreen() {
         regionId,
         districtId,
         images: [],
+        listingType,
+        sellerType,
+        elanTur,
       },
     });
   }
@@ -114,7 +129,74 @@ export default function CreateScreen() {
         contentContainerStyle={[styles.content, { paddingBottom: Platform.OS === 'web' ? 84 + 34 : 100 }]}
         keyboardShouldPersistTaps="handled"
       >
-        {/* Title */}
+        {/* ─── E'lon turi: Savdo / Xizmat ─── */}
+        <FieldLabel label="E'lon turi *" colors={colors} />
+        <View style={styles.twoChipRow}>
+          {([
+            { val: 'savdo', icon: '🛒', label: 'Savdo' },
+            { val: 'xizmat', icon: '🛠️', label: 'Xizmat' },
+          ] as const).map(({ val, icon, label }) => (
+            <TouchableOpacity
+              key={val}
+              style={[
+                styles.halfChip,
+                {
+                  backgroundColor: listingType === val ? colors.primary : colors.card,
+                  borderColor: listingType === val ? colors.primary : colors.border,
+                },
+              ]}
+              onPress={() => setListingType(val)}
+            >
+              <Text style={{ fontSize: 18 }}>{icon}</Text>
+              <Text style={{ fontSize: 13, fontFamily: 'Inter_600SemiBold', color: listingType === val ? colors.primaryForeground : colors.text }}>
+                {label}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+
+        {/* ─── Sotuvchi turi (faqat savdoda) ─── */}
+        {listingType === 'savdo' && (
+          <>
+            <FieldLabel label="Siz kimni ifodalaysiz?" colors={colors} />
+            <View style={styles.twoChipRow}>
+              {([
+                { val: 'sotuvchi', icon: '🛒', label: 'Sotuvchi', sub: 'Tayyor mahsulot' },
+                { val: 'ishlab_chiqaruvchi', icon: '🏭', label: 'Ishlab chiqaruvchi', sub: "O'zim yasayman" },
+              ] as const).map(({ val, icon, label, sub }) => (
+                <TouchableOpacity
+                  key={val}
+                  style={[
+                    styles.sellerTypeChip,
+                    {
+                      backgroundColor: sellerType === val ? colors.primary + '15' : colors.card,
+                      borderColor: sellerType === val ? colors.primary : colors.border,
+                      borderWidth: sellerType === val ? 2 : 1,
+                    },
+                  ]}
+                  onPress={() => setSellerType(val)}
+                >
+                  <Text style={{ fontSize: 22 }}>{icon}</Text>
+                  <Text style={{ fontSize: 13, fontFamily: 'Inter_700Bold', color: sellerType === val ? colors.primary : colors.text }}>
+                    {label}
+                  </Text>
+                  <Text style={{ fontSize: 11, fontFamily: 'Inter_400Regular', color: colors.mutedForeground }}>
+                    {sub}
+                  </Text>
+                  {val === 'ishlab_chiqaruvchi' && (
+                    <View style={[styles.adminNote, { backgroundColor: colors.secondary }]}>
+                      <Text style={{ fontSize: 10, fontFamily: 'Inter_400Regular', color: colors.mutedForeground }}>
+                        ⏳ Admin tasdiqlash kerak
+                      </Text>
+                    </View>
+                  )}
+                </TouchableOpacity>
+              ))}
+            </View>
+          </>
+        )}
+
+        {/* ─── Title ─── */}
         <FieldLabel label="Sarlavha *" colors={colors} />
         <TextInput
           style={[styles.input, { borderColor: colors.border, color: colors.text, backgroundColor: colors.card }]}
@@ -291,6 +373,71 @@ export default function CreateScreen() {
           </>
         )}
 
+        {/* ─── E'lon turi: VIP / Oddiy ─── */}
+        <FieldLabel label="E'lon darajasi" colors={colors} />
+
+        {/* Bepul davr banneri */}
+        {isBepul && (
+          <View style={[styles.freeBanner, { backgroundColor: '#16a34a18', borderColor: '#16a34a40' }]}>
+            <Text style={{ fontSize: 16 }}>🎁</Text>
+            <View style={{ flex: 1 }}>
+              <Text style={{ fontSize: 13, fontFamily: 'Inter_700Bold', color: '#16a34a' }}>
+                Bepul davr: {freeDaysLeft} kun qoldi
+              </Text>
+              <Text style={{ fontSize: 12, fontFamily: 'Inter_400Regular', color: '#16a34a' }}>
+                Oddiy e'lon hozir bepul
+              </Text>
+            </View>
+          </View>
+        )}
+
+        <View style={styles.twoChipRow}>
+          {([
+            {
+              val: 'oddiy' as const,
+              icon: '📄',
+              label: "Oddiy e'lon",
+              price: isBepul ? 'BEPUL' : "5 000 so'm",
+              priceColor: isBepul ? '#16a34a' : undefined,
+            },
+            {
+              val: 'vip' as const,
+              icon: '⭐',
+              label: "VIP e'lon",
+              price: isBepul ? "5 000 so'm" : "10 000 so'm",
+              priceColor: '#f59e0b',
+            },
+          ]).map(({ val, icon, label, price, priceColor }) => (
+            <TouchableOpacity
+              key={val}
+              style={[
+                styles.sellerTypeChip,
+                {
+                  backgroundColor: elanTur === val ? (val === 'vip' ? '#f59e0b18' : colors.primary + '15') : colors.card,
+                  borderColor: elanTur === val ? (val === 'vip' ? '#f59e0b' : colors.primary) : colors.border,
+                  borderWidth: elanTur === val ? 2 : 1,
+                },
+              ]}
+              onPress={() => setElanTur(val)}
+            >
+              <Text style={{ fontSize: 22 }}>{icon}</Text>
+              <Text style={{ fontSize: 13, fontFamily: 'Inter_700Bold', color: elanTur === val ? (val === 'vip' ? '#f59e0b' : colors.primary) : colors.text }}>
+                {label}
+              </Text>
+              <Text style={{ fontSize: 12, fontFamily: 'Inter_600SemiBold', color: priceColor ?? colors.mutedForeground }}>
+                {price}
+              </Text>
+              {val === 'vip' && (
+                <View style={[styles.adminNote, { backgroundColor: '#f59e0b18' }]}>
+                  <Text style={{ fontSize: 10, fontFamily: 'Inter_400Regular', color: '#f59e0b' }}>
+                    Tepada ko'rinadi 🚀
+                  </Text>
+                </View>
+              )}
+            </TouchableOpacity>
+          ))}
+        </View>
+
         {/* Submit */}
         <TouchableOpacity
           style={[styles.submitBtn, { backgroundColor: colors.primary, opacity: createMutation.isPending ? 0.7 : 1 }]}
@@ -370,6 +517,43 @@ const styles = StyleSheet.create({
     paddingVertical: 7,
     borderRadius: 100,
     borderWidth: 1,
+  },
+  twoChipRow: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  halfChip: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    paddingVertical: 12,
+    borderRadius: 12,
+    borderWidth: 1,
+  },
+  sellerTypeChip: {
+    flex: 1,
+    alignItems: 'center',
+    gap: 4,
+    paddingVertical: 14,
+    paddingHorizontal: 8,
+    borderRadius: 14,
+  },
+  adminNote: {
+    borderRadius: 6,
+    paddingHorizontal: 6,
+    paddingVertical: 3,
+    marginTop: 2,
+  },
+  freeBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    borderRadius: 12,
+    borderWidth: 1,
+    padding: 12,
+    marginBottom: 4,
   },
   submitBtn: {
     flexDirection: 'row',

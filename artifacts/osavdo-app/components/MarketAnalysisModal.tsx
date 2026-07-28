@@ -42,7 +42,8 @@ export function MarketAnalysisModal({ visible, listingId, onClose }: MarketAnaly
 
   const { data, isLoading, isError } = useAnalyseListingMarket(
     listingId ?? '',
-    { query: { enabled: !!listingId && visible } },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    { query: { enabled: !!listingId && visible } as any },
   );
 
   const pos = data ? (POSITION_MAP[data.pricePosition] ?? POSITION_MAP.malumot_yoq) : null;
