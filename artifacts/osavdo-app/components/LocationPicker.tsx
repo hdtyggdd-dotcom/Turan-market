@@ -23,12 +23,16 @@ interface LocationPickerProps {
 export function LocationPicker({ visible, onClose }: LocationPickerProps) {
   const colors = useColors();
   const insets = useSafeAreaInsets();
-  const { setLocation } = useLocation();
+  const { setLocation, countryId } = useLocation();
   const [step, setStep] = useState<'region' | 'district'>('region');
   const [selectedRegionId, setSelectedRegionId] = useState<string | null>(null);
   const [selectedRegionName, setSelectedRegionName] = useState<string | null>(null);
 
-  const { data: regions, isLoading: regionsLoading } = useGetRegions();
+  const currentCountryId = countryId ?? 'uz';
+
+  const { data: regions, isLoading: regionsLoading } = useGetRegions(
+    { countryId: currentCountryId },
+  );
   const { data: districtsData, isLoading: districtsLoading } = useGetDistricts(
     { regionId: selectedRegionId ?? undefined },
     { query: { enabled: !!selectedRegionId && step === 'district' } },

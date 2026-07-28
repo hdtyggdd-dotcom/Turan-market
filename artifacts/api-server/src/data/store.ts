@@ -399,6 +399,188 @@ export const districts: StoredDistrict[] = [
   { id: 'd230', name: "To'rtko'l",       nameRu: "Турткуль",         regionId: 'r14', lat: 41.5600, lng: 61.0100 },
   { id: 'd231', name: "Xo'jayli",        nameRu: "Ходжейли",         regionId: 'r14', lat: 42.3500, lng: 59.4600 },
   { id: 'd232', name: "Bo'zatov",        nameRu: "Бозатау",          regionId: 'r14', lat: 43.2500, lng: 59.7000 },
+
+  // ════════════════════════════════════════════════════════════════════════════
+  //  CHET EL TUMANLARI
+  // ════════════════════════════════════════════════════════════════════════════
+
+  // ── Qozog'iston ─────────────────────────────────────────────────────────────
+  // Almati
+  { id: 'kz1_1',  name: "Alatau tumani",          nameRu: "Алатауский район",          regionId: 'kz1',  lat: 43.1700, lng: 76.7800 },
+  { id: 'kz1_2',  name: "Almaly tumani",           nameRu: "Алмалинский район",         regionId: 'kz1',  lat: 43.2600, lng: 76.9200 },
+  { id: 'kz1_3',  name: "Auezov tumani",           nameRu: "Ауэзовский район",          regionId: 'kz1',  lat: 43.2100, lng: 76.8300 },
+  { id: 'kz1_4',  name: "Bostandyq tumani",        nameRu: "Бостандыкский район",       regionId: 'kz1',  lat: 43.2400, lng: 76.8700 },
+  { id: 'kz1_5',  name: "Jambyl tumani",           nameRu: "Жамбылский район",          regionId: 'kz1',  lat: 43.2800, lng: 76.8100 },
+  { id: 'kz1_6',  name: "Medeu tumani",            nameRu: "Медеуский район",           regionId: 'kz1',  lat: 43.2100, lng: 76.9300 },
+  { id: 'kz1_7',  name: "Nauryzbay tumani",        nameRu: "Наурызбайский район",       regionId: 'kz1',  lat: 43.2000, lng: 76.7500 },
+  { id: 'kz1_8',  name: "Turksib tumani",          nameRu: "Түрксіб районы",            regionId: 'kz1',  lat: 43.3100, lng: 77.0000 },
+  // Astana
+  { id: 'kz2_1',  name: "Almaty tumani",           nameRu: "Алматинский район",         regionId: 'kz2',  lat: 51.1600, lng: 71.3800 },
+  { id: 'kz2_2',  name: "Baikonur tumani",         nameRu: "Байконур районы",           regionId: 'kz2',  lat: 51.1500, lng: 71.4000 },
+  { id: 'kz2_3',  name: "Esil tumani",             nameRu: "Есильский район",           regionId: 'kz2',  lat: 51.1900, lng: 71.4600 },
+  { id: 'kz2_4',  name: "Nura tumani",             nameRu: "Нура районы",               regionId: 'kz2',  lat: 51.1700, lng: 71.3600 },
+  { id: 'kz2_5',  name: "Saryarka tumani",         nameRu: "Сарыарка районы",           regionId: 'kz2',  lat: 51.2200, lng: 71.5100 },
+  // Shymkent
+  { id: 'kz3_1',  name: "Abay tumani",             nameRu: "Абайский район",            regionId: 'kz3',  lat: 42.3100, lng: 69.5500 },
+  { id: 'kz3_2',  name: "Al-Farobiy tumani",       nameRu: "Аль-Фарабийский район",     regionId: 'kz3',  lat: 42.2900, lng: 69.6100 },
+  { id: 'kz3_3',  name: "Qaratau tumani",          nameRu: "Каратауский район",         regionId: 'kz3',  lat: 42.3200, lng: 69.5800 },
+  { id: 'kz3_4',  name: "Yenbekshy tumani",        nameRu: "Енбекшинский район",        regionId: 'kz3',  lat: 42.2800, lng: 69.5700 },
+  // Qolgan KZ shaharlar
+  { id: 'kz4_1',  name: "Qaragandy markazi",       nameRu: "Центр Карагандинский",      regionId: 'kz4',  lat: 49.8000, lng: 73.1100 },
+  { id: 'kz4_2',  name: "Qaragandy Kazıbek biy",  nameRu: "Казыбек би район",          regionId: 'kz4',  lat: 49.8200, lng: 73.0900 },
+  { id: 'kz4_3',  name: "Qaragandy Oktobr",        nameRu: "Октябрьский район",         regionId: 'kz4',  lat: 49.7800, lng: 73.1300 },
+  { id: 'kz5_1',  name: "Aktobe markazi",          nameRu: "Центр Актобе",              regionId: 'kz5',  lat: 50.2800, lng: 57.2100 },
+  { id: 'kz5_2',  name: "Aktobe Nurjol tumani",    nameRu: "Нурлы жол район",           regionId: 'kz5',  lat: 50.2700, lng: 57.2300 },
+  { id: 'kz6_1',  name: "Taraz markazi",           nameRu: "Центр Тараза",              regionId: 'kz6',  lat: 42.9000, lng: 71.3700 },
+  { id: 'kz6_2',  name: "Taraz Baydibek tumani",   nameRu: "Байдибек район",            regionId: 'kz6',  lat: 42.9100, lng: 71.3500 },
+  { id: 'kz7_1',  name: "Pavlodar markazi",        nameRu: "Центр Павлодара",           regionId: 'kz7',  lat: 52.2900, lng: 76.9700 },
+  { id: 'kz7_2',  name: "Pavlodar Irtysh tumani",  nameRu: "Иртышский район",           regionId: 'kz7',  lat: 52.3100, lng: 76.9500 },
+  { id: 'kz8_1',  name: "O'skemen markazi",        nameRu: "Центр Усть-Каменогорска",   regionId: 'kz8',  lat: 49.9500, lng: 82.6200 },
+  { id: 'kz8_2',  name: "O'skemen Ulba tumani",    nameRu: "Ульбинский район",          regionId: 'kz8',  lat: 49.9700, lng: 82.6400 },
+  { id: 'kz9_1',  name: "Atyrau markazi",          nameRu: "Центр Атырау",              regionId: 'kz9',  lat: 47.1200, lng: 51.9000 },
+  { id: 'kz9_2',  name: "Atyrau Azgir tumani",     nameRu: "Азгирский район",           regionId: 'kz9',  lat: 47.1400, lng: 51.9200 },
+  { id: 'kz10_1', name: "Qostanay markazi",        nameRu: "Центр Костаная",            regionId: 'kz10', lat: 53.2100, lng: 63.6200 },
+  { id: 'kz10_2', name: "Qostanay Taranov tumani", nameRu: "Тарановский район",         regionId: 'kz10', lat: 53.2300, lng: 63.6000 },
+
+  // ── Qirg'iziston ────────────────────────────────────────────────────────────
+  // Bishkek
+  { id: 'kg1_1',  name: "Birinchi May tumani",     nameRu: "Первомайский район",        regionId: 'kg1',  lat: 42.8600, lng: 74.5600 },
+  { id: 'kg1_2',  name: "Leninski tumani",         nameRu: "Ленинский район",           regionId: 'kg1',  lat: 42.8800, lng: 74.5900 },
+  { id: 'kg1_3',  name: "Oktyabr tumani",          nameRu: "Октябрьский район",         regionId: 'kg1',  lat: 42.8600, lng: 74.5800 },
+  { id: 'kg1_4',  name: "Sverdlov tumani",         nameRu: "Свердловский район",        regionId: 'kg1',  lat: 42.8900, lng: 74.6100 },
+  // O'sh
+  { id: 'kg2_1',  name: "O'sh markazi",            nameRu: "Центр Оша",                 regionId: 'kg2',  lat: 40.5133, lng: 72.7985 },
+  { id: 'kg2_2',  name: "Sharq tumani",            nameRu: "Восточный район",           regionId: 'kg2',  lat: 40.5300, lng: 72.8200 },
+  { id: 'kg2_3',  name: "Kara-Suu tumani",         nameRu: "Кара-Су район",             regionId: 'kg2',  lat: 40.4900, lng: 72.7900 },
+  // Qolgan KG shaharlar
+  { id: 'kg3_1',  name: "Jalal-Obod markazi",      nameRu: "Центр Джалал-Абада",        regionId: 'kg3',  lat: 40.9333, lng: 72.9833 },
+  { id: 'kg3_2',  name: "Jalal-Obod Suzak tumani", nameRu: "Сузакский район",           regionId: 'kg3',  lat: 40.9100, lng: 73.0100 },
+  { id: 'kg4_1',  name: "Karakol markazi",         nameRu: "Центр Каракола",            regionId: 'kg4',  lat: 42.4892, lng: 78.3937 },
+  { id: 'kg4_2',  name: "Karakol Ak-Suu tumani",   nameRu: "Ак-Суйский район",          regionId: 'kg4',  lat: 42.5000, lng: 78.4100 },
+  { id: 'kg5_1',  name: "Tokmok markazi",          nameRu: "Центр Токмока",             regionId: 'kg5',  lat: 42.8401, lng: 75.2907 },
+  { id: 'kg6_1',  name: "Kant markazi",            nameRu: "Центр Канта",               regionId: 'kg6',  lat: 42.8900, lng: 74.8500 },
+  { id: 'kg7_1',  name: "Batken markazi",          nameRu: "Центр Баткена",             regionId: 'kg7',  lat: 40.0643, lng: 70.8188 },
+
+  // ── Tojikiston ──────────────────────────────────────────────────────────────
+  // Dushanbe
+  { id: 'tj1_1',  name: "Firdavsiy tumani",        nameRu: "Фирдавсийский район",       regionId: 'tj1',  lat: 38.5600, lng: 68.7700 },
+  { id: 'tj1_2',  name: "Ismoil Somoniy tumani",   nameRu: "Исмоили Сомони район",      regionId: 'tj1',  lat: 38.5700, lng: 68.7600 },
+  { id: 'tj1_3',  name: "Shohmansur tumani",       nameRu: "Шохмансурский район",       regionId: 'tj1',  lat: 38.5500, lng: 68.7900 },
+  { id: 'tj1_4',  name: "Sino tumani",             nameRu: "Синский район",             regionId: 'tj1',  lat: 38.5800, lng: 68.7800 },
+  // Qolgan TJ shaharlar
+  { id: 'tj2_1',  name: "Xo'jand markazi",         nameRu: "Центр Худжанда",            regionId: 'tj2',  lat: 40.2825, lng: 69.6215 },
+  { id: 'tj2_2',  name: "Xo'jand Spitamen tumani", nameRu: "Спитаменский район",        regionId: 'tj2',  lat: 40.3000, lng: 69.6400 },
+  { id: 'tj3_1',  name: "Kulob markazi",           nameRu: "Центр Куляба",              regionId: 'tj3',  lat: 37.9125, lng: 69.7798 },
+  { id: 'tj3_2',  name: "Kulob Vose tumani",       nameRu: "Восейский район",           regionId: 'tj3',  lat: 37.8900, lng: 69.8000 },
+  { id: 'tj4_1',  name: "Bokhtar markazi",         nameRu: "Центр Бохтара",             regionId: 'tj4',  lat: 37.8333, lng: 68.7833 },
+  { id: 'tj5_1',  name: "Istaravshan markazi",     nameRu: "Центр Истаравшана",         regionId: 'tj5',  lat: 39.9139, lng: 69.0025 },
+  { id: 'tj6_1',  name: "Konibodom markazi",       nameRu: "Центр Канибадама",          regionId: 'tj6',  lat: 40.2847, lng: 70.4281 },
+  { id: 'tj7_1',  name: "Panjakent markazi",       nameRu: "Центр Пенджикента",         regionId: 'tj7',  lat: 39.4942, lng: 67.6097 },
+
+  // ── Turkmaniston ────────────────────────────────────────────────────────────
+  // Ashxabad
+  { id: 'tm1_1',  name: "Abadan tumani",           nameRu: "Абаданский район",          regionId: 'tm1',  lat: 37.9700, lng: 58.3500 },
+  { id: 'tm1_2',  name: "Arkadag tumani",          nameRu: "Аркадагский район",         regionId: 'tm1',  lat: 37.9500, lng: 58.3000 },
+  { id: 'tm1_3',  name: "Bagtyarlyk tumani",       nameRu: "Бахтиярлыкский район",      regionId: 'tm1',  lat: 37.9400, lng: 58.3200 },
+  { id: 'tm1_4',  name: "Berkararlyk tumani",      nameRu: "Беркарарлыкский район",     regionId: 'tm1',  lat: 37.9600, lng: 58.3400 },
+  { id: 'tm1_5',  name: "Kopetdag tumani",         nameRu: "Копетдагский район",        regionId: 'tm1',  lat: 37.9500, lng: 58.3100 },
+  // Qolgan TM shaharlar
+  { id: 'tm2_1',  name: "Turkmenabat markazi",     nameRu: "Центр Туркменабада",        regionId: 'tm2',  lat: 39.0833, lng: 63.5667 },
+  { id: 'tm2_2',  name: "Turkmenabat Farap tumani",nameRu: "Фарапский район",           regionId: 'tm2',  lat: 39.1200, lng: 63.5900 },
+  { id: 'tm3_1',  name: "Mary markazi",            nameRu: "Центр Мары",                regionId: 'tm3',  lat: 37.5933, lng: 61.8300 },
+  { id: 'tm3_2',  name: "Mary Bayramaly tumani",   nameRu: "Байрамалийский район",      regionId: 'tm3',  lat: 37.6200, lng: 62.1800 },
+  { id: 'tm4_1',  name: "Balkanabat markazi",      nameRu: "Центр Балканабада",         regionId: 'tm4',  lat: 39.5100, lng: 54.3700 },
+  { id: 'tm5_1',  name: "Dashhoguz markazi",       nameRu: "Центр Дашогуза",            regionId: 'tm5',  lat: 41.8369, lng: 59.9669 },
+  { id: 'tm5_2',  name: "Dashhoguz Ko'hna tumani", nameRu: "Кухна-Ургенчский район",    regionId: 'tm5',  lat: 41.7100, lng: 59.7700 },
+  { id: 'tm6_1',  name: "Türkmenbaşy markazi",     nameRu: "Центр Туркменбаши",         regionId: 'tm6',  lat: 40.0181, lng: 52.9795 },
+
+  // ── Afg'oniston ─────────────────────────────────────────────────────────────
+  // Kobul
+  { id: 'af1_1',  name: "Shahr-e Naw",             nameRu: "Шахр-э-Нав",                regionId: 'af1',  lat: 34.5280, lng: 69.1724 },
+  { id: 'af1_2',  name: "Wazir Akbar Khan",        nameRu: "Вазир Акбар Хан",           regionId: 'af1',  lat: 34.5400, lng: 69.1900 },
+  { id: 'af1_3',  name: "Makrorayon",              nameRu: "Макрорайон",                regionId: 'af1',  lat: 34.5100, lng: 69.1800 },
+  { id: 'af1_4',  name: "Karte Seh",               nameRu: "Карта Сех",                 regionId: 'af1',  lat: 34.5000, lng: 69.1600 },
+  { id: 'af1_5',  name: "Khayr Xona",              nameRu: "Хайр Хана",                 regionId: 'af1',  lat: 34.5700, lng: 69.1500 },
+  { id: 'af1_6',  name: "Taimani",                 nameRu: "Таймани",                   regionId: 'af1',  lat: 34.5200, lng: 69.1600 },
+  { id: 'af1_7',  name: "Deh Mazang",              nameRu: "Дех Мазанг",                regionId: 'af1',  lat: 34.5150, lng: 69.1400 },
+  // Qolgan AF shaharlar
+  { id: 'af2_1',  name: "Hirot markazi",           nameRu: "Центр Герата",              regionId: 'af2',  lat: 34.3482, lng: 62.2040 },
+  { id: 'af2_2',  name: "Hirot Injil tumani",      nameRu: "Инджильский район",         regionId: 'af2',  lat: 34.4300, lng: 62.2200 },
+  { id: 'af3_1',  name: "Mozori Sharif markazi",   nameRu: "Центр Мазари-Шарифа",       regionId: 'af3',  lat: 36.7069, lng: 67.1115 },
+  { id: 'af3_2',  name: "Mozori Sharif Dehdadi",   nameRu: "Дехдадийский район",        regionId: 'af3',  lat: 36.7500, lng: 67.2000 },
+  { id: 'af4_1',  name: "Qandahor markazi",        nameRu: "Центр Кандагара",           regionId: 'af4',  lat: 31.6131, lng: 65.7100 },
+  { id: 'af5_1',  name: "Jalalabad markazi",       nameRu: "Центр Джалалабада",         regionId: 'af5',  lat: 34.4211, lng: 70.4514 },
+  { id: 'af6_1',  name: "Kunduz markazi",          nameRu: "Центр Кундуза",             regionId: 'af6',  lat: 36.7281, lng: 68.8670 },
+  { id: 'af7_1',  name: "G'azna markazi",          nameRu: "Центр Газни",               regionId: 'af7',  lat: 33.5500, lng: 68.4167 },
+
+  // ── Rossiya ─────────────────────────────────────────────────────────────────
+  // Moskva
+  { id: 'ru1_1',  name: "Markaziy okrug",          nameRu: "Центральный округ",         regionId: 'ru1',  lat: 55.7558, lng: 37.6173 },
+  { id: 'ru1_2',  name: "Shimoliy-Sharq okrugi",   nameRu: "Северо-Восточный округ",    regionId: 'ru1',  lat: 55.8300, lng: 37.6600 },
+  { id: 'ru1_3',  name: "Sharqiy okrug",           nameRu: "Восточный округ",           regionId: 'ru1',  lat: 55.7800, lng: 37.8100 },
+  { id: 'ru1_4',  name: "Janubi-Sharq okrugi",     nameRu: "Юго-Восточный округ",       regionId: 'ru1',  lat: 55.7000, lng: 37.7500 },
+  { id: 'ru1_5',  name: "Janubiy okrug",           nameRu: "Южный округ",               regionId: 'ru1',  lat: 55.6500, lng: 37.6200 },
+  { id: 'ru1_6',  name: "Janubi-G'arb okrugi",     nameRu: "Юго-Западный округ",        regionId: 'ru1',  lat: 55.6700, lng: 37.4900 },
+  { id: 'ru1_7',  name: "G'arbiy okrug",           nameRu: "Западный округ",            regionId: 'ru1',  lat: 55.7300, lng: 37.3800 },
+  { id: 'ru1_8',  name: "Shimoliy-G'arb okrugi",   nameRu: "Северо-Западный округ",     regionId: 'ru1',  lat: 55.8000, lng: 37.3900 },
+  { id: 'ru1_9',  name: "Shimoliy okrug",          nameRu: "Северный округ",            regionId: 'ru1',  lat: 55.8500, lng: 37.5700 },
+  { id: 'ru1_10', name: "Zelenograd okrugi",       nameRu: "Зеленоградский округ",      regionId: 'ru1',  lat: 55.9800, lng: 37.1800 },
+  // Sankt-Peterburg
+  { id: 'ru2_1',  name: "Admiralteysky okrug",     nameRu: "Адмиралтейский округ",      regionId: 'ru2',  lat: 59.9200, lng: 30.3000 },
+  { id: 'ru2_2',  name: "Vasilyeostrovsky okrug",  nameRu: "Василеостровский округ",    regionId: 'ru2',  lat: 59.9400, lng: 30.2600 },
+  { id: 'ru2_3',  name: "Vyborgsky okrug",         nameRu: "Выборгский округ",          regionId: 'ru2',  lat: 60.0500, lng: 30.3500 },
+  { id: 'ru2_4',  name: "Kalininsky okrug",        nameRu: "Калининский округ",         regionId: 'ru2',  lat: 60.0000, lng: 30.4200 },
+  { id: 'ru2_5',  name: "Nevsky okrug",            nameRu: "Невский округ",             regionId: 'ru2',  lat: 59.9100, lng: 30.4600 },
+  { id: 'ru2_6',  name: "Primorsky okrug",         nameRu: "Приморский округ",          regionId: 'ru2',  lat: 60.0100, lng: 30.2200 },
+  { id: 'ru2_7',  name: "Frunzensky okrug",        nameRu: "Фрунзенский округ",         regionId: 'ru2',  lat: 59.8700, lng: 30.3900 },
+  { id: 'ru2_8',  name: "Tsentralny okrug",        nameRu: "Центральный округ",         regionId: 'ru2',  lat: 59.9500, lng: 30.3600 },
+  // Qolgan RU shaharlar
+  { id: 'ru3_1',  name: "Novosibirsk markazi",     nameRu: "Центр Новосибирска",        regionId: 'ru3',  lat: 54.9833, lng: 82.8964 },
+  { id: 'ru3_2',  name: "Novosibirsk Kirovskiy",   nameRu: "Кировский район",           regionId: 'ru3',  lat: 54.9700, lng: 82.8500 },
+  { id: 'ru4_1',  name: "Yekaterinburg markazi",   nameRu: "Центр Екатеринбурга",       regionId: 'ru4',  lat: 56.8356, lng: 60.6128 },
+  { id: 'ru4_2',  name: "Yekaterinburg Verx-Iset", nameRu: "Верх-Исетский район",       regionId: 'ru4',  lat: 56.8600, lng: 60.5900 },
+  { id: 'ru5_1',  name: "Kazan markazi",           nameRu: "Центр Казани",              regionId: 'ru5',  lat: 55.7887, lng: 49.1221 },
+  { id: 'ru5_2',  name: "Kazan Sovetsky tumani",   nameRu: "Советский район",           regionId: 'ru5',  lat: 55.8100, lng: 49.1400 },
+  { id: 'ru6_1',  name: "Omsk markazi",            nameRu: "Центр Омска",               regionId: 'ru6',  lat: 54.9924, lng: 73.3686 },
+  { id: 'ru7_1',  name: "Chelyabinsk markazi",     nameRu: "Центр Челябинска",          regionId: 'ru7',  lat: 55.1644, lng: 61.4368 },
+  { id: 'ru7_2',  name: "Chelyabinsk Leninsky",    nameRu: "Ленинский район",           regionId: 'ru7',  lat: 55.1400, lng: 61.4100 },
+  { id: 'ru8_1',  name: "Ufa markazi",             nameRu: "Центр Уфы",                 regionId: 'ru8',  lat: 54.7388, lng: 55.9721 },
+  { id: 'ru8_2',  name: "Ufa Oktyabr tumani",      nameRu: "Октябрьский район",         regionId: 'ru8',  lat: 54.7200, lng: 55.9500 },
+  { id: 'ru9_1',  name: "Krasnodar markazi",       nameRu: "Центр Краснодара",          regionId: 'ru9',  lat: 45.0328, lng: 38.9769 },
+  { id: 'ru9_2',  name: "Krasnodar Prikubansky",   nameRu: "Прикубанский район",        regionId: 'ru9',  lat: 45.0600, lng: 38.9900 },
+  { id: 'ru10_1', name: "Saratov markazi",         nameRu: "Центр Саратова",            regionId: 'ru10', lat: 51.5924, lng: 46.0267 },
+  { id: 'ru10_2', name: "Saratov Zavodskoy",       nameRu: "Заводской район",           regionId: 'ru10', lat: 51.5700, lng: 46.0500 },
+
+  // ── Xitoy ────────────────────────────────────────────────────────────────────
+  // Pekin
+  { id: 'cn1_1',  name: "Dongcheng tumani",        nameRu: "Дунчэн район",              regionId: 'cn1',  lat: 39.9300, lng: 116.4200 },
+  { id: 'cn1_2',  name: "Xicheng tumani",          nameRu: "Сичэн район",               regionId: 'cn1',  lat: 39.9100, lng: 116.3700 },
+  { id: 'cn1_3',  name: "Chaoyang tumani",         nameRu: "Чаоян район",               regionId: 'cn1',  lat: 39.9200, lng: 116.4900 },
+  { id: 'cn1_4',  name: "Haidian tumani",          nameRu: "Хайдянь район",             regionId: 'cn1',  lat: 40.0000, lng: 116.3200 },
+  { id: 'cn1_5',  name: "Fengtai tumani",          nameRu: "Фэнтай район",              regionId: 'cn1',  lat: 39.8600, lng: 116.2900 },
+  { id: 'cn1_6',  name: "Tongzhou tumani",         nameRu: "Тунчжоу район",             regionId: 'cn1',  lat: 39.9100, lng: 116.6600 },
+  { id: 'cn1_7',  name: "Shijingshan tumani",      nameRu: "Шицзиншань район",          regionId: 'cn1',  lat: 39.9000, lng: 116.2200 },
+  // Shanxay
+  { id: 'cn2_1',  name: "Huangpu tumani",          nameRu: "Хуанпу район",              regionId: 'cn2',  lat: 31.2300, lng: 121.4800 },
+  { id: 'cn2_2',  name: "Jing'an tumani",          nameRu: "Цзин'ань район",            regionId: 'cn2',  lat: 31.2500, lng: 121.4500 },
+  { id: 'cn2_3',  name: "Putuo tumani",            nameRu: "Путо район",                regionId: 'cn2',  lat: 31.2600, lng: 121.4100 },
+  { id: 'cn2_4',  name: "Xuhui tumani",            nameRu: "Сюйхуэй район",             regionId: 'cn2',  lat: 31.1900, lng: 121.4400 },
+  { id: 'cn2_5',  name: "Pudong tumani",           nameRu: "Пудун район",               regionId: 'cn2',  lat: 31.2200, lng: 121.5500 },
+  { id: 'cn2_6',  name: "Yangpu tumani",           nameRu: "Янпу район",                regionId: 'cn2',  lat: 31.2700, lng: 121.5200 },
+  // Urumqi
+  { id: 'cn3_1',  name: "Tianshan tumani",         nameRu: "Тяньшань район",            regionId: 'cn3',  lat: 43.7900, lng: 87.5900 },
+  { id: 'cn3_2',  name: "Saybak tumani",           nameRu: "Шайбак район",              regionId: 'cn3',  lat: 43.8100, lng: 87.5500 },
+  { id: 'cn3_3',  name: "Xinshi tumani",           nameRu: "Синьши район",              regionId: 'cn3',  lat: 43.8500, lng: 87.5800 },
+  { id: 'cn3_4',  name: "Shuimogou tumani",        nameRu: "Шуймогоу район",            regionId: 'cn3',  lat: 43.8200, lng: 87.6400 },
+  // Qolgan CN shaharlar
+  { id: 'cn4_1',  name: "Guangzhou markazi",       nameRu: "Центр Гуанчжоу",            regionId: 'cn4',  lat: 23.1291, lng: 113.2644 },
+  { id: 'cn4_2',  name: "Guangzhou Tianhe tumani", nameRu: "Тяньхэ район",              regionId: 'cn4',  lat: 23.1500, lng: 113.3200 },
+  { id: 'cn5_1',  name: "Chengdu markazi",         nameRu: "Центр Чэнду",               regionId: 'cn5',  lat: 30.5728, lng: 104.0668 },
+  { id: 'cn5_2',  name: "Chengdu Jinjiang tumani", nameRu: "Цзиньцзян район",           regionId: 'cn5',  lat: 30.5900, lng: 104.0800 },
+  { id: 'cn6_1',  name: "Si'an markazi",           nameRu: "Центр Сианя",               regionId: 'cn6',  lat: 34.2658, lng: 108.9541 },
+  { id: 'cn6_2',  name: "Si'an Beilin tumani",     nameRu: "Бэйлинь район",             regionId: 'cn6',  lat: 34.2700, lng: 108.9400 },
+  { id: 'cn7_1',  name: "Wuhan markazi",           nameRu: "Центр Уханя",               regionId: 'cn7',  lat: 30.5928, lng: 114.3055 },
+  { id: 'cn7_2',  name: "Wuhan Jiang'an tumani",   nameRu: "Цзян'ань район",            regionId: 'cn7',  lat: 30.6100, lng: 114.2900 },
 ];
 
 // ─── NEIGHBORHOODS ────────────────────────────────────────────────────────────
