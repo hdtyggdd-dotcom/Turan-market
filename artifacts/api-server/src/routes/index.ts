@@ -8,6 +8,7 @@ import deliveryRouter from "./delivery.js";
 import ordersRouter from "./orders.js";
 import statsRouter from "./stats.js";
 import sellersRouter from "./sellers.js";
+import uploadsRouter from "./uploads.js";
 
 const router: IRouter = Router();
 
@@ -20,5 +21,6 @@ router.use(deliveryRouter);
 router.use(ordersRouter);
 router.use(statsRouter);
 router.use(sellersRouter);
+router.use(uploadsRouter);
 
 export default router;

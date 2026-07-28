@@ -13,6 +13,7 @@ import {
   getPriceColor,
 } from "../data/store.js";
 import { authenticateToken, type AuthRequest } from "../middleware/auth.js";
+import { scoreSearch, FUZZY_THRESHOLD } from "../utils/fuzzy.js";
 
 const router = Router();
 
@@ -178,13 +179,23 @@ router.get("/listings", (req, res) => {
   if (districtId) result = result.filter((l) => l.districtId === districtId);
   if (neighborhoodId) result = result.filter((l) => l.neighborhoodId === neighborhoodId);
   if (search) {
-    const q = search.toLowerCase();
-    result = result.filter(
-      (l) =>
-        l.title.toLowerCase().includes(q) ||
-        (l.titleRu ?? "").toLowerCase().includes(q) ||
-        (l.description ?? "").toLowerCase().includes(q),
-    );
+    // Aqlli fuzzy qidiruv — xato yozilsa ham tushunadi
+    const scored = result.map((l) => {
+      const cat = categories.find((c) => c.id === l.categoryId);
+      const sub = cat?.subcategories.find((s) => s.id === l.subcategoryId);
+      const fields = [
+        l.title,
+        l.titleRu ?? "",
+        l.description ?? "",
+        cat?.name ?? "",
+        sub?.name ?? "",
+      ];
+      return { listing: l, score: scoreSearch(search, fields) };
+    });
+    result = scored
+      .filter((s) => s.score >= FUZZY_THRESHOLD)
+      .sort((a, b) => b.score - a.score)
+      .map((s) => s.listing);
   }
   if (minPrice) result = result.filter((l) => l.price >= Number(minPrice));
   if (maxPrice) result = result.filter((l) => l.price <= Number(maxPrice));

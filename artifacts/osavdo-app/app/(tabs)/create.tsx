@@ -14,6 +14,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useColors } from '@/hooks/useColors';
 import { Feather } from '@expo/vector-icons';
 import { useGetCategories, useCreateListing, useGetRegions, useGetDistricts } from '@workspace/api-client-react';
+import { ImageUploader } from '@/components/ImageUploader';
 import { useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
 import { useAuth } from '@/context/AuthContext';
@@ -39,6 +40,7 @@ export default function CreateScreen() {
   const [listingType, setListingType] = useState<'savdo' | 'xizmat'>('savdo');
   const [sellerType, setSellerType] = useState<'sotuvchi' | 'ishlab_chiqaruvchi'>('sotuvchi');
   const [elanTur, setElanTur] = useState<'oddiy' | 'vip'>('oddiy');
+  const [images, setImages] = useState<string[]>([]);
   const [analysisListingId, setAnalysisListingId] = useState<string | null>(null);
 
   // Bepul davr: ro'yxatdan o'tganidan 30 kun ichida birinchi e'lon bepul
@@ -101,7 +103,7 @@ export default function CreateScreen() {
         subcategoryId: selectedSubcategoryId || undefined,
         regionId,
         districtId,
-        images: [],
+        images,
         listingType,
         sellerType,
         elanTur,
@@ -195,6 +197,16 @@ export default function CreateScreen() {
             </View>
           </>
         )}
+
+        {/* ─── Rasmlar ─── */}
+        <View style={{ marginTop: 8 }}>
+          <ImageUploader
+            images={images}
+            onChange={setImages}
+            max={5}
+            label="📸 Rasmlar (ixtiyoriy)"
+          />
+        </View>
 
         {/* ─── Title ─── */}
         <FieldLabel label="Sarlavha *" colors={colors} />
