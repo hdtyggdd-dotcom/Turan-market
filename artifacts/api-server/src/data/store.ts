@@ -697,14 +697,40 @@ export const categories: StoredCategory[] = [
       { id: 'sub2_11', name: "Pol taxta",                  nameRu: "Напольная доска",          categoryId: 'cat2' },
       { id: 'sub2_12', name: "Profillar (har xil razmer)", nameRu: "Профили разных размеров",  categoryId: 'cat2' },
       { id: 'sub2_13', name: "Boshqa og'ir materiallar",   nameRu: "Прочие тяжёлые материалы", categoryId: 'cat2' },
-      // ── 2. Yengil / zavod mahsulotlari ───────────────────────────────
-      { id: 'sub2_14', name: "Kulchatlar (plitka)",        nameRu: "Плитка / Кафель",          categoryId: 'cat2' },
-      { id: 'sub2_15', name: "Kraskalar",                  nameRu: "Краски",                   categoryId: 'cat2' },
-      { id: 'sub2_16', name: "Shpagilovka",                nameRu: "Шпаклёвка",                categoryId: 'cat2' },
-      { id: 'sub2_17', name: "Metall quvurlar (MQ)",       nameRu: "Металлические трубы",      categoryId: 'cat2' },
-      { id: 'sub2_18', name: "Elektr materiallari",        nameRu: "Электроматериалы",         categoryId: 'cat2' },
-      { id: 'sub2_19', name: "Santexnika materiallari",    nameRu: "Сантехматериалы",          categoryId: 'cat2' },
-      { id: 'sub2_20', name: "Boshqa zavod mahsulotlari",  nameRu: "Прочие заводские товары",  categoryId: 'cat2' },
+    ],
+  },
+  {
+    id: 'cat10',
+    name: "Ta'mirlash & Bezak",
+    nameRu: "Ремонт и отделка",
+    icon: "🪟",
+    subcategories: [
+      { id: 'sub10_01', name: "Kulchatlar (plitka)",        nameRu: "Плитка / Кафель",          categoryId: 'cat10' },
+      { id: 'sub10_02', name: "Kraskalar",                  nameRu: "Краски",                   categoryId: 'cat10' },
+      { id: 'sub10_03', name: "Shpagilovka",                nameRu: "Шпаклёвка",                categoryId: 'cat10' },
+      { id: 'sub10_04', name: "Metall quvurlar (MQ)",       nameRu: "Металлические трубы",      categoryId: 'cat10' },
+      { id: 'sub10_05', name: "Elektr materiallari",        nameRu: "Электроматериалы",         categoryId: 'cat10' },
+      { id: 'sub10_06', name: "Santexnika materiallari",    nameRu: "Сантехматериалы",          categoryId: 'cat10' },
+      { id: 'sub10_07', name: "Oyna & eshik & deraza",      nameRu: "Стекло / двери / окна",    categoryId: 'cat10' },
+      { id: 'sub10_08', name: "Pardalar & devorqog'oz",     nameRu: "Шторы и обои",             categoryId: 'cat10' },
+      { id: 'sub10_09', name: "Boshqa bezak materiallari",  nameRu: "Прочие отделочные",        categoryId: 'cat10' },
+    ],
+  },
+  {
+    id: 'cat11',
+    name: "Ovchilik & Baliqchilik",
+    nameRu: "Охота и рыбалка",
+    icon: "🎯",
+    subcategories: [
+      { id: 'sub11_01', name: "Miltiq & Yarog'lar",         nameRu: "Ружьё и оружие",           categoryId: 'cat11' },
+      { id: 'sub11_02', name: "Kamon & Qo'lbola qurollar",  nameRu: "Лук и стрелы",             categoryId: 'cat11' },
+      { id: 'sub11_03', name: "Tuzoq & Tor",                nameRu: "Ловушки и сети",           categoryId: 'cat11' },
+      { id: 'sub11_04', name: "Ovchilik kiyimlari",         nameRu: "Одежда для охоты",         categoryId: 'cat11' },
+      { id: 'sub11_05', name: "Ovchilik jihozlari",         nameRu: "Снаряжение для охоты",     categoryId: 'cat11' },
+      { id: 'sub11_06', name: "Baliq ovlash qarmoqlari",    nameRu: "Удочки и снасти",          categoryId: 'cat11' },
+      { id: 'sub11_07', name: "Baliq ovlash qayiqlari",     nameRu: "Лодки для рыбалки",        categoryId: 'cat11' },
+      { id: 'sub11_08', name: "Yem & Jig'a",                nameRu: "Приманки и наживки",       categoryId: 'cat11' },
+      { id: 'sub11_09', name: "Boshqa ovchilik anjomlar",   nameRu: "Прочие охотничьи товары",  categoryId: 'cat11' },
     ],
   },
   {
@@ -1254,8 +1280,8 @@ export const listings: StoredListing[] = [
     price: 2800000,
     priceUnit: "rulon",
     images: [],
-    categoryId: 'cat2',
-    subcategoryId: 'sub2_20', // Boshqa zavod mahsulotlari
+    categoryId: 'cat10',
+    subcategoryId: 'sub10_09', // Boshqa bezak materiallari
     userId: 'u1',
     regionId: 'r3',
     districtId: 'd11',
@@ -1570,8 +1596,8 @@ export const listings: StoredListing[] = [
     price: 85000,
     priceUnit: "kv.m",
     images: [],
-    categoryId: 'cat2',
-    subcategoryId: 'sub2_14', // Kulchatlar (plitka)
+    categoryId: 'cat10',
+    subcategoryId: 'sub10_01', // Kulchatlar (plitka)
     userId: 'u3',
     regionId: 'r1',
     districtId: 'd3',
@@ -1594,8 +1620,8 @@ export const listings: StoredListing[] = [
     price: 125000,
     priceUnit: "banka (20 kg)",
     images: [],
-    categoryId: 'cat2',
-    subcategoryId: 'sub2_15', // Kraskalar
+    categoryId: 'cat10',
+    subcategoryId: 'sub10_02', // Kraskalar
     userId: 'u1',
     regionId: 'r1',
     districtId: 'd2',
@@ -2200,6 +2226,123 @@ export const listings: StoredListing[] = [
     viewCount: 211,
     createdAt: '2024-07-28T10:00:00.000Z',
   },
+  // ── cat10: Ta'mirlash & Bezak ────────────────────────────────────────────────
+  {
+    id: 'l53',
+    title: "Santexnika — Grohe dush kabinasi",
+    titleRu: "Душевая кабина Grohe",
+    description: "Rang: shaffof oyna + xrom ramka. O'lcham: 90×90×200 sm. Termostatli aralashtirgich. Sertifikat bor. Yig'ish xizmati mavjud.",
+    price: 4800000,
+    priceUnit: "dona",
+    images: [],
+    categoryId: 'cat10',
+    subcategoryId: 'sub10_06', // Santexnika materiallari
+    userId: 'u2',
+    regionId: 'r1',
+    districtId: 'd3',
+    neighborhoodId: null,
+    lat: 41.3000, lng: 69.2700,
+    status: 'active',
+    sellerType: null,
+    listingType: 'savdo',
+    elanTur: 'oddiy',
+    adminStatus: null,
+    viewCount: 143,
+    createdAt: '2024-07-10T09:00:00.000Z',
+  },
+  {
+    id: 'l54',
+    title: "Metall-plastik deraza (5 kamerali)",
+    titleRu: "Металлопластиковое окно (5-камерное)",
+    description: "Rang: oq. O'lcham: 1200×1400 mm. 5 kamerali profilь (VEKA). Ikki qavatli steklopaket. Mosquito to'r bepul. O'rnatish xizmati bor.",
+    price: 1200000,
+    priceUnit: "dona",
+    images: [],
+    categoryId: 'cat10',
+    subcategoryId: 'sub10_07', // Oyna/eshik/deraza
+    userId: 'u3',
+    regionId: 'r2',
+    districtId: 'd7',
+    neighborhoodId: null,
+    lat: 39.6500, lng: 66.9700,
+    status: 'active',
+    sellerType: 'ishlab_chiqaruvchi',
+    listingType: 'savdo',
+    elanTur: 'oddiy',
+    adminStatus: null,
+    viewCount: 287,
+    createdAt: '2024-07-12T11:00:00.000Z',
+  },
+  // ── cat11: Ovchilik & Baliqchilik ─────────────────────────────────────────────
+  {
+    id: 'l55',
+    title: "Ov miltiq — MR-153 (12 kalibrli)",
+    titleRu: "Охотничье ружьё МР-153 (12 калибр)",
+    description: "Marka: Baikal MR-153. Patron: 12/76. Lula uzunligi: 710 mm. Magazin: 4+1. Yog'och qo'ndog'i. Ruxsat hujjatlari bilan birga. Yaxshi holat.",
+    price: 3500000,
+    priceUnit: "dona",
+    images: [],
+    categoryId: 'cat11',
+    subcategoryId: 'sub11_01', // Miltiq
+    userId: 'u1',
+    regionId: 'r5',
+    districtId: 'd19',
+    neighborhoodId: null,
+    lat: 41.1000, lng: 71.2700,
+    status: 'active',
+    sellerType: null,
+    listingType: 'savdo',
+    elanTur: 'oddiy',
+    adminStatus: null,
+    viewCount: 96,
+    createdAt: '2024-07-15T08:00:00.000Z',
+  },
+  {
+    id: 'l56',
+    title: "Baliq ovlash to'plami (Shimano)",
+    titleRu: "Рыболовный набор Shimano",
+    description: "Komplekt: Shimano FX 2.7 m qarmog', Shimano Sienna 2500 katushka, 0.28 mm aster (100 m), 20 ta qo'rg'oshin, quti bilan. Yangi, qutisida.",
+    price: 850000,
+    priceUnit: "to'plam",
+    images: [],
+    categoryId: 'cat11',
+    subcategoryId: 'sub11_06', // Baliq ovlash qarmoqlari
+    userId: 'u2',
+    regionId: 'r1',
+    districtId: 'd4',
+    neighborhoodId: null,
+    lat: 41.3200, lng: 69.2100,
+    status: 'active',
+    sellerType: null,
+    listingType: 'savdo',
+    elanTur: 'oddiy',
+    adminStatus: null,
+    viewCount: 174,
+    createdAt: '2024-07-18T10:00:00.000Z',
+  },
+  {
+    id: 'l57',
+    title: "Ovchilik kostyumi — Gorka-4 (fleece astari)",
+    titleRu: "Охотничий костюм Горка-4 (флисовая подкладка)",
+    description: "Rang: yashil kamuflaj (tundra). Kattalik: M, L, XL, XXL (tanlash mumkin). Fleece astari, suv o'tkazmaydigan yuqori qatlam. 4 ta katta cho'ntak.",
+    price: 480000,
+    priceUnit: "dona",
+    images: [],
+    categoryId: 'cat11',
+    subcategoryId: 'sub11_04', // Ovchilik kiyimlari
+    userId: 'u3',
+    regionId: 'r3',
+    districtId: 'd11',
+    neighborhoodId: null,
+    lat: 40.7900, lng: 72.3500,
+    status: 'active',
+    sellerType: null,
+    listingType: 'savdo',
+    elanTur: 'oddiy',
+    adminStatus: null,
+    viewCount: 62,
+    createdAt: '2024-07-20T09:00:00.000Z',
+  },
 ];
 
 // ─── ORDERS ───────────────────────────────────────────────────────────────────
@@ -2302,14 +2445,26 @@ const PRICE_THRESHOLDS: Record<string, { arzon: number; qimmat: number }> = {
   'sub2_11': { arzon: 30_000,      qimmat: 120_000     }, // Pol taxta (dona)
   'sub2_12': { arzon: 15_000,      qimmat: 80_000      }, // Profillar (metr)
   'sub2_13': { arzon: 100_000,     qimmat: 1_000_000   }, // Boshqa og'ir
-  // Qurilish mollari (yengil/zavod)
-  'sub2_14': { arzon: 40_000,      qimmat: 150_000     }, // Kulchatlar/plitka (kv.m)
-  'sub2_15': { arzon: 60_000,      qimmat: 250_000     }, // Kraskalar (banka)
-  'sub2_16': { arzon: 30_000,      qimmat: 150_000     }, // Shpagilovka (qop)
-  'sub2_17': { arzon: 20_000,      qimmat: 100_000     }, // Metall quvurlar (metr)
-  'sub2_18': { arzon: 10_000,      qimmat: 500_000     }, // Elektr materiallari
-  'sub2_19': { arzon: 30_000,      qimmat: 500_000     }, // Santexnika
-  'sub2_20': { arzon: 50_000,      qimmat: 500_000     }, // Boshqa zavod
+  // Ta'mirlash & Bezak (cat10)
+  'sub10_01': { arzon: 40_000,     qimmat: 150_000     }, // Kulchatlar/plitka (kv.m)
+  'sub10_02': { arzon: 60_000,     qimmat: 250_000     }, // Kraskalar (banka)
+  'sub10_03': { arzon: 30_000,     qimmat: 150_000     }, // Shpagilovka (qop)
+  'sub10_04': { arzon: 20_000,     qimmat: 100_000     }, // Metall quvurlar (metr)
+  'sub10_05': { arzon: 10_000,     qimmat: 500_000     }, // Elektr materiallari
+  'sub10_06': { arzon: 30_000,     qimmat: 500_000     }, // Santexnika
+  'sub10_07': { arzon: 200_000,    qimmat: 2_000_000   }, // Oyna/eshik/deraza
+  'sub10_08': { arzon: 50_000,     qimmat: 500_000     }, // Pardalar/devorqog'oz
+  'sub10_09': { arzon: 50_000,     qimmat: 500_000     }, // Boshqa bezak
+  // Ovchilik & Baliqchilik (cat11)
+  'sub11_01': { arzon: 500_000,    qimmat: 5_000_000   }, // Miltiq/yarog'
+  'sub11_02': { arzon: 100_000,    qimmat: 800_000     }, // Kamon
+  'sub11_03': { arzon: 20_000,     qimmat: 200_000     }, // Tuzoq/tor
+  'sub11_04': { arzon: 80_000,     qimmat: 500_000     }, // Ovchilik kiyimlari
+  'sub11_05': { arzon: 50_000,     qimmat: 1_000_000   }, // Ovchilik jihozlari
+  'sub11_06': { arzon: 30_000,     qimmat: 500_000     }, // Baliq qarmoqlari
+  'sub11_07': { arzon: 500_000,    qimmat: 5_000_000   }, // Baliq qayiqlari
+  'sub11_08': { arzon: 5_000,      qimmat: 50_000      }, // Yem/jig'a
+  'sub11_09': { arzon: 30_000,     qimmat: 500_000     }, // Boshqa ovchilik
   // Transport & Texnika
   'sub3_01': { arzon: 60_000_000,  qimmat: 200_000_000 }, // Engil avtomobil
   'sub3_02': { arzon: 80_000_000,  qimmat: 250_000_000 }, // Mikroavtobus
