@@ -3,13 +3,13 @@ import Anthropic from "@anthropic-ai/sdk";
 
 const router = Router();
 
-function getAnthropicClient() {
-  const key = process.env.ANTHROPIC_API_KEY ?? "";
-  console.log(`[AI] ANTHROPIC_API_KEY prefix: "${key.slice(0, 14)}..." length: ${key.length}`);
+function getAIClient() {
+  // Support key stored under either name
+  const key = process.env.ANTHROPIC_API_KEY || process.env.OPENAI_API_KEY || "";
   return new Anthropic({ apiKey: key });
 }
 
-const SYSTEM_PROMPT = `Sen O'Savdo — O'zbekiston va qo'shni mamlakatlar uchun mahalliy bozor ilovasining AI yordamchisisan.
+const SYSTEM_PROMPT = `Sen Turan Market — O'zbekiston va qo'shni mamlakatlar uchun mahalliy bozor ilovasining AI yordamchisisan.
 
 Foydalanuvchilarga quyidagi mavzularda yordam ber:
 - Mahsulot/tovar narxi bo'yicha maslahat (bozor narxlari, raqobat)
@@ -43,7 +43,7 @@ router.post("/ai/advice", async (req, res) => {
     return;
   }
 
-  if (!process.env.ANTHROPIC_API_KEY) {
+  if (!process.env.ANTHROPIC_API_KEY && !process.env.OPENAI_API_KEY) {
     res.status(503).json({ error: "AI xizmati sozlanmagan" });
     return;
   }
@@ -53,16 +53,14 @@ router.post("/ai/advice", async (req, res) => {
       ? `Kontekst: ${JSON.stringify(context)}\n\nSavol: ${message}`
       : message;
 
-    const response = await getAnthropicClient().messages.create({
+    const response = await getAIClient().messages.create({
       model: "claude-haiku-4-5",
       max_tokens: 1024,
       system: SYSTEM_PROMPT,
       messages: [{ role: "user", content: userContent }],
     });
 
-    const text =
-      response.content[0]?.type === "text" ? response.content[0].text : "";
-
+    const text = response.content[0]?.type === "text" ? response.content[0].text : "";
     res.json({ reply: text });
   } catch (err: unknown) {
     console.error("AI advice error:", err);

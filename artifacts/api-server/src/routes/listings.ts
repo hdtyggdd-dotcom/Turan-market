@@ -17,9 +17,8 @@ import { authenticateToken, type AuthRequest } from "../middleware/auth.js";
 import { scoreSearch, FUZZY_THRESHOLD } from "../utils/fuzzy.js";
 import { ensureSubcategory, findBestCategory } from "../utils/autoCategory.js";
 
-function getAnthropicClient() {
-  const key = process.env.ANTHROPIC_API_KEY ?? "";
-  console.log(`[listings] ANTHROPIC_API_KEY prefix: "${key.slice(0, 14)}..." length: ${key.length}`);
+function getAIClient() {
+  const key = process.env.ANTHROPIC_API_KEY || process.env.OPENAI_API_KEY || "";
   return new Anthropic({ apiKey: key });
 }
 
@@ -437,7 +436,7 @@ Quyidagi bo'limlarda qisqa va aniq maslahat ber:
 Qisqa, aniq, O'zbek tilida. Har bo'lim 2-3 jumladan oshmasin.`;
 
     try {
-      const resp = await getAnthropicClient().messages.create({
+      const resp = await getAIClient().messages.create({
         model: "claude-haiku-4-5",
         max_tokens: 900,
         messages: [{ role: "user", content: prompt }],
