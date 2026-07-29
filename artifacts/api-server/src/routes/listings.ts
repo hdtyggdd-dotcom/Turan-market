@@ -1,4 +1,5 @@
 import { Router } from "express";
+import Anthropic from "@anthropic-ai/sdk";
 import {
   listings,
   users,
@@ -15,6 +16,8 @@ import {
 import { authenticateToken, type AuthRequest } from "../middleware/auth.js";
 import { scoreSearch, FUZZY_THRESHOLD } from "../utils/fuzzy.js";
 import { ensureSubcategory, findBestCategory } from "../utils/autoCategory.js";
+
+const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
 const router = Router();
 
@@ -326,6 +329,133 @@ router.delete("/listings/:id", authenticateToken, (req: AuthRequest, res) => {
   }
   listings.splice(idx, 1);
   res.status(204).send();
+});
+
+// GET /listings/:id/analyse  — bozor tahlili + AI maslahat
+router.get("/listings/:id/analyse", async (req, res) => {
+  const listing = listings.find((l) => l.id === req.params.id);
+  if (!listing) {
+    res.status(404).json({ error: "not_found", message: "Listing not found" });
+    return;
+  }
+
+  // ── 1. Bir xil subkategoriya e'lonlari (o'zidan tashqari) ──────────────────
+  const sameSub = listings.filter(
+    (l) => l.id !== listing.id &&
+           l.subcategoryId === listing.subcategoryId &&
+           l.price > 0 &&
+           l.status === "active",
+  );
+  const regional = sameSub.filter((l) => l.regionId === listing.regionId);
+
+  const prices = sameSub.map((l) => l.price);
+  const avgPrice = prices.length ? Math.round(prices.reduce((a, b) => a + b, 0) / prices.length) : 0;
+  const minPrice = prices.length ? Math.min(...prices) : 0;
+  const maxPrice = prices.length ? Math.max(...prices) : 0;
+
+  // ── 2. Narx pozitsiyasi ─────────────────────────────────────────────────────
+  let pricePosition: string;
+  if (listing.price <= 0) {
+    pricePosition = "kelishiladi";
+  } else if (!prices.length) {
+    pricePosition = "malumot_yoq";
+  } else if (listing.price < avgPrice * 0.80)  { pricePosition = "juda_arzon"; }
+  else if (listing.price < avgPrice * 0.95)    { pricePosition = "arzon"; }
+  else if (listing.price <= avgPrice * 1.05)   { pricePosition = "orta"; }
+  else if (listing.price <= avgPrice * 1.20)   { pricePosition = "qimmatroq"; }
+  else                                          { pricePosition = "juda_qimmat"; }
+
+  // ── 3. Top subkategoriyalar (jami aktiv e'lon soni bo'yicha) ───────────────
+  const subCount: Record<string, { name: string; count: number }> = {};
+  for (const l of listings.filter((x) => x.status === "active")) {
+    if (!l.subcategoryId) continue;
+    if (!subCount[l.subcategoryId]) {
+      const cat = categories.flatMap((c) => c.subcategories).find((s) => s.id === l.subcategoryId);
+      subCount[l.subcategoryId] = { name: cat?.name ?? l.subcategoryId, count: 0 };
+    }
+    subCount[l.subcategoryId].count++;
+  }
+  const topCategories = Object.values(subCount)
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 5)
+    .map((x) => ({ name: x.name, count: x.count }));
+
+  // ── 4. Claude maslahat (API key bo'lsa) ────────────────────────────────────
+  let advice: string | null = null;
+  if (process.env.ANTHROPIC_API_KEY) {
+    const subcat = categories.flatMap((c) => c.subcategories).find((s) => s.id === listing.subcategoryId);
+    const cat    = categories.find((c) => c.id === listing.categoryId);
+    const region = regions.find((r) => r.id === listing.regionId);
+    const seller = listing.sellerType === "ishlab_chiqaruvchi" ? "Ishlab chiqaruvchi" : "Sotuvchi";
+
+    const poz_text: Record<string, string> = {
+      juda_arzon:  "Juda arzon (bozordan 20%+ past)",
+      arzon:       "Arzon (bozordan 5-20% past)",
+      orta:        "O'rtacha (bozorga mos)",
+      qimmatroq:   "Qimmatroq (bozordan 5-20% yuqori)",
+      juda_qimmat: "Juda qimmat (bozordan 20%+ yuqori)",
+      kelishiladi: "Kelishiladi (narx ko'rsatilmagan)",
+      malumot_yoq: "Ma'lumot yo'q (bozorda o'xshash e'lon yo'q)",
+    };
+
+    const topStr = topCategories.map((t, i) => `${i + 1}. ${t.name} — ${t.count} ta e'lon`).join("\n");
+
+    const prompt = `Sen O'zbekiston savdo bozori bo'yicha tajribali moliyaviy maslahatchi va bozor tahlilchisissan.
+O'zbek tilida qisqa, amaliy maslahat ber.
+
+═══ E'LON MA'LUMOTLARI ═══
+Kategoriya: ${cat?.name ?? listing.categoryId}
+Mahsulot turi: ${subcat?.name ?? listing.subcategoryId}
+Sotuvchi turi: ${seller}
+Joylashuv: ${region?.name ?? listing.regionId}
+Narx: ${listing.price > 0 ? listing.price.toLocaleString() + " so'm" : "Kelishiladi"}
+Tavsif: ${listing.description ?? ""}
+
+═══ BOZOR TAHLILI ═══
+Shu subkategoriyada raqobatchilar: ${sameSub.length} ta
+Shu viloyatda: ${regional.length} ta
+Bozor o'rtacha narxi: ${avgPrice.toLocaleString()} so'm
+Eng arzon: ${minPrice.toLocaleString()} so'm
+Eng qimmat: ${maxPrice.toLocaleString()} so'm
+Narx pozitsiyasi: ${poz_text[pricePosition] ?? pricePosition}
+
+═══ ENG KO'P E'LON BERILGAN TOVARLAR ═══
+${topStr}
+
+═══ MASLAHAT BERISH QO'LLANMASI ═══
+Quyidagi bo'limlarda qisqa va aniq maslahat ber:
+
+1. 💰 NARX TAHLILI — narx bozorga nisbatan qanday? Optimal narx qancha?
+2. 📈 SOTUV IMKONIYATI — bu mahsulotga talab qanday? Mavsum bormi?
+3. 🏆 RAQOBAT — raqobat qanday? Raqobatchilardan qanday farqlanish mumkin?
+4. 💡 3 ta amaliy tavsiya — ${seller} sifatida nima qilish kerak?
+
+Qisqa, aniq, O'zbek tilida. Har bo'lim 2-3 jumladan oshmasin.`;
+
+    try {
+      const resp = await anthropic.messages.create({
+        model: "claude-haiku-4-5",
+        max_tokens: 900,
+        messages: [{ role: "user", content: prompt }],
+      });
+      advice = resp.content[0]?.type === "text" ? resp.content[0].text : null;
+    } catch (e) {
+      console.error("AI analyse error:", e);
+    }
+  }
+
+  res.json({
+    listingId:           listing.id,
+    subcategoryId:       listing.subcategoryId,
+    totalCompetitors:    sameSub.length,
+    regionalCompetitors: regional.length,
+    avgPrice,
+    minPrice,
+    maxPrice,
+    pricePosition,
+    topCategories,
+    advice,
+  });
 });
 
 export default router;
