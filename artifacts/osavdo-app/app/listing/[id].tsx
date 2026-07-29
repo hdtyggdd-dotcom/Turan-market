@@ -46,6 +46,11 @@ export default function ListingDetailScreen() {
   const { districtId, lat, lng } = useLocation();
   const queryClient = useQueryClient();
   const [quantity, setQuantity] = useState(1);
+  const [selectedDelivery, setSelectedDelivery] = useState<{
+    vehicleType: string;
+    vehicleName: string;
+    price: number;
+  } | null>(null);
 
   const { data: listing, isLoading } = useGetListing(id);
 
@@ -69,9 +74,17 @@ export default function ListingDetailScreen() {
     }
     if (!listing) return;
 
+    const goodsTotal = listing.price * quantity;
+    const deliveryTotal = selectedDelivery ? selectedDelivery.price : 0;
+    const grandTotal = goodsTotal + deliveryTotal;
+
+    const deliveryLine = selectedDelivery
+      ? `\nYetkazib berish (${selectedDelivery.vehicleName}): ${formatPrice(selectedDelivery.price)}`
+      : '\nYetkazib berish: tanlanmagan';
+
     Alert.alert(
       "Buyurtma berish",
-      `${quantity} ta × ${formatPrice(listing.price)} = ${formatPrice(listing.price * quantity)}`,
+      `${quantity} ta × ${formatPrice(listing.price)} = ${formatPrice(goodsTotal)}${deliveryLine}\n\nJami: ${formatPrice(grandTotal)}`,
       [
         { text: "Bekor qilish", style: "cancel" },
         {
@@ -81,6 +94,10 @@ export default function ListingDetailScreen() {
               data: {
                 listingId: listing.id,
                 quantity,
+                ...(selectedDelivery && {
+                  deliveryOption: selectedDelivery.vehicleType,
+                  deliveryPrice: selectedDelivery.price,
+                }),
               },
             });
           },
@@ -231,25 +248,63 @@ export default function ListingDetailScreen() {
             >
               <Feather name="truck" size={16} color={colors.primary} />
               <Text style={[styles.deliveryBtnText, { color: colors.primary }]}>
-                Yetkazib berish narxini bilish
+                {deliveryMutation.isPending ? "Hisoblanmoqda..." : "Yetkazib berish narxini bilish"}
               </Text>
             </TouchableOpacity>
           )}
 
-          {/* Delivery result */}
+          {/* Delivery result — selectable options */}
           {deliveryMutation.data && (
             <View style={[styles.deliveryResult, { backgroundColor: colors.card, borderColor: colors.border }]}>
               <Text style={[styles.deliveryTitle, { color: colors.text }]}>
-                Yetkazib berish ({deliveryMutation.data.distanceKm} km)
+                🚚 Yetkazib berish ({deliveryMutation.data.distanceKm} km) — birini tanlang
               </Text>
-              {deliveryMutation.data.options.map((opt) => (
-                <View key={opt.vehicleType} style={styles.deliveryOption}>
-                  <Text style={[styles.deliveryVehicle, { color: colors.text }]}>{opt.vehicleName}</Text>
-                  <Text style={[styles.deliveryPrice, { color: colors.primary }]}>
-                    {formatPrice(opt.price)}
-                  </Text>
+              {/* "O'zim olib ketaman" option */}
+              <TouchableOpacity
+                style={[
+                  styles.deliveryOptionRow,
+                  {
+                    borderColor: selectedDelivery === null ? colors.primary : colors.border,
+                    backgroundColor: selectedDelivery === null ? colors.primary + '12' : 'transparent',
+                  },
+                ]}
+                onPress={() => setSelectedDelivery(null)}
+              >
+                <View style={styles.deliveryOptionLeft}>
+                  <Text style={[styles.deliveryVehicle, { color: colors.text }]}>🚶 O'zim olib ketaman</Text>
+                  <Text style={[styles.deliveryVehicleSub, { color: colors.mutedForeground }]}>Yetkazib berish kerak emas</Text>
                 </View>
-              ))}
+                <View style={styles.deliveryOptionRight}>
+                  <Text style={[styles.deliveryPrice, { color: colors.primary }]}>Bepul</Text>
+                  {selectedDelivery === null && (
+                    <Feather name="check-circle" size={18} color={colors.primary} />
+                  )}
+                </View>
+              </TouchableOpacity>
+              {deliveryMutation.data.options.map((opt) => {
+                const isSelected = selectedDelivery?.vehicleType === opt.vehicleType;
+                return (
+                  <TouchableOpacity
+                    key={opt.vehicleType}
+                    style={[
+                      styles.deliveryOptionRow,
+                      {
+                        borderColor: isSelected ? colors.primary : colors.border,
+                        backgroundColor: isSelected ? colors.primary + '12' : 'transparent',
+                      },
+                    ]}
+                    onPress={() => setSelectedDelivery({ vehicleType: opt.vehicleType, vehicleName: opt.vehicleName, price: opt.price })}
+                  >
+                    <View style={styles.deliveryOptionLeft}>
+                      <Text style={[styles.deliveryVehicle, { color: colors.text }]}>{opt.vehicleName}</Text>
+                    </View>
+                    <View style={styles.deliveryOptionRight}>
+                      <Text style={[styles.deliveryPrice, { color: colors.primary }]}>{formatPrice(opt.price)}</Text>
+                      {isSelected && <Feather name="check-circle" size={18} color={colors.primary} />}
+                    </View>
+                  </TouchableOpacity>
+                );
+              })}
             </View>
           )}
         </View>
@@ -340,10 +395,21 @@ const styles = StyleSheet.create({
   descText: { fontSize: 14, fontFamily: 'Inter_400Regular', lineHeight: 22 },
   deliveryBtn: { flexDirection: 'row', alignItems: 'center', gap: 8, padding: 14, borderRadius: 14, borderWidth: 1 },
   deliveryBtnText: { fontSize: 14, fontFamily: 'Inter_500Medium' },
-  deliveryResult: { borderRadius: 14, borderWidth: 1, padding: 14, gap: 10 },
-  deliveryTitle: { fontSize: 15, fontFamily: 'Inter_600SemiBold' },
-  deliveryOption: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  deliveryVehicle: { fontSize: 13, fontFamily: 'Inter_400Regular' },
+  deliveryResult: { borderRadius: 14, borderWidth: 1, padding: 14, gap: 8 },
+  deliveryTitle: { fontSize: 14, fontFamily: 'Inter_600SemiBold', marginBottom: 4 },
+  deliveryOptionRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    borderWidth: 1.5,
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+  },
+  deliveryOptionLeft: { flex: 1, gap: 2 },
+  deliveryOptionRight: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  deliveryVehicle: { fontSize: 13, fontFamily: 'Inter_500Medium' },
+  deliveryVehicleSub: { fontSize: 11, fontFamily: 'Inter_400Regular' },
   deliveryPrice: { fontSize: 14, fontFamily: 'Inter_600SemiBold' },
   bottomBar: {
     position: 'absolute',
