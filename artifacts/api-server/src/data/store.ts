@@ -892,6 +892,60 @@ export const categories: StoredCategory[] = [
       { id: 'sub60',  name: "Boshqa ko'chmas mulk",      nameRu: "Другая недвижимость",    categoryId: 'cat8' },
     ],
   },
+  {
+    id: 'cat12',
+    name: "Mebel",
+    nameRu: "Мебель",
+    icon: "🛋️",
+    subcategories: [
+      { id: 'sub12_01', name: "Divan & Kreslo",           nameRu: "Диван и кресло",           categoryId: 'cat12' },
+      { id: 'sub12_02', name: "Karavot & Yotoq",          nameRu: "Кровать и спальня",        categoryId: 'cat12' },
+      { id: 'sub12_03', name: "Shkaf & Buyum",            nameRu: "Шкаф и комод",             categoryId: 'cat12' },
+      { id: 'sub12_04', name: "Stol & Stul",              nameRu: "Стол и стул",              categoryId: 'cat12' },
+      { id: 'sub12_05', name: "Oshxona garnitiri",        nameRu: "Кухонный гарнитур",        categoryId: 'cat12' },
+      { id: 'sub12_06', name: "Bolalar meblari",          nameRu: "Детская мебель",           categoryId: 'cat12' },
+      { id: 'sub12_07', name: "Ofis meblari",             nameRu: "Офисная мебель",           categoryId: 'cat12' },
+      { id: 'sub12_08', name: "Gilamlar & To'shaklar",    nameRu: "Ковры и матрасы",          categoryId: 'cat12' },
+      { id: 'sub12_09', name: "Dekorativ buyumlar",       nameRu: "Декоративные предметы",    categoryId: 'cat12' },
+      { id: 'sub12_10', name: "Boshqa mebel",             nameRu: "Прочая мебель",            categoryId: 'cat12' },
+    ],
+  },
+  {
+    id: 'cat13',
+    name: "Texnika & Elektronika",
+    nameRu: "Техника и электроника",
+    icon: "📱",
+    subcategories: [
+      { id: 'sub13_01', name: "Smartfon & Telefon",       nameRu: "Смартфон и телефон",       categoryId: 'cat13' },
+      { id: 'sub13_02', name: "Noutbuk & Kompyuter",      nameRu: "Ноутбук и компьютер",      categoryId: 'cat13' },
+      { id: 'sub13_03', name: "Planshet",                 nameRu: "Планшет",                  categoryId: 'cat13' },
+      { id: 'sub13_04', name: "Televizor",                nameRu: "Телевизор",                categoryId: 'cat13' },
+      { id: 'sub13_05', name: "Muzlatgich & Muzxona",     nameRu: "Холодильник и морозилка",  categoryId: 'cat13' },
+      { id: 'sub13_06', name: "Kir yuvish mashinasi",     nameRu: "Стиральная машина",        categoryId: 'cat13' },
+      { id: 'sub13_07', name: "Konditsioner",             nameRu: "Кондиционер",              categoryId: 'cat13' },
+      { id: 'sub13_08', name: "Oshxona texnikasi",        nameRu: "Кухонная техника",         categoryId: 'cat13' },
+      { id: 'sub13_09', name: "Audio & Video",            nameRu: "Аудио и видео",            categoryId: 'cat13' },
+      { id: 'sub13_10', name: "Fotoaparat & Kamera",      nameRu: "Фото и видеокамера",       categoryId: 'cat13' },
+      { id: 'sub13_11', name: "O'yin konsoli",            nameRu: "Игровая консоль",          categoryId: 'cat13' },
+      { id: 'sub13_12', name: "Aksessuarlar",             nameRu: "Аксессуары",               categoryId: 'cat13' },
+      { id: 'sub13_13', name: "Boshqa texnika",           nameRu: "Прочая техника",           categoryId: 'cat13' },
+    ],
+  },
+  {
+    id: 'cat14',
+    name: "Ayrboshlash",
+    nameRu: "Обмен (бартер)",
+    icon: "🔄",
+    subcategories: [
+      { id: 'sub14_01', name: "Avtomobil ayrboshlash",    nameRu: "Обмен авто",               categoryId: 'cat14' },
+      { id: 'sub14_02', name: "Ko'chmas mulk ayrbosh.",   nameRu: "Обмен недвижимости",       categoryId: 'cat14' },
+      { id: 'sub14_03', name: "Texnika ayrboshlash",      nameRu: "Обмен техники",            categoryId: 'cat14' },
+      { id: 'sub14_04', name: "Chorva ayrboshlash",       nameRu: "Обмен скота",              categoryId: 'cat14' },
+      { id: 'sub14_05', name: "Mebel ayrboshlash",        nameRu: "Обмен мебели",             categoryId: 'cat14' },
+      { id: 'sub14_06', name: "Qurilish mat. ayrbosh.",   nameRu: "Обмен стройматериалов",    categoryId: 'cat14' },
+      { id: 'sub14_07', name: "Boshqa ayrboshlash",       nameRu: "Прочий обмен",             categoryId: 'cat14' },
+    ],
+  },
 ];
 
 // ─── USERS ────────────────────────────────────────────────────────────────────
@@ -2343,6 +2397,117 @@ export const listings: StoredListing[] = [
     viewCount: 62,
     createdAt: '2024-07-20T09:00:00.000Z',
   },
+  // ── cat12: Mebel ─────────────────────────────────────────────────────────────
+  {
+    id: 'l58',
+    title: "Divan (uch o'rindiqli, klondayk)",
+    titleRu: "Диван трёхместный (Клондайк)",
+    description: "Rang: to'q jigarrang (shokoladli). O'lcham: 220×85×90 sm. Materiyal: mikrofibra, yog'och oyoqlar. Yotadigan qilinadi. Yangi, qutisida.",
+    price: 3_200_000, priceUnit: "dona", images: [],
+    categoryId: 'cat12', subcategoryId: 'sub12_01',
+    userId: 'u2', regionId: 'r1', districtId: 'd3', neighborhoodId: null,
+    lat: 41.3100, lng: 69.2400, status: 'active', sellerType: 'ishlab_chiqaruvchi',
+    listingType: 'savdo', elanTur: 'oddiy', adminStatus: null, viewCount: 214,
+    createdAt: '2024-07-22T09:00:00.000Z',
+  },
+  {
+    id: 'l59',
+    title: "Oshxona garnitiri (MDF, 3.2 m)",
+    titleRu: "Кухонный гарнитур МДФ 3.2 м",
+    description: "Rang: oq + kulrang (mat). Uzunligi: 3.2 m. Materiyal: MDF bo'yalgan, BLUM mexanizmlari. Lavabo va moslik bilan. O'rnatish xizmati bor.",
+    price: 8_500_000, priceUnit: "dona", images: [],
+    categoryId: 'cat12', subcategoryId: 'sub12_05',
+    userId: 'u3', regionId: 'r2', districtId: 'd7', neighborhoodId: null,
+    lat: 39.6600, lng: 66.9600, status: 'active', sellerType: 'ishlab_chiqaruvchi',
+    listingType: 'savdo', elanTur: 'oddiy', adminStatus: null, viewCount: 389,
+    createdAt: '2024-07-23T10:00:00.000Z',
+  },
+  {
+    id: 'l60',
+    title: "Xonadon gilofi (Toshkent to'qimasi, 2×3 m)",
+    titleRu: "Ковёр ручной работы 2×3 м",
+    description: "Rang: qizil-ko'k milliy naqsh. O'lcham: 2×3 m. Toshkent to'qimasi, jundan. Qalinligi: 8 mm. Yuvishga chidamli.",
+    price: 1_800_000, priceUnit: "dona", images: [],
+    categoryId: 'cat12', subcategoryId: 'sub12_08',
+    userId: 'u1', regionId: 'r1', districtId: 'd2', neighborhoodId: null,
+    lat: 41.2900, lng: 69.2500, status: 'active', sellerType: null,
+    listingType: 'savdo', elanTur: 'oddiy', adminStatus: null, viewCount: 127,
+    createdAt: '2024-07-24T08:00:00.000Z',
+  },
+  // ── cat13: Texnika & Elektronika ─────────────────────────────────────────────
+  {
+    id: 'l61',
+    title: "Samsung Galaxy S24 (256 GB)",
+    titleRu: "Samsung Galaxy S24 256 GB",
+    description: "Rang: Phantom Black. Xotira: 256 GB / 8 GB RAM. Holat: yangi, muhr buzilmagan. Kafolat: 1 yil. Zaryadlovchi va quloqchin bilan.",
+    price: 9_200_000, priceUnit: "dona", images: [],
+    categoryId: 'cat13', subcategoryId: 'sub13_01',
+    userId: 'u3', regionId: 'r1', districtId: 'd4', neighborhoodId: null,
+    lat: 41.3300, lng: 69.2300, status: 'active', sellerType: null,
+    listingType: 'savdo', elanTur: 'oddiy', adminStatus: null, viewCount: 512,
+    createdAt: '2024-07-24T11:00:00.000Z',
+  },
+  {
+    id: 'l62',
+    title: "LG konditsioner (24 000 BTU, Inverter)",
+    titleRu: "Кондиционер LG Inverter 24000 BTU",
+    description: "Model: LG S24ET. Quvvat: 24 000 BTU (70 kv.m). Inverter texnologiya. Energiya sinfi: A++. Issitish va sovutish. O'rnatish xizmati bor.",
+    price: 7_800_000, priceUnit: "dona", images: [],
+    categoryId: 'cat13', subcategoryId: 'sub13_07',
+    userId: 'u2', regionId: 'r4', districtId: 'd15', neighborhoodId: null,
+    lat: 40.4500, lng: 71.7200, status: 'active', sellerType: 'ishlab_chiqaruvchi',
+    listingType: 'savdo', elanTur: 'oddiy', adminStatus: null, viewCount: 298,
+    createdAt: '2024-07-25T09:00:00.000Z',
+  },
+  {
+    id: 'l63',
+    title: "Noutbuk Lenovo IdeaPad 5 (Ryzen 5)",
+    titleRu: "Ноутбук Lenovo IdeaPad 5 Ryzen 5",
+    description: "Protsessor: AMD Ryzen 5 5500U. RAM: 16 GB. SSD: 512 GB. Ekran: 15.6\" FHD IPS. Batareya: 10 soat. Rang: kulrang. Kafolat: 1 yil.",
+    price: 6_500_000, priceUnit: "dona", images: [],
+    categoryId: 'cat13', subcategoryId: 'sub13_02',
+    userId: 'u1', regionId: 'r5', districtId: 'd19', neighborhoodId: null,
+    lat: 41.1100, lng: 71.2600, status: 'active', sellerType: null,
+    listingType: 'savdo', elanTur: 'oddiy', adminStatus: null, viewCount: 341,
+    createdAt: '2024-07-25T12:00:00.000Z',
+  },
+  // ── cat14: Ayrboshlash ────────────────────────────────────────────────────────
+  {
+    id: 'l64',
+    title: "Chevrolet Cobalt 2021 — Nexia 3 ga ayrboshlash",
+    titleRu: "Обмен Cobalt 2021 на Nexia 3",
+    description: "Mening: Cobalt 2021, oq, 45 000 km, to'liq komplektatsiya. Xohlayman: Nexia 3 2020+ yoki Matiz 2019+. Narx farqi ko'rib gaplashamiz.",
+    price: 0, priceUnit: "kelishiladi", images: [],
+    categoryId: 'cat14', subcategoryId: 'sub14_01',
+    userId: 'u2', regionId: 'r1', districtId: 'd2', neighborhoodId: null,
+    lat: 41.3000, lng: 69.2600, status: 'active', sellerType: null,
+    listingType: 'savdo', elanTur: 'oddiy', adminStatus: null, viewCount: 183,
+    createdAt: '2024-07-26T08:00:00.000Z',
+  },
+  {
+    id: 'l65',
+    title: "2 xonali kvartira — uy-hovliga ayrboshlash",
+    titleRu: "Обмен 2-комн. квартиры на дом",
+    description: "Mening: Toshkent shahri, Yunusobod, 2 xonali, 60 kv.m, 5/9 qavat. Xohlayman: Toshkent viloyati yoki Samarqand viloyatida hovli-uy. Narq farqiga tayyorman.",
+    price: 0, priceUnit: "kelishiladi", images: [],
+    categoryId: 'cat14', subcategoryId: 'sub14_02',
+    userId: 'u3', regionId: 'r1', districtId: 'd5', neighborhoodId: null,
+    lat: 41.3600, lng: 69.2900, status: 'active', sellerType: null,
+    listingType: 'savdo', elanTur: 'oddiy', adminStatus: null, viewCount: 267,
+    createdAt: '2024-07-26T10:00:00.000Z',
+  },
+  {
+    id: 'l66',
+    title: "iPhone 13 Pro — Samsung S22 ga ayrboshlash",
+    titleRu: "Обмен iPhone 13 Pro на Samsung S22",
+    description: "Mening: iPhone 13 Pro, 256 GB, tog'-yashil, batareya 89%, holati A. Xohlayman: Samsung S22 yoki S23, xolat yaxshi bo'lsin. Narq farqiga kelishamiz.",
+    price: 0, priceUnit: "kelishiladi", images: [],
+    categoryId: 'cat14', subcategoryId: 'sub14_03',
+    userId: 'u1', regionId: 'r2', districtId: 'd7', neighborhoodId: null,
+    lat: 39.6700, lng: 66.9800, status: 'active', sellerType: null,
+    listingType: 'savdo', elanTur: 'oddiy', adminStatus: null, viewCount: 95,
+    createdAt: '2024-07-27T09:00:00.000Z',
+  },
 ];
 
 // ─── ORDERS ───────────────────────────────────────────────────────────────────
@@ -2455,6 +2620,39 @@ const PRICE_THRESHOLDS: Record<string, { arzon: number; qimmat: number }> = {
   'sub10_07': { arzon: 200_000,    qimmat: 2_000_000   }, // Oyna/eshik/deraza
   'sub10_08': { arzon: 50_000,     qimmat: 500_000     }, // Pardalar/devorqog'oz
   'sub10_09': { arzon: 50_000,     qimmat: 500_000     }, // Boshqa bezak
+  // Mebel (cat12)
+  'sub12_01': { arzon: 500_000,    qimmat: 5_000_000   }, // Divan/kreslo
+  'sub12_02': { arzon: 800_000,    qimmat: 8_000_000   }, // Karavot/yotoq
+  'sub12_03': { arzon: 400_000,    qimmat: 4_000_000   }, // Shkaf/buyum
+  'sub12_04': { arzon: 200_000,    qimmat: 2_000_000   }, // Stol/stul
+  'sub12_05': { arzon: 1_500_000,  qimmat: 12_000_000  }, // Oshxona garnitiri
+  'sub12_06': { arzon: 300_000,    qimmat: 3_000_000   }, // Bolalar meblari
+  'sub12_07': { arzon: 500_000,    qimmat: 5_000_000   }, // Ofis meblari
+  'sub12_08': { arzon: 200_000,    qimmat: 3_000_000   }, // Gilamlar/to'shaklar
+  'sub12_09': { arzon: 50_000,     qimmat: 1_000_000   }, // Dekorativ buyumlar
+  'sub12_10': { arzon: 100_000,    qimmat: 5_000_000   }, // Boshqa mebel
+  // Texnika & Elektronika (cat13)
+  'sub13_01': { arzon: 1_500_000,  qimmat: 15_000_000  }, // Smartfon
+  'sub13_02': { arzon: 3_000_000,  qimmat: 25_000_000  }, // Noutbuk/kompyuter
+  'sub13_03': { arzon: 1_000_000,  qimmat: 8_000_000   }, // Planshet
+  'sub13_04': { arzon: 1_500_000,  qimmat: 12_000_000  }, // Televizor
+  'sub13_05': { arzon: 2_000_000,  qimmat: 10_000_000  }, // Muzlatgich
+  'sub13_06': { arzon: 1_500_000,  qimmat: 8_000_000   }, // Kir yuvish
+  'sub13_07': { arzon: 2_000_000,  qimmat: 12_000_000  }, // Konditsioner
+  'sub13_08': { arzon: 300_000,    qimmat: 5_000_000   }, // Oshxona texnikasi
+  'sub13_09': { arzon: 200_000,    qimmat: 5_000_000   }, // Audio/video
+  'sub13_10': { arzon: 1_000_000,  qimmat: 15_000_000  }, // Fotoaparat
+  'sub13_11': { arzon: 2_000_000,  qimmat: 15_000_000  }, // O'yin konsoli
+  'sub13_12': { arzon: 50_000,     qimmat: 1_000_000   }, // Aksessuarlar
+  'sub13_13': { arzon: 100_000,    qimmat: 5_000_000   }, // Boshqa texnika
+  // Ayrboshlash (cat14)
+  'sub14_01': { arzon: 20_000_000, qimmat: 300_000_000 }, // Avtomobil ayrbosh
+  'sub14_02': { arzon: 50_000_000, qimmat: 500_000_000 }, // Ko'chmas mulk
+  'sub14_03': { arzon: 500_000,    qimmat: 20_000_000  }, // Texnika ayrbosh
+  'sub14_04': { arzon: 1_000_000,  qimmat: 30_000_000  }, // Chorva ayrbosh
+  'sub14_05': { arzon: 200_000,    qimmat: 10_000_000  }, // Mebel ayrbosh
+  'sub14_06': { arzon: 500_000,    qimmat: 20_000_000  }, // Qurilish mat.
+  'sub14_07': { arzon: 100_000,    qimmat: 50_000_000  }, // Boshqa ayrbosh
   // Ovchilik & Baliqchilik (cat11)
   'sub11_01': { arzon: 500_000,    qimmat: 5_000_000   }, // Miltiq/yarog'
   'sub11_02': { arzon: 100_000,    qimmat: 800_000     }, // Kamon
