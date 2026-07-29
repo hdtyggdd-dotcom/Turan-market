@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity,
-  StyleSheet, ActivityIndicator, Alert, Platform, ScrollView,
+  StyleSheet, ActivityIndicator, Alert, Platform, ScrollView, Image,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
@@ -80,10 +80,8 @@ export default function LoginScreen() {
       >
         {/* Logo */}
         <View style={styles.logoSection}>
-          <View style={[styles.logoCircle, { backgroundColor: colors.primary }]}>
-            <Text style={styles.logoText}>O</Text>
-          </View>
-          <Text style={[styles.appName, { color: colors.primary }]}>O'Savdo</Text>
+          <Image source={require('@/assets/images/turan-logo.png')} style={styles.logoImage} resizeMode="contain" />
+          <Text style={[styles.appName, { color: colors.primary }]}>Turan Market</Text>
           <Text style={[styles.tagline, { color: colors.mutedForeground }]}>{t('appTagline')}</Text>
         </View>
 
@@ -195,10 +193,9 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   content: { paddingHorizontal: 20, gap: 14 },
-  logoSection: { alignItems: 'center', gap: 8, marginBottom: 6 },
-  logoCircle: { width: 64, height: 64, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
-  logoText: { fontSize: 32, fontFamily: 'Inter_700Bold', color: '#fff' },
-  appName: { fontSize: 26, fontFamily: 'Inter_700Bold' },
+  logoSection: { alignItems: 'center', gap: 6, marginBottom: 6 },
+  logoImage: { width: 100, height: 100 },
+  appName: { fontSize: 28, fontFamily: 'Inter_700Bold', letterSpacing: 0.5 },
   tagline: { fontSize: 13, fontFamily: 'Inter_400Regular', textAlign: 'center' },
   countrySelector: {
     flexDirection: 'row', alignItems: 'center', gap: 10,

@@ -1,15 +1,15 @@
 {
   "expo": {
-    "name": "O'Savdo",
+    "name": "Turan Market",
     "slug": "osavdo-app",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/images/turan-logo.png",
     "scheme": "osavdo-app",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "splash": {
-      "image": "./assets/images/icon.png",
+      "image": "./assets/images/turan-logo.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },

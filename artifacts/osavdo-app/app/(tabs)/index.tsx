@@ -53,7 +53,7 @@ export default function HomeScreen() {
       <View style={[styles.header, { paddingTop: topPadding + 12, backgroundColor: colors.card, borderBottomColor: colors.border }]}>
         <View style={styles.headerTop}>
           <View>
-            <Text style={[styles.appName, { color: colors.primary }]}>O'Savdo</Text>
+            <Text style={[styles.appName, { color: colors.primary }]}>Turan Market</Text>
             <Text style={[styles.greeting, { color: colors.mutedForeground }]}>
               Assalomu alaykum, {user?.name?.split(' ')[0] ?? 'Mehmon'}!
             </Text>
