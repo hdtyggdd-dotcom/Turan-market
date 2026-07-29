@@ -3,9 +3,11 @@ import Anthropic from "@anthropic-ai/sdk";
 
 const router = Router();
 
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
-});
+function getAnthropicClient() {
+  const key = process.env.ANTHROPIC_API_KEY ?? "";
+  console.log(`[AI] ANTHROPIC_API_KEY prefix: "${key.slice(0, 14)}..." length: ${key.length}`);
+  return new Anthropic({ apiKey: key });
+}
 
 const SYSTEM_PROMPT = `Sen O'Savdo — O'zbekiston va qo'shni mamlakatlar uchun mahalliy bozor ilovasining AI yordamchisisan.
 
@@ -51,7 +53,7 @@ router.post("/ai/advice", async (req, res) => {
       ? `Kontekst: ${JSON.stringify(context)}\n\nSavol: ${message}`
       : message;
 
-    const response = await anthropic.messages.create({
+    const response = await getAnthropicClient().messages.create({
       model: "claude-haiku-4-5",
       max_tokens: 1024,
       system: SYSTEM_PROMPT,
