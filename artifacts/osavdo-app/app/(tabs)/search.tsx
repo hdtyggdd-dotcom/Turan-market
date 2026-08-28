@@ -8,11 +8,12 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   Platform,
+  ScrollView,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import { useColors } from '@/hooks/useColors';
-import { useGetListings, useGetCategories } from '@workspace/api-client-react';
+import { useGetListings, useGetCategories, useGetRegions, useGetDistricts, getGetDistrictsQueryKey, getGetListingsQueryKey } from '@workspace/api-client-react';
 import { ListingCard } from '@/components/ListingCard';
 import { EmptyState } from '@/components/EmptyState';
 
@@ -21,26 +22,51 @@ export default function SearchScreen() {
   const insets = useSafeAreaInsets();
   const [query, setQuery] = useState('');
   const [search, setSearch] = useState('');
+
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [selectedSubcategory, setSelectedSubcategory] = useState<string | null>(null);
+
+  const [selectedRegion, setSelectedRegion] = useState<string | null>(null);
+  const [selectedDistrict, setSelectedDistrict] = useState<string | null>(null);
+
   const [minPrice, setMinPrice] = useState('');
   const [maxPrice, setMaxPrice] = useState('');
   const [showFilters, setShowFilters] = useState(false);
 
   const { data: categories } = useGetCategories();
+  const { data: regions } = useGetRegions();
+  const { data: districts } = useGetDistricts(
+    { regionId: selectedRegion ?? undefined },
+    { query: { enabled: !!selectedRegion, queryKey: getGetDistrictsQueryKey({ regionId: selectedRegion ?? undefined }) } }
+  );
+
+  const activeCategory = categories?.find(c => c.id === selectedCategory);
 
   const { data: listingsData, isLoading } = useGetListings(
     {
       search: search || undefined,
       categoryId: selectedCategory ?? undefined,
+      subcategoryId: selectedSubcategory ?? undefined,
+      regionId: selectedRegion ?? undefined,
+      districtId: selectedDistrict ?? undefined,
       minPrice: minPrice ? Number(minPrice) : undefined,
       maxPrice: maxPrice ? Number(maxPrice) : undefined,
       limit: 40,
     },
-    { query: { enabled: search.length > 0 || selectedCategory !== null || !!minPrice || !!maxPrice } },
+    { query: { enabled: search.length > 0 || selectedCategory !== null || selectedRegion !== null || !!minPrice || !!maxPrice, queryKey: getGetListingsQueryKey({
+      search: search || undefined,
+      categoryId: selectedCategory ?? undefined,
+      subcategoryId: selectedSubcategory ?? undefined,
+      regionId: selectedRegion ?? undefined,
+      districtId: selectedDistrict ?? undefined,
+      minPrice: minPrice ? Number(minPrice) : undefined,
+      maxPrice: maxPrice ? Number(maxPrice) : undefined,
+      limit: 40,
+    }) } },
   );
 
   const listings = listingsData?.items ?? [];
-  const hasSearched = search.length > 0 || selectedCategory !== null || !!minPrice || !!maxPrice;
+  const hasSearched = search.length > 0 || selectedCategory !== null || selectedRegion !== null || !!minPrice || !!maxPrice;
   const topPadding = Platform.OS === 'web' ? 67 : insets.top;
 
   return (
@@ -83,7 +109,7 @@ export default function SearchScreen() {
 
       {/* Filters panel */}
       {showFilters && (
-        <View style={[styles.filtersPanel, { backgroundColor: colors.card, borderBottomColor: colors.border }]}>
+        <ScrollView style={[styles.filtersPanel, { backgroundColor: colors.card, borderBottomColor: colors.border }]} nestedScrollEnabled showsVerticalScrollIndicator={false}>
           <Text style={[styles.filterLabel, { color: colors.mutedForeground }]}>Kategoriya</Text>
           <View style={styles.categoryChips}>
             {(categories ?? []).map((cat) => (
@@ -96,7 +122,10 @@ export default function SearchScreen() {
                     borderColor: selectedCategory === cat.id ? colors.primary : colors.border,
                   },
                 ]}
-                onPress={() => setSelectedCategory(selectedCategory === cat.id ? null : cat.id)}
+                onPress={() => {
+                  setSelectedCategory(selectedCategory === cat.id ? null : cat.id);
+                  setSelectedSubcategory(null);
+                }}
               >
                 <Text style={{ fontSize: 13, color: selectedCategory === cat.id ? colors.primaryForeground : colors.text }}>
                   {cat.icon} {cat.name.split(' ')[0]}
@@ -105,7 +134,81 @@ export default function SearchScreen() {
             ))}
           </View>
 
-          <Text style={[styles.filterLabel, { color: colors.mutedForeground, marginTop: 12 }]}>Narx oralig'i (so'm)</Text>
+          {activeCategory && activeCategory.subcategories.length > 0 && (
+            <>
+              <Text style={[styles.filterLabel, { color: colors.mutedForeground, marginTop: 16 }]}>Ostki kategoriya</Text>
+              <View style={styles.categoryChips}>
+                {activeCategory.subcategories.map((sub) => (
+                  <TouchableOpacity
+                    key={sub.id}
+                    style={[
+                      styles.catChip,
+                      {
+                        backgroundColor: selectedSubcategory === sub.id ? colors.primary : colors.secondary,
+                        borderColor: selectedSubcategory === sub.id ? colors.primary : colors.border,
+                      },
+                    ]}
+                    onPress={() => setSelectedSubcategory(selectedSubcategory === sub.id ? null : sub.id)}
+                  >
+                    <Text style={{ fontSize: 12, color: selectedSubcategory === sub.id ? colors.primaryForeground : colors.text }}>
+                      {sub.name}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </>
+          )}
+
+          <Text style={[styles.filterLabel, { color: colors.mutedForeground, marginTop: 16 }]}>Hudud</Text>
+          <View style={styles.categoryChips}>
+            {(regions ?? []).map((reg) => (
+              <TouchableOpacity
+                key={reg.id}
+                style={[
+                  styles.catChip,
+                  {
+                    backgroundColor: selectedRegion === reg.id ? colors.primary : colors.secondary,
+                    borderColor: selectedRegion === reg.id ? colors.primary : colors.border,
+                  },
+                ]}
+                onPress={() => {
+                  setSelectedRegion(selectedRegion === reg.id ? null : reg.id);
+                  setSelectedDistrict(null);
+                }}
+              >
+                <Text style={{ fontSize: 13, color: selectedRegion === reg.id ? colors.primaryForeground : colors.text }}>
+                  {reg.name}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+
+          {selectedRegion && (districts ?? []).length > 0 && (
+            <>
+              <Text style={[styles.filterLabel, { color: colors.mutedForeground, marginTop: 16 }]}>Tuman</Text>
+              <View style={styles.categoryChips}>
+                {(districts ?? []).map((dist) => (
+                  <TouchableOpacity
+                    key={dist.id}
+                    style={[
+                      styles.catChip,
+                      {
+                        backgroundColor: selectedDistrict === dist.id ? colors.primary : colors.secondary,
+                        borderColor: selectedDistrict === dist.id ? colors.primary : colors.border,
+                      },
+                    ]}
+                    onPress={() => setSelectedDistrict(selectedDistrict === dist.id ? null : dist.id)}
+                  >
+                    <Text style={{ fontSize: 12, color: selectedDistrict === dist.id ? colors.primaryForeground : colors.text }}>
+                      {dist.name}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </>
+          )}
+
+          <Text style={[styles.filterLabel, { color: colors.mutedForeground, marginTop: 16 }]}>Narx oralig'i (so'm)</Text>
           <View style={styles.priceRow}>
             <TextInput
               style={[styles.priceInput, { borderColor: colors.border, color: colors.text, backgroundColor: colors.muted }]}
@@ -130,6 +233,9 @@ export default function SearchScreen() {
             style={[styles.clearBtn, { borderColor: colors.border }]}
             onPress={() => {
               setSelectedCategory(null);
+              setSelectedSubcategory(null);
+              setSelectedRegion(null);
+              setSelectedDistrict(null);
               setMinPrice('');
               setMaxPrice('');
               setSearch('');
@@ -140,7 +246,7 @@ export default function SearchScreen() {
               Filtrni tozalash
             </Text>
           </TouchableOpacity>
-        </View>
+        </ScrollView>
       )}
 
       {/* Results */}
@@ -230,6 +336,7 @@ const styles = StyleSheet.create({
   },
   filtersPanel: {
     padding: 16,
+    maxHeight: 400,
     borderBottomWidth: StyleSheet.hairlineWidth,
   },
   filterLabel: {

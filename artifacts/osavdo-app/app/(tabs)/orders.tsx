@@ -11,7 +11,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import { useColors } from '@/hooks/useColors';
-import { useGetOrders } from '@workspace/api-client-react';
+import { useGetOrders, Order } from '@workspace/api-client-react';
 import { EmptyState } from '@/components/EmptyState';
 import { useRouter } from 'expo-router';
 
@@ -35,16 +35,18 @@ function formatPrice(price: number): string {
   return price.toLocaleString() + " so'm";
 }
 
-type OrderItem = NonNullable<ReturnType<typeof useGetOrders>['data']>[number];
+type OrderItem = Order;
 
 function OrderCard({ order, colors, onPress }: { order: OrderItem; colors: ReturnType<typeof useColors>; onPress: () => void }) {
-  const statusColor = {
-    pending: colors.statusPending,
-    confirmed: colors.statusConfirmed,
-    delivering: colors.statusDelivering,
-    delivered: colors.statusDelivered,
-    cancelled: colors.statusCancelled,
-  }[order.status] ?? colors.mutedForeground;
+  const statusColor = (
+    {
+      pending: colors.statusPending,
+      confirmed: colors.statusConfirmed,
+      delivering: colors.statusDelivering,
+      delivered: colors.statusDelivered,
+      cancelled: colors.statusCancelled,
+    } as Record<string, string>
+  )[order.status] ?? colors.mutedForeground;
 
   const icon = STATUS_ICONS[order.status] ?? 'clock';
   const date = new Date(order.createdAt).toLocaleDateString('uz-Latn', {

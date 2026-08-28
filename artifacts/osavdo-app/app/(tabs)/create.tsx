@@ -13,7 +13,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useColors } from '@/hooks/useColors';
 import { Feather } from '@expo/vector-icons';
-import { useGetCategories, useCreateListing, useGetRegions, useGetDistricts } from '@workspace/api-client-react';
+import { useGetCategories, useCreateListing, useGetRegions, useGetDistricts, getGetDistrictsQueryKey } from '@workspace/api-client-react';
 import { ImageUploader } from '@/components/ImageUploader';
 import { useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
@@ -52,7 +52,7 @@ export default function CreateScreen() {
   );
   const { data: districtsData } = useGetDistricts(
     { regionId: regionId || undefined },
-    { query: { enabled: !!regionId } },
+    { query: { enabled: !!regionId, queryKey: getGetDistrictsQueryKey({ regionId: regionId || undefined }) } },
   );
 
   const createMutation = useCreateListing({

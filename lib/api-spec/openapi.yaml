@@ -26,6 +26,8 @@ tags:
     description: Delivery estimation
   - name: sellers
     description: Seller management
+  - name: cargo
+    description: Turan Market cargo logistics
 
 paths:
   /healthz:
@@ -603,6 +605,228 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/StatsSummary"
+
+  /cargo-loads:
+    get:
+      operationId: getCargoLoads
+      tags: [cargo]
+      summary: List cargo loads
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - name: status
+          in: query
+          schema: { type: string, enum: [open, negotiating, accepted, in_transit, delivered, cancelled] }
+        - name: pickupRegionId
+          in: query
+          schema: { type: string }
+        - name: deliveryRegionId
+          in: query
+          schema: { type: string }
+        - name: mine
+          in: query
+          description: Return only cargo loads owned by the authenticated user
+          schema: { type: boolean }
+      responses:
+        "200":
+          description: Cargo loads
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/CargoLoad" }
+    post:
+      operationId: createCargoLoad
+      tags: [cargo]
+      summary: Create a cargo load
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CargoLoadInput" }
+      responses:
+        "201":
+          description: Cargo load created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CargoLoad" }
+
+  /cargo-loads/recommendation:
+    post:
+      operationId: recommendCargoTransport
+      tags: [cargo]
+      summary: Get a deterministic transport recommendation
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CargoRecommendationInput" }
+      responses:
+        "200":
+          description: Transport recommendation
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/TransportRecommendation" }
+        "422":
+          description: No configured vehicle can carry this cargo
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+
+  /cargo-loads/{id}:
+    get:
+      operationId: getCargoLoad
+      tags: [cargo]
+      summary: Get cargo load detail including offers
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Cargo load
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CargoLoadDetail" }
+        "404": { description: Cargo load not found }
+
+  /cargo-loads/{id}/offers:
+    post:
+      operationId: createCargoOffer
+      tags: [cargo]
+      summary: Submit a driver offer for a cargo load
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CargoOfferInput" }
+      responses:
+        "201":
+          description: Offer created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CargoOffer" }
+        "422":
+          description: Driver vehicle or remaining capacity is incompatible with the cargo
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+
+  /cargo-loads/{id}/offers/{offerId}/counter:
+    post:
+      operationId: counterCargoOffer
+      tags: [cargo]
+      summary: Counter a driver offer
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+        - { name: offerId, in: path, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CargoCounterInput" }
+      responses:
+        "200":
+          description: Countered offer
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CargoOffer" }
+
+  /cargo-loads/{id}/offers/{offerId}/counter-decision:
+    post:
+      operationId: respondCargoCounter
+      tags: [cargo]
+      summary: Let the offering driver accept or reject a shipper counter offer
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+        - { name: offerId, in: path, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CargoCounterDecisionInput" }
+      responses:
+        "200":
+          description: Counter decision recorded
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CargoOffer" }
+
+  /cargo-loads/{id}/offers/{offerId}/accept:
+    post:
+      operationId: acceptCargoOffer
+      tags: [cargo]
+      summary: Accept an offer and reserve the load
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+        - { name: offerId, in: path, required: true, schema: { type: string } }
+      responses:
+        "200":
+          description: Accepted offer
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CargoOffer" }
+
+  /drivers:
+    get:
+      operationId: getDrivers
+      tags: [cargo]
+      summary: List available driver profiles
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - name: regionId
+          in: query
+          schema: { type: string }
+      responses:
+        "200":
+          description: Drivers
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/DriverProfile" }
+
+  /vehicle-types:
+    get:
+      operationId: getVehicleTypes
+      tags: [cargo]
+      summary: List cargo vehicle types and capacities
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200":
+          description: Vehicle types
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/VehicleType" }
+
+  /drivers/{id}:
+    get:
+      operationId: getDriver
+      tags: [cargo]
+      summary: Get a driver profile
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      responses:
+        "200":
+          description: Driver
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/DriverProfile" }
 
 components:
   securitySchemes:
@@ -1319,3 +1543,153 @@ components:
         - totalOrders
         - activeListings
         - topCategories
+
+    VehicleType:
+      type: object
+      required: [id, name, nameRu, capacityKg, capacityM3, supportedCargoTypes]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        nameRu: { type: string }
+        capacityKg: { type: number }
+        capacityM3: { type: number }
+        supportedCargoTypes:
+          type: array
+          items: { type: string, enum: [general, fragile, perishable, livestock, hazardous, construction] }
+
+    DriverProfile:
+      type: object
+      required: [id, userId, user, vehicleType, vehiclePlate, availableFrom, currentRegionId, rating, ratingCount, completedTrips, sharedLoadAvailableKg, sharedLoadAvailableM3]
+      properties:
+        id: { type: string }
+        userId: { type: string }
+        user: { $ref: "#/components/schemas/User" }
+        vehicleType: { $ref: "#/components/schemas/VehicleType" }
+        vehiclePlate: { type: string }
+        availableFrom: { type: string, format: date-time }
+        currentRegionId: { type: string }
+        rating: { type: number }
+        ratingCount: { type: integer }
+        completedTrips: { type: integer }
+        sharedLoadAvailableKg: { type: number }
+        sharedLoadAvailableM3: { type: number }
+        bio: { type: ["string", "null"] }
+
+    CargoLoad:
+      type: object
+      required: [id, shipperId, shipper, title, cargoType, weightKg, volumeM3, pickupRegionId, pickupDistrictId, deliveryRegionId, deliveryDistrictId, distanceKm, pickupDate, sharedLoadAllowed, status, createdAt]
+      properties:
+        id: { type: string }
+        shipperId: { type: string }
+        shipper: { $ref: "#/components/schemas/User" }
+        title: { type: string }
+        description: { type: ["string", "null"] }
+        cargoType: { type: string, enum: [general, fragile, perishable, livestock, hazardous, construction] }
+        weightKg: { type: number }
+        volumeM3: { type: number }
+        lengthCm: { type: ["number", "null"] }
+        widthCm: { type: ["number", "null"] }
+        heightCm: { type: ["number", "null"] }
+        pickupRegionId: { type: string }
+        pickupDistrictId: { type: string }
+        pickupAddress: { type: ["string", "null"] }
+        deliveryRegionId: { type: string }
+        deliveryDistrictId: { type: string }
+        deliveryAddress: { type: ["string", "null"] }
+        distanceKm: { type: number }
+        pickupDate: { type: string, format: date, description: Strict YYYY-MM-DD calendar date }
+        budgetUzs: { type: ["number", "null"] }
+        sharedLoadAllowed: { type: boolean }
+        status: { type: string, enum: [open, negotiating, accepted, in_transit, delivered, cancelled] }
+        createdAt: { type: string, format: date-time }
+
+    CargoOffer:
+      type: object
+      required: [id, loadId, driverId, driver, amountUzs, status, createdAt, updatedAt]
+      properties:
+        id: { type: string }
+        loadId: { type: string }
+        driverId: { type: string }
+        driver: { $ref: "#/components/schemas/DriverProfile" }
+        amountUzs: { type: number }
+        message: { type: ["string", "null"] }
+        status: { type: string, enum: [pending, countered, accepted, rejected, withdrawn] }
+        counterAmountUzs: { type: ["number", "null"] }
+        counterMessage: { type: ["string", "null"] }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+
+    CargoLoadDetail:
+      allOf:
+        - $ref: "#/components/schemas/CargoLoad"
+        - type: object
+          required: [offers, recommendation]
+          properties:
+            offers:
+              type: array
+              items: { $ref: "#/components/schemas/CargoOffer" }
+            recommendation:
+              anyOf:
+                - $ref: "#/components/schemas/TransportRecommendation"
+                - type: "null"
+
+    CargoLoadInput:
+      type: object
+      required: [title, cargoType, weightKg, volumeM3, pickupRegionId, pickupDistrictId, deliveryRegionId, deliveryDistrictId, pickupDate, sharedLoadAllowed]
+      properties:
+        title: { type: string }
+        description: { type: string }
+        cargoType: { type: string, enum: [general, fragile, perishable, livestock, hazardous, construction] }
+        weightKg: { type: number }
+        volumeM3: { type: number }
+        lengthCm: { type: number }
+        widthCm: { type: number }
+        heightCm: { type: number }
+        pickupRegionId: { type: string }
+        pickupDistrictId: { type: string }
+        pickupAddress: { type: string }
+        deliveryRegionId: { type: string }
+        deliveryDistrictId: { type: string }
+        deliveryAddress: { type: string }
+        pickupDate: { type: string, format: date, description: Strict YYYY-MM-DD calendar date }
+        budgetUzs: { type: number }
+        sharedLoadAllowed: { type: boolean }
+
+    CargoOfferInput:
+      type: object
+      required: [amountUzs]
+      properties:
+        amountUzs: { type: number }
+        message: { type: string }
+
+    CargoCounterInput:
+      type: object
+      required: [amountUzs]
+      properties:
+        amountUzs: { type: number }
+        message: { type: string }
+
+    CargoCounterDecisionInput:
+      type: object
+      required: [accepted]
+      properties:
+        accepted: { type: boolean }
+
+    CargoRecommendationInput:
+      type: object
+      required: [cargoType, weightKg, volumeM3]
+      properties:
+        cargoType: { type: string, enum: [general, fragile, perishable, livestock, hazardous, construction] }
+        weightKg: { type: number }
+        volumeM3: { type: number }
+        lengthCm: { type: number }
+        widthCm: { type: number }
+        heightCm: { type: number }
+
+    TransportRecommendation:
+      type: object
+      required: [vehicleType, reason, source]
+      properties:
+        vehicleType: { $ref: "#/components/schemas/VehicleType" }
+        reason: { type: string }
+        source: { type: string, enum: [deterministic_fallback] }

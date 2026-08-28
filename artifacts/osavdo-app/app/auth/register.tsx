@@ -6,7 +6,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import { useColors } from '@/hooks/useColors';
-import { useRegister, useGetRegions, useGetDistricts, useGetCountries } from '@workspace/api-client-react';
+import { useRegister, useGetRegions, useGetDistricts, useGetCountries, getGetDistrictsQueryKey } from '@workspace/api-client-react';
 import { useAuth, type UserProfile } from '@/context/AuthContext';
 import { useRouter } from 'expo-router';
 import { useI18n } from '@/context/I18nContext';
@@ -42,7 +42,7 @@ export default function RegisterScreen() {
   const { data: regions } = useGetRegions({ countryId: selectedCountryId });
   const { data: districts } = useGetDistricts(
     { regionId: regionId || undefined },
-    { query: { enabled: !!regionId } },
+    { query: { enabled: !!regionId, queryKey: getGetDistrictsQueryKey({ regionId: regionId || undefined }) } },
   );
 
   const selectedCountry = countries?.find(c => c.id === selectedCountryId);

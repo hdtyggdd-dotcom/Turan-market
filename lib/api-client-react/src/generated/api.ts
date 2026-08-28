@@ -21,6 +21,14 @@ import type {
 
 import type {
   AuthResponse,
+  CargoCounterDecisionInput,
+  CargoCounterInput,
+  CargoLoad,
+  CargoLoadDetail,
+  CargoLoadInput,
+  CargoOffer,
+  CargoOfferInput,
+  CargoRecommendationInput,
   Category,
   Country,
   CreateListingRequest,
@@ -30,8 +38,11 @@ import type {
   DetectLocationRequest,
   DetectedLocation,
   District,
+  DriverProfile,
   ErrorResponse,
+  GetCargoLoadsParams,
   GetDistrictsParams,
+  GetDriversParams,
   GetListingsParams,
   GetNeighborhoodsParams,
   GetRegionsParams,
@@ -45,9 +56,11 @@ import type {
   Region,
   RegisterRequest,
   StatsSummary,
+  TransportRecommendation,
   UpdateOrderStatusRequest,
   UpdateUserRequest,
   User,
+  VehicleType,
   VerificationRequest,
   VerificationResponse
 } from './api.schemas';
@@ -2035,6 +2048,840 @@ export function useGetStatsSummary<TData = Awaited<ReturnType<typeof getStatsSum
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
   const queryOptions = getGetStatsSummaryQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getGetCargoLoadsUrl = (params?: GetCargoLoadsParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/cargo-loads?${stringifiedParams}` : `/api/cargo-loads`
+}
+
+/**
+ * @summary List cargo loads
+ */
+export const getCargoLoads = async (params?: GetCargoLoadsParams, options?: RequestInit): Promise<CargoLoad[]> => {
+
+  return customFetch<CargoLoad[]>(getGetCargoLoadsUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetCargoLoadsQueryKey = (params?: GetCargoLoadsParams,) => {
+    return [
+    `/api/cargo-loads`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetCargoLoadsQueryOptions = <TData = Awaited<ReturnType<typeof getCargoLoads>>, TError = ErrorType<unknown>>(params?: GetCargoLoadsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getCargoLoads>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetCargoLoadsQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getCargoLoads>>> = ({ signal }) => getCargoLoads(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getCargoLoads>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetCargoLoadsQueryResult = NonNullable<Awaited<ReturnType<typeof getCargoLoads>>>
+export type GetCargoLoadsQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary List cargo loads
+ */
+
+export function useGetCargoLoads<TData = Awaited<ReturnType<typeof getCargoLoads>>, TError = ErrorType<unknown>>(
+ params?: GetCargoLoadsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getCargoLoads>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetCargoLoadsQueryOptions(params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getCreateCargoLoadUrl = () => {
+
+
+
+
+  return `/api/cargo-loads`
+}
+
+/**
+ * @summary Create a cargo load
+ */
+export const createCargoLoad = async (cargoLoadInput: CargoLoadInput, options?: RequestInit): Promise<CargoLoad> => {
+
+  return customFetch<CargoLoad>(getCreateCargoLoadUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(cargoLoadInput)
+  }
+);}
+
+
+
+
+
+export const getCreateCargoLoadMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createCargoLoad>>, TError,{data: BodyType<CargoLoadInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createCargoLoad>>, TError,{data: BodyType<CargoLoadInput>}, TContext> => {
+
+const mutationKey = ['createCargoLoad'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createCargoLoad>>, {data: BodyType<CargoLoadInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  createCargoLoad(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateCargoLoadMutationResult = NonNullable<Awaited<ReturnType<typeof createCargoLoad>>>
+    export type CreateCargoLoadMutationBody = BodyType<CargoLoadInput>
+    export type CreateCargoLoadMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Create a cargo load
+ */
+export const useCreateCargoLoad = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createCargoLoad>>, TError,{data: BodyType<CargoLoadInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createCargoLoad>>,
+        TError,
+        {data: BodyType<CargoLoadInput>},
+        TContext
+      > => {
+      return useMutation(getCreateCargoLoadMutationOptions(options));
+    }
+
+export const getRecommendCargoTransportUrl = () => {
+
+
+
+
+  return `/api/cargo-loads/recommendation`
+}
+
+/**
+ * @summary Get a deterministic transport recommendation
+ */
+export const recommendCargoTransport = async (cargoRecommendationInput: CargoRecommendationInput, options?: RequestInit): Promise<TransportRecommendation> => {
+
+  return customFetch<TransportRecommendation>(getRecommendCargoTransportUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(cargoRecommendationInput)
+  }
+);}
+
+
+
+
+
+export const getRecommendCargoTransportMutationOptions = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof recommendCargoTransport>>, TError,{data: BodyType<CargoRecommendationInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof recommendCargoTransport>>, TError,{data: BodyType<CargoRecommendationInput>}, TContext> => {
+
+const mutationKey = ['recommendCargoTransport'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof recommendCargoTransport>>, {data: BodyType<CargoRecommendationInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  recommendCargoTransport(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RecommendCargoTransportMutationResult = NonNullable<Awaited<ReturnType<typeof recommendCargoTransport>>>
+    export type RecommendCargoTransportMutationBody = BodyType<CargoRecommendationInput>
+    export type RecommendCargoTransportMutationError = ErrorType<ErrorResponse>
+
+    /**
+ * @summary Get a deterministic transport recommendation
+ */
+export const useRecommendCargoTransport = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof recommendCargoTransport>>, TError,{data: BodyType<CargoRecommendationInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof recommendCargoTransport>>,
+        TError,
+        {data: BodyType<CargoRecommendationInput>},
+        TContext
+      > => {
+      return useMutation(getRecommendCargoTransportMutationOptions(options));
+    }
+
+export const getGetCargoLoadUrl = (id: string,) => {
+
+
+
+
+  return `/api/cargo-loads/${id}`
+}
+
+/**
+ * @summary Get cargo load detail including offers
+ */
+export const getCargoLoad = async (id: string, options?: RequestInit): Promise<CargoLoadDetail> => {
+
+  return customFetch<CargoLoadDetail>(getGetCargoLoadUrl(id),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetCargoLoadQueryKey = (id: string,) => {
+    return [
+    `/api/cargo-loads/${id}`
+    ] as const;
+    }
+
+
+export const getGetCargoLoadQueryOptions = <TData = Awaited<ReturnType<typeof getCargoLoad>>, TError = ErrorType<void>>(id: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getCargoLoad>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetCargoLoadQueryKey(id);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getCargoLoad>>> = ({ signal }) => getCargoLoad(id, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: id !== null && id !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getCargoLoad>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetCargoLoadQueryResult = NonNullable<Awaited<ReturnType<typeof getCargoLoad>>>
+export type GetCargoLoadQueryError = ErrorType<void>
+
+
+/**
+ * @summary Get cargo load detail including offers
+ */
+
+export function useGetCargoLoad<TData = Awaited<ReturnType<typeof getCargoLoad>>, TError = ErrorType<void>>(
+ id: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getCargoLoad>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetCargoLoadQueryOptions(id,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getCreateCargoOfferUrl = (id: string,) => {
+
+
+
+
+  return `/api/cargo-loads/${id}/offers`
+}
+
+/**
+ * @summary Submit a driver offer for a cargo load
+ */
+export const createCargoOffer = async (id: string,
+    cargoOfferInput: CargoOfferInput, options?: RequestInit): Promise<CargoOffer> => {
+
+  return customFetch<CargoOffer>(getCreateCargoOfferUrl(id),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(cargoOfferInput)
+  }
+);}
+
+
+
+
+
+export const getCreateCargoOfferMutationOptions = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createCargoOffer>>, TError,{id: string;data: BodyType<CargoOfferInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createCargoOffer>>, TError,{id: string;data: BodyType<CargoOfferInput>}, TContext> => {
+
+const mutationKey = ['createCargoOffer'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createCargoOffer>>, {id: string;data: BodyType<CargoOfferInput>}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  createCargoOffer(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateCargoOfferMutationResult = NonNullable<Awaited<ReturnType<typeof createCargoOffer>>>
+    export type CreateCargoOfferMutationBody = BodyType<CargoOfferInput>
+    export type CreateCargoOfferMutationError = ErrorType<ErrorResponse>
+
+    /**
+ * @summary Submit a driver offer for a cargo load
+ */
+export const useCreateCargoOffer = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createCargoOffer>>, TError,{id: string;data: BodyType<CargoOfferInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createCargoOffer>>,
+        TError,
+        {id: string;data: BodyType<CargoOfferInput>},
+        TContext
+      > => {
+      return useMutation(getCreateCargoOfferMutationOptions(options));
+    }
+
+export const getCounterCargoOfferUrl = (id: string,
+    offerId: string,) => {
+
+
+
+
+  return `/api/cargo-loads/${id}/offers/${offerId}/counter`
+}
+
+/**
+ * @summary Counter a driver offer
+ */
+export const counterCargoOffer = async (id: string,
+    offerId: string,
+    cargoCounterInput: CargoCounterInput, options?: RequestInit): Promise<CargoOffer> => {
+
+  return customFetch<CargoOffer>(getCounterCargoOfferUrl(id,offerId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(cargoCounterInput)
+  }
+);}
+
+
+
+
+
+export const getCounterCargoOfferMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof counterCargoOffer>>, TError,{id: string;offerId: string;data: BodyType<CargoCounterInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof counterCargoOffer>>, TError,{id: string;offerId: string;data: BodyType<CargoCounterInput>}, TContext> => {
+
+const mutationKey = ['counterCargoOffer'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof counterCargoOffer>>, {id: string;offerId: string;data: BodyType<CargoCounterInput>}> = (props) => {
+          const {id,offerId,data} = props ?? {};
+
+          return  counterCargoOffer(id,offerId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CounterCargoOfferMutationResult = NonNullable<Awaited<ReturnType<typeof counterCargoOffer>>>
+    export type CounterCargoOfferMutationBody = BodyType<CargoCounterInput>
+    export type CounterCargoOfferMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Counter a driver offer
+ */
+export const useCounterCargoOffer = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof counterCargoOffer>>, TError,{id: string;offerId: string;data: BodyType<CargoCounterInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof counterCargoOffer>>,
+        TError,
+        {id: string;offerId: string;data: BodyType<CargoCounterInput>},
+        TContext
+      > => {
+      return useMutation(getCounterCargoOfferMutationOptions(options));
+    }
+
+export const getRespondCargoCounterUrl = (id: string,
+    offerId: string,) => {
+
+
+
+
+  return `/api/cargo-loads/${id}/offers/${offerId}/counter-decision`
+}
+
+/**
+ * @summary Let the offering driver accept or reject a shipper counter offer
+ */
+export const respondCargoCounter = async (id: string,
+    offerId: string,
+    cargoCounterDecisionInput: CargoCounterDecisionInput, options?: RequestInit): Promise<CargoOffer> => {
+
+  return customFetch<CargoOffer>(getRespondCargoCounterUrl(id,offerId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(cargoCounterDecisionInput)
+  }
+);}
+
+
+
+
+
+export const getRespondCargoCounterMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof respondCargoCounter>>, TError,{id: string;offerId: string;data: BodyType<CargoCounterDecisionInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof respondCargoCounter>>, TError,{id: string;offerId: string;data: BodyType<CargoCounterDecisionInput>}, TContext> => {
+
+const mutationKey = ['respondCargoCounter'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof respondCargoCounter>>, {id: string;offerId: string;data: BodyType<CargoCounterDecisionInput>}> = (props) => {
+          const {id,offerId,data} = props ?? {};
+
+          return  respondCargoCounter(id,offerId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RespondCargoCounterMutationResult = NonNullable<Awaited<ReturnType<typeof respondCargoCounter>>>
+    export type RespondCargoCounterMutationBody = BodyType<CargoCounterDecisionInput>
+    export type RespondCargoCounterMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Let the offering driver accept or reject a shipper counter offer
+ */
+export const useRespondCargoCounter = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof respondCargoCounter>>, TError,{id: string;offerId: string;data: BodyType<CargoCounterDecisionInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof respondCargoCounter>>,
+        TError,
+        {id: string;offerId: string;data: BodyType<CargoCounterDecisionInput>},
+        TContext
+      > => {
+      return useMutation(getRespondCargoCounterMutationOptions(options));
+    }
+
+export const getAcceptCargoOfferUrl = (id: string,
+    offerId: string,) => {
+
+
+
+
+  return `/api/cargo-loads/${id}/offers/${offerId}/accept`
+}
+
+/**
+ * @summary Accept an offer and reserve the load
+ */
+export const acceptCargoOffer = async (id: string,
+    offerId: string, options?: RequestInit): Promise<CargoOffer> => {
+
+  return customFetch<CargoOffer>(getAcceptCargoOfferUrl(id,offerId),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getAcceptCargoOfferMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof acceptCargoOffer>>, TError,{id: string;offerId: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof acceptCargoOffer>>, TError,{id: string;offerId: string}, TContext> => {
+
+const mutationKey = ['acceptCargoOffer'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof acceptCargoOffer>>, {id: string;offerId: string}> = (props) => {
+          const {id,offerId} = props ?? {};
+
+          return  acceptCargoOffer(id,offerId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AcceptCargoOfferMutationResult = NonNullable<Awaited<ReturnType<typeof acceptCargoOffer>>>
+
+    export type AcceptCargoOfferMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Accept an offer and reserve the load
+ */
+export const useAcceptCargoOffer = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof acceptCargoOffer>>, TError,{id: string;offerId: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof acceptCargoOffer>>,
+        TError,
+        {id: string;offerId: string},
+        TContext
+      > => {
+      return useMutation(getAcceptCargoOfferMutationOptions(options));
+    }
+
+export const getGetDriversUrl = (params?: GetDriversParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/drivers?${stringifiedParams}` : `/api/drivers`
+}
+
+/**
+ * @summary List available driver profiles
+ */
+export const getDrivers = async (params?: GetDriversParams, options?: RequestInit): Promise<DriverProfile[]> => {
+
+  return customFetch<DriverProfile[]>(getGetDriversUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetDriversQueryKey = (params?: GetDriversParams,) => {
+    return [
+    `/api/drivers`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetDriversQueryOptions = <TData = Awaited<ReturnType<typeof getDrivers>>, TError = ErrorType<unknown>>(params?: GetDriversParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getDrivers>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetDriversQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getDrivers>>> = ({ signal }) => getDrivers(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getDrivers>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetDriversQueryResult = NonNullable<Awaited<ReturnType<typeof getDrivers>>>
+export type GetDriversQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary List available driver profiles
+ */
+
+export function useGetDrivers<TData = Awaited<ReturnType<typeof getDrivers>>, TError = ErrorType<unknown>>(
+ params?: GetDriversParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getDrivers>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetDriversQueryOptions(params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getGetVehicleTypesUrl = () => {
+
+
+
+
+  return `/api/vehicle-types`
+}
+
+/**
+ * @summary List cargo vehicle types and capacities
+ */
+export const getVehicleTypes = async ( options?: RequestInit): Promise<VehicleType[]> => {
+
+  return customFetch<VehicleType[]>(getGetVehicleTypesUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetVehicleTypesQueryKey = () => {
+    return [
+    `/api/vehicle-types`
+    ] as const;
+    }
+
+
+export const getGetVehicleTypesQueryOptions = <TData = Awaited<ReturnType<typeof getVehicleTypes>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getVehicleTypes>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetVehicleTypesQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getVehicleTypes>>> = ({ signal }) => getVehicleTypes({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getVehicleTypes>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetVehicleTypesQueryResult = NonNullable<Awaited<ReturnType<typeof getVehicleTypes>>>
+export type GetVehicleTypesQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary List cargo vehicle types and capacities
+ */
+
+export function useGetVehicleTypes<TData = Awaited<ReturnType<typeof getVehicleTypes>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getVehicleTypes>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetVehicleTypesQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getGetDriverUrl = (id: string,) => {
+
+
+
+
+  return `/api/drivers/${id}`
+}
+
+/**
+ * @summary Get a driver profile
+ */
+export const getDriver = async (id: string, options?: RequestInit): Promise<DriverProfile> => {
+
+  return customFetch<DriverProfile>(getGetDriverUrl(id),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetDriverQueryKey = (id: string,) => {
+    return [
+    `/api/drivers/${id}`
+    ] as const;
+    }
+
+
+export const getGetDriverQueryOptions = <TData = Awaited<ReturnType<typeof getDriver>>, TError = ErrorType<unknown>>(id: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getDriver>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetDriverQueryKey(id);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getDriver>>> = ({ signal }) => getDriver(id, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: id !== null && id !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getDriver>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetDriverQueryResult = NonNullable<Awaited<ReturnType<typeof getDriver>>>
+export type GetDriverQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Get a driver profile
+ */
+
+export function useGetDriver<TData = Awaited<ReturnType<typeof getDriver>>, TError = ErrorType<unknown>>(
+ id: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getDriver>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetDriverQueryOptions(id,options)
 
   const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 

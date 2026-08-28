@@ -13,7 +13,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import { useColors } from '@/hooks/useColors';
 import { useAuth } from '@/context/AuthContext';
-import { useGetUserListings } from '@workspace/api-client-react';
+import { useGetUserListings, getGetUserListingsQueryKey } from '@workspace/api-client-react';
 import { ListingCard } from '@/components/ListingCard';
 import { EmptyState } from '@/components/EmptyState';
 import { useRouter } from 'expo-router';
@@ -65,7 +65,7 @@ export default function ProfileScreen() {
   const topPadding = Platform.OS === 'web' ? 67 : insets.top;
 
   const { data: myListings } = useGetUserListings(user?.id ?? '', {
-    query: { enabled: !!user?.id },
+    query: { enabled: !!user?.id, queryKey: getGetUserListingsQueryKey(user?.id ?? '') },
   });
 
   function handleSignOut() {
@@ -135,6 +135,20 @@ export default function ProfileScreen() {
             </View>
           </View>
         )}
+
+        {/* Orders Link */}
+        <TouchableOpacity
+          style={[styles.ordersBtn, { backgroundColor: colors.card, borderColor: colors.border }]}
+          onPress={() => router.push('/(tabs)/orders')}
+        >
+          <View style={styles.ordersBtnLeft}>
+            <View style={[styles.ordersBtnIcon, { backgroundColor: colors.primary + '15' }]}>
+              <Feather name="shopping-bag" size={20} color={colors.primary} />
+            </View>
+            <Text style={[styles.ordersBtnText, { color: colors.text }]}>Mening buyurtmalarim</Text>
+          </View>
+          <Feather name="chevron-right" size={20} color={colors.mutedForeground} />
+        </TouchableOpacity>
 
         {/* Stats */}
         {user.role === 'seller' && (
@@ -285,6 +299,30 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     borderWidth: 1,
     gap: 4,
+  },
+  ordersBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: 12,
+    borderRadius: 14,
+    borderWidth: 1,
+  },
+  ordersBtnLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  ordersBtnIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  ordersBtnText: {
+    fontSize: 16,
+    fontFamily: 'Inter_600SemiBold',
   },
   statValue: {
     fontSize: 20,

@@ -1,0 +1,3 @@
+- [Cargo privacy boundary](cargo-privacy-boundary.md) — reveal exact addresses and personal profile locality only after a transport offer is accepted.
+- [Operational driver trust](operational-driver-trust.md) — cargo bidding requires approved identity and verified real vehicle data, not a self-selected driver role.
+- [Cargo negotiation integrity](cargo-negotiation-integrity.md) — a shipper counter becomes the payable amount only after the offering driver accepts it.

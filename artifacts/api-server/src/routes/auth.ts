@@ -1,9 +1,12 @@
 import { Router } from "express";
 import {
+  driverProfiles,
+  regions,
   users,
   generateId,
   generateToken,
   sanitizeUser,
+  vehicleTypes,
 } from "../data/store.js";
 import { authenticateToken, type AuthRequest } from "../middleware/auth.js";
 
@@ -34,6 +37,14 @@ router.post("/auth/register", (req, res) => {
       .json({ error: "conflict", message: "Phone number already registered" });
     return;
   }
+  if (role === "driver" && (!regionId || !regions.some((region) => region.id === regionId))) {
+    res.status(400).json({ error: "validation", message: "Drivers must provide a valid current region" });
+    return;
+  }
+  if (role === "driver" && !vehicleTypes.some((vehicle) => vehicle.supportedCargoTypes.includes("general"))) {
+    res.status(500).json({ error: "configuration", message: "No general cargo vehicle type is configured" });
+    return;
+  }
 
   const newUser = {
     id: generateId(),
@@ -51,7 +62,26 @@ router.post("/auth/register", (req, res) => {
     createdAt: new Date().toISOString(),
   };
 
-  users.push(newUser);
+  const defaultVehicle = vehicleTypes
+    .filter((vehicle) => vehicle.supportedCargoTypes.includes("general"))
+    .sort((a, b) => a.capacityKg - b.capacityKg || a.capacityM3 - b.capacityM3)[0];
+  const driverProfile = role === "driver" ? {
+    id: generateId(), userId: newUser.id, vehicleTypeId: defaultVehicle!.id, vehiclePlate: "PENDING",
+    availableFrom: new Date().toISOString(), currentRegionId: regionId!, rating: 0, ratingCount: 0,
+    completedTrips: 0, sharedLoadAvailableKg: 0, sharedLoadAvailableM3: 0, bio: null,
+  } : null;
+
+  try {
+    users.push(newUser);
+    if (driverProfile) driverProfiles.push(driverProfile);
+  } catch (error) {
+    const userIndex = users.indexOf(newUser);
+    if (userIndex >= 0) users.splice(userIndex, 1);
+    const profileIndex = driverProfile ? driverProfiles.indexOf(driverProfile) : -1;
+    if (profileIndex >= 0) driverProfiles.splice(profileIndex, 1);
+    res.status(500).json({ error: "registration_failed", message: "Unable to create user profile" });
+    return;
+  }
 
   const token = generateToken(newUser.id);
   res.status(201).json({ token, user: sanitizeUser(newUser) });

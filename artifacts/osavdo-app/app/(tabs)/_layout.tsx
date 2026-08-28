@@ -25,9 +25,9 @@ function NativeTabLayout() {
         <Icon sf={{ default: 'plus.circle', selected: 'plus.circle.fill' }} />
         <Label>E'lon</Label>
       </NativeTabs.Trigger>
-      <NativeTabs.Trigger name="orders">
-        <Icon sf={{ default: 'bag', selected: 'bag.fill' }} />
-        <Label>Buyurtmalar</Label>
+      <NativeTabs.Trigger name="cargo">
+        <Icon sf={{ default: 'box.truck', selected: 'box.truck.fill' }} />
+        <Label>Yuklar</Label>
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name="profile">
         <Icon sf={{ default: 'person', selected: 'person.fill' }} />
@@ -107,14 +107,14 @@ function ClassicTabLayout() {
         }}
       />
       <Tabs.Screen
-        name="orders"
+        name="cargo"
         options={{
-          title: 'Buyurtmalar',
+          title: 'Yuklar',
           tabBarIcon: ({ color }) =>
             isIOS ? (
-              <SymbolView name="bag" tintColor={color} size={24} />
+              <SymbolView name="box.truck.fill" tintColor={color} size={24} />
             ) : (
-              <Feather name="shopping-bag" size={22} color={color} />
+              <Feather name="truck" size={22} color={color} />
             ),
         }}
       />
@@ -128,6 +128,12 @@ function ClassicTabLayout() {
             ) : (
               <Feather name="user" size={22} color={color} />
             ),
+        }}
+      />
+      <Tabs.Screen
+        name="orders"
+        options={{
+          href: null,
         }}
       />
     </Tabs>

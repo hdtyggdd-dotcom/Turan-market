@@ -475,6 +475,216 @@ export interface StatsSummary {
   topCategories: StatsSummaryTopCategoriesItem[];
 }
 
+export type VehicleTypeSupportedCargoTypesItem = typeof VehicleTypeSupportedCargoTypesItem[keyof typeof VehicleTypeSupportedCargoTypesItem];
+
+
+export const VehicleTypeSupportedCargoTypesItem = {
+  general: 'general',
+  fragile: 'fragile',
+  perishable: 'perishable',
+  livestock: 'livestock',
+  hazardous: 'hazardous',
+  construction: 'construction',
+} as const;
+
+export interface VehicleType {
+  id: string;
+  name: string;
+  nameRu: string;
+  capacityKg: number;
+  capacityM3: number;
+  supportedCargoTypes: VehicleTypeSupportedCargoTypesItem[];
+}
+
+export interface DriverProfile {
+  id: string;
+  userId: string;
+  user: User;
+  vehicleType: VehicleType;
+  vehiclePlate: string;
+  availableFrom: string;
+  currentRegionId: string;
+  rating: number;
+  ratingCount: number;
+  completedTrips: number;
+  sharedLoadAvailableKg: number;
+  sharedLoadAvailableM3: number;
+  /** @nullable */
+  bio?: string | null;
+}
+
+export type CargoLoadCargoType = typeof CargoLoadCargoType[keyof typeof CargoLoadCargoType];
+
+
+export const CargoLoadCargoType = {
+  general: 'general',
+  fragile: 'fragile',
+  perishable: 'perishable',
+  livestock: 'livestock',
+  hazardous: 'hazardous',
+  construction: 'construction',
+} as const;
+
+export type CargoLoadStatus = typeof CargoLoadStatus[keyof typeof CargoLoadStatus];
+
+
+export const CargoLoadStatus = {
+  open: 'open',
+  negotiating: 'negotiating',
+  accepted: 'accepted',
+  in_transit: 'in_transit',
+  delivered: 'delivered',
+  cancelled: 'cancelled',
+} as const;
+
+export interface CargoLoad {
+  id: string;
+  shipperId: string;
+  shipper: User;
+  title: string;
+  /** @nullable */
+  description?: string | null;
+  cargoType: CargoLoadCargoType;
+  weightKg: number;
+  volumeM3: number;
+  /** @nullable */
+  lengthCm?: number | null;
+  /** @nullable */
+  widthCm?: number | null;
+  /** @nullable */
+  heightCm?: number | null;
+  pickupRegionId: string;
+  pickupDistrictId: string;
+  /** @nullable */
+  pickupAddress?: string | null;
+  deliveryRegionId: string;
+  deliveryDistrictId: string;
+  /** @nullable */
+  deliveryAddress?: string | null;
+  distanceKm: number;
+  /** Strict YYYY-MM-DD calendar date */
+  pickupDate: string;
+  /** @nullable */
+  budgetUzs?: number | null;
+  sharedLoadAllowed: boolean;
+  status: CargoLoadStatus;
+  createdAt: string;
+}
+
+export type CargoOfferStatus = typeof CargoOfferStatus[keyof typeof CargoOfferStatus];
+
+
+export const CargoOfferStatus = {
+  pending: 'pending',
+  countered: 'countered',
+  accepted: 'accepted',
+  rejected: 'rejected',
+  withdrawn: 'withdrawn',
+} as const;
+
+export interface CargoOffer {
+  id: string;
+  loadId: string;
+  driverId: string;
+  driver: DriverProfile;
+  amountUzs: number;
+  /** @nullable */
+  message?: string | null;
+  status: CargoOfferStatus;
+  /** @nullable */
+  counterAmountUzs?: number | null;
+  /** @nullable */
+  counterMessage?: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type TransportRecommendationSource = typeof TransportRecommendationSource[keyof typeof TransportRecommendationSource];
+
+
+export const TransportRecommendationSource = {
+  deterministic_fallback: 'deterministic_fallback',
+} as const;
+
+export interface TransportRecommendation {
+  vehicleType: VehicleType;
+  reason: string;
+  source: TransportRecommendationSource;
+}
+
+export type CargoLoadDetail = CargoLoad & ({
+  offers: CargoOffer[];
+  recommendation: TransportRecommendation | null;
+});
+
+export type CargoLoadInputCargoType = typeof CargoLoadInputCargoType[keyof typeof CargoLoadInputCargoType];
+
+
+export const CargoLoadInputCargoType = {
+  general: 'general',
+  fragile: 'fragile',
+  perishable: 'perishable',
+  livestock: 'livestock',
+  hazardous: 'hazardous',
+  construction: 'construction',
+} as const;
+
+export interface CargoLoadInput {
+  title: string;
+  description?: string;
+  cargoType: CargoLoadInputCargoType;
+  weightKg: number;
+  volumeM3: number;
+  lengthCm?: number;
+  widthCm?: number;
+  heightCm?: number;
+  pickupRegionId: string;
+  pickupDistrictId: string;
+  pickupAddress?: string;
+  deliveryRegionId: string;
+  deliveryDistrictId: string;
+  deliveryAddress?: string;
+  /** Strict YYYY-MM-DD calendar date */
+  pickupDate: string;
+  budgetUzs?: number;
+  sharedLoadAllowed: boolean;
+}
+
+export interface CargoOfferInput {
+  amountUzs: number;
+  message?: string;
+}
+
+export interface CargoCounterInput {
+  amountUzs: number;
+  message?: string;
+}
+
+export interface CargoCounterDecisionInput {
+  accepted: boolean;
+}
+
+export type CargoRecommendationInputCargoType = typeof CargoRecommendationInputCargoType[keyof typeof CargoRecommendationInputCargoType];
+
+
+export const CargoRecommendationInputCargoType = {
+  general: 'general',
+  fragile: 'fragile',
+  perishable: 'perishable',
+  livestock: 'livestock',
+  hazardous: 'hazardous',
+  construction: 'construction',
+} as const;
+
+export interface CargoRecommendationInput {
+  cargoType: CargoRecommendationInputCargoType;
+  weightKg: number;
+  volumeM3: number;
+  lengthCm?: number;
+  widthCm?: number;
+  heightCm?: number;
+}
+
 export type GetRegionsParams = {
 countryId?: string;
 };
@@ -500,5 +710,31 @@ sellerLat?: number;
 sellerLng?: number;
 page?: number;
 limit?: number;
+};
+
+export type GetCargoLoadsParams = {
+status?: GetCargoLoadsStatus;
+pickupRegionId?: string;
+deliveryRegionId?: string;
+/**
+ * Return only cargo loads owned by the authenticated user
+ */
+mine?: boolean;
+};
+
+export type GetCargoLoadsStatus = typeof GetCargoLoadsStatus[keyof typeof GetCargoLoadsStatus];
+
+
+export const GetCargoLoadsStatus = {
+  open: 'open',
+  negotiating: 'negotiating',
+  accepted: 'accepted',
+  in_transit: 'in_transit',
+  delivered: 'delivered',
+  cancelled: 'cancelled',
+} as const;
+
+export type GetDriversParams = {
+regionId?: string;
 };
 

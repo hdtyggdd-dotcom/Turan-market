@@ -1671,3 +1671,794 @@ export const GetStatsSummaryResponse = zod.object({
 })
 
 
+/**
+ * @summary List cargo loads
+ */
+export const GetCargoLoadsQueryParams = zod.object({
+  "status": zod.enum(['open', 'negotiating', 'accepted', 'in_transit', 'delivered', 'cancelled']).optional(),
+  "pickupRegionId": zod.coerce.string().optional(),
+  "deliveryRegionId": zod.coerce.string().optional(),
+  "mine": zod.coerce.boolean().optional().describe('Return only cargo loads owned by the authenticated user')
+})
+
+export const GetCargoLoadsResponseItem = zod.object({
+  "id": zod.string(),
+  "shipperId": zod.string(),
+  "shipper": zod.object({
+  "id": zod.string(),
+  "phone": zod.string(),
+  "name": zod.string(),
+  "role": zod.enum(['buyer', 'seller', 'driver', 'admin']),
+  "sellerBadge": zod.enum(['manufacturer', 'reseller']).nullish(),
+  "verificationStatus": zod.enum(['none', 'pending', 'approved', 'rejected']),
+  "regionId": zod.string().nullish(),
+  "districtId": zod.string().nullish(),
+  "neighborhoodId": zod.string().nullish(),
+  "region": zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "nameRu": zod.string(),
+  "countryId": zod.string()
+}).nullish(),
+  "district": zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "nameRu": zod.string(),
+  "regionId": zod.string(),
+  "lat": zod.number().nullish(),
+  "lng": zod.number().nullish()
+}).nullish(),
+  "neighborhood": zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "nameRu": zod.string(),
+  "districtId": zod.string()
+}).nullish(),
+  "rating": zod.number().nullish(),
+  "totalSales": zod.number().nullish(),
+  "createdAt": zod.coerce.date()
+}),
+  "title": zod.string(),
+  "description": zod.string().nullish(),
+  "cargoType": zod.enum(['general', 'fragile', 'perishable', 'livestock', 'hazardous', 'construction']),
+  "weightKg": zod.number(),
+  "volumeM3": zod.number(),
+  "lengthCm": zod.number().nullish(),
+  "widthCm": zod.number().nullish(),
+  "heightCm": zod.number().nullish(),
+  "pickupRegionId": zod.string(),
+  "pickupDistrictId": zod.string(),
+  "pickupAddress": zod.string().nullish(),
+  "deliveryRegionId": zod.string(),
+  "deliveryDistrictId": zod.string(),
+  "deliveryAddress": zod.string().nullish(),
+  "distanceKm": zod.number(),
+  "pickupDate": zod.coerce.date().describe('Strict YYYY-MM-DD calendar date'),
+  "budgetUzs": zod.number().nullish(),
+  "sharedLoadAllowed": zod.boolean(),
+  "status": zod.enum(['open', 'negotiating', 'accepted', 'in_transit', 'delivered', 'cancelled']),
+  "createdAt": zod.coerce.date()
+})
+export const GetCargoLoadsResponse = zod.array(GetCargoLoadsResponseItem)
+
+
+/**
+ * @summary Create a cargo load
+ */
+export const CreateCargoLoadBody = zod.object({
+  "title": zod.string(),
+  "description": zod.string().optional(),
+  "cargoType": zod.enum(['general', 'fragile', 'perishable', 'livestock', 'hazardous', 'construction']),
+  "weightKg": zod.number(),
+  "volumeM3": zod.number(),
+  "lengthCm": zod.number().optional(),
+  "widthCm": zod.number().optional(),
+  "heightCm": zod.number().optional(),
+  "pickupRegionId": zod.string(),
+  "pickupDistrictId": zod.string(),
+  "pickupAddress": zod.string().optional(),
+  "deliveryRegionId": zod.string(),
+  "deliveryDistrictId": zod.string(),
+  "deliveryAddress": zod.string().optional(),
+  "pickupDate": zod.coerce.date().describe('Strict YYYY-MM-DD calendar date'),
+  "budgetUzs": zod.number().optional(),
+  "sharedLoadAllowed": zod.boolean()
+})
+
+export const CreateCargoLoadResponse = zod.object({
+  "id": zod.string(),
+  "shipperId": zod.string(),
+  "shipper": zod.object({
+  "id": zod.string(),
+  "phone": zod.string(),
+  "name": zod.string(),
+  "role": zod.enum(['buyer', 'seller', 'driver', 'admin']),
+  "sellerBadge": zod.enum(['manufacturer', 'reseller']).nullish(),
+  "verificationStatus": zod.enum(['none', 'pending', 'approved', 'rejected']),
+  "regionId": zod.string().nullish(),
+  "districtId": zod.string().nullish(),
+  "neighborhoodId": zod.string().nullish(),
+  "region": zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "nameRu": zod.string(),
+  "countryId": zod.string()
+}).nullish(),
+  "district": zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "nameRu": zod.string(),
+  "regionId": zod.string(),
+  "lat": zod.number().nullish(),
+  "lng": zod.number().nullish()
+}).nullish(),
+  "neighborhood": zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "nameRu": zod.string(),
+  "districtId": zod.string()
+}).nullish(),
+  "rating": zod.number().nullish(),
+  "totalSales": zod.number().nullish(),
+  "createdAt": zod.coerce.date()
+}),
+  "title": zod.string(),
+  "description": zod.string().nullish(),
+  "cargoType": zod.enum(['general', 'fragile', 'perishable', 'livestock', 'hazardous', 'construction']),
+  "weightKg": zod.number(),
+  "volumeM3": zod.number(),
+  "lengthCm": zod.number().nullish(),
+  "widthCm": zod.number().nullish(),
+  "heightCm": zod.number().nullish(),
+  "pickupRegionId": zod.string(),
+  "pickupDistrictId": zod.string(),
+  "pickupAddress": zod.string().nullish(),
+  "deliveryRegionId": zod.string(),
+  "deliveryDistrictId": zod.string(),
+  "deliveryAddress": zod.string().nullish(),
+  "distanceKm": zod.number(),
+  "pickupDate": zod.coerce.date().describe('Strict YYYY-MM-DD calendar date'),
+  "budgetUzs": zod.number().nullish(),
+  "sharedLoadAllowed": zod.boolean(),
+  "status": zod.enum(['open', 'negotiating', 'accepted', 'in_transit', 'delivered', 'cancelled']),
+  "createdAt": zod.coerce.date()
+})
+
+
+/**
+ * @summary Get a deterministic transport recommendation
+ */
+export const RecommendCargoTransportBody = zod.object({
+  "cargoType": zod.enum(['general', 'fragile', 'perishable', 'livestock', 'hazardous', 'construction']),
+  "weightKg": zod.number(),
+  "volumeM3": zod.number(),
+  "lengthCm": zod.number().optional(),
+  "widthCm": zod.number().optional(),
+  "heightCm": zod.number().optional()
+})
+
+export const RecommendCargoTransportResponse = zod.object({
+  "vehicleType": zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "nameRu": zod.string(),
+  "capacityKg": zod.number(),
+  "capacityM3": zod.number(),
+  "supportedCargoTypes": zod.array(zod.enum(['general', 'fragile', 'perishable', 'livestock', 'hazardous', 'construction']))
+}),
+  "reason": zod.string(),
+  "source": zod.enum(['deterministic_fallback'])
+})
+
+
+/**
+ * @summary Get cargo load detail including offers
+ */
+export const GetCargoLoadParams = zod.object({
+  "id": zod.coerce.string()
+})
+
+export const GetCargoLoadResponse = zod.object({
+  "id": zod.string(),
+  "shipperId": zod.string(),
+  "shipper": zod.object({
+  "id": zod.string(),
+  "phone": zod.string(),
+  "name": zod.string(),
+  "role": zod.enum(['buyer', 'seller', 'driver', 'admin']),
+  "sellerBadge": zod.enum(['manufacturer', 'reseller']).nullish(),
+  "verificationStatus": zod.enum(['none', 'pending', 'approved', 'rejected']),
+  "regionId": zod.string().nullish(),
+  "districtId": zod.string().nullish(),
+  "neighborhoodId": zod.string().nullish(),
+  "region": zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "nameRu": zod.string(),
+  "countryId": zod.string()
+}).nullish(),
+  "district": zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "nameRu": zod.string(),
+  "regionId": zod.string(),
+  "lat": zod.number().nullish(),
+  "lng": zod.number().nullish()
+}).nullish(),
+  "neighborhood": zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "nameRu": zod.string(),
+  "districtId": zod.string()
+}).nullish(),
+  "rating": zod.number().nullish(),
+  "totalSales": zod.number().nullish(),
+  "createdAt": zod.coerce.date()
+}),
+  "title": zod.string(),
+  "description": zod.string().nullish(),
+  "cargoType": zod.enum(['general', 'fragile', 'perishable', 'livestock', 'hazardous', 'construction']),
+  "weightKg": zod.number(),
+  "volumeM3": zod.number(),
+  "lengthCm": zod.number().nullish(),
+  "widthCm": zod.number().nullish(),
+  "heightCm": zod.number().nullish(),
+  "pickupRegionId": zod.string(),
+  "pickupDistrictId": zod.string(),
+  "pickupAddress": zod.string().nullish(),
+  "deliveryRegionId": zod.string(),
+  "deliveryDistrictId": zod.string(),
+  "deliveryAddress": zod.string().nullish(),
+  "distanceKm": zod.number(),
+  "pickupDate": zod.coerce.date().describe('Strict YYYY-MM-DD calendar date'),
+  "budgetUzs": zod.number().nullish(),
+  "sharedLoadAllowed": zod.boolean(),
+  "status": zod.enum(['open', 'negotiating', 'accepted', 'in_transit', 'delivered', 'cancelled']),
+  "createdAt": zod.coerce.date()
+}).and(zod.object({
+  "offers": zod.array(zod.object({
+  "id": zod.string(),
+  "loadId": zod.string(),
+  "driverId": zod.string(),
+  "driver": zod.object({
+  "id": zod.string(),
+  "userId": zod.string(),
+  "user": zod.object({
+  "id": zod.string(),
+  "phone": zod.string(),
+  "name": zod.string(),
+  "role": zod.enum(['buyer', 'seller', 'driver', 'admin']),
+  "sellerBadge": zod.enum(['manufacturer', 'reseller']).nullish(),
+  "verificationStatus": zod.enum(['none', 'pending', 'approved', 'rejected']),
+  "regionId": zod.string().nullish(),
+  "districtId": zod.string().nullish(),
+  "neighborhoodId": zod.string().nullish(),
+  "region": zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "nameRu": zod.string(),
+  "countryId": zod.string()
+}).nullish(),
+  "district": zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "nameRu": zod.string(),
+  "regionId": zod.string(),
+  "lat": zod.number().nullish(),
+  "lng": zod.number().nullish()
+}).nullish(),
+  "neighborhood": zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "nameRu": zod.string(),
+  "districtId": zod.string()
+}).nullish(),
+  "rating": zod.number().nullish(),
+  "totalSales": zod.number().nullish(),
+  "createdAt": zod.coerce.date()
+}),
+  "vehicleType": zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "nameRu": zod.string(),
+  "capacityKg": zod.number(),
+  "capacityM3": zod.number(),
+  "supportedCargoTypes": zod.array(zod.enum(['general', 'fragile', 'perishable', 'livestock', 'hazardous', 'construction']))
+}),
+  "vehiclePlate": zod.string(),
+  "availableFrom": zod.coerce.date(),
+  "currentRegionId": zod.string(),
+  "rating": zod.number(),
+  "ratingCount": zod.number(),
+  "completedTrips": zod.number(),
+  "sharedLoadAvailableKg": zod.number(),
+  "sharedLoadAvailableM3": zod.number(),
+  "bio": zod.string().nullish()
+}),
+  "amountUzs": zod.number(),
+  "message": zod.string().nullish(),
+  "status": zod.enum(['pending', 'countered', 'accepted', 'rejected', 'withdrawn']),
+  "counterAmountUzs": zod.number().nullish(),
+  "counterMessage": zod.string().nullish(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+})),
+  "recommendation": zod.union([zod.object({
+  "vehicleType": zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "nameRu": zod.string(),
+  "capacityKg": zod.number(),
+  "capacityM3": zod.number(),
+  "supportedCargoTypes": zod.array(zod.enum(['general', 'fragile', 'perishable', 'livestock', 'hazardous', 'construction']))
+}),
+  "reason": zod.string(),
+  "source": zod.enum(['deterministic_fallback'])
+}),zod.null()])
+}))
+
+
+/**
+ * @summary Submit a driver offer for a cargo load
+ */
+export const CreateCargoOfferParams = zod.object({
+  "id": zod.coerce.string()
+})
+
+export const CreateCargoOfferBody = zod.object({
+  "amountUzs": zod.number(),
+  "message": zod.string().optional()
+})
+
+export const CreateCargoOfferResponse = zod.object({
+  "id": zod.string(),
+  "loadId": zod.string(),
+  "driverId": zod.string(),
+  "driver": zod.object({
+  "id": zod.string(),
+  "userId": zod.string(),
+  "user": zod.object({
+  "id": zod.string(),
+  "phone": zod.string(),
+  "name": zod.string(),
+  "role": zod.enum(['buyer', 'seller', 'driver', 'admin']),
+  "sellerBadge": zod.enum(['manufacturer', 'reseller']).nullish(),
+  "verificationStatus": zod.enum(['none', 'pending', 'approved', 'rejected']),
+  "regionId": zod.string().nullish(),
+  "districtId": zod.string().nullish(),
+  "neighborhoodId": zod.string().nullish(),
+  "region": zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "nameRu": zod.string(),
+  "countryId": zod.string()
+}).nullish(),
+  "district": zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "nameRu": zod.string(),
+  "regionId": zod.string(),
+  "lat": zod.number().nullish(),
+  "lng": zod.number().nullish()
+}).nullish(),
+  "neighborhood": zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "nameRu": zod.string(),
+  "districtId": zod.string()
+}).nullish(),
+  "rating": zod.number().nullish(),
+  "totalSales": zod.number().nullish(),
+  "createdAt": zod.coerce.date()
+}),
+  "vehicleType": zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "nameRu": zod.string(),
+  "capacityKg": zod.number(),
+  "capacityM3": zod.number(),
+  "supportedCargoTypes": zod.array(zod.enum(['general', 'fragile', 'perishable', 'livestock', 'hazardous', 'construction']))
+}),
+  "vehiclePlate": zod.string(),
+  "availableFrom": zod.coerce.date(),
+  "currentRegionId": zod.string(),
+  "rating": zod.number(),
+  "ratingCount": zod.number(),
+  "completedTrips": zod.number(),
+  "sharedLoadAvailableKg": zod.number(),
+  "sharedLoadAvailableM3": zod.number(),
+  "bio": zod.string().nullish()
+}),
+  "amountUzs": zod.number(),
+  "message": zod.string().nullish(),
+  "status": zod.enum(['pending', 'countered', 'accepted', 'rejected', 'withdrawn']),
+  "counterAmountUzs": zod.number().nullish(),
+  "counterMessage": zod.string().nullish(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+})
+
+
+/**
+ * @summary Counter a driver offer
+ */
+export const CounterCargoOfferParams = zod.object({
+  "id": zod.coerce.string(),
+  "offerId": zod.coerce.string()
+})
+
+export const CounterCargoOfferBody = zod.object({
+  "amountUzs": zod.number(),
+  "message": zod.string().optional()
+})
+
+export const CounterCargoOfferResponse = zod.object({
+  "id": zod.string(),
+  "loadId": zod.string(),
+  "driverId": zod.string(),
+  "driver": zod.object({
+  "id": zod.string(),
+  "userId": zod.string(),
+  "user": zod.object({
+  "id": zod.string(),
+  "phone": zod.string(),
+  "name": zod.string(),
+  "role": zod.enum(['buyer', 'seller', 'driver', 'admin']),
+  "sellerBadge": zod.enum(['manufacturer', 'reseller']).nullish(),
+  "verificationStatus": zod.enum(['none', 'pending', 'approved', 'rejected']),
+  "regionId": zod.string().nullish(),
+  "districtId": zod.string().nullish(),
+  "neighborhoodId": zod.string().nullish(),
+  "region": zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "nameRu": zod.string(),
+  "countryId": zod.string()
+}).nullish(),
+  "district": zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "nameRu": zod.string(),
+  "regionId": zod.string(),
+  "lat": zod.number().nullish(),
+  "lng": zod.number().nullish()
+}).nullish(),
+  "neighborhood": zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "nameRu": zod.string(),
+  "districtId": zod.string()
+}).nullish(),
+  "rating": zod.number().nullish(),
+  "totalSales": zod.number().nullish(),
+  "createdAt": zod.coerce.date()
+}),
+  "vehicleType": zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "nameRu": zod.string(),
+  "capacityKg": zod.number(),
+  "capacityM3": zod.number(),
+  "supportedCargoTypes": zod.array(zod.enum(['general', 'fragile', 'perishable', 'livestock', 'hazardous', 'construction']))
+}),
+  "vehiclePlate": zod.string(),
+  "availableFrom": zod.coerce.date(),
+  "currentRegionId": zod.string(),
+  "rating": zod.number(),
+  "ratingCount": zod.number(),
+  "completedTrips": zod.number(),
+  "sharedLoadAvailableKg": zod.number(),
+  "sharedLoadAvailableM3": zod.number(),
+  "bio": zod.string().nullish()
+}),
+  "amountUzs": zod.number(),
+  "message": zod.string().nullish(),
+  "status": zod.enum(['pending', 'countered', 'accepted', 'rejected', 'withdrawn']),
+  "counterAmountUzs": zod.number().nullish(),
+  "counterMessage": zod.string().nullish(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+})
+
+
+/**
+ * @summary Let the offering driver accept or reject a shipper counter offer
+ */
+export const RespondCargoCounterParams = zod.object({
+  "id": zod.coerce.string(),
+  "offerId": zod.coerce.string()
+})
+
+export const RespondCargoCounterBody = zod.object({
+  "accepted": zod.boolean()
+})
+
+export const RespondCargoCounterResponse = zod.object({
+  "id": zod.string(),
+  "loadId": zod.string(),
+  "driverId": zod.string(),
+  "driver": zod.object({
+  "id": zod.string(),
+  "userId": zod.string(),
+  "user": zod.object({
+  "id": zod.string(),
+  "phone": zod.string(),
+  "name": zod.string(),
+  "role": zod.enum(['buyer', 'seller', 'driver', 'admin']),
+  "sellerBadge": zod.enum(['manufacturer', 'reseller']).nullish(),
+  "verificationStatus": zod.enum(['none', 'pending', 'approved', 'rejected']),
+  "regionId": zod.string().nullish(),
+  "districtId": zod.string().nullish(),
+  "neighborhoodId": zod.string().nullish(),
+  "region": zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "nameRu": zod.string(),
+  "countryId": zod.string()
+}).nullish(),
+  "district": zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "nameRu": zod.string(),
+  "regionId": zod.string(),
+  "lat": zod.number().nullish(),
+  "lng": zod.number().nullish()
+}).nullish(),
+  "neighborhood": zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "nameRu": zod.string(),
+  "districtId": zod.string()
+}).nullish(),
+  "rating": zod.number().nullish(),
+  "totalSales": zod.number().nullish(),
+  "createdAt": zod.coerce.date()
+}),
+  "vehicleType": zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "nameRu": zod.string(),
+  "capacityKg": zod.number(),
+  "capacityM3": zod.number(),
+  "supportedCargoTypes": zod.array(zod.enum(['general', 'fragile', 'perishable', 'livestock', 'hazardous', 'construction']))
+}),
+  "vehiclePlate": zod.string(),
+  "availableFrom": zod.coerce.date(),
+  "currentRegionId": zod.string(),
+  "rating": zod.number(),
+  "ratingCount": zod.number(),
+  "completedTrips": zod.number(),
+  "sharedLoadAvailableKg": zod.number(),
+  "sharedLoadAvailableM3": zod.number(),
+  "bio": zod.string().nullish()
+}),
+  "amountUzs": zod.number(),
+  "message": zod.string().nullish(),
+  "status": zod.enum(['pending', 'countered', 'accepted', 'rejected', 'withdrawn']),
+  "counterAmountUzs": zod.number().nullish(),
+  "counterMessage": zod.string().nullish(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+})
+
+
+/**
+ * @summary Accept an offer and reserve the load
+ */
+export const AcceptCargoOfferParams = zod.object({
+  "id": zod.coerce.string(),
+  "offerId": zod.coerce.string()
+})
+
+export const AcceptCargoOfferResponse = zod.object({
+  "id": zod.string(),
+  "loadId": zod.string(),
+  "driverId": zod.string(),
+  "driver": zod.object({
+  "id": zod.string(),
+  "userId": zod.string(),
+  "user": zod.object({
+  "id": zod.string(),
+  "phone": zod.string(),
+  "name": zod.string(),
+  "role": zod.enum(['buyer', 'seller', 'driver', 'admin']),
+  "sellerBadge": zod.enum(['manufacturer', 'reseller']).nullish(),
+  "verificationStatus": zod.enum(['none', 'pending', 'approved', 'rejected']),
+  "regionId": zod.string().nullish(),
+  "districtId": zod.string().nullish(),
+  "neighborhoodId": zod.string().nullish(),
+  "region": zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "nameRu": zod.string(),
+  "countryId": zod.string()
+}).nullish(),
+  "district": zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "nameRu": zod.string(),
+  "regionId": zod.string(),
+  "lat": zod.number().nullish(),
+  "lng": zod.number().nullish()
+}).nullish(),
+  "neighborhood": zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "nameRu": zod.string(),
+  "districtId": zod.string()
+}).nullish(),
+  "rating": zod.number().nullish(),
+  "totalSales": zod.number().nullish(),
+  "createdAt": zod.coerce.date()
+}),
+  "vehicleType": zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "nameRu": zod.string(),
+  "capacityKg": zod.number(),
+  "capacityM3": zod.number(),
+  "supportedCargoTypes": zod.array(zod.enum(['general', 'fragile', 'perishable', 'livestock', 'hazardous', 'construction']))
+}),
+  "vehiclePlate": zod.string(),
+  "availableFrom": zod.coerce.date(),
+  "currentRegionId": zod.string(),
+  "rating": zod.number(),
+  "ratingCount": zod.number(),
+  "completedTrips": zod.number(),
+  "sharedLoadAvailableKg": zod.number(),
+  "sharedLoadAvailableM3": zod.number(),
+  "bio": zod.string().nullish()
+}),
+  "amountUzs": zod.number(),
+  "message": zod.string().nullish(),
+  "status": zod.enum(['pending', 'countered', 'accepted', 'rejected', 'withdrawn']),
+  "counterAmountUzs": zod.number().nullish(),
+  "counterMessage": zod.string().nullish(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+})
+
+
+/**
+ * @summary List available driver profiles
+ */
+export const GetDriversQueryParams = zod.object({
+  "regionId": zod.coerce.string().optional()
+})
+
+export const GetDriversResponseItem = zod.object({
+  "id": zod.string(),
+  "userId": zod.string(),
+  "user": zod.object({
+  "id": zod.string(),
+  "phone": zod.string(),
+  "name": zod.string(),
+  "role": zod.enum(['buyer', 'seller', 'driver', 'admin']),
+  "sellerBadge": zod.enum(['manufacturer', 'reseller']).nullish(),
+  "verificationStatus": zod.enum(['none', 'pending', 'approved', 'rejected']),
+  "regionId": zod.string().nullish(),
+  "districtId": zod.string().nullish(),
+  "neighborhoodId": zod.string().nullish(),
+  "region": zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "nameRu": zod.string(),
+  "countryId": zod.string()
+}).nullish(),
+  "district": zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "nameRu": zod.string(),
+  "regionId": zod.string(),
+  "lat": zod.number().nullish(),
+  "lng": zod.number().nullish()
+}).nullish(),
+  "neighborhood": zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "nameRu": zod.string(),
+  "districtId": zod.string()
+}).nullish(),
+  "rating": zod.number().nullish(),
+  "totalSales": zod.number().nullish(),
+  "createdAt": zod.coerce.date()
+}),
+  "vehicleType": zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "nameRu": zod.string(),
+  "capacityKg": zod.number(),
+  "capacityM3": zod.number(),
+  "supportedCargoTypes": zod.array(zod.enum(['general', 'fragile', 'perishable', 'livestock', 'hazardous', 'construction']))
+}),
+  "vehiclePlate": zod.string(),
+  "availableFrom": zod.coerce.date(),
+  "currentRegionId": zod.string(),
+  "rating": zod.number(),
+  "ratingCount": zod.number(),
+  "completedTrips": zod.number(),
+  "sharedLoadAvailableKg": zod.number(),
+  "sharedLoadAvailableM3": zod.number(),
+  "bio": zod.string().nullish()
+})
+export const GetDriversResponse = zod.array(GetDriversResponseItem)
+
+
+/**
+ * @summary List cargo vehicle types and capacities
+ */
+export const GetVehicleTypesResponseItem = zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "nameRu": zod.string(),
+  "capacityKg": zod.number(),
+  "capacityM3": zod.number(),
+  "supportedCargoTypes": zod.array(zod.enum(['general', 'fragile', 'perishable', 'livestock', 'hazardous', 'construction']))
+})
+export const GetVehicleTypesResponse = zod.array(GetVehicleTypesResponseItem)
+
+
+/**
+ * @summary Get a driver profile
+ */
+export const GetDriverParams = zod.object({
+  "id": zod.coerce.string()
+})
+
+export const GetDriverResponse = zod.object({
+  "id": zod.string(),
+  "userId": zod.string(),
+  "user": zod.object({
+  "id": zod.string(),
+  "phone": zod.string(),
+  "name": zod.string(),
+  "role": zod.enum(['buyer', 'seller', 'driver', 'admin']),
+  "sellerBadge": zod.enum(['manufacturer', 'reseller']).nullish(),
+  "verificationStatus": zod.enum(['none', 'pending', 'approved', 'rejected']),
+  "regionId": zod.string().nullish(),
+  "districtId": zod.string().nullish(),
+  "neighborhoodId": zod.string().nullish(),
+  "region": zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "nameRu": zod.string(),
+  "countryId": zod.string()
+}).nullish(),
+  "district": zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "nameRu": zod.string(),
+  "regionId": zod.string(),
+  "lat": zod.number().nullish(),
+  "lng": zod.number().nullish()
+}).nullish(),
+  "neighborhood": zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "nameRu": zod.string(),
+  "districtId": zod.string()
+}).nullish(),
+  "rating": zod.number().nullish(),
+  "totalSales": zod.number().nullish(),
+  "createdAt": zod.coerce.date()
+}),
+  "vehicleType": zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "nameRu": zod.string(),
+  "capacityKg": zod.number(),
+  "capacityM3": zod.number(),
+  "supportedCargoTypes": zod.array(zod.enum(['general', 'fragile', 'perishable', 'livestock', 'hazardous', 'construction']))
+}),
+  "vehiclePlate": zod.string(),
+  "availableFrom": zod.coerce.date(),
+  "currentRegionId": zod.string(),
+  "rating": zod.number(),
+  "ratingCount": zod.number(),
+  "completedTrips": zod.number(),
+  "sharedLoadAvailableKg": zod.number(),
+  "sharedLoadAvailableM3": zod.number(),
+  "bio": zod.string().nullish()
+})
+
+

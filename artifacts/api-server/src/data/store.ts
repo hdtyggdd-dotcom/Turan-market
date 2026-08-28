@@ -105,6 +105,72 @@ export interface StoredOrder {
   createdAt: string;
 }
 
+export type CargoType = 'general' | 'fragile' | 'perishable' | 'livestock' | 'hazardous' | 'construction';
+export type CargoLoadStatus = 'open' | 'negotiating' | 'accepted' | 'in_transit' | 'delivered' | 'cancelled';
+export type CargoOfferStatus = 'pending' | 'countered' | 'accepted' | 'rejected' | 'withdrawn';
+
+export interface StoredVehicleType {
+  id: string;
+  name: string;
+  nameRu: string;
+  capacityKg: number;
+  capacityM3: number;
+  supportedCargoTypes: CargoType[];
+}
+
+export interface StoredDriverProfile {
+  id: string;
+  userId: string;
+  vehicleTypeId: string;
+  vehiclePlate: string;
+  availableFrom: string;
+  currentRegionId: string;
+  rating: number;
+  ratingCount: number;
+  completedTrips: number;
+  sharedLoadAvailableKg: number;
+  sharedLoadAvailableM3: number;
+  bio: string | null;
+}
+
+export interface StoredCargoLoad {
+  id: string;
+  shipperId: string;
+  title: string;
+  description: string | null;
+  cargoType: CargoType;
+  weightKg: number;
+  volumeM3: number;
+  lengthCm: number | null;
+  widthCm: number | null;
+  heightCm: number | null;
+  pickupRegionId: string;
+  pickupDistrictId: string;
+  pickupAddress: string | null;
+  deliveryRegionId: string;
+  deliveryDistrictId: string;
+  deliveryAddress: string | null;
+  distanceKm: number;
+  pickupDate: string;
+  budgetUzs: number | null;
+  sharedLoadAllowed: boolean;
+  status: CargoLoadStatus;
+  createdAt: string;
+}
+
+export interface StoredCargoOffer {
+  id: string;
+  loadId: string;
+  driverId: string;
+  amountUzs: number;
+  message: string | null;
+  status: CargoOfferStatus;
+  counterAmountUzs: number | null;
+  counterMessage: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
 // ─── COUNTRIES ────────────────────────────────────────────────────────────────
 export const countries: StoredCountry[] = [
   { id: 'uz', name: "O'zbekiston",   nameRu: "Узбекистан",    flag: '🇺🇿', dialCode: '+998', currency: 'UZS' },
@@ -1009,6 +1075,51 @@ export const users: StoredUser[] = [
     rating: null,
     totalSales: 0,
     createdAt: '2024-03-05T11:00:00.000Z',
+  },
+  {
+    id: 'u5',
+    phone: '+998907770101',
+    name: 'Bekzod Mamatqulov',
+    password: 'test123',
+    role: 'driver',
+    sellerBadge: null,
+    verificationStatus: 'approved',
+    regionId: 'r1',
+    districtId: 'd104',
+    neighborhoodId: null,
+    rating: 4.9,
+    totalSales: 0,
+    createdAt: '2023-08-12T09:00:00.000Z',
+  },
+  {
+    id: 'u6',
+    phone: '+998907770202',
+    name: 'Sardor Ergashev',
+    password: 'test123',
+    role: 'driver',
+    sellerBadge: null,
+    verificationStatus: 'approved',
+    regionId: 'r6',
+    districtId: 'd22',
+    neighborhoodId: null,
+    rating: 4.7,
+    totalSales: 0,
+    createdAt: '2023-10-02T09:00:00.000Z',
+  },
+  {
+    id: 'u7',
+    phone: '+998907770303',
+    name: 'Umidjon Qodirov',
+    password: 'test123',
+    role: 'driver',
+    sellerBadge: null,
+    verificationStatus: 'approved',
+    regionId: 'r3',
+    districtId: 'd11',
+    neighborhoodId: null,
+    rating: 4.8,
+    totalSales: 0,
+    createdAt: '2024-01-18T09:00:00.000Z',
   },
 ];
 
@@ -2538,6 +2649,38 @@ export const orders: StoredOrder[] = [
     notes: null,
     createdAt: '2024-06-26T10:00:00.000Z',
   },
+];
+
+// ─── TURAN MARKET CARGO ──────────────────────────────────────────────────────
+export const vehicleTypes: StoredVehicleType[] = [
+  { id: 'van', name: 'Yuk tashuvchi van', nameRu: 'Грузовой фургон', capacityKg: 1500, capacityM3: 12, supportedCargoTypes: ['general', 'fragile', 'perishable'] },
+  { id: 'gazelle', name: 'Gazelle', nameRu: 'Газель', capacityKg: 3000, capacityM3: 18, supportedCargoTypes: ['general', 'fragile', 'construction'] },
+  { id: 'truck', name: 'Yuk mashinasi', nameRu: 'Грузовик', capacityKg: 10000, capacityM3: 45, supportedCargoTypes: ['general', 'fragile', 'perishable', 'construction'] },
+  { id: 'livestock', name: 'Chorva tashuvchi', nameRu: 'Скотовоз', capacityKg: 7000, capacityM3: 36, supportedCargoTypes: ['livestock'] },
+  { id: 'refrigerated', name: 'Sovutgichli fura', nameRu: 'Рефрижератор', capacityKg: 12000, capacityM3: 50, supportedCargoTypes: ['perishable'] },
+];
+
+export const driverProfiles: StoredDriverProfile[] = [
+  { id: 'driver-1', userId: 'u5', vehicleTypeId: 'gazelle', vehiclePlate: '01 A 777 BA', availableFrom: '2025-01-10T06:00:00.000Z', currentRegionId: 'r1', rating: 4.9, ratingCount: 86, completedTrips: 124, sharedLoadAvailableKg: 1100, sharedLoadAvailableM3: 7, bio: 'Toshkent va vodiy yo‘nalishlarida tezkor yetkazib berish.' },
+  { id: 'driver-2', userId: 'u6', vehicleTypeId: 'truck', vehiclePlate: '30 B 555 CA', availableFrom: '2025-01-10T07:00:00.000Z', currentRegionId: 'r6', rating: 4.7, ratingCount: 61, completedTrips: 93, sharedLoadAvailableKg: 4200, sharedLoadAvailableM3: 19, bio: 'Qurilish va umumiy yuklar uchun ishonchli haydovchi.' },
+  { id: 'driver-3', userId: 'u7', vehicleTypeId: 'livestock', vehiclePlate: '60 C 333 DA', availableFrom: '2025-01-11T05:00:00.000Z', currentRegionId: 'r3', rating: 4.8, ratingCount: 44, completedTrips: 68, sharedLoadAvailableKg: 2500, sharedLoadAvailableM3: 13, bio: 'Chorva yuklarini xavfsiz tashish tajribasi.' },
+];
+
+function futureCargoDate(daysFromToday: number): string {
+  const date = new Date();
+  date.setUTCHours(0, 0, 0, 0);
+  date.setUTCDate(date.getUTCDate() + daysFromToday);
+  return date.toISOString().slice(0, 10);
+}
+
+export const cargoLoads: StoredCargoLoad[] = [
+  { id: 'cargo-1', shipperId: 'u1', title: 'Samarqandga M150 g‘isht', description: 'Palletdagi qurilish g‘ishtlari.', cargoType: 'construction', weightKg: 2800, volumeM3: 14, lengthCm: 300, widthCm: 180, heightCm: 160, pickupRegionId: 'r1', pickupDistrictId: 'd104', pickupAddress: 'Sergeli sanoat hududi', deliveryRegionId: 'r6', deliveryDistrictId: 'd22', deliveryAddress: 'Samarqand qurilish bozori', distanceKm: 310, pickupDate: futureCargoDate(14), budgetUzs: 1850000, sharedLoadAllowed: true, status: 'negotiating', createdAt: '2025-01-08T08:00:00.000Z' },
+  { id: 'cargo-2', shipperId: 'u2', title: 'Farg‘onaga sovutilgan mevalar', description: 'Sovutilgan holda tashish talab qilinadi.', cargoType: 'perishable', weightKg: 900, volumeM3: 6, lengthCm: 220, widthCm: 140, heightCm: 160, pickupRegionId: 'r1', pickupDistrictId: 'd2', pickupAddress: 'Chilonzor ulgurji bozori', deliveryRegionId: 'r4', deliveryDistrictId: 'd15', deliveryAddress: 'Farg‘ona dehqon bozori', distanceKm: 325, pickupDate: futureCargoDate(18), budgetUzs: 1600000, sharedLoadAllowed: true, status: 'open', createdAt: '2025-01-08T10:00:00.000Z' },
+  { id: 'cargo-3', shipperId: 'u3', title: 'Andijonga naslli qoramol', description: 'Ikki bosh naslli qoramol, ehtiyotkor tashish kerak.', cargoType: 'livestock', weightKg: 1300, volumeM3: 10, lengthCm: null, widthCm: null, heightCm: null, pickupRegionId: 'r6', pickupDistrictId: 'd22', pickupAddress: 'Samarqand chorva bozori', deliveryRegionId: 'r3', deliveryDistrictId: 'd11', deliveryAddress: 'Andijon tumani', distanceKm: 540, pickupDate: futureCargoDate(21), budgetUzs: 3900000, sharedLoadAllowed: false, status: 'open', createdAt: '2025-01-09T08:30:00.000Z' },
+];
+
+export const cargoOffers: StoredCargoOffer[] = [
+  { id: 'offer-1', loadId: 'cargo-1', driverId: 'driver-2', amountUzs: 1950000, message: 'Ertalab yuklab, shu kunning o‘zida yetkazaman.', status: 'countered', counterAmountUzs: 1850000, counterMessage: '1 850 000 so‘mga kelishamizmi?', createdAt: '2025-01-08T09:00:00.000Z', updatedAt: '2025-01-08T10:00:00.000Z' },
 ];
 
 // ─── HELPERS ──────────────────────────────────────────────────────────────────
