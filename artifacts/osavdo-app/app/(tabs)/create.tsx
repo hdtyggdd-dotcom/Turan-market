@@ -291,7 +291,13 @@ export default function CreateScreen() {
                 fontFamily: 'Inter_500Medium',
                 color: selectedCategoryId === cat.id ? colors.primaryForeground : colors.text,
               }}>
-                {cat.name.split(' ')[0]}
+                 {cat.id === 'cat15'
+                   ? 'Sanoat'
+                   : cat.id === 'cat16'
+                     ? 'B2B / Optom'
+                     : cat.id === 'cat17'
+                       ? 'Ishlatilgan'
+                       : cat.name.split(' ')[0]}
               </Text>
             </TouchableOpacity>
           ))}

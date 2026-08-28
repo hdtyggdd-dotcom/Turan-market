@@ -56,6 +56,19 @@ const CATEGORY_KEYWORDS: Record<string, string[]> = {
     "sotiladi", "garaj", "ombor", "ofis", "do'kon", "magazin", "bozor",
     "ko'chmas mulk", "apartment",
   ],
+  cat15: [
+    "sanoat", "ishlab chiqarish", "zavod", "fabrika", "sex", "stanok", "uskuna",
+    "metall", "plastmassa", "polimer", "tekstil", "tikuvchilik", "qadoqlash",
+    "kimyo", "yog'och", "ishlab chiqaruvchi", "mahsulot ishlab chiqarish",
+  ],
+  cat16: [
+    "optom", "ulgurji", "b2b", "partiya", "partiyalar", "korxona", "distribyutor",
+    "import", "eksport", "diler", "katta hajm", "wholesale", "bulk",
+  ],
+  cat17: [
+    "ishlatilgan", "eski", "b/u", "second hand", "second-hand", "podderjanniy",
+    "avval ishlatilgan", "arzon ishlatilgan",
+  ],
 };
 
 /**

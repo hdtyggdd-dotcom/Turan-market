@@ -128,7 +128,15 @@ export default function SearchScreen() {
                 }}
               >
                 <Text style={{ fontSize: 13, color: selectedCategory === cat.id ? colors.primaryForeground : colors.text }}>
-                  {cat.icon} {cat.name.split(' ')[0]}
+                  {cat.icon} {
+                    cat.id === 'cat15'
+                      ? 'Sanoat'
+                      : cat.id === 'cat16'
+                        ? 'B2B / Optom'
+                        : cat.id === 'cat17'
+                          ? 'Ishlatilgan'
+                          : cat.name.split(' ')[0]
+                  }
                 </Text>
               </TouchableOpacity>
             ))}
