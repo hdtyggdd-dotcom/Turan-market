@@ -81,7 +81,6 @@ export default function LoginScreen() {
         {/* Logo */}
         <View style={styles.logoSection}>
           <Image source={require('@/assets/images/turan-logo.png')} style={styles.logoImage} resizeMode="contain" />
-          <Text style={[styles.appName, { color: colors.primary }]}>Turan Market</Text>
           <Text style={[styles.tagline, { color: colors.mutedForeground }]}>{t('appTagline')}</Text>
         </View>
 
@@ -194,8 +193,7 @@ const styles = StyleSheet.create({
   container: { flex: 1 },
   content: { paddingHorizontal: 20, gap: 14 },
   logoSection: { alignItems: 'center', gap: 6, marginBottom: 6 },
-  logoImage: { width: 100, height: 100 },
-  appName: { fontSize: 28, fontFamily: 'Inter_700Bold', letterSpacing: 0.5 },
+  logoImage: { width: 230, height: 230 },
   tagline: { fontSize: 13, fontFamily: 'Inter_400Regular', textAlign: 'center' },
   countrySelector: {
     flexDirection: 'row', alignItems: 'center', gap: 10,
