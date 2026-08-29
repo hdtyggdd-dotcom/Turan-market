@@ -141,6 +141,8 @@ export interface DetectedLocation {
   currency: string;
   regionId: string;
   regionName: string;
+  districtId?: string;
+  districtName?: string;
   distanceKm: number;
 }
 
@@ -290,10 +292,10 @@ export interface CreateListingRequest {
   price: number;
   priceUnit?: string;
   images?: string[];
-  categoryId: string;
+  categoryId?: string;
   subcategoryId?: string;
-  regionId: string;
-  districtId: string;
+  regionId?: string;
+  districtId?: string;
   neighborhoodId?: string;
   lat?: number;
   lng?: number;

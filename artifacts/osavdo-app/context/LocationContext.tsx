@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useI18n } from '@/context/I18nContext';
 
 interface LocationState {
   countryId: string | null;
@@ -38,6 +39,20 @@ const defaultState: LocationState = {
 
 export function LocationProvider({ children }: { children: React.ReactNode }) {
   const [location, setLocationState] = useState<LocationState>(defaultState);
+  const { setLangByCountry } = useI18n();
+
+  React.useEffect(() => {
+    AsyncStorage.getItem(LOCATION_KEY).then((saved) => {
+      if (!saved) return;
+      try {
+        const stored = JSON.parse(saved) as Partial<LocationState>;
+        setLocationState({ ...defaultState, ...stored });
+        if (stored.countryId) setLangByCountry(stored.countryId);
+      } catch {
+        // Ignore a corrupted old location and continue with a clean state.
+      }
+    });
+  }, [setLangByCountry]);
 
   const setLocation = useCallback((loc: Partial<LocationState>) => {
     setLocationState(prev => {

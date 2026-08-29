@@ -16,7 +16,7 @@ function haversine(lat1: number, lng1: number, lat2: number, lng2: number): numb
 // ISO country_code → our country IDs
 const ISO_MAP: Record<string, string> = {
   uz: 'uz', kz: 'kz', kg: 'kg', tj: 'tj',
-  tm: 'tm', af: 'af', ru: 'ru', cn: 'cn', ir: 'ir',
+  tm: 'tm', af: 'af', ru: 'ru', cn: 'cn', ir: 'ir', tr: 'tr',
 };
 
 // GET /locations/countries
@@ -84,6 +84,19 @@ router.post("/locations/detect", async (req, res) => {
       if (d < minDist) { minDist = d; nearest = r; }
     }
 
+    // For Uzbekistan and other countries with district data, also resolve
+    // the closest district so listing creation needs no manual selection.
+    const countryDistricts = districts.filter(d => d.regionId === nearest.id);
+    let nearestDistrict = countryDistricts[0];
+    let districtDist = Infinity;
+    for (const d of countryDistricts) {
+      const distance = haversine(lat, lng, d.lat, d.lng);
+      if (distance < districtDist) {
+        districtDist = distance;
+        nearestDistrict = d;
+      }
+    }
+
     const country = countries.find(c => c.id === countryId)!;
     res.json({
       countryId,
@@ -93,6 +106,8 @@ router.post("/locations/detect", async (req, res) => {
       currency: country.currency,
       regionId: nearest.id,
       regionName: nearest.name,
+      districtId: nearestDistrict?.id,
+      districtName: nearestDistrict?.name,
       distanceKm: Math.round(minDist),
     });
   } catch {

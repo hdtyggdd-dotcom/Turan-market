@@ -230,10 +230,10 @@ router.post("/listings", authenticateToken, (req: AuthRequest, res) => {
     price: number;
     priceUnit?: string;
     images?: string[];
-    categoryId: string;
+    categoryId?: string;
     subcategoryId?: string;
-    regionId: string;
-    districtId: string;
+    regionId?: string;
+    districtId?: string;
     neighborhoodId?: string;
     lat?: number;
     lng?: number;
@@ -242,14 +242,28 @@ router.post("/listings", authenticateToken, (req: AuthRequest, res) => {
     customSubcategoryName?: string;
   };
 
-  // Ro'yhatda yo'q xizmat — AI avtomatik subkategoriya yaratadi
+  const owner = users.find((u) => u.id === req.userId);
+  const sourceText = [body.title, body.description].filter(Boolean).join(" ");
+  const submittedCategory = body.categoryId && categories.some((c) => c.id === body.categoryId)
+    ? body.categoryId
+    : undefined;
+
+  // Kategoriya yuborilmasa, tovar ma'lumotidan avtomatik aniqlanadi.
+  let resolvedCategoryId = submittedCategory ?? findBestCategory(sourceText);
   let resolvedSubcategoryId = body.subcategoryId ?? null;
-  let resolvedCategoryId = body.categoryId;
 
   if (body.customSubcategoryName?.trim()) {
-    const sub = ensureSubcategory(body.customSubcategoryName.trim(), body.categoryId);
+    const sub = ensureSubcategory(body.customSubcategoryName.trim(), resolvedCategoryId);
     resolvedSubcategoryId = sub.id;
     resolvedCategoryId = sub.categoryId; // AI boshqa kategoriyaga o'tkazgan bo'lishi mumkin
+  }
+
+  // Location is taken from the user's detected profile when omitted by the app.
+  const resolvedRegionId = body.regionId ?? owner?.regionId ?? undefined;
+  const resolvedDistrictId = body.districtId ?? owner?.districtId ?? undefined;
+  if (!resolvedRegionId || !resolvedDistrictId) {
+    res.status(400).json({ error: "location_required", message: "Joylashuvni aniqlash kerak" });
+    return;
   }
 
   // Ishlab chiqaruvchi bo'lsa admin tasdiqlashiga yuboriladi
@@ -266,8 +280,8 @@ router.post("/listings", authenticateToken, (req: AuthRequest, res) => {
     categoryId: resolvedCategoryId,
     subcategoryId: resolvedSubcategoryId,
     userId: req.userId!,
-    regionId: body.regionId,
-    districtId: body.districtId,
+    regionId: resolvedRegionId,
+    districtId: resolvedDistrictId,
     neighborhoodId: body.neighborhoodId ?? null,
     lat: body.lat ?? null,
     lng: body.lng ?? null,

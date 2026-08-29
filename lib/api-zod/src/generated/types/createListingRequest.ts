@@ -16,10 +16,10 @@ export interface CreateListingRequest {
   price: number;
   priceUnit?: string;
   images?: string[];
-  categoryId: string;
+  categoryId?: string;
   subcategoryId?: string;
-  regionId: string;
-  districtId: string;
+  regionId?: string;
+  districtId?: string;
   neighborhoodId?: string;
   lat?: number;
   lng?: number;

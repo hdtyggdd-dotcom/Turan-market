@@ -10,15 +10,17 @@ import {
   Platform,
   ActivityIndicator,
 } from 'react-native';
+import * as ExpoLocation from 'expo-location';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useColors } from '@/hooks/useColors';
 import { Feather } from '@expo/vector-icons';
-import { useGetCategories, useCreateListing, useGetRegions, useGetDistricts, getGetDistrictsQueryKey } from '@workspace/api-client-react';
+import { useCreateListing, useDetectLocation } from '@workspace/api-client-react';
 import { ImageUploader } from '@/components/ImageUploader';
 import { useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
 import { useAuth } from '@/context/AuthContext';
 import { useLocation } from '@/context/LocationContext';
+import { useI18n } from '@/context/I18nContext';
 import { MarketAnalysisModal } from '@/components/MarketAnalysisModal';
 
 export default function CreateScreen() {
@@ -26,34 +28,25 @@ export default function CreateScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const { user } = useAuth();
-  const { countryId } = useLocation();
+  const {
+    countryName,
+    regionId: detectedRegionId,
+    regionName: detectedRegionName,
+    districtId: detectedDistrictId,
+    districtName: detectedDistrictName,
+    setLocation,
+  } = useLocation();
+  const { t, lang, setLangByCountry } = useI18n();
   const queryClient = useQueryClient();
   const topPadding = Platform.OS === 'web' ? 67 : insets.top;
 
   const [title, setTitle] = useState('');
-  const [titleRu, setTitleRu] = useState('');
-  const [description, setDescription] = useState('');
   const [price, setPrice] = useState('');
-  const [priceUnit, setPriceUnit] = useState('');
-  const [selectedCategoryId, setSelectedCategoryId] = useState('');
-  const [selectedSubcategoryId, setSelectedSubcategoryId] = useState('');
-  const [regionId, setRegionId] = useState(user?.regionId ?? '');
-  const [districtId, setDistrictId] = useState(user?.districtId ?? '');
-  const [listingType, setListingType] = useState<'savdo' | 'xizmat'>('savdo');
-  const [sellerType, setSellerType] = useState<'sotuvchi' | 'ishlab_chiqaruvchi'>('sotuvchi');
   const [images, setImages] = useState<string[]>([]);
-  const [customSubcategoryName, setCustomSubcategoryName] = useState('');
-  const [showCustomSubcat, setShowCustomSubcat] = useState(false);
   const [analysisListingId, setAnalysisListingId] = useState<string | null>(null);
+  const [isPreparing, setIsPreparing] = useState(false);
 
-  const { data: categories } = useGetCategories();
-  const { data: regions } = useGetRegions(
-    { countryId: countryId ?? 'uz' },
-  );
-  const { data: districtsData } = useGetDistricts(
-    { regionId: regionId || undefined },
-    { query: { enabled: !!regionId, queryKey: getGetDistrictsQueryKey({ regionId: regionId || undefined }) } },
-  );
+  const detectLocationMutation = useDetectLocation();
 
   const createMutation = useCreateListing({
     mutation: {
@@ -63,48 +56,79 @@ export default function CreateScreen() {
         setAnalysisListingId(data.id);
       },
       onError: () => {
+        setIsPreparing(false);
         Alert.alert("Xato", "E'lon joylashtirishda xato yuz berdi");
       },
     },
   });
 
-  const selectedCategory = categories?.find((c) => c.id === selectedCategoryId);
+  async function resolveAutomaticLocation() {
+    const knownRegionId = detectedRegionId ?? user?.regionId;
+    const knownDistrictId = detectedDistrictId ?? user?.districtId;
+    if (knownRegionId && knownDistrictId) {
+      return { regionId: knownRegionId, districtId: knownDistrictId };
+    }
 
-  function handleSubmit() {
+    if (Platform.OS === 'web' && typeof navigator === 'undefined') return null;
+
+    try {
+      const permission = await ExpoLocation.requestForegroundPermissionsAsync();
+      if (!permission.granted) return null;
+      const position = await ExpoLocation.getCurrentPositionAsync({
+        accuracy: ExpoLocation.Accuracy.Balanced,
+      });
+      const detected = await detectLocationMutation.mutateAsync({
+        data: { lat: position.coords.latitude, lng: position.coords.longitude },
+      });
+      const nextDistrictId = detected.districtId ?? detected.regionId;
+      setLocation({
+        countryId: detected.countryId,
+        countryName: detected.countryName,
+        countryFlag: detected.countryFlag,
+        currency: detected.currency,
+        regionId: detected.regionId,
+        regionName: detected.regionName,
+        districtId: nextDistrictId,
+        districtName: detected.districtName ?? detected.regionName,
+        lat: position.coords.latitude,
+        lng: position.coords.longitude,
+      });
+      setLangByCountry(detected.countryId);
+      return { regionId: detected.regionId, districtId: nextDistrictId };
+    } catch {
+      return null;
+    }
+  }
+
+  async function handleSubmit() {
     if (!title.trim()) {
-      Alert.alert("Xato", "Sarlavha kiriting");
+      Alert.alert("Xato", "Tovar haqida ma'lumot kiriting");
       return;
     }
     if (!price || isNaN(Number(price))) {
       Alert.alert("Xato", "Narxni kiriting");
       return;
     }
-    if (!selectedCategoryId) {
-      Alert.alert("Xato", "Kategoriya tanlang");
+    if (images.length === 0) {
+      Alert.alert("Xato", "Kamida bitta rasm qo'shing");
       return;
     }
-    if (!regionId || !districtId) {
-      Alert.alert("Xato", "Viloyat va tumanni tanlang");
+
+    setIsPreparing(true);
+    const location = await resolveAutomaticLocation();
+    if (!location) {
+      setIsPreparing(false);
+      Alert.alert("Xato", "Joylashuvni aniqlab bo'lmadi. GPS ruxsatini yoqing.");
       return;
     }
 
     createMutation.mutate({
       data: {
         title: title.trim(),
-        titleRu: titleRu.trim() || undefined,
-        description: description.trim() || undefined,
         price: Number(price),
-        priceUnit: priceUnit.trim() || undefined,
-        categoryId: selectedCategoryId,
-        subcategoryId: selectedSubcategoryId || undefined,
-        regionId,
-        districtId,
         images,
-        listingType,
-        sellerType,
-        customSubcategoryName: showCustomSubcat && customSubcategoryName.trim()
-          ? customSubcategoryName.trim()
-          : undefined,
+        regionId: location.regionId,
+        districtId: location.districtId,
       },
     });
   }
@@ -112,7 +136,7 @@ export default function CreateScreen() {
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <View style={[styles.header, { paddingTop: topPadding + 12, backgroundColor: colors.card, borderBottomColor: colors.border }]}>
-        <Text style={[styles.headerTitle, { color: colors.text }]}>E'lon joylash</Text>
+        <Text style={[styles.headerTitle, { color: colors.text }]}>{t('addListing')}</Text>
       </View>
 
       <MarketAnalysisModal
@@ -129,334 +153,77 @@ export default function CreateScreen() {
         contentContainerStyle={[styles.content, { paddingBottom: Platform.OS === 'web' ? 84 + 34 : 100 }]}
         keyboardShouldPersistTaps="handled"
       >
-        {/* ─── E'lon turi: Savdo / Xizmat ─── */}
-        <FieldLabel label="E'lon turi *" colors={colors} />
-        <View style={styles.twoChipRow}>
-          {([
-            { val: 'savdo', icon: '🛒', label: 'Savdo' },
-            { val: 'xizmat', icon: '🛠️', label: 'Xizmat' },
-          ] as const).map(({ val, icon, label }) => (
-            <TouchableOpacity
-              key={val}
-              style={[
-                styles.halfChip,
-                {
-                  backgroundColor: listingType === val ? colors.primary : colors.card,
-                  borderColor: listingType === val ? colors.primary : colors.border,
-                },
-              ]}
-              onPress={() => setListingType(val)}
-            >
-              <Text style={{ fontSize: 18 }}>{icon}</Text>
-              <Text style={{ fontSize: 13, fontFamily: 'Inter_600SemiBold', color: listingType === val ? colors.primaryForeground : colors.text }}>
-                {label}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-
-        {/* ─── Sotuvchi turi (faqat savdoda) ─── */}
-        {listingType === 'savdo' && (
-          <>
-            <FieldLabel label="Siz kimni ifodalaysiz?" colors={colors} />
-            <View style={styles.twoChipRow}>
-              {([
-                { val: 'sotuvchi', icon: '🛒', label: 'Sotuvchi', sub: 'Tayyor mahsulot' },
-                { val: 'ishlab_chiqaruvchi', icon: '🏭', label: 'Ishlab chiqaruvchi', sub: "O'zim yasayman" },
-              ] as const).map(({ val, icon, label, sub }) => (
-                <TouchableOpacity
-                  key={val}
-                  style={[
-                    styles.sellerTypeChip,
-                    {
-                      backgroundColor: sellerType === val ? colors.primary + '15' : colors.card,
-                      borderColor: sellerType === val ? colors.primary : colors.border,
-                      borderWidth: sellerType === val ? 2 : 1,
-                    },
-                  ]}
-                  onPress={() => setSellerType(val)}
-                >
-                  <Text style={{ fontSize: 22 }}>{icon}</Text>
-                  <Text style={{ fontSize: 13, fontFamily: 'Inter_700Bold', color: sellerType === val ? colors.primary : colors.text }}>
-                    {label}
-                  </Text>
-                  <Text style={{ fontSize: 11, fontFamily: 'Inter_400Regular', color: colors.mutedForeground }}>
-                    {sub}
-                  </Text>
-                  {val === 'ishlab_chiqaruvchi' && (
-                    <View style={[styles.adminNote, { backgroundColor: colors.secondary }]}>
-                      <Text style={{ fontSize: 10, fontFamily: 'Inter_400Regular', color: colors.mutedForeground }}>
-                        ⏳ Admin tasdiqlash kerak
-                      </Text>
-                    </View>
-                  )}
-                </TouchableOpacity>
-              ))}
-            </View>
-          </>
-        )}
-
         {/* ─── Rasmlar ─── */}
         <View style={{ marginTop: 8 }}>
           <ImageUploader
             images={images}
             onChange={setImages}
             max={5}
-            label="📸 Rasmlar (ixtiyoriy)"
+            label="📸 Rasm *"
           />
         </View>
 
-        {/* ─── Title ─── */}
-        <FieldLabel label="Sarlavha *" colors={colors} />
+        {/* ─── Product information ─── */}
+        <FieldLabel label="Tovar haqida ma'lumot *" colors={colors} />
         <TextInput
-          style={[styles.input, { borderColor: colors.border, color: colors.text, backgroundColor: colors.card }]}
-          placeholder="Masalan: Sut sigir sotiladi"
+          style={[styles.input, styles.textArea, { borderColor: colors.border, color: colors.text, backgroundColor: colors.card }]}
+          placeholder="Masalan: Ishlatilgan iPhone 13, yaxshi holatda..."
           placeholderTextColor={colors.mutedForeground}
           value={title}
           onChangeText={setTitle}
-          maxLength={100}
-        />
-
-        {/* Russian title */}
-        <FieldLabel label="Sarlavha (Ruscha, ixtiyoriy)" colors={colors} />
-        <TextInput
-          style={[styles.input, { borderColor: colors.border, color: colors.text, backgroundColor: colors.card }]}
-          placeholder="Название на русском"
-          placeholderTextColor={colors.mutedForeground}
-          value={titleRu}
-          onChangeText={setTitleRu}
-          maxLength={100}
-        />
-
-        {/* Description */}
-        <FieldLabel label="Tavsif" colors={colors} />
-        <TextInput
-          style={[styles.input, styles.textArea, { borderColor: colors.border, color: colors.text, backgroundColor: colors.card }]}
-          placeholder="Mahsulot haqida batafsil ma'lumot..."
-          placeholderTextColor={colors.mutedForeground}
-          value={description}
-          onChangeText={setDescription}
           multiline
           numberOfLines={4}
-          maxLength={1000}
+          maxLength={100}
         />
 
         {/* Price */}
-        <View style={styles.priceRow}>
-          <View style={{ flex: 2 }}>
-            <FieldLabel label="Narx (so'm) *" colors={colors} />
-            <TextInput
-              style={[styles.input, { borderColor: colors.border, color: colors.text, backgroundColor: colors.card }]}
-              placeholder="0"
-              placeholderTextColor={colors.mutedForeground}
-              value={price}
-              onChangeText={setPrice}
-              keyboardType="numeric"
-            />
-          </View>
-          <View style={{ flex: 1.2 }}>
-            <FieldLabel label="O'lchov birligi" colors={colors} />
-            <TextInput
-              style={[styles.input, { borderColor: colors.border, color: colors.text, backgroundColor: colors.card }]}
-              placeholder="dona, kg, m..."
-              placeholderTextColor={colors.mutedForeground}
-              value={priceUnit}
-              onChangeText={setPriceUnit}
-              maxLength={20}
-            />
-          </View>
-        </View>
+        <FieldLabel label={`${t('price')} (so'm) *`} colors={colors} />
+        <TextInput
+          style={[styles.input, { borderColor: colors.border, color: colors.text, backgroundColor: colors.card }]}
+          placeholder="0"
+          placeholderTextColor={colors.mutedForeground}
+          value={price}
+          onChangeText={setPrice}
+          keyboardType="numeric"
+        />
 
-        {/* Category */}
-        <FieldLabel label="Kategoriya *" colors={colors} />
-        <View style={styles.chipGrid}>
-          {(categories ?? []).map((cat) => (
-            <TouchableOpacity
-              key={cat.id}
-              style={[
-                styles.catChip,
-                {
-                  backgroundColor: selectedCategoryId === cat.id ? colors.primary : colors.card,
-                  borderColor: selectedCategoryId === cat.id ? colors.primary : colors.border,
-                },
-              ]}
-              onPress={() => {
-                setSelectedCategoryId(cat.id);
-                setSelectedSubcategoryId('');
-              }}
-            >
-              <Text style={{ fontSize: 14 }}>{cat.icon}</Text>
-              <Text style={{
-                fontSize: 12,
-                fontFamily: 'Inter_500Medium',
-                color: selectedCategoryId === cat.id ? colors.primaryForeground : colors.text,
-              }}>
-                 {cat.id === 'cat15'
-                   ? 'Sanoat'
-                   : cat.id === 'cat16'
-                     ? 'B2B / Optom'
-                     : cat.id === 'cat17'
-                       ? 'Ishlatilgan'
-                       : cat.name.split(' ')[0]}
+        {/* AI-filled fields */}
+        <View style={[styles.autoCard, { backgroundColor: colors.secondary, borderColor: colors.border }]}>
+          <View style={styles.autoHeader}>
+            <Text style={{ fontSize: 20 }}>✨</Text>
+            <View style={{ flex: 1 }}>
+              <Text style={[styles.autoTitle, { color: colors.text }]}>Qolganini AI joylaydi</Text>
+              <Text style={[styles.autoSubtitle, { color: colors.mutedForeground }]}>
+                Kategoriya, viloyat va tuman avtomatik aniqlanadi
               </Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-
-        {/* Subcategory */}
-        {selectedCategory && (
-          <>
-            <FieldLabel label="Kichik kategoriya" colors={colors} />
-            <View style={styles.chipGrid}>
-              {selectedCategory.subcategories.map((sub) => (
-                <TouchableOpacity
-                  key={sub.id}
-                  style={[
-                    styles.catChip,
-                    {
-                      backgroundColor: (!showCustomSubcat && selectedSubcategoryId === sub.id) ? colors.secondary : colors.card,
-                      borderColor: (!showCustomSubcat && selectedSubcategoryId === sub.id) ? colors.primary : colors.border,
-                    },
-                  ]}
-                  onPress={() => {
-                    setSelectedSubcategoryId(sub.id);
-                    setShowCustomSubcat(false);
-                    setCustomSubcategoryName('');
-                  }}
-                >
-                  <Text style={{
-                    fontSize: 12,
-                    fontFamily: 'Inter_500Medium',
-                    color: (!showCustomSubcat && selectedSubcategoryId === sub.id) ? colors.primary : colors.text,
-                  }}>
-                    {sub.name}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-
-              {/* Ro'yhatda yo'q — yangi xizmat */}
-              <TouchableOpacity
-                style={[
-                  styles.catChip,
-                  {
-                    backgroundColor: showCustomSubcat ? '#8b5cf615' : colors.card,
-                    borderColor: showCustomSubcat ? '#8b5cf6' : colors.border,
-                    borderStyle: showCustomSubcat ? 'solid' : 'dashed',
-                  },
-                ]}
-                onPress={() => {
-                  setShowCustomSubcat(true);
-                  setSelectedSubcategoryId('');
-                }}
-              >
-                <Text style={{ fontSize: 12 }}>✨</Text>
-                <Text style={{
-                  fontSize: 12,
-                  fontFamily: 'Inter_500Medium',
-                  color: showCustomSubcat ? '#8b5cf6' : colors.mutedForeground,
-                }}>
-                  Ro'yhatda yo'q
-                </Text>
-              </TouchableOpacity>
             </View>
-
-            {/* Yangi xizmat nomi kiriting */}
-            {showCustomSubcat && (
-              <View style={{ marginTop: 8 }}>
-                <TextInput
-                  style={[
-                    styles.input,
-                    {
-                      borderColor: '#8b5cf6',
-                      color: colors.text,
-                      backgroundColor: colors.card,
-                      borderWidth: 1.5,
-                    },
-                  ]}
-                  placeholder="Masalan: Tikuvchi, Ustoz, Kompyuter ta'miri..."
-                  placeholderTextColor={colors.mutedForeground}
-                  value={customSubcategoryName}
-                  onChangeText={setCustomSubcategoryName}
-                  maxLength={60}
-                  autoFocus
-                />
-                <Text style={{ fontSize: 11, fontFamily: 'Inter_400Regular', color: '#8b5cf6', marginTop: 4 }}>
-                  ✨ AI avtomatik mos kategoriyaga joylaydi
-                </Text>
-              </View>
-            )}
-          </>
-        )}
-
-        {/* Region */}
-        <FieldLabel label="Viloyat *" colors={colors} />
-        <View style={styles.chipGrid}>
-          {(regions ?? []).map((reg) => (
-            <TouchableOpacity
-              key={reg.id}
-              style={[
-                styles.catChip,
-                {
-                  backgroundColor: regionId === reg.id ? colors.primary : colors.card,
-                  borderColor: regionId === reg.id ? colors.primary : colors.border,
-                },
-              ]}
-              onPress={() => { setRegionId(reg.id); setDistrictId(''); }}
-            >
-              <Text style={{
-                fontSize: 12,
-                fontFamily: 'Inter_500Medium',
-                color: regionId === reg.id ? colors.primaryForeground : colors.text,
-              }}>
-                {reg.name}
-              </Text>
-            </TouchableOpacity>
-          ))}
+          </View>
+          <Text style={[styles.autoRow, { color: colors.mutedForeground }]}>
+            📍 {countryName ?? "Joylashuvingiz GPS orqali aniqlanadi"}
+            {detectedRegionName ? ` · ${detectedRegionName}` : ''}
+            {detectedDistrictName ? ` · ${detectedDistrictName}` : ''}
+          </Text>
+          <Text style={[styles.autoRow, { color: colors.mutedForeground }]}>
+            🗂️ Mahsulot ma'lumotidan mos kategoriya topiladi
+          </Text>
+          <Text style={[styles.autoRow, { color: colors.mutedForeground }]}>
+            🌐 Til: {lang.toUpperCase()} · Valyuta joylashuvga mos
+          </Text>
         </View>
-
-        {/* District */}
-        {regionId && (
-          <>
-            <FieldLabel label="Tuman *" colors={colors} />
-            <View style={styles.chipGrid}>
-              {(districtsData ?? []).map((dist) => (
-                <TouchableOpacity
-                  key={dist.id}
-                  style={[
-                    styles.catChip,
-                    {
-                      backgroundColor: districtId === dist.id ? colors.primary : colors.card,
-                      borderColor: districtId === dist.id ? colors.primary : colors.border,
-                    },
-                  ]}
-                  onPress={() => setDistrictId(dist.id)}
-                >
-                  <Text style={{
-                    fontSize: 12,
-                    fontFamily: 'Inter_500Medium',
-                    color: districtId === dist.id ? colors.primaryForeground : colors.text,
-                  }}>
-                    {dist.name}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-          </>
-        )}
 
         {/* Submit */}
         <TouchableOpacity
           style={[styles.submitBtn, { backgroundColor: colors.primary, opacity: createMutation.isPending ? 0.7 : 1 }]}
           onPress={handleSubmit}
-          disabled={createMutation.isPending}
+          disabled={createMutation.isPending || isPreparing}
         >
-          {createMutation.isPending ? (
+          {createMutation.isPending || isPreparing ? (
             <ActivityIndicator color={colors.primaryForeground} />
           ) : (
             <>
               <Feather name="plus-circle" size={18} color={colors.primaryForeground} />
               <Text style={[styles.submitText, { color: colors.primaryForeground }]}>
-                E'lonni joylash
+                {t('publish')}
               </Text>
             </>
           )}
@@ -509,6 +276,31 @@ const styles = StyleSheet.create({
   priceRow: {
     flexDirection: 'row',
     gap: 10,
+  },
+  autoCard: {
+    borderRadius: 14,
+    borderWidth: 1,
+    padding: 14,
+    gap: 8,
+    marginTop: 4,
+  },
+  autoHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  autoTitle: {
+    fontSize: 15,
+    fontFamily: 'Inter_700Bold',
+  },
+  autoSubtitle: {
+    fontSize: 12,
+    fontFamily: 'Inter_400Regular',
+    marginTop: 2,
+  },
+  autoRow: {
+    fontSize: 12,
+    fontFamily: 'Inter_400Regular',
   },
   chipGrid: {
     flexDirection: 'row',

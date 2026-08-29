@@ -14,5 +14,7 @@ export interface DetectedLocation {
   currency: string;
   regionId: string;
   regionName: string;
+  districtId?: string;
+  districtName?: string;
   distanceKm: number;
 }

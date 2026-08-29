@@ -12,6 +12,7 @@ import * as ExpoLocation from 'expo-location';
 import { useDetectLocation, useGetCountries } from '@workspace/api-client-react';
 import { useLocation } from '@/context/LocationContext';
 import { useI18n } from '@/context/I18nContext';
+import { LANGUAGE_OPTIONS, type LangCode } from '@/constants/i18n';
 import { useColors } from '@/hooks/useColors';
 
 interface Props {
@@ -24,16 +25,18 @@ type Step = 'idle' | 'requesting' | 'detecting' | 'confirm' | 'pick' | 'error';
 interface Detected {
   countryId: string; countryName: string; countryFlag: string;
   currency: string; dialCode: string;
-  regionId: string; regionName: string; distanceKm: number;
+  regionId: string; regionName: string;
+  districtId?: string; districtName?: string; distanceKm: number;
 }
 
 export function CountrySetupModal({ visible, onDone }: Props) {
   const colors = useColors();
   const { setLocation } = useLocation();
-  const { t, setLangByCountry } = useI18n();
+  const { t, lang, setLang, setLangByCountry } = useI18n();
   const [step, setStep] = useState<Step>('idle');
   const [errorMsg, setErrorMsg] = useState('');
   const [detected, setDetected] = useState<Detected | null>(null);
+  const [languageOverride, setLanguageOverride] = useState(false);
 
   const { data: allCountries } = useGetCountries();
 
@@ -73,7 +76,13 @@ export function CountrySetupModal({ visible, onDone }: Props) {
     }
   }
 
-  function applyCountry(c: { id: string; name: string; flag: string; currency: string; dialCode: string }, regionId?: string, regionName?: string) {
+  function applyCountry(
+    c: { id: string; name: string; flag: string; currency: string; dialCode: string },
+    regionId?: string,
+    regionName?: string,
+    districtId?: string,
+    districtName?: string,
+  ) {
     setLocation({
       countryId: c.id,
       countryName: c.name,
@@ -81,8 +90,10 @@ export function CountrySetupModal({ visible, onDone }: Props) {
       currency: c.currency,
       regionId: regionId ?? null,
       regionName: regionName ?? null,
+      districtId: districtId ?? null,
+      districtName: districtName ?? null,
     });
-    setLangByCountry(c.id);
+    if (!languageOverride) setLangByCountry(c.id);
     onDone();
   }
 
@@ -91,6 +102,7 @@ export function CountrySetupModal({ visible, onDone }: Props) {
     applyCountry(
       { id: detected.countryId, name: detected.countryName, flag: detected.countryFlag, currency: detected.currency, dialCode: detected.dialCode },
       detected.regionId, detected.regionName,
+      detected.districtId, detected.districtName,
     );
   }
 
@@ -138,6 +150,32 @@ export function CountrySetupModal({ visible, onDone }: Props) {
                   {t('skipUz')}
                 </Text>
               </TouchableOpacity>
+
+              <View style={styles.languageSection}>
+                <Text style={[styles.languageTitle, { color: colors.mutedForeground }]}>🌐 Til / Language</Text>
+                <View style={styles.languageGrid}>
+                  {LANGUAGE_OPTIONS.map((option) => (
+                    <TouchableOpacity
+                      key={option.code}
+                      onPress={() => {
+                        setLanguageOverride(true);
+                        setLang(option.code as LangCode);
+                      }}
+                      style={[
+                        styles.languageChip,
+                        {
+                          backgroundColor: lang === option.code ? colors.primary : colors.background,
+                          borderColor: lang === option.code ? colors.primary : colors.border,
+                        },
+                      ]}
+                    >
+                      <Text style={{ color: lang === option.code ? colors.primaryForeground : colors.text, fontSize: 12 }}>
+                        {option.label}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </View>
             </>
           )}
 
@@ -234,6 +272,10 @@ const styles = StyleSheet.create({
   detectedRegion: { fontSize: 14, fontFamily: 'Inter_500Medium', marginBottom: 4 },
   detectedMeta: { fontSize: 13, fontFamily: 'Inter_400Regular' },
   errorBox: { width: '100%', borderWidth: 1, borderRadius: 10, padding: 12, marginTop: 12 },
+  languageSection: { width: '100%', marginTop: 18, paddingTop: 14, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: '#d1d5db' },
+  languageTitle: { fontSize: 12, fontFamily: 'Inter_600SemiBold', textAlign: 'center', marginBottom: 9 },
+  languageGrid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: 7 },
+  languageChip: { borderWidth: 1, borderRadius: 9, paddingHorizontal: 9, paddingVertical: 7 },
   countryRow: {
     flexDirection: 'row', alignItems: 'center', gap: 12,
     paddingVertical: 11, borderBottomWidth: StyleSheet.hairlineWidth, width: '100%',

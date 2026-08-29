@@ -182,6 +182,7 @@ export const countries: StoredCountry[] = [
   { id: 'ru', name: "Rossiya",       nameRu: "Россия",        flag: '🇷🇺', dialCode: '+7',   currency: 'RUB' },
   { id: 'cn', name: "Xitoy",         nameRu: "Китай",         flag: '🇨🇳', dialCode: '+86',  currency: 'CNY' },
   { id: 'ir', name: "Eron",          nameRu: "Иран",          flag: '🇮🇷', dialCode: '+98',  currency: 'IRR' },
+  { id: 'tr', name: "Turkiya",       nameRu: "Турция",        flag: '🇹🇷', dialCode: '+90',  currency: 'TRY' },
 ];
 
 // ─── REGIONS ──────────────────────────────────────────────────────────────────
@@ -273,6 +274,10 @@ export const regions: StoredRegion[] = [
   { id: 'ir8',  countryId: 'ir', name: "Qum",              nameRu: "Кум",                    lat: 34.6401, lng: 50.8764 },
   { id: 'ir9',  countryId: 'ir', name: "Kirmonshoh",       nameRu: "Керманшах",              lat: 34.3277, lng: 47.0780 },
   { id: 'ir10', countryId: 'ir', name: "Urmiya",           nameRu: "Урмия",                  lat: 37.5527, lng: 45.0760 },
+  // ── Turkiya ───────────────────────────────────────────────────────────────
+  { id: 'tr1', countryId: 'tr', name: "Istanbul",           nameRu: "Стамбул",               lat: 41.0082, lng: 28.9784 },
+  { id: 'tr2', countryId: 'tr', name: "Anqara",             nameRu: "Анкара",                 lat: 39.9334, lng: 32.8597 },
+  { id: 'tr3', countryId: 'tr', name: "Izmir",              nameRu: "Измир",                 lat: 38.4237, lng: 27.1428 },
 ];
 
 // ─── DISTRICTS ────────────────────────────────────────────────────────────────

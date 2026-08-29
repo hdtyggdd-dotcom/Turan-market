@@ -1017,6 +1017,10 @@ components:
           type: string
         regionName:
           type: string
+        districtId:
+          type: string
+        districtName:
+          type: string
         distanceKm:
           type: number
       required:
@@ -1279,9 +1283,6 @@ components:
       required:
         - title
         - price
-        - categoryId
-        - regionId
-        - districtId
 
     ListingsResponse:
       type: object

@@ -1,7 +1,22 @@
 // O'Savdo — Multi-language translations
-// 9 countries: uz, kz, kg, tj, tm, af, ru, cn, ir
+// Supported languages: Uzbek, Kazakh, Kyrgyz, Tajik, Turkmen, Dari,
+// Russian, Chinese, Persian, Turkish, and English.
 
-export type LangCode = 'uz' | 'kz' | 'kg' | 'tj' | 'tm' | 'af' | 'ru' | 'cn' | 'ir';
+export type LangCode = 'uz' | 'kz' | 'kg' | 'tj' | 'tm' | 'af' | 'ru' | 'cn' | 'ir' | 'tr' | 'en';
+
+export const LANGUAGE_OPTIONS: Array<{ code: LangCode; label: string }> = [
+  { code: 'uz', label: "O'zbekcha" },
+  { code: 'kz', label: "Қазақша" },
+  { code: 'kg', label: "Кыргызча" },
+  { code: 'cn', label: "中文" },
+  { code: 'tr', label: "Türkçe" },
+  { code: 'ru', label: "Русский" },
+  { code: 'ir', label: "فارسی" },
+  { code: 'tj', label: "Тоҷикӣ" },
+  { code: 'af', label: "دری" },
+  { code: 'tm', label: "Türkmençe" },
+  { code: 'en', label: "English" },
+];
 
 export interface PhoneFormat {
   dialCode: string;
@@ -20,6 +35,8 @@ export const PHONE_FORMATS: Record<LangCode, PhoneFormat> = {
   ru: { dialCode: '+7',   maxDigits: 10, placeholder: '912 345 67 89', mask: 'XXX XXX XX XX' },
   cn: { dialCode: '+86',  maxDigits: 11, placeholder: '138 0013 8000', mask: 'XXX XXXX XXXX' },
   ir: { dialCode: '+98',  maxDigits: 10, placeholder: '912 345 6789',  mask: 'XXX XXX XXXX'  },
+  tr: { dialCode: '+90',  maxDigits: 10, placeholder: '532 123 45 67',  mask: 'XXX XXX XX XX'  },
+  en: { dialCode: '+998', maxDigits: 9,  placeholder: '90 123 45 67',  mask: 'XX XXX XX XX'  },
 };
 
 /** Apply mask formatting to raw digits */
@@ -269,10 +286,56 @@ const ir: Translations = {
   welcomeBack: "خوش برگشتید!", createAccount: "حساب جدید بسازید",
 };
 
-export const TRANSLATIONS: Record<LangCode, Translations> = { uz, kz, kg, tj, tm, af, ru, cn, ir };
+const tr: Translations = {
+  appTagline: "Yerel pazar — bölgenizdeki en iyi fiyatlar",
+  login: "Giriş", register: "Kayıt ol", logout: "Çıkış",
+  phone: "Telefon numarası", password: "Şifre", name: "Ad",
+  selectCountry: "Ülke seçin", country: "Ülke", region: "Bölge/Şehir", district: "İlçe",
+  enterPhone: "Numarayı girin", enterPassword: "Şifreyi girin", enterName: "Adınızı girin",
+  loginBtn: "Giriş yap", registerBtn: "Kayıt ol", nextBtn: "İleri", saveBtn: "Kaydet", cancelBtn: "İptal", confirmBtn: "Onayla",
+  dontHaveAccount: "Hesabınız yok mu?", haveAccount: "Hesabınız var mı?",
+  buyer: "Alıcı", seller: "Satıcı", driver: "Sürücü",
+  buyerDesc: "Ürün satın alırım", sellerDesc: "İlan yayınlarım", driverDesc: "Teslimat yaparım",
+  locationStep: "Konum", infoStep: "Bilgiler",
+  home: "Ana sayfa", search: "Ara", addListing: "İlan", orders: "Siparişler", profile: "Profil",
+  category: "Kategori", subcategory: "Alt kategori", price: "Fiyat", description: "Açıklama", title: "Başlık", images: "Fotoğraflar",
+  publish: "İlanı yayınla", publishing: "Yayınlanıyor...",
+  wrongCredentials: "Telefon veya şifre yanlış", fillAllFields: "Tüm alanları doldurun",
+  passwordTooShort: "Şifre en az 6 karakter olmalı", selectRegion: "Bölge ve ilçeyi seçin",
+  role: "Rol", detectLocation: "Konumumu belirle", detecting: "AI konumu belirliyor...",
+  locationPermissionDenied: "Konum izni verilmedi",
+  countryDetected: "Konumunuz belirlendi", correctLocation: "Evet, doğru", reDetect: "Yeniden belirle", skipUz: "Özbekistan — varsayılan devam",
+  demoHint: "Demo: +998901234567 / test123",
+  welcomeBack: "Tekrar hoş geldiniz!", createAccount: "Yeni hesap oluşturun",
+};
+
+const en: Translations = {
+  appTagline: "Local marketplace — the best prices in your region",
+  login: "Log in", register: "Sign up", logout: "Log out",
+  phone: "Phone number", password: "Password", name: "Name",
+  selectCountry: "Select country", country: "Country", region: "Region/City", district: "District",
+  enterPhone: "Enter your number", enterPassword: "Enter your password", enterName: "Enter your name",
+  loginBtn: "Log in", registerBtn: "Sign up", nextBtn: "Next", saveBtn: "Save", cancelBtn: "Cancel", confirmBtn: "Confirm",
+  dontHaveAccount: "Don't have an account?", haveAccount: "Already have an account?",
+  buyer: "Buyer", seller: "Seller", driver: "Driver",
+  buyerDesc: "I buy products", sellerDesc: "I publish listings", driverDesc: "I deliver goods",
+  locationStep: "Location", infoStep: "Information",
+  home: "Home", search: "Search", addListing: "Listing", orders: "Orders", profile: "Profile",
+  category: "Category", subcategory: "Subcategory", price: "Price", description: "Description", title: "Title", images: "Images",
+  publish: "Publish listing", publishing: "Publishing...",
+  wrongCredentials: "Incorrect phone number or password", fillAllFields: "Fill in all fields",
+  passwordTooShort: "Password must be at least 6 characters", selectRegion: "Select a region and district",
+  role: "Role", detectLocation: "Detect my location", detecting: "AI is detecting your location...",
+  locationPermissionDenied: "Location permission was denied",
+  countryDetected: "Your location was detected", correctLocation: "Yes, correct", reDetect: "Detect again", skipUz: "Uzbekistan — continue by default",
+  demoHint: "Demo: +998901234567 / test123",
+  welcomeBack: "Welcome back!", createAccount: "Create a new account",
+};
+
+export const TRANSLATIONS: Record<LangCode, Translations> = { uz, kz, kg, tj, tm, af, ru, cn, ir, tr, en };
 
 /** Map countryId → default language */
 export const COUNTRY_LANG: Record<string, LangCode> = {
   uz: 'uz', kz: 'kz', kg: 'kg', tj: 'tj',
-  tm: 'tm', af: 'af', ru: 'ru', cn: 'cn', ir: 'ir',
+  tm: 'tm', af: 'af', ru: 'ru', cn: 'cn', ir: 'ir', tr: 'tr',
 };
