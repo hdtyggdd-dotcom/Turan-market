@@ -14,6 +14,8 @@ import { Feather } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useColors } from '@/hooks/useColors';
 import { useGetListing, useCreateOrder, useEstimateDelivery } from '@workspace/api-client-react';
+import { getBaseUrl } from '@workspace/api-client-react';
+import * as WebBrowser from 'expo-web-browser';
 import { useAuth } from '@/context/AuthContext';
 import { useQueryClient } from '@tanstack/react-query';
 import { useLocation } from '@/context/LocationContext';
@@ -42,7 +44,7 @@ export default function ListingDetailScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const { user } = useAuth();
+  const { user, token } = useAuth();
   const { districtId, lat, lng } = useLocation();
   const queryClient = useQueryClient();
   const [quantity, setQuantity] = useState(1);
@@ -57,15 +59,41 @@ export default function ListingDetailScreen() {
   const deliveryMutation = useEstimateDelivery();
   const orderMutation = useCreateOrder({
     mutation: {
-      onSuccess: () => {
+      onSuccess: (order) => {
         queryClient.invalidateQueries({ queryKey: ['getOrders'] });
-        Alert.alert("Buyurtma qabul qilindi!", "Sotuvchi tez orada siz bilan bog'lanadi.", [
-          { text: "OK", onPress: () => router.push('/(tabs)/orders') },
+        Alert.alert("Buyurtma yaratildi", "Buyurtmani hozir xavfsiz Stripe Checkout orqali to'lashingiz mumkin.", [
+          { text: "Keyinroq", onPress: () => router.push('/(tabs)/orders') },
+          { text: "Hozir to'lash", onPress: () => { void openPaymentCheckout(order.id); } },
         ]);
       },
       onError: () => Alert.alert("Xato", "Buyurtma berishda xato yuz berdi"),
     },
   });
+
+  async function openPaymentCheckout(orderId: string) {
+    if (!user || !user.id) {
+      router.push('/auth/login');
+      return;
+    }
+    try {
+      const response = await fetch(`${getBaseUrl()}/api/payments/checkout`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({ orderId, currency: 'uzs' }),
+      });
+      const data = await response.json() as { url?: string; message?: string };
+      if (!response.ok || !data.url) {
+        throw new Error(data.message ?? "To'lov sahifasi ochilmadi");
+      }
+      await WebBrowser.openBrowserAsync(data.url);
+      queryClient.invalidateQueries({ queryKey: ['getOrders'] });
+    } catch (error) {
+      Alert.alert("To'lov xatosi", error instanceof Error ? error.message : "To'lovni boshlash imkoni bo'lmadi");
+    }
+  }
 
   function handleOrder() {
     if (!user) {

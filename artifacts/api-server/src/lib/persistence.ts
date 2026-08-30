@@ -121,6 +121,18 @@ export async function persistRecord(
     });
 }
 
+export async function getRecord(
+  collection: string,
+  id: string,
+): Promise<Record<string, unknown> | null> {
+  const [row] = await db
+    .select()
+    .from(appRecords)
+    .where(and(eq(appRecords.collection, collection), eq(appRecords.id, id)))
+    .limit(1);
+  return row ? row.payload : null;
+}
+
 export async function persistItem(collection: string, item: PersistedItem): Promise<void> {
   const prepared = collection === "users" ? normalizeUser(item as StoredUser) : item;
   await persistRecord(

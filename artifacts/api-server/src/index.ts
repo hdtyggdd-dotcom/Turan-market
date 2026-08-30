@@ -1,6 +1,8 @@
 import app from "./app";
 import { logger } from "./lib/logger";
 import { initializePersistence } from "./lib/persistence.js";
+import { runMigrations } from "stripe-replit-sync";
+import { getStripeSync } from "./stripeClient.js";
 import { imageStore } from "./routes/uploads.js";
 import { initializeImagePersistence } from "./lib/persistence.js";
 
@@ -19,6 +21,25 @@ if (Number.isNaN(port) || port <= 0) {
 }
 
 async function bootstrap() {
+  const databaseUrl = process.env.DATABASE_URL;
+  if (!databaseUrl) throw new Error("DATABASE_URL is required");
+  try {
+    await runMigrations({ databaseUrl });
+    const stripeSync = await getStripeSync();
+    const domain = process.env.REPLIT_DOMAINS?.split(",")[0];
+    if (domain) {
+      await stripeSync.findOrCreateManagedWebhook(
+        `https://${domain}/api/stripe/webhook`,
+      );
+    }
+    await stripeSync.syncBackfill();
+    logger.info("Stripe Sync initialized");
+  } catch (err) {
+    logger.warn(
+      { err },
+      "Stripe Sync startup skipped; connector proxy checkout remains available",
+    );
+  }
   await initializePersistence();
   await initializeImagePersistence(imageStore);
   app.listen(port, (err) => {
