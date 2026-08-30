@@ -89,10 +89,41 @@ export default function ListingDetailScreen() {
         throw new Error(data.message ?? "To'lov sahifasi ochilmadi");
       }
       await WebBrowser.openBrowserAsync(data.url);
+      await pollPaymentStatus(orderId);
       queryClient.invalidateQueries({ queryKey: ['getOrders'] });
     } catch (error) {
       Alert.alert("To'lov xatosi", error instanceof Error ? error.message : "To'lovni boshlash imkoni bo'lmadi");
     }
+  }
+
+  async function pollPaymentStatus(orderId: string) {
+    for (let attempt = 0; attempt < 5; attempt += 1) {
+      if (attempt > 0) {
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+      }
+
+      const response = await fetch(`${getBaseUrl()}/api/payments/orders/${orderId}`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+      });
+      if (!response.ok) {
+        throw new Error("To'lov holatini tekshirib bo'lmadi");
+      }
+
+      const data = await response.json() as {
+        payment?: { status?: string };
+        orderStatus?: string;
+      };
+      const paymentStatus = data.payment?.status;
+      if (paymentStatus === 'paid' || paymentStatus === 'succeeded' || data.orderStatus === 'confirmed') {
+        Alert.alert("To'lov tasdiqlandi", "Buyurtmangiz sotuvchiga yuborildi.");
+        return;
+      }
+    }
+
+    Alert.alert(
+      "To'lov kutilmoqda",
+      "To'lov hali tasdiqlanmadi. Buyurtmalar bo'limida holatni keyinroq tekshirishingiz mumkin.",
+    );
   }
 
   function handleOrder() {

@@ -183,7 +183,7 @@ router.post(
           success_url: `${baseUrl}/api/payments/success?session_id={CHECKOUT_SESSION_ID}`,
           cancel_url: `${baseUrl}/api/payments/cancel`,
         },
-        { idempotencyKey: `turan-checkout-${order.id}` },
+        { idempotencyKey: `turan-checkout-v2-${order.id}-${currency}-${expectedUnitAmount}` },
       );
       if (!session.url) {
         res.status(502).json({ error: "payment_unavailable", message: "Stripe checkout URL was not returned" });
