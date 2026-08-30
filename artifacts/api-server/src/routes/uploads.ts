@@ -1,10 +1,11 @@
 import { Router } from "express";
-import { authenticateToken } from "../middleware/auth.js";
+import { authenticateToken, type AuthRequest } from "../middleware/auth.js";
+import { persistRecord } from "../lib/persistence.js";
 
 const router = Router();
 
 // Xotirada saqlanadigan rasmlar: id → base64 data URL
-const imageStore = new Map<string, string>();
+export const imageStore = new Map<string, string>();
 let imgCounter = 0;
 
 function genImgId() {
@@ -12,7 +13,7 @@ function genImgId() {
 }
 
 // POST /api/upload — base64 rasm yuklash
-router.post("/upload", authenticateToken, (req, res) => {
+router.post("/upload", authenticateToken, async (req: AuthRequest, res) => {
   const { data, mimeType = "image/jpeg" } = req.body as {
     data?: string;
     mimeType?: string;
@@ -32,6 +33,11 @@ router.post("/upload", authenticateToken, (req, res) => {
 
   const id = genImgId();
   const dataUrl = `data:${mimeType};base64,${data}`;
+  await persistRecord("images", id, {
+    dataUrl,
+    userId: req.userId ?? null,
+    mimeType,
+  });
   imageStore.set(id, dataUrl);
 
   res.json({ id, url: `/api/images/${id}` });

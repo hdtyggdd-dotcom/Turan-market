@@ -1,5 +1,8 @@
 import app from "./app";
 import { logger } from "./lib/logger";
+import { initializePersistence } from "./lib/persistence.js";
+import { imageStore } from "./routes/uploads.js";
+import { initializeImagePersistence } from "./lib/persistence.js";
 
 const rawPort = process.env["PORT"];
 
@@ -15,11 +18,20 @@ if (Number.isNaN(port) || port <= 0) {
   throw new Error(`Invalid PORT value: "${rawPort}"`);
 }
 
-app.listen(port, (err) => {
-  if (err) {
-    logger.error({ err }, "Error listening on port");
-    process.exit(1);
-  }
+async function bootstrap() {
+  await initializePersistence();
+  await initializeImagePersistence(imageStore);
+  app.listen(port, (err) => {
+    if (err) {
+      logger.error({ err }, "Error listening on port");
+      process.exit(1);
+    }
 
-  logger.info({ port }, "Server listening");
+    logger.info({ port }, "Server listening with durable PostgreSQL state");
+  });
+}
+
+bootstrap().catch((err) => {
+  logger.error({ err }, "Unable to initialize database persistence");
+  process.exit(1);
 });

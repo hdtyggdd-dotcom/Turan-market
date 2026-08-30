@@ -10,6 +10,7 @@ import {
   sanitizeUser,
 } from "../data/store.js";
 import { authenticateToken, type AuthRequest } from "../middleware/auth.js";
+import { persistItem } from "../lib/persistence.js";
 
 const router = Router();
 
@@ -53,7 +54,7 @@ router.get("/orders", authenticateToken, (req: AuthRequest, res) => {
 });
 
 // POST /orders
-router.post("/orders", authenticateToken, (req: AuthRequest, res) => {
+router.post("/orders", authenticateToken, async (req: AuthRequest, res) => {
   const { listingId, quantity, deliveryOption, deliveryPrice, notes } =
     req.body as {
       listingId: string;
@@ -83,6 +84,7 @@ router.post("/orders", authenticateToken, (req: AuthRequest, res) => {
     createdAt: new Date().toISOString(),
   };
 
+  await persistItem("orders", newOrder);
   orders.push(newOrder);
   res.status(201).json(hydrateOrder(newOrder));
 });
@@ -102,7 +104,7 @@ router.get("/orders/:id", authenticateToken, (req: AuthRequest, res) => {
 });
 
 // PUT /orders/:id/status
-router.put("/orders/:id/status", authenticateToken, (req: AuthRequest, res) => {
+router.put("/orders/:id/status", authenticateToken, async (req: AuthRequest, res) => {
   const order = orders.find((o) => o.id === req.params.id);
   if (!order) {
     res.status(404).json({ error: "not_found", message: "Order not found" });
@@ -113,6 +115,7 @@ router.put("/orders/:id/status", authenticateToken, (req: AuthRequest, res) => {
     return;
   }
   order.status = req.body.status;
+  await persistItem("orders", order);
   res.json(hydrateOrder(order));
 });
 

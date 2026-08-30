@@ -13,6 +13,7 @@ import {
   vehicleTypes,
 } from "../data/store.js";
 import { authenticateToken, type AuthRequest } from "../middleware/auth.js";
+import { persistItem } from "../lib/persistence.js";
 
 const router = Router();
 const cargoTypes: CargoType[] = ["general", "fragile", "perishable", "livestock", "hazardous", "construction"];
@@ -174,7 +175,7 @@ router.post("/cargo-loads/recommendation", authenticateToken, (req, res) => {
   res.json(result);
 });
 
-router.post("/cargo-loads", authenticateToken, (req: AuthRequest, res) => {
+router.post("/cargo-loads", authenticateToken, async (req: AuthRequest, res) => {
   const body = req.body as Record<string, unknown>;
   if (!validCargoInput(body)) {
     res.status(400).json({ error: "validation", message: "Missing or invalid cargo load fields" });
@@ -195,6 +196,7 @@ router.post("/cargo-loads", authenticateToken, (req: AuthRequest, res) => {
     distanceKm: Math.round(Math.hypot(pickup.lat - delivery.lat, pickup.lng - delivery.lng) * 111), pickupDate: body.pickupDate,
     budgetUzs: typeof body.budgetUzs === "number" ? body.budgetUzs : null, sharedLoadAllowed: body.sharedLoadAllowed, status: "open", createdAt: new Date().toISOString(),
   };
+  await persistItem("cargo_loads", load);
   cargoLoads.push(load);
   res.status(201).json(hydrateLoad(load, req.userId));
 });
@@ -221,7 +223,7 @@ router.get("/cargo-loads/:id", authenticateToken, (req: AuthRequest, res) => {
   });
 });
 
-router.post("/cargo-loads/:id/offers", authenticateToken, (req: AuthRequest, res) => {
+router.post("/cargo-loads/:id/offers", authenticateToken, async (req: AuthRequest, res) => {
   const load = cargoLoads.find((item) => item.id === rawParam(req.params.id));
   const driver = driverProfiles.find((item) => item.userId === req.userId);
   const { amountUzs, message } = req.body as Record<string, unknown>;
@@ -262,11 +264,14 @@ router.post("/cargo-loads/:id/offers", authenticateToken, (req: AuthRequest, res
   }
   const now = new Date().toISOString();
   const offer: StoredCargoOffer = { id: generateId(), loadId: load.id, driverId: driver.id, amountUzs, message: typeof message === "string" ? message : null, status: "pending", counterAmountUzs: null, counterMessage: null, createdAt: now, updatedAt: now };
-  cargoOffers.push(offer); load.status = "negotiating";
+  await persistItem("cargo_offers", offer);
+  load.status = "negotiating";
+  await persistItem("cargo_loads", load);
+  cargoOffers.push(offer);
   res.status(201).json(hydrateOffer(offer));
 });
 
-router.post("/cargo-loads/:id/offers/:offerId/counter", authenticateToken, (req: AuthRequest, res) => {
+router.post("/cargo-loads/:id/offers/:offerId/counter", authenticateToken, async (req: AuthRequest, res) => {
   const load = cargoLoads.find((item) => item.id === rawParam(req.params.id));
   const offer = cargoOffers.find((item) => item.id === rawParam(req.params.offerId) && item.loadId === load?.id);
   const { amountUzs, message } = req.body as Record<string, unknown>;
@@ -279,10 +284,12 @@ router.post("/cargo-loads/:id/offers/:offerId/counter", authenticateToken, (req:
   }
   if (typeof amountUzs !== "number" || amountUzs <= 0) { res.status(400).json({ error: "validation", message: "A positive amountUzs is required" }); return; }
   offer.counterAmountUzs = amountUzs; offer.counterMessage = typeof message === "string" ? message : null; offer.status = "countered"; offer.updatedAt = new Date().toISOString(); load.status = "negotiating";
+  await persistItem("cargo_offers", offer);
+  await persistItem("cargo_loads", load);
   res.json(hydrateOffer(offer));
 });
 
-router.post("/cargo-loads/:id/offers/:offerId/counter-decision", authenticateToken, (req: AuthRequest, res) => {
+router.post("/cargo-loads/:id/offers/:offerId/counter-decision", authenticateToken, async (req: AuthRequest, res) => {
   const load = cargoLoads.find((item) => item.id === rawParam(req.params.id));
   const offer = cargoOffers.find((item) => item.id === rawParam(req.params.offerId) && item.loadId === load?.id);
   const driver = driverProfiles.find((item) => item.userId === req.userId);
@@ -324,10 +331,12 @@ router.post("/cargo-loads/:id/offers/:offerId/counter-decision", authenticateTok
       : "open";
   }
   offer.updatedAt = now;
+  await persistItem("cargo_offers", offer);
+  await persistItem("cargo_loads", load);
   res.json(hydrateOffer(offer));
 });
 
-router.post("/cargo-loads/:id/offers/:offerId/accept", authenticateToken, (req: AuthRequest, res) => {
+router.post("/cargo-loads/:id/offers/:offerId/accept", authenticateToken, async (req: AuthRequest, res) => {
   const load = cargoLoads.find((item) => item.id === rawParam(req.params.id));
   const offer = cargoOffers.find((item) => item.id === rawParam(req.params.offerId) && item.loadId === load?.id);
   const offerDriver = driverProfiles.find((item) => item.id === offer?.driverId);
@@ -347,6 +356,13 @@ router.post("/cargo-loads/:id/offers/:offerId/accept", authenticateToken, (req: 
   }
   offer.status = "accepted"; offer.updatedAt = new Date().toISOString(); load.status = "accepted";
   cargoOffers.filter((item) => item.loadId === load.id && item.id !== offer.id && item.status !== "accepted").forEach((item) => { item.status = "rejected"; item.updatedAt = offer.updatedAt; });
+  await persistItem("cargo_offers", offer);
+  await persistItem("cargo_loads", load);
+  await Promise.all(
+    cargoOffers
+      .filter((item) => item.loadId === load.id && item.id !== offer.id && item.status === "rejected")
+      .map((item) => persistItem("cargo_offers", item)),
+  );
   res.json(hydrateOffer(offer, true));
 });
 

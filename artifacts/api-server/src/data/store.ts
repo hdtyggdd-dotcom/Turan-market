@@ -1,4 +1,5 @@
-// O'Savdo in-memory store with full Uzbekistan seed data
+// Turan Market domain model and seed data.
+import { createHmac, randomBytes, scryptSync, timingSafeEqual } from "node:crypto";
 
 export interface StoredCountry {
   id: string;        // ISO 2-letter: uz, kz, kg, ...
@@ -2747,17 +2748,46 @@ export function generateId(): string {
 
 export function generateToken(userId: string): string {
   const payload = { id: userId, exp: Date.now() + 86400000 * 30 };
-  return Buffer.from(JSON.stringify(payload)).toString('base64');
+  const encoded = Buffer.from(JSON.stringify(payload)).toString("base64url");
+  const signature = createHmac("sha256", process.env.SESSION_SECRET ?? "local-development-secret")
+    .update(encoded)
+    .digest("base64url");
+  return `${encoded}.${signature}`;
 }
 
 export function verifyToken(token: string): string | null {
   try {
-    const payload = JSON.parse(Buffer.from(token, 'base64').toString('utf8'));
+    const [encoded, signature] = token.split(".");
+    if (!encoded || !signature) return null;
+    const expected = createHmac("sha256", process.env.SESSION_SECRET ?? "local-development-secret")
+      .update(encoded)
+      .digest("base64url");
+    const expectedBuffer = Buffer.from(expected);
+    const actualBuffer = Buffer.from(signature);
+    if (expectedBuffer.length !== actualBuffer.length || !timingSafeEqual(expectedBuffer, actualBuffer)) {
+      return null;
+    }
+    const payload = JSON.parse(Buffer.from(encoded, "base64url").toString("utf8"));
     if (payload.exp < Date.now()) return null;
     return payload.id;
   } catch {
     return null;
   }
+}
+
+export function hashPassword(password: string): string {
+  const salt = randomBytes(16).toString("hex");
+  const hash = scryptSync(password, salt, 64).toString("hex");
+  return `scrypt$${salt}$${hash}`;
+}
+
+export function verifyPassword(password: string, stored: string): boolean {
+  if (!stored.startsWith("scrypt$")) return stored === password;
+  const [, salt, expectedHex] = stored.split("$");
+  if (!salt || !expectedHex) return false;
+  const actual = scryptSync(password, salt, 64);
+  const expected = Buffer.from(expectedHex, "hex");
+  return actual.length === expected.length && timingSafeEqual(actual, expected);
 }
 
 export function calculateDistance(lat1: number, lng1: number, lat2: number, lng2: number): number {

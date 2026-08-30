@@ -7,13 +7,15 @@ import {
   generateToken,
   sanitizeUser,
   vehicleTypes,
+  verifyPassword,
 } from "../data/store.js";
 import { authenticateToken, type AuthRequest } from "../middleware/auth.js";
+import { deleteItem, persistItem } from "../lib/persistence.js";
 
 const router = Router();
 
 // POST /auth/register
-router.post("/auth/register", (req, res) => {
+router.post("/auth/register", async (req, res) => {
   const { phone, name, password, role, regionId, districtId, neighborhoodId } =
     req.body as {
       phone: string;
@@ -35,6 +37,10 @@ router.post("/auth/register", (req, res) => {
     res
       .status(400)
       .json({ error: "conflict", message: "Phone number already registered" });
+    return;
+  }
+  if (!["buyer", "seller", "driver"].includes(role)) {
+    res.status(400).json({ error: "validation", message: "Invalid account role" });
     return;
   }
   if (role === "driver" && (!regionId || !regions.some((region) => region.id === regionId))) {
@@ -72,13 +78,13 @@ router.post("/auth/register", (req, res) => {
   } : null;
 
   try {
+    await persistItem("users", newUser);
+    if (driverProfile) await persistItem("driver_profiles", driverProfile);
     users.push(newUser);
     if (driverProfile) driverProfiles.push(driverProfile);
-  } catch (error) {
-    const userIndex = users.indexOf(newUser);
-    if (userIndex >= 0) users.splice(userIndex, 1);
-    const profileIndex = driverProfile ? driverProfiles.indexOf(driverProfile) : -1;
-    if (profileIndex >= 0) driverProfiles.splice(profileIndex, 1);
+  } catch {
+    await deleteItem("users", newUser.id).catch(() => {});
+    if (driverProfile) await deleteItem("driver_profiles", driverProfile.id).catch(() => {});
     res.status(500).json({ error: "registration_failed", message: "Unable to create user profile" });
     return;
   }
@@ -92,7 +98,7 @@ router.post("/auth/login", (req, res) => {
   const { phone, password } = req.body as { phone: string; password: string };
 
   const user = users.find((u) => u.phone === phone);
-  if (!user || user.password !== password) {
+  if (!user || !verifyPassword(password, user.password)) {
     res.status(401).json({ error: "unauthorized", message: "Invalid phone or password" });
     return;
   }

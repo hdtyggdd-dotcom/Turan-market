@@ -48,7 +48,7 @@ export function ImageUploader({ images, onChange, max = 5, label = "Rasmlar" }: 
   async function getToken(): Promise<string | null> {
     try {
       const AsyncStorage = (await import('@react-native-async-storage/async-storage')).default;
-      return await AsyncStorage.getItem('auth_token');
+      return await AsyncStorage.getItem('osavdo_token');
     } catch {
       return null;
     }

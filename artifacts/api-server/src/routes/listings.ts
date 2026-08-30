@@ -14,6 +14,7 @@ import {
   getPriceColor,
 } from "../data/store.js";
 import { authenticateToken, type AuthRequest } from "../middleware/auth.js";
+import { deleteItem, persistItem } from "../lib/persistence.js";
 import { scoreSearch, FUZZY_THRESHOLD } from "../utils/fuzzy.js";
 import { ensureSubcategory, findBestCategory } from "../utils/autoCategory.js";
 
@@ -222,7 +223,7 @@ router.get("/listings", (req, res) => {
 });
 
 // POST /listings
-router.post("/listings", authenticateToken, (req: AuthRequest, res) => {
+router.post("/listings", authenticateToken, async (req: AuthRequest, res) => {
   const body = req.body as {
     title: string;
     titleRu?: string;
@@ -294,6 +295,7 @@ router.post("/listings", authenticateToken, (req: AuthRequest, res) => {
     createdAt: new Date().toISOString(),
   };
 
+  await persistItem("listings", newListing);
   listings.push(newListing);
   res.status(201).json(hydrateListing(newListing));
 });
@@ -319,7 +321,7 @@ router.get("/listings/:id", (req, res) => {
 });
 
 // PUT /listings/:id
-router.put("/listings/:id", authenticateToken, (req: AuthRequest, res) => {
+router.put("/listings/:id", authenticateToken, async (req: AuthRequest, res) => {
   const idx = listings.findIndex((l) => l.id === req.params.id);
   if (idx === -1) {
     res.status(404).json({ error: "not_found", message: "Listing not found" });
@@ -330,11 +332,12 @@ router.put("/listings/:id", authenticateToken, (req: AuthRequest, res) => {
     return;
   }
   Object.assign(listings[idx], req.body);
+  await persistItem("listings", listings[idx]);
   res.json(hydrateListing(listings[idx]));
 });
 
 // DELETE /listings/:id
-router.delete("/listings/:id", authenticateToken, (req: AuthRequest, res) => {
+router.delete("/listings/:id", authenticateToken, async (req: AuthRequest, res) => {
   const idx = listings.findIndex((l) => l.id === req.params.id);
   if (idx === -1) {
     res.status(404).json({ error: "not_found", message: "Listing not found" });
@@ -344,6 +347,8 @@ router.delete("/listings/:id", authenticateToken, (req: AuthRequest, res) => {
     res.status(403).json({ error: "forbidden", message: "Not your listing" });
     return;
   }
+  const listingId = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+  await deleteItem("listings", listingId);
   listings.splice(idx, 1);
   res.status(204).send();
 });
