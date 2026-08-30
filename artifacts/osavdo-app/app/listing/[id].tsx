@@ -61,9 +61,9 @@ export default function ListingDetailScreen() {
     mutation: {
       onSuccess: (order) => {
         queryClient.invalidateQueries({ queryKey: ['getOrders'] });
-        Alert.alert("Buyurtma yaratildi", "Buyurtmani hozir xavfsiz Stripe Checkout orqali to'lashingiz mumkin.", [
+        Alert.alert("Buyurtma yaratildi", "Visa yoki boshqa bank kartangiz bilan xavfsiz to'lang.", [
           { text: "Keyinroq", onPress: () => router.push('/(tabs)/orders') },
-          { text: "Hozir to'lash", onPress: () => { void openPaymentCheckout(order.id); } },
+          { text: "Visa / karta bilan to'lash", onPress: () => { void openPaymentCheckout(order.id); } },
         ]);
       },
       onError: () => Alert.alert("Xato", "Buyurtma berishda xato yuz berdi"),

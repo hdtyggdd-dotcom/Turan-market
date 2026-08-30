@@ -109,8 +109,31 @@ router.post(
 
     const existing = await getRecord(PAYMENT_COLLECTION, order.id) as PaymentRecord | null;
     if (existing?.status === "pending") {
-      res.json({ orderId: order.id, sessionId: existing.sessionId, status: existing.status });
-      return;
+      try {
+        const stripe = await getUncachableStripeClient();
+        const session = await stripe.checkout.sessions.retrieve(existing.sessionId);
+        if (session.status !== "expired" && session.url) {
+          res.json({
+            orderId: order.id,
+            sessionId: existing.sessionId,
+            url: session.url,
+            status: existing.status,
+          });
+          return;
+        }
+        await persistRecord(PAYMENT_COLLECTION, order.id, {
+          ...existing,
+          status: "expired",
+          updatedAt: new Date().toISOString(),
+        });
+      } catch (error) {
+        console.error("Unable to recover pending Stripe checkout", error);
+        res.status(502).json({
+          error: "payment_provider_error",
+          message: "Visa checkout sessiyasini qayta ochib bo'lmadi.",
+        });
+        return;
+      }
     }
     if (existing?.status === "paid") {
       res.json({ orderId: order.id, sessionId: existing.sessionId, status: existing.status });
@@ -136,16 +159,15 @@ router.post(
       const listing = listings.find((item) => item.id === order.listingId);
       const total = orderTotal(order);
       const priceRecord = await getRecord(PRICE_COLLECTION, order.id);
-    const expectedUnitAmount = stripeAmount(total, currency);
-    let priceId =
-      priceRecord?.priceId as string | undefined;
-    if (
-      priceId &&
-      (priceRecord?.currency !== currency ||
-        priceRecord?.unitAmount !== expectedUnitAmount)
-    ) {
-      priceId = undefined;
-    }
+      const expectedUnitAmount = stripeAmount(total, currency);
+      let priceId = priceRecord?.priceId as string | undefined;
+      if (
+        priceId &&
+        (priceRecord?.currency !== currency ||
+          priceRecord?.unitAmount !== expectedUnitAmount)
+      ) {
+        priceId = undefined;
+      }
       if (!priceId) {
         const product = await stripe.products.create(
           {
@@ -157,18 +179,18 @@ router.post(
         const price = await stripe.prices.create(
           {
             product: product.id,
-          unit_amount: expectedUnitAmount,
+            unit_amount: expectedUnitAmount,
             currency,
             metadata: { turanOrderId: order.id },
           },
-        { idempotencyKey: `turan-price-v2-${order.id}-${currency}-${expectedUnitAmount}` },
+          { idempotencyKey: `turan-price-v2-${order.id}-${currency}-${expectedUnitAmount}` },
         );
         priceId = price.id;
         await persistRecord(PRICE_COLLECTION, order.id, {
           priceId,
           productId: product.id,
           amount: total,
-        unitAmount: expectedUnitAmount,
+          unitAmount: expectedUnitAmount,
           currency,
         });
       }
@@ -178,12 +200,13 @@ router.post(
         {
           customer: customerId,
           mode: "payment",
+          payment_method_types: ["card"],
           line_items: [{ price: priceId, quantity: 1 }],
           metadata: { turanOrderId: order.id, turanUserId: req.userId! },
           success_url: `${baseUrl}/api/payments/success?session_id={CHECKOUT_SESSION_ID}`,
           cancel_url: `${baseUrl}/api/payments/cancel`,
         },
-        { idempotencyKey: `turan-checkout-v2-${order.id}-${currency}-${expectedUnitAmount}` },
+        { idempotencyKey: `turan-checkout-v3-card-${order.id}-${currency}-${expectedUnitAmount}` },
       );
       if (!session.url) {
         res.status(502).json({ error: "payment_unavailable", message: "Stripe checkout URL was not returned" });
