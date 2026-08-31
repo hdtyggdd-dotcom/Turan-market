@@ -6,12 +6,13 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import { useColors } from '@/hooks/useColors';
-import { useLogin, useGetCountries } from '@workspace/api-client-react';
+import { getBaseUrl, useLogin, useGetCountries } from '@workspace/api-client-react';
 import { useAuth, type UserProfile } from '@/context/AuthContext';
 import { useRouter } from 'expo-router';
 import { useI18n } from '@/context/I18nContext';
 import { useLocation } from '@/context/LocationContext';
 import { PHONE_FORMATS, buildFullPhone, type LangCode } from '@/constants/i18n';
+import * as Linking from 'expo-linking';
 
 export default function LoginScreen() {
   const colors = useColors();
@@ -170,11 +171,12 @@ export default function LoginScreen() {
             }
           </TouchableOpacity>
 
-          {/* Demo hint */}
-          <View style={[styles.demoHint, { backgroundColor: colors.secondary }]}>
-            <Feather name="info" size={13} color={colors.primary} />
-            <Text style={[styles.demoText, { color: colors.primary }]}>{t('demoHint')}</Text>
-          </View>
+          {__DEV__ && (
+            <View style={[styles.demoHint, { backgroundColor: colors.secondary }]}>
+              <Feather name="info" size={13} color={colors.primary} />
+              <Text style={[styles.demoText, { color: colors.primary }]}>{t('demoHint')}</Text>
+            </View>
+          )}
         </View>
 
         {/* Register link */}
@@ -184,6 +186,12 @@ export default function LoginScreen() {
             <Text style={[styles.registerLink, { color: colors.primary }]}>{t('register')}</Text>
           </TouchableOpacity>
         </View>
+        <TouchableOpacity
+          style={styles.privacyLinkRow}
+          onPress={() => { void Linking.openURL(`${getBaseUrl()}/api/privacy-policy`); }}
+        >
+          <Text style={[styles.privacyLink, { color: colors.primary }]}>Maxfiylik siyosati</Text>
+        </TouchableOpacity>
       </ScrollView>
     </View>
   );
@@ -234,4 +242,6 @@ const styles = StyleSheet.create({
   registerRow: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 6 },
   registerText: { fontSize: 14, fontFamily: 'Inter_400Regular' },
   registerLink: { fontSize: 14, fontFamily: 'Inter_600SemiBold' },
+  privacyLinkRow: { alignItems: 'center', paddingTop: 10 },
+  privacyLink: { fontSize: 13, fontFamily: 'Inter_500Medium', textDecorationLine: 'underline' },
 });

@@ -17,6 +17,8 @@ import { useGetUserListings, getGetUserListingsQueryKey } from '@workspace/api-c
 import { ListingCard } from '@/components/ListingCard';
 import { EmptyState } from '@/components/EmptyState';
 import { useRouter } from 'expo-router';
+import * as Linking from 'expo-linking';
+import { getBaseUrl } from '@workspace/api-client-react';
 
 function StatBox({ label, value, colors }: { label: string; value: string | number; colors: ReturnType<typeof useColors> }) {
   return (
@@ -148,6 +150,19 @@ export default function ProfileScreen() {
             <Text style={[styles.ordersBtnText, { color: colors.text }]}>Mening buyurtmalarim</Text>
           </View>
           <Feather name="chevron-right" size={20} color={colors.mutedForeground} />
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[styles.ordersBtn, { backgroundColor: colors.card, borderColor: colors.border }]}
+          onPress={() => { void Linking.openURL(`${getBaseUrl()}/api/privacy-policy`); }}
+        >
+          <View style={styles.ordersBtnLeft}>
+            <View style={[styles.ordersBtnIcon, { backgroundColor: colors.primary + '15' }]}>
+              <Feather name="shield" size={20} color={colors.primary} />
+            </View>
+            <Text style={[styles.ordersBtnText, { color: colors.text }]}>Maxfiylik siyosati</Text>
+          </View>
+          <Feather name="external-link" size={20} color={colors.mutedForeground} />
         </TouchableOpacity>
 
         {/* Stats */}

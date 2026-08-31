@@ -13,8 +13,13 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useColors } from '@/hooks/useColors';
-import { useGetListing, useCreateOrder, useEstimateDelivery } from '@workspace/api-client-react';
-import { getBaseUrl } from '@workspace/api-client-react';
+import {
+  createPaymentCheckout,
+  getPaymentOrderStatus,
+  useGetListing,
+  useCreateOrder,
+  useEstimateDelivery,
+} from '@workspace/api-client-react';
 import * as WebBrowser from 'expo-web-browser';
 import { useAuth } from '@/context/AuthContext';
 import { useQueryClient } from '@tanstack/react-query';
@@ -44,7 +49,7 @@ export default function ListingDetailScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const { user, token } = useAuth();
+  const { user } = useAuth();
   const { districtId, lat, lng } = useLocation();
   const queryClient = useQueryClient();
   const [quantity, setQuantity] = useState(1);
@@ -76,18 +81,7 @@ export default function ListingDetailScreen() {
       return;
     }
     try {
-      const response = await fetch(`${getBaseUrl()}/api/payments/checkout`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
-        body: JSON.stringify({ orderId, currency: 'uzs' }),
-      });
-      const data = await response.json() as { url?: string; message?: string };
-      if (!response.ok || !data.url) {
-        throw new Error(data.message ?? "To'lov sahifasi ochilmadi");
-      }
+      const data = await createPaymentCheckout({ orderId, currency: 'uzs' });
       await WebBrowser.openBrowserAsync(data.url);
       await pollPaymentStatus(orderId);
       queryClient.invalidateQueries({ queryKey: ['getOrders'] });
@@ -102,19 +96,9 @@ export default function ListingDetailScreen() {
         await new Promise((resolve) => setTimeout(resolve, 2000));
       }
 
-      const response = await fetch(`${getBaseUrl()}/api/payments/orders/${orderId}`, {
-        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
-      });
-      if (!response.ok) {
-        throw new Error("To'lov holatini tekshirib bo'lmadi");
-      }
-
-      const data = await response.json() as {
-        payment?: { status?: string };
-        orderStatus?: string;
-      };
+      const data = await getPaymentOrderStatus(orderId);
       const paymentStatus = data.payment?.status;
-      if (paymentStatus === 'paid' || paymentStatus === 'succeeded' || data.orderStatus === 'confirmed') {
+      if (paymentStatus === 'paid' || data.orderStatus === 'confirmed') {
         Alert.alert("To'lov tasdiqlandi", "Buyurtmangiz sotuvchiga yuborildi.");
         return;
       }
