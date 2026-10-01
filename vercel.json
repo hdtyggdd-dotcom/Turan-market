@@ -1,0 +1,6 @@
+{
+  "framework": "nextjs",
+  "installCommand": "pnpm install --no-frozen-lockfile",
+  "buildCommand": "pnpm --filter ./artifacts/web run build",
+  "outputDirectory": "artifacts/web/.next"
+}
