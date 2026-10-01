@@ -5,6 +5,7 @@
  * - GET / or /manifest with expo-platform header → platform manifest JSON
  * - GET / without expo-platform → landing page HTML
  * - GET /manifest.json, /sw.js and PWA assets from public/
+ * - GET /icon-192.png and /icon-512.png → existing Turan Market app icon
  * Everything else falls through to static file serving from ./static-build/.
  *
  * Zero external dependencies — uses only Node.js built-ins (http, fs, path).
@@ -16,6 +17,7 @@ const path = require('path');
 
 const STATIC_ROOT = path.resolve(__dirname, '..', 'static-build');
 const PUBLIC_ROOT = path.resolve(__dirname, '..', 'public');
+const APP_ICON_PATH = path.resolve(__dirname, '..', 'assets', 'images', 'icon.png');
 const TEMPLATE_PATH = path.resolve(__dirname, 'templates', 'landing-page.html');
 const basePath = (process.env.BASE_PATH || '/').replace(/\/+$/, '');
 
@@ -99,13 +101,19 @@ function serveLandingPage(req, res, landingPageTemplate, appName) {
 }
 
 function safeFilePath(root, urlPath) {
-  const relativePath = path.normalize(urlPath).replace(/^([.][.]([/\\]|$))+/, '');
+  const relativePath = path
+    .normalize(urlPath)
+    .replace(/^([.][.]([/\\]|$))+/, '');
   const filePath = path.join(root, relativePath);
   return filePath.startsWith(root) ? filePath : null;
 }
 
 function serveFile(filePath, res) {
-  if (!filePath || !fs.existsSync(filePath) || fs.statSync(filePath).isDirectory()) {
+  if (
+    !filePath ||
+    !fs.existsSync(filePath) ||
+    fs.statSync(filePath).isDirectory()
+  ) {
     res.writeHead(404);
     res.end('Not Found');
     return;
@@ -147,8 +155,12 @@ const server = http.createServer((req, res) => {
     }
   }
 
-  if (pathname === '/manifest.json' || pathname === '/sw.js' || pathname.startsWith('/icon-')) {
+  if (pathname === '/manifest.json' || pathname === '/sw.js') {
     return servePublicFile(pathname, res);
+  }
+
+  if (pathname === '/icon-192.png' || pathname === '/icon-512.png') {
+    return serveFile(APP_ICON_PATH, res);
   }
 
   serveStaticFile(pathname, res);
