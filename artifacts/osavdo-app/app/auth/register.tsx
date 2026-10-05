@@ -125,32 +125,52 @@ export default function RegisterScreen() {
     setGpsNotice('');
     let gpsTimeout: ReturnType<typeof setTimeout> | undefined;
     try {
-      const permission = await ExpoLocation.requestForegroundPermissionsAsync();
-      if (!permission.granted) {
-        setGpsNotice('GPS ruxsati berilmadi. Davlat, viloyat va tumanni qo‘lda tanlashingiz mumkin.');
-        return;
-      }
-      const position = await Promise.race([
-        ExpoLocation.getCurrentPositionAsync({ accuracy: ExpoLocation.Accuracy.Balanced }),
-        new Promise<ExpoLocation.LocationObject>((_, reject) => {
+      const detect = async () => {
+        let coords: { latitude: number; longitude: number };
+        if (Platform.OS === 'web') {
+          // Browser permission requests also acquire a fix; Expo's separate
+          // web permission probe can wait forever before a position timeout.
+          coords = await new Promise<{ latitude: number; longitude: number }>((resolve, reject) => {
+            if (typeof navigator === 'undefined' || !navigator.geolocation) {
+              reject(new Error('GPS_UNAVAILABLE'));
+              return;
+            }
+            navigator.geolocation.getCurrentPosition(
+              (position) => resolve(position.coords),
+              (error) => reject(new Error(error.code === 1 ? 'GPS_PERMISSION_DENIED' : 'GPS_UNAVAILABLE')),
+              { enableHighAccuracy: false, timeout: 15_000, maximumAge: 60_000 },
+            );
+          });
+        } else {
+          const permission = await ExpoLocation.requestForegroundPermissionsAsync();
+          if (!permission.granted) throw new Error('GPS_PERMISSION_DENIED');
+          coords = (await ExpoLocation.getCurrentPositionAsync({ accuracy: ExpoLocation.Accuracy.Balanced })).coords;
+        }
+        const detected = await detectLocation.mutateAsync({ data: { lat: coords.latitude, lng: coords.longitude } });
+        return { coords, detected };
+      };
+      const { coords, detected } = await Promise.race([
+        detect(),
+        new Promise<Awaited<ReturnType<typeof detect>>>((_, reject) => {
           gpsTimeout = setTimeout(() => reject(new Error('GPS timeout')), 20_000);
         }),
       ]);
-      const detected = await detectLocation.mutateAsync({ data: { lat: position.coords.latitude, lng: position.coords.longitude } });
       const detectedDistrict = detected.districtId ?? (detected.countryId !== 'uz' ? detected.regionId : '');
       if (detected.countryId !== selectedCountryId) setPhoneDigits('');
       setLocation({
         countryId: detected.countryId, countryName: detected.countryName, countryFlag: detected.countryFlag,
         currency: detected.currency, regionId: detected.regionId, regionName: detected.regionName,
         districtId: detectedDistrict || null, districtName: detected.districtName ?? null,
-        lat: position.coords.latitude, lng: position.coords.longitude,
+        lat: coords.latitude, lng: coords.longitude,
       });
       setLangByCountry(detected.countryId);
       setRegionId(detected.regionId);
       setDistrictId(detectedDistrict);
       setGpsNotice(`${detected.countryName} · ${detected.regionName}${detected.districtName ? ` · ${detected.districtName}` : ''}`);
-    } catch {
-      setGpsNotice('Joylashuv aniqlanmadi. GPS’ni qayta yoqing yoki joylashuvni qo‘lda tanlang.');
+    } catch (error) {
+      setGpsNotice(error instanceof Error && error.message === 'GPS_PERMISSION_DENIED'
+        ? 'GPS ruxsati berilmadi. Davlat, viloyat va tumanni qo‘lda tanlashingiz mumkin.'
+        : 'Joylashuv aniqlanmadi. GPS’ni qayta yoqing yoki joylashuvni qo‘lda tanlang.');
     } finally {
       if (gpsTimeout) clearTimeout(gpsTimeout);
       setIsDetecting(false);

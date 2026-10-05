@@ -184,7 +184,7 @@ export const getRegisterUrl = () => {
 }
 
 /**
- * @summary Register new user
+ * @summary Register new user or sign into an existing account through the unified form
  */
 export const register = async (registerRequest: RegisterRequest, options?: RequestInit): Promise<AuthResponse> => {
 
@@ -233,7 +233,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
     export type RegisterMutationError = ErrorType<ErrorResponse>
 
     /**
- * @summary Register new user
+ * @summary Register new user or sign into an existing account through the unified form
  */
 export const useRegister = <TError = ErrorType<ErrorResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof register>>, TError,{data: BodyType<RegisterRequest>}, TContext>, request?: SecondParameter<typeof customFetch>}

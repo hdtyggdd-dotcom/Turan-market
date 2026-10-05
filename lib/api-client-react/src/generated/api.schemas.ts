@@ -98,6 +98,8 @@ export const RegisterRequestRole = {
 } as const;
 
 export interface RegisterRequest {
+  /** Use the full form for existing accounts as well; new accounts still require a valid location. */
+  signInExisting?: boolean;
   phone: string;
   name: string;
   password: string;

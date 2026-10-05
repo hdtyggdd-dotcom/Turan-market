@@ -17,9 +17,10 @@ export const HealthCheckResponse = zod.object({
 
 
 /**
- * @summary Register new user
+ * @summary Register new user or sign into an existing account through the unified form
  */
 export const RegisterBody = zod.object({
+  "signInExisting": zod.boolean().optional().describe('Use the full form for existing accounts as well; new accounts still require a valid location.'),
   "phone": zod.string(),
   "name": zod.string(),
   "password": zod.string(),
