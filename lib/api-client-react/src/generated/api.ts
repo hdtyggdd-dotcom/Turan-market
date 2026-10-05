@@ -42,10 +42,17 @@ import type {
   DetectLocationRequest,
   DetectedLocation,
   District,
+  DriverDocumentInput,
   DriverProfile,
+  DriverRating,
+  DriverRatingInput,
+  DriverReviewInput,
+  DriverVerification,
+  DriverVerificationInput,
   ErrorResponse,
   GetCargoLoadsParams,
   GetDistrictsParams,
+  GetDriverDocumentUrl200,
   GetDriversParams,
   GetListingsParams,
   GetNeighborhoodsParams,
@@ -3397,6 +3404,486 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
         TContext
       > => {
       return useMutation(getUnregisterPushTokenMutationOptions(options));
+    }
+
+export const getGetMyDriverVerificationUrl = () => {
+
+
+
+
+  return `/api/drivers/me/verification`
+}
+
+export const getMyDriverVerification = async ( options?: RequestInit): Promise<DriverVerification> => {
+
+  return customFetch<DriverVerification>(getGetMyDriverVerificationUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetMyDriverVerificationQueryKey = () => {
+    return [
+    `/api/drivers/me/verification`
+    ] as const;
+    }
+
+
+export const getGetMyDriverVerificationQueryOptions = <TData = Awaited<ReturnType<typeof getMyDriverVerification>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getMyDriverVerification>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetMyDriverVerificationQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getMyDriverVerification>>> = ({ signal }) => getMyDriverVerification({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getMyDriverVerification>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetMyDriverVerificationQueryResult = NonNullable<Awaited<ReturnType<typeof getMyDriverVerification>>>
+export type GetMyDriverVerificationQueryError = ErrorType<unknown>
+
+
+
+export function useGetMyDriverVerification<TData = Awaited<ReturnType<typeof getMyDriverVerification>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getMyDriverVerification>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetMyDriverVerificationQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getSubmitDriverVerificationUrl = () => {
+
+
+
+
+  return `/api/drivers/me/verification`
+}
+
+export const submitDriverVerification = async (driverVerificationInput: DriverVerificationInput, options?: RequestInit): Promise<DriverVerification> => {
+
+  return customFetch<DriverVerification>(getSubmitDriverVerificationUrl(),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(driverVerificationInput)
+  }
+);}
+
+
+
+
+
+export const getSubmitDriverVerificationMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof submitDriverVerification>>, TError,{data: BodyType<DriverVerificationInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof submitDriverVerification>>, TError,{data: BodyType<DriverVerificationInput>}, TContext> => {
+
+const mutationKey = ['submitDriverVerification'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof submitDriverVerification>>, {data: BodyType<DriverVerificationInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  submitDriverVerification(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type SubmitDriverVerificationMutationResult = NonNullable<Awaited<ReturnType<typeof submitDriverVerification>>>
+    export type SubmitDriverVerificationMutationBody = BodyType<DriverVerificationInput>
+    export type SubmitDriverVerificationMutationError = ErrorType<unknown>
+
+    export const useSubmitDriverVerification = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof submitDriverVerification>>, TError,{data: BodyType<DriverVerificationInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof submitDriverVerification>>,
+        TError,
+        {data: BodyType<DriverVerificationInput>},
+        TContext
+      > => {
+      return useMutation(getSubmitDriverVerificationMutationOptions(options));
+    }
+
+export const getUploadDriverDocumentUrl = () => {
+
+
+
+
+  return `/api/drivers/me/documents`
+}
+
+export const uploadDriverDocument = async (driverDocumentInput: DriverDocumentInput, options?: RequestInit): Promise<DriverVerification> => {
+
+  return customFetch<DriverVerification>(getUploadDriverDocumentUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(driverDocumentInput)
+  }
+);}
+
+
+
+
+
+export const getUploadDriverDocumentMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof uploadDriverDocument>>, TError,{data: BodyType<DriverDocumentInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof uploadDriverDocument>>, TError,{data: BodyType<DriverDocumentInput>}, TContext> => {
+
+const mutationKey = ['uploadDriverDocument'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof uploadDriverDocument>>, {data: BodyType<DriverDocumentInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  uploadDriverDocument(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UploadDriverDocumentMutationResult = NonNullable<Awaited<ReturnType<typeof uploadDriverDocument>>>
+    export type UploadDriverDocumentMutationBody = BodyType<DriverDocumentInput>
+    export type UploadDriverDocumentMutationError = ErrorType<unknown>
+
+    export const useUploadDriverDocument = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof uploadDriverDocument>>, TError,{data: BodyType<DriverDocumentInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof uploadDriverDocument>>,
+        TError,
+        {data: BodyType<DriverDocumentInput>},
+        TContext
+      > => {
+      return useMutation(getUploadDriverDocumentMutationOptions(options));
+    }
+
+export const getGetDriverDocumentUrlUrl = (id: string,
+    documentId: string,) => {
+
+
+
+
+  return `/api/drivers/${id}/documents/${documentId}`
+}
+
+export const getDriverDocumentUrl = async (id: string,
+    documentId: string, options?: RequestInit): Promise<GetDriverDocumentUrl200> => {
+
+  return customFetch<GetDriverDocumentUrl200>(getGetDriverDocumentUrlUrl(id,documentId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetDriverDocumentUrlQueryKey = (id: string,
+    documentId: string,) => {
+    return [
+    `/api/drivers/${id}/documents/${documentId}`
+    ] as const;
+    }
+
+
+export const getGetDriverDocumentUrlQueryOptions = <TData = Awaited<ReturnType<typeof getDriverDocumentUrl>>, TError = ErrorType<unknown>>(id: string,
+    documentId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getDriverDocumentUrl>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetDriverDocumentUrlQueryKey(id,documentId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getDriverDocumentUrl>>> = ({ signal }) => getDriverDocumentUrl(id,documentId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: id !== null && id !== undefined && documentId !== null && documentId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getDriverDocumentUrl>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetDriverDocumentUrlQueryResult = NonNullable<Awaited<ReturnType<typeof getDriverDocumentUrl>>>
+export type GetDriverDocumentUrlQueryError = ErrorType<unknown>
+
+
+
+export function useGetDriverDocumentUrl<TData = Awaited<ReturnType<typeof getDriverDocumentUrl>>, TError = ErrorType<unknown>>(
+ id: string,
+    documentId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getDriverDocumentUrl>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetDriverDocumentUrlQueryOptions(id,documentId,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getListDriverVerificationsUrl = () => {
+
+
+
+
+  return `/api/admin/drivers`
+}
+
+export const listDriverVerifications = async ( options?: RequestInit): Promise<DriverVerification[]> => {
+
+  return customFetch<DriverVerification[]>(getListDriverVerificationsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListDriverVerificationsQueryKey = () => {
+    return [
+    `/api/admin/drivers`
+    ] as const;
+    }
+
+
+export const getListDriverVerificationsQueryOptions = <TData = Awaited<ReturnType<typeof listDriverVerifications>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listDriverVerifications>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListDriverVerificationsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listDriverVerifications>>> = ({ signal }) => listDriverVerifications({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listDriverVerifications>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListDriverVerificationsQueryResult = NonNullable<Awaited<ReturnType<typeof listDriverVerifications>>>
+export type ListDriverVerificationsQueryError = ErrorType<unknown>
+
+
+
+export function useListDriverVerifications<TData = Awaited<ReturnType<typeof listDriverVerifications>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listDriverVerifications>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListDriverVerificationsQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getReviewDriverVerificationUrl = (id: string,) => {
+
+
+
+
+  return `/api/admin/drivers/${id}/verification`
+}
+
+export const reviewDriverVerification = async (id: string,
+    driverReviewInput: DriverReviewInput, options?: RequestInit): Promise<DriverVerification> => {
+
+  return customFetch<DriverVerification>(getReviewDriverVerificationUrl(id),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(driverReviewInput)
+  }
+);}
+
+
+
+
+
+export const getReviewDriverVerificationMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof reviewDriverVerification>>, TError,{id: string;data: BodyType<DriverReviewInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof reviewDriverVerification>>, TError,{id: string;data: BodyType<DriverReviewInput>}, TContext> => {
+
+const mutationKey = ['reviewDriverVerification'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof reviewDriverVerification>>, {id: string;data: BodyType<DriverReviewInput>}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  reviewDriverVerification(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ReviewDriverVerificationMutationResult = NonNullable<Awaited<ReturnType<typeof reviewDriverVerification>>>
+    export type ReviewDriverVerificationMutationBody = BodyType<DriverReviewInput>
+    export type ReviewDriverVerificationMutationError = ErrorType<unknown>
+
+    export const useReviewDriverVerification = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof reviewDriverVerification>>, TError,{id: string;data: BodyType<DriverReviewInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof reviewDriverVerification>>,
+        TError,
+        {id: string;data: BodyType<DriverReviewInput>},
+        TContext
+      > => {
+      return useMutation(getReviewDriverVerificationMutationOptions(options));
+    }
+
+export const getRateCargoDriverUrl = (id: string,) => {
+
+
+
+
+  return `/api/cargo-loads/${id}/driver-rating`
+}
+
+export const rateCargoDriver = async (id: string,
+    driverRatingInput: DriverRatingInput, options?: RequestInit): Promise<DriverRating> => {
+
+  return customFetch<DriverRating>(getRateCargoDriverUrl(id),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(driverRatingInput)
+  }
+);}
+
+
+
+
+
+export const getRateCargoDriverMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof rateCargoDriver>>, TError,{id: string;data: BodyType<DriverRatingInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof rateCargoDriver>>, TError,{id: string;data: BodyType<DriverRatingInput>}, TContext> => {
+
+const mutationKey = ['rateCargoDriver'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof rateCargoDriver>>, {id: string;data: BodyType<DriverRatingInput>}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  rateCargoDriver(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RateCargoDriverMutationResult = NonNullable<Awaited<ReturnType<typeof rateCargoDriver>>>
+    export type RateCargoDriverMutationBody = BodyType<DriverRatingInput>
+    export type RateCargoDriverMutationError = ErrorType<unknown>
+
+    export const useRateCargoDriver = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof rateCargoDriver>>, TError,{id: string;data: BodyType<DriverRatingInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof rateCargoDriver>>,
+        TError,
+        {id: string;data: BodyType<DriverRatingInput>},
+        TContext
+      > => {
+      return useMutation(getRateCargoDriverMutationOptions(options));
     }
 
 export const getGetDriverUrl = (id: string,) => {

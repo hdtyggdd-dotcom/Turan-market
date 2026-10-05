@@ -7,6 +7,28 @@
  */
 import * as zod from 'zod';
 
+export const getListingsQueryPageDefault = 1;
+export const getListingsQueryLimitDefault = 20;
+export const createOrderBodyClientRequestIdMin = 8;
+export const createOrderBodyClientRequestIdMax = 160;
+export const updateCargoLocationBodyLatMin = -90;
+export const updateCargoLocationBodyLatMax = 90;
+export const updateCargoLocationBodyLngMin = -180;
+export const updateCargoLocationBodyLngMax = 180;
+export const registerPushTokenBodyTokenMax = 256;
+export const unregisterPushTokenBodyTokenMax = 256;
+export const submitDriverVerificationBodyRevisionMin = 0;
+export const submitDriverVerificationBodyVehiclePlateMin = 3;
+export const submitDriverVerificationBodyVehiclePlateMax = 30;
+export const submitDriverVerificationBodyCapacityKgExclusiveMin = 0;
+export const submitDriverVerificationBodyCapacityM3ExclusiveMin = 0;
+export const submitDriverVerificationBodySharedLoadAvailableKgMin = 0;
+export const submitDriverVerificationBodySharedLoadAvailableM3Min = 0;
+export const submitDriverVerificationBodyBioMax = 1000;
+export const reviewDriverVerificationBodyReasonMax = 1000;
+export const rateCargoDriverBodyScoreMax = 5;
+export const rateCargoDriverBodyCommentMax = 500;
+
 
 /**
  * @summary Health check
@@ -356,8 +378,8 @@ export const GetCategoriesResponse = zod.array(GetCategoriesResponseItem)
 /**
  * @summary Get listings with filters
  */
-export const getListingsQueryPageDefault = 1;
-export const getListingsQueryLimitDefault = 20;
+
+
 
 export const GetListingsQueryParams = zod.object({
   "categoryId": zod.coerce.string().optional(),
@@ -1133,8 +1155,8 @@ export const GetOrdersResponse = zod.array(GetOrdersResponseItem)
 /**
  * @summary Create a new order
  */
-export const createOrderBodyClientRequestIdMin = 8;
-export const createOrderBodyClientRequestIdMax = 160;
+
+
 
 
 
@@ -1932,6 +1954,24 @@ export const GetCargoLoadResponse = zod.object({
   "loadId": zod.string(),
   "driverId": zod.string(),
   "driver": zod.object({
+  "operational": zod.boolean().optional(),
+  "reviewStatus": zod.enum(['none', 'pending', 'approved', 'rejected']).optional(),
+  "capacityKg": zod.number().optional(),
+  "capacityM3": zod.number().optional(),
+  "verifiedDocuments": zod.array(zod.object({
+  "id": zod.string(),
+  "kind": zod.enum(['identity', 'license', 'registration']),
+  "status": zod.enum(['pending', 'approved', 'rejected']),
+  "submittedAt": zod.string(),
+  "reviewedAt": zod.string().nullish()
+})).optional(),
+  "ratingHistory": zod.array(zod.object({
+  "id": zod.string(),
+  "loadId": zod.string(),
+  "score": zod.number(),
+  "comment": zod.string().nullable(),
+  "createdAt": zod.string()
+})).optional(),
   "id": zod.string(),
   "userId": zod.string(),
   "user": zod.object({
@@ -2099,11 +2139,11 @@ export const UpdateCargoLocationParams = zod.object({
   "id": zod.coerce.string()
 })
 
-export const updateCargoLocationBodyLatMin = -90;
-export const updateCargoLocationBodyLatMax = 90;
 
-export const updateCargoLocationBodyLngMin = -180;
-export const updateCargoLocationBodyLngMax = 180;
+
+
+
+
 
 
 
@@ -2224,6 +2264,24 @@ export const CreateCargoOfferResponse = zod.object({
   "loadId": zod.string(),
   "driverId": zod.string(),
   "driver": zod.object({
+  "operational": zod.boolean().optional(),
+  "reviewStatus": zod.enum(['none', 'pending', 'approved', 'rejected']).optional(),
+  "capacityKg": zod.number().optional(),
+  "capacityM3": zod.number().optional(),
+  "verifiedDocuments": zod.array(zod.object({
+  "id": zod.string(),
+  "kind": zod.enum(['identity', 'license', 'registration']),
+  "status": zod.enum(['pending', 'approved', 'rejected']),
+  "submittedAt": zod.string(),
+  "reviewedAt": zod.string().nullish()
+})).optional(),
+  "ratingHistory": zod.array(zod.object({
+  "id": zod.string(),
+  "loadId": zod.string(),
+  "score": zod.number(),
+  "comment": zod.string().nullable(),
+  "createdAt": zod.string()
+})).optional(),
   "id": zod.string(),
   "userId": zod.string(),
   "user": zod.object({
@@ -2306,6 +2364,24 @@ export const CounterCargoOfferResponse = zod.object({
   "loadId": zod.string(),
   "driverId": zod.string(),
   "driver": zod.object({
+  "operational": zod.boolean().optional(),
+  "reviewStatus": zod.enum(['none', 'pending', 'approved', 'rejected']).optional(),
+  "capacityKg": zod.number().optional(),
+  "capacityM3": zod.number().optional(),
+  "verifiedDocuments": zod.array(zod.object({
+  "id": zod.string(),
+  "kind": zod.enum(['identity', 'license', 'registration']),
+  "status": zod.enum(['pending', 'approved', 'rejected']),
+  "submittedAt": zod.string(),
+  "reviewedAt": zod.string().nullish()
+})).optional(),
+  "ratingHistory": zod.array(zod.object({
+  "id": zod.string(),
+  "loadId": zod.string(),
+  "score": zod.number(),
+  "comment": zod.string().nullable(),
+  "createdAt": zod.string()
+})).optional(),
   "id": zod.string(),
   "userId": zod.string(),
   "user": zod.object({
@@ -2387,6 +2463,24 @@ export const RespondCargoCounterResponse = zod.object({
   "loadId": zod.string(),
   "driverId": zod.string(),
   "driver": zod.object({
+  "operational": zod.boolean().optional(),
+  "reviewStatus": zod.enum(['none', 'pending', 'approved', 'rejected']).optional(),
+  "capacityKg": zod.number().optional(),
+  "capacityM3": zod.number().optional(),
+  "verifiedDocuments": zod.array(zod.object({
+  "id": zod.string(),
+  "kind": zod.enum(['identity', 'license', 'registration']),
+  "status": zod.enum(['pending', 'approved', 'rejected']),
+  "submittedAt": zod.string(),
+  "reviewedAt": zod.string().nullish()
+})).optional(),
+  "ratingHistory": zod.array(zod.object({
+  "id": zod.string(),
+  "loadId": zod.string(),
+  "score": zod.number(),
+  "comment": zod.string().nullable(),
+  "createdAt": zod.string()
+})).optional(),
   "id": zod.string(),
   "userId": zod.string(),
   "user": zod.object({
@@ -2464,6 +2558,24 @@ export const AcceptCargoOfferResponse = zod.object({
   "loadId": zod.string(),
   "driverId": zod.string(),
   "driver": zod.object({
+  "operational": zod.boolean().optional(),
+  "reviewStatus": zod.enum(['none', 'pending', 'approved', 'rejected']).optional(),
+  "capacityKg": zod.number().optional(),
+  "capacityM3": zod.number().optional(),
+  "verifiedDocuments": zod.array(zod.object({
+  "id": zod.string(),
+  "kind": zod.enum(['identity', 'license', 'registration']),
+  "status": zod.enum(['pending', 'approved', 'rejected']),
+  "submittedAt": zod.string(),
+  "reviewedAt": zod.string().nullish()
+})).optional(),
+  "ratingHistory": zod.array(zod.object({
+  "id": zod.string(),
+  "loadId": zod.string(),
+  "score": zod.number(),
+  "comment": zod.string().nullable(),
+  "createdAt": zod.string()
+})).optional(),
   "id": zod.string(),
   "userId": zod.string(),
   "user": zod.object({
@@ -2536,6 +2648,24 @@ export const GetDriversQueryParams = zod.object({
 })
 
 export const GetDriversResponseItem = zod.object({
+  "operational": zod.boolean().optional(),
+  "reviewStatus": zod.enum(['none', 'pending', 'approved', 'rejected']).optional(),
+  "capacityKg": zod.number().optional(),
+  "capacityM3": zod.number().optional(),
+  "verifiedDocuments": zod.array(zod.object({
+  "id": zod.string(),
+  "kind": zod.enum(['identity', 'license', 'registration']),
+  "status": zod.enum(['pending', 'approved', 'rejected']),
+  "submittedAt": zod.string(),
+  "reviewedAt": zod.string().nullish()
+})).optional(),
+  "ratingHistory": zod.array(zod.object({
+  "id": zod.string(),
+  "loadId": zod.string(),
+  "score": zod.number(),
+  "comment": zod.string().nullable(),
+  "createdAt": zod.string()
+})).optional(),
   "id": zod.string(),
   "userId": zod.string(),
   "user": zod.object({
@@ -2640,7 +2770,7 @@ export const MarkNotificationReadResponse = zod.object({
 })
 
 
-export const registerPushTokenBodyTokenMax = 256;
+
 
 
 
@@ -2653,7 +2783,7 @@ export const RegisterPushTokenResponse = zod.object({
 })
 
 
-export const unregisterPushTokenBodyTokenMax = 256;
+
 
 
 
@@ -2666,6 +2796,250 @@ export const UnregisterPushTokenResponse = zod.object({
 })
 
 
+export const GetMyDriverVerificationResponse = zod.object({
+  "id": zod.string(),
+  "userId": zod.string(),
+  "name": zod.string(),
+  "vehicleTypeId": zod.string(),
+  "vehiclePlate": zod.string(),
+  "capacityKg": zod.number(),
+  "capacityM3": zod.number(),
+  "sharedLoadAvailableKg": zod.number(),
+  "sharedLoadAvailableM3": zod.number(),
+  "availableFrom": zod.string(),
+  "currentRegionId": zod.string(),
+  "bio": zod.string().nullable(),
+  "status": zod.enum(['none', 'pending', 'approved', 'rejected']),
+  "reason": zod.string().nullable(),
+  "revision": zod.number(),
+  "documents": zod.array(zod.object({
+  "id": zod.string(),
+  "kind": zod.enum(['identity', 'license', 'registration']),
+  "status": zod.enum(['pending', 'approved', 'rejected']),
+  "submittedAt": zod.string(),
+  "reviewedAt": zod.string().nullish()
+})),
+  "reviewHistory": zod.array(zod.object({
+  "status": zod.enum(['pending', 'approved', 'rejected']),
+  "reason": zod.string(),
+  "createdAt": zod.string()
+}))
+})
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+export const SubmitDriverVerificationBody = zod.object({
+  "revision": zod.number().min(submitDriverVerificationBodyRevisionMin),
+  "vehicleTypeId": zod.string(),
+  "vehiclePlate": zod.string().min(submitDriverVerificationBodyVehiclePlateMin).max(submitDriverVerificationBodyVehiclePlateMax),
+  "capacityKg": zod.number().gt(submitDriverVerificationBodyCapacityKgExclusiveMin),
+  "capacityM3": zod.number().gt(submitDriverVerificationBodyCapacityM3ExclusiveMin),
+  "sharedLoadAvailableKg": zod.number().min(submitDriverVerificationBodySharedLoadAvailableKgMin),
+  "sharedLoadAvailableM3": zod.number().min(submitDriverVerificationBodySharedLoadAvailableM3Min),
+  "availableFrom": zod.coerce.date(),
+  "currentRegionId": zod.string(),
+  "bio": zod.string().max(submitDriverVerificationBodyBioMax).nullish()
+})
+
+export const SubmitDriverVerificationResponse = zod.object({
+  "id": zod.string(),
+  "userId": zod.string(),
+  "name": zod.string(),
+  "vehicleTypeId": zod.string(),
+  "vehiclePlate": zod.string(),
+  "capacityKg": zod.number(),
+  "capacityM3": zod.number(),
+  "sharedLoadAvailableKg": zod.number(),
+  "sharedLoadAvailableM3": zod.number(),
+  "availableFrom": zod.string(),
+  "currentRegionId": zod.string(),
+  "bio": zod.string().nullable(),
+  "status": zod.enum(['none', 'pending', 'approved', 'rejected']),
+  "reason": zod.string().nullable(),
+  "revision": zod.number(),
+  "documents": zod.array(zod.object({
+  "id": zod.string(),
+  "kind": zod.enum(['identity', 'license', 'registration']),
+  "status": zod.enum(['pending', 'approved', 'rejected']),
+  "submittedAt": zod.string(),
+  "reviewedAt": zod.string().nullish()
+})),
+  "reviewHistory": zod.array(zod.object({
+  "status": zod.enum(['pending', 'approved', 'rejected']),
+  "reason": zod.string(),
+  "createdAt": zod.string()
+}))
+})
+
+
+export const UploadDriverDocumentBody = zod.object({
+  "kind": zod.enum(['identity', 'license', 'registration']),
+  "data": zod.string().describe('Base64 image'),
+  "mimeType": zod.enum(['image/jpeg', 'image/png'])
+})
+
+export const UploadDriverDocumentResponse = zod.object({
+  "id": zod.string(),
+  "userId": zod.string(),
+  "name": zod.string(),
+  "vehicleTypeId": zod.string(),
+  "vehiclePlate": zod.string(),
+  "capacityKg": zod.number(),
+  "capacityM3": zod.number(),
+  "sharedLoadAvailableKg": zod.number(),
+  "sharedLoadAvailableM3": zod.number(),
+  "availableFrom": zod.string(),
+  "currentRegionId": zod.string(),
+  "bio": zod.string().nullable(),
+  "status": zod.enum(['none', 'pending', 'approved', 'rejected']),
+  "reason": zod.string().nullable(),
+  "revision": zod.number(),
+  "documents": zod.array(zod.object({
+  "id": zod.string(),
+  "kind": zod.enum(['identity', 'license', 'registration']),
+  "status": zod.enum(['pending', 'approved', 'rejected']),
+  "submittedAt": zod.string(),
+  "reviewedAt": zod.string().nullish()
+})),
+  "reviewHistory": zod.array(zod.object({
+  "status": zod.enum(['pending', 'approved', 'rejected']),
+  "reason": zod.string(),
+  "createdAt": zod.string()
+}))
+})
+
+
+export const GetDriverDocumentUrlParams = zod.object({
+  "id": zod.coerce.string(),
+  "documentId": zod.coerce.string()
+})
+
+export const GetDriverDocumentUrlResponse = zod.object({
+  "url": zod.string()
+})
+
+
+export const ListDriverVerificationsResponseItem = zod.object({
+  "id": zod.string(),
+  "userId": zod.string(),
+  "name": zod.string(),
+  "vehicleTypeId": zod.string(),
+  "vehiclePlate": zod.string(),
+  "capacityKg": zod.number(),
+  "capacityM3": zod.number(),
+  "sharedLoadAvailableKg": zod.number(),
+  "sharedLoadAvailableM3": zod.number(),
+  "availableFrom": zod.string(),
+  "currentRegionId": zod.string(),
+  "bio": zod.string().nullable(),
+  "status": zod.enum(['none', 'pending', 'approved', 'rejected']),
+  "reason": zod.string().nullable(),
+  "revision": zod.number(),
+  "documents": zod.array(zod.object({
+  "id": zod.string(),
+  "kind": zod.enum(['identity', 'license', 'registration']),
+  "status": zod.enum(['pending', 'approved', 'rejected']),
+  "submittedAt": zod.string(),
+  "reviewedAt": zod.string().nullish()
+})),
+  "reviewHistory": zod.array(zod.object({
+  "status": zod.enum(['pending', 'approved', 'rejected']),
+  "reason": zod.string(),
+  "createdAt": zod.string()
+}))
+})
+export const ListDriverVerificationsResponse = zod.array(ListDriverVerificationsResponseItem)
+
+
+export const ReviewDriverVerificationParams = zod.object({
+  "id": zod.coerce.string()
+})
+
+
+
+
+
+export const ReviewDriverVerificationBody = zod.object({
+  "status": zod.enum(['pending', 'approved', 'rejected']),
+  "revision": zod.number(),
+  "reason": zod.string().max(reviewDriverVerificationBodyReasonMax),
+  "documents": zod.array(zod.object({
+  "id": zod.string(),
+  "status": zod.enum(['pending', 'approved', 'rejected'])
+}))
+})
+
+export const ReviewDriverVerificationResponse = zod.object({
+  "id": zod.string(),
+  "userId": zod.string(),
+  "name": zod.string(),
+  "vehicleTypeId": zod.string(),
+  "vehiclePlate": zod.string(),
+  "capacityKg": zod.number(),
+  "capacityM3": zod.number(),
+  "sharedLoadAvailableKg": zod.number(),
+  "sharedLoadAvailableM3": zod.number(),
+  "availableFrom": zod.string(),
+  "currentRegionId": zod.string(),
+  "bio": zod.string().nullable(),
+  "status": zod.enum(['none', 'pending', 'approved', 'rejected']),
+  "reason": zod.string().nullable(),
+  "revision": zod.number(),
+  "documents": zod.array(zod.object({
+  "id": zod.string(),
+  "kind": zod.enum(['identity', 'license', 'registration']),
+  "status": zod.enum(['pending', 'approved', 'rejected']),
+  "submittedAt": zod.string(),
+  "reviewedAt": zod.string().nullish()
+})),
+  "reviewHistory": zod.array(zod.object({
+  "status": zod.enum(['pending', 'approved', 'rejected']),
+  "reason": zod.string(),
+  "createdAt": zod.string()
+}))
+})
+
+
+export const RateCargoDriverParams = zod.object({
+  "id": zod.coerce.string()
+})
+
+
+
+
+
+
+
+export const RateCargoDriverBody = zod.object({
+  "score": zod.number().min(1).max(rateCargoDriverBodyScoreMax),
+  "comment": zod.string().max(rateCargoDriverBodyCommentMax).optional()
+})
+
+export const RateCargoDriverResponse = zod.object({
+  "id": zod.string(),
+  "loadId": zod.string(),
+  "score": zod.number(),
+  "comment": zod.string().nullable(),
+  "createdAt": zod.string()
+})
+
+
 /**
  * @summary Get a driver profile
  */
@@ -2674,6 +3048,24 @@ export const GetDriverParams = zod.object({
 })
 
 export const GetDriverResponse = zod.object({
+  "operational": zod.boolean().optional(),
+  "reviewStatus": zod.enum(['none', 'pending', 'approved', 'rejected']).optional(),
+  "capacityKg": zod.number().optional(),
+  "capacityM3": zod.number().optional(),
+  "verifiedDocuments": zod.array(zod.object({
+  "id": zod.string(),
+  "kind": zod.enum(['identity', 'license', 'registration']),
+  "status": zod.enum(['pending', 'approved', 'rejected']),
+  "submittedAt": zod.string(),
+  "reviewedAt": zod.string().nullish()
+})).optional(),
+  "ratingHistory": zod.array(zod.object({
+  "id": zod.string(),
+  "loadId": zod.string(),
+  "score": zod.number(),
+  "comment": zod.string().nullable(),
+  "createdAt": zod.string()
+})).optional(),
   "id": zod.string(),
   "userId": zod.string(),
   "user": zod.object({

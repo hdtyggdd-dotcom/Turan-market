@@ -976,6 +976,108 @@ paths:
             application/json:
               schema: { $ref: "#/components/schemas/PushRegistration" }
 
+  /drivers/me/verification:
+    get:
+      operationId: getMyDriverVerification
+      tags: [Cargo]
+      responses:
+        "200":
+          description: Private driver application
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/DriverVerification" }
+    put:
+      operationId: submitDriverVerification
+      tags: [Cargo]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/DriverVerificationInput" }
+      responses:
+        "200":
+          description: Application saved for moderation
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/DriverVerification" }
+  /drivers/me/documents:
+    post:
+      operationId: uploadDriverDocument
+      tags: [Cargo]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/DriverDocumentInput" }
+      responses:
+        "201":
+          description: Private document saved
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/DriverVerification" }
+  /drivers/{id}/documents/{documentId}:
+    get:
+      operationId: getDriverDocumentUrl
+      tags: [Cargo]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+        - { name: documentId, in: path, required: true, schema: { type: string } }
+      responses:
+        "200":
+          description: Short-lived read URL for owner or moderator only
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [url]
+                properties:
+                  url: { type: string }
+  /admin/drivers:
+    get:
+      operationId: listDriverVerifications
+      tags: [Cargo]
+      responses:
+        "200":
+          description: Moderator driver queue
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/DriverVerification" }
+  /admin/drivers/{id}/verification:
+    patch:
+      operationId: reviewDriverVerification
+      tags: [Cargo]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/DriverReviewInput" }
+      responses:
+        "200":
+          description: Review persisted
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/DriverVerification" }
+  /cargo-loads/{id}/driver-rating:
+    post:
+      operationId: rateCargoDriver
+      tags: [Cargo]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/DriverRatingInput" }
+      responses:
+        "201":
+          description: Verified trip rating saved
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/DriverRating" }
   /drivers/{id}:
     get:
       operationId: getDriver
@@ -1739,6 +1841,16 @@ components:
       type: object
       required: [id, userId, user, vehicleType, vehiclePlate, availableFrom, currentRegionId, rating, ratingCount, completedTrips, sharedLoadAvailableKg, sharedLoadAvailableM3]
       properties:
+        operational: { type: boolean }
+        reviewStatus: { type: string, enum: [none, pending, approved, rejected] }
+        capacityKg: { type: number }
+        capacityM3: { type: number }
+        verifiedDocuments:
+          type: array
+          items: { $ref: "#/components/schemas/DriverDocument" }
+        ratingHistory:
+          type: array
+          items: { $ref: "#/components/schemas/DriverRating" }
         id: { type: string }
         userId: { type: string }
         user: { $ref: "#/components/schemas/User" }
@@ -1753,6 +1865,97 @@ components:
         sharedLoadAvailableM3: { type: number }
         bio: { type: ["string", "null"] }
 
+    DriverDocumentInput:
+      type: object
+      required: [kind, data, mimeType]
+      properties:
+        kind: { type: string, enum: [identity, license, registration] }
+        data: { type: string, description: Base64 image, maximum 5 MB decoded }
+        mimeType: { type: string, enum: [image/jpeg, image/png] }
+    DriverReviewInput:
+      type: object
+      required: [status, revision, reason, documents]
+      properties:
+        status: { type: string, enum: [pending, approved, rejected] }
+        revision: { type: integer }
+        reason: { type: string, maxLength: 1000 }
+        documents:
+          type: array
+          items:
+            type: object
+            required: [id, status]
+            properties:
+              id: { type: string }
+              status: { type: string, enum: [pending, approved, rejected] }
+    DriverRatingInput:
+      type: object
+      required: [score]
+      properties:
+        score: { type: integer, minimum: 1, maximum: 5 }
+        comment: { type: string, maxLength: 500 }
+    DriverDocument:
+      type: object
+      required: [id, kind, status, submittedAt]
+      properties:
+        id: { type: string }
+        kind: { type: string, enum: [identity, license, registration] }
+        status: { type: string, enum: [pending, approved, rejected] }
+        submittedAt: { type: string }
+        reviewedAt: { type: ["string", "null"] }
+    DriverRating:
+      type: object
+      required: [id, loadId, score, comment, createdAt]
+      properties:
+        id: { type: string }
+        loadId: { type: string }
+        score: { type: integer }
+        comment: { type: ["string", "null"] }
+        createdAt: { type: string }
+    DriverVerificationInput:
+      type: object
+      required: [vehicleTypeId, vehiclePlate, capacityKg, capacityM3, sharedLoadAvailableKg, sharedLoadAvailableM3, availableFrom, currentRegionId, revision]
+      properties:
+        revision: { type: integer, minimum: 0 }
+        vehicleTypeId: { type: string }
+        vehiclePlate: { type: string, minLength: 3, maxLength: 30 }
+        capacityKg: { type: number, exclusiveMinimum: 0 }
+        capacityM3: { type: number, exclusiveMinimum: 0 }
+        sharedLoadAvailableKg: { type: number, minimum: 0 }
+        sharedLoadAvailableM3: { type: number, minimum: 0 }
+        availableFrom: { type: string, format: date-time }
+        currentRegionId: { type: string }
+        bio: { type: ["string", "null"], maxLength: 1000 }
+    DriverVerification:
+      type: object
+      required: [id, userId, name, vehicleTypeId, vehiclePlate, capacityKg, capacityM3, sharedLoadAvailableKg, sharedLoadAvailableM3, availableFrom, currentRegionId, bio, status, reason, revision, documents, reviewHistory]
+      properties:
+        id: { type: string }
+        userId: { type: string }
+        name: { type: string }
+        vehicleTypeId: { type: string }
+        vehiclePlate: { type: string }
+        capacityKg: { type: number }
+        capacityM3: { type: number }
+        sharedLoadAvailableKg: { type: number }
+        sharedLoadAvailableM3: { type: number }
+        availableFrom: { type: string }
+        currentRegionId: { type: string }
+        bio: { type: ["string", "null"] }
+        status: { type: string, enum: [none, pending, approved, rejected] }
+        reason: { type: ["string", "null"] }
+        revision: { type: integer }
+        documents:
+          type: array
+          items: { $ref: "#/components/schemas/DriverDocument" }
+        reviewHistory:
+          type: array
+          items:
+            type: object
+            required: [status, reason, createdAt]
+            properties:
+              status: { type: string, enum: [pending, approved, rejected] }
+              reason: { type: string }
+              createdAt: { type: string }
     CargoLoad:
       type: object
       required: [id, shipperId, shipper, title, cargoType, weightKg, volumeM3, pickupRegionId, pickupDistrictId, deliveryRegionId, deliveryDistrictId, distanceKm, pickupDate, sharedLoadAllowed, status, createdAt]

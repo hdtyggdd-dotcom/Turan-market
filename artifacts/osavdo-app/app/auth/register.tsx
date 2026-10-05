@@ -72,7 +72,7 @@ export default function RegisterScreen() {
     mutation: {
       onSuccess: async (data) => {
         await signIn(data.token, data.user as UserProfile);
-        router.replace('/(tabs)');
+        router.replace(role === 'driver' ? '/driver/verification' : '/(tabs)');
       },
       onError: (err: unknown) => {
         const details = (err as { data?: { error?: string; message?: string } })?.data;

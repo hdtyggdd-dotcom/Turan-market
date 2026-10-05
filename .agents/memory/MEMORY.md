@@ -6,5 +6,6 @@
 - [Special goods taxonomy](special-goods-taxonomy.md) — damaged and promotional goods are sibling subcategories under one parent, not separate categories.
 - [AI advice billing](ai-advice-billing.md) — use owner-provided Anthropic access; do not switch advice to Replit credit billing without an explicit request.
 - [Mobile push runtime](mobile-push-runtime.md) — verify push support against the installed Expo SDK and native build, not general Expo Go guidance.
+- [Generated schema initialization](generated-schema-initialization.md) — generation must check runtime imports, not only types; eager schemas require initialized bounds.
 - [Single authentication form](single-authentication-form.md) — keep the full name/country/GPS/phone/password entry; do not restore a separate phone-only form.
 - [Browser distribution](browser-distribution.md) — always-available phone access uses the published browser app; Expo Go remains a development preview.

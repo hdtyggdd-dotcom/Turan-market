@@ -11,8 +11,9 @@ import {
   verifyPassword,
 } from "../data/store.js";
 import { authenticateToken, type AuthRequest } from "../middleware/auth.js";
-import { deleteItem, persistItem } from "../lib/persistence.js";
+import { deleteItem as defaultDeleteItem, persistItem as defaultPersistItem } from "../lib/persistence.js";
 
+export function createAuthRouter(persistItem = defaultPersistItem, deleteItem = defaultDeleteItem) {
 const router = Router();
 
 // POST /auth/register
@@ -99,6 +100,8 @@ router.post("/auth/register", async (req, res) => {
     id: generateId(), userId: newUser.id, vehicleTypeId: defaultVehicle!.id, vehiclePlate: "PENDING",
     availableFrom: new Date().toISOString(), currentRegionId: regionId!, rating: 0, ratingCount: 0,
     completedTrips: 0, sharedLoadAvailableKg: 0, sharedLoadAvailableM3: 0, bio: null,
+    capacityKg: 0, capacityM3: 0, reviewStatus: "none" as const, reviewReason: null,
+    revision: 0, documents: [], reviewHistory: [], ratingHistory: [],
   } : null;
 
   try {
@@ -141,4 +144,7 @@ router.get("/auth/me", authenticateToken, (req: AuthRequest, res) => {
   res.json(sanitizeUser(user));
 });
 
-export default router;
+return router;
+}
+
+export default createAuthRouter();

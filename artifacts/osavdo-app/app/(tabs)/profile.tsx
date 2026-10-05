@@ -126,6 +126,29 @@ export default function ProfileScreen() {
           </View>
         )}
 
+        {user.role === 'driver' && (
+          <>
+            <TouchableOpacity
+              onPress={() => router.push('/driver/verification')}
+              style={[styles.section, { backgroundColor: colors.card, borderColor: colors.border, flexDirection: 'row', alignItems: 'center', gap: 12 }]}
+            >
+              <Feather name="shield" size={18} color={colors.primary} />
+              <Text style={{ flex: 1, color: colors.text, fontFamily: 'Inter_600SemiBold' }}>Transport va hujjatlar tekshiruvi</Text>
+              <Feather name="chevron-right" size={18} color={colors.mutedForeground} />
+            </TouchableOpacity>
+          </>
+        )}
+        {user.role === 'admin' && (
+          <TouchableOpacity
+            onPress={() => router.push('/admin/drivers')}
+            style={[styles.section, { backgroundColor: colors.card, borderColor: colors.border, flexDirection: 'row', alignItems: 'center', gap: 12 }]}
+          >
+            <Feather name="clipboard" size={18} color={colors.primary} />
+            <Text style={{ flex: 1, color: colors.text, fontFamily: 'Inter_600SemiBold' }}>Haydovchi arizalari</Text>
+            <Feather name="chevron-right" size={18} color={colors.mutedForeground} />
+          </TouchableOpacity>
+        )}
+
         {/* Location */}
         {(user.region || user.district) && (
           <View style={[styles.section, { backgroundColor: colors.card, borderColor: colors.border }]}>

@@ -23,11 +23,14 @@ import {
   useRespondCargoCounter,
   useGetDistricts,
   useGetRegions,
+  useGetMyDriverVerification,
+  getGetMyDriverVerificationQueryKey,
   getGetDistrictsQueryKey,
   CargoLoadStatus,
   CargoOfferStatus,
 } from '@workspace/api-client-react';
 import { KeyboardAwareScrollViewCompat } from '@/components/KeyboardAwareScrollViewCompat';
+import { RateDriver } from '@/components/cargo/RateDriver';
 import { CargoTrackingCard } from '@/components/cargo/CargoTrackingCard';
 import { useQueryClient } from '@tanstack/react-query';
 import { getGetCargoLoadQueryKey } from '@workspace/api-client-react';
@@ -57,6 +60,9 @@ export default function CargoDetailScreen() {
   const router = useRouter();
   const { user } = useAuth();
   const queryClient = useQueryClient();
+  const { data: driverApplication } = useGetMyDriverVerification({ query: {
+    queryKey: getGetMyDriverVerificationQueryKey(), enabled: user?.role === 'driver', refetchInterval: 15_000,
+  } });
 
   const { data: load, isLoading } = useGetCargoLoad(id!, {
     query: { enabled: !!id, queryKey: getGetCargoLoadQueryKey(id!), refetchInterval: 10_000 },
@@ -114,7 +120,9 @@ export default function CargoDetailScreen() {
   const isShipper = user?.id === load.shipperId;
   const isDriver = user?.role === 'driver';
   const isVerifiedDriver =
-    isDriver && user?.verificationStatus === 'approved';
+    isDriver && driverApplication?.status === 'approved' &&
+    ['identity', 'license', 'registration'].every(kind =>
+      driverApplication.documents.some(doc => doc.kind === kind && doc.status === 'approved'));
   const canNegotiate =
     load.status === CargoLoadStatus.open ||
     load.status === CargoLoadStatus.negotiating;
@@ -328,6 +336,13 @@ export default function CargoDetailScreen() {
           loadId={load.id}
           canUpdate={Boolean(isAssignedDriver)}
         />
+
+        {isShipper && load.status === CargoLoadStatus.delivered && (
+          <RateDriver
+            loadId={load.id}
+            driverId={load.offers?.find((o) => o.status === CargoOfferStatus.accepted)?.driverId}
+          />
+        )}
 
         {/* Recommendation */}
         {load.recommendation && (

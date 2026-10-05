@@ -516,7 +516,59 @@ export interface VehicleType {
   supportedCargoTypes: VehicleTypeSupportedCargoTypesItem[];
 }
 
+export type DriverProfileReviewStatus = typeof DriverProfileReviewStatus[keyof typeof DriverProfileReviewStatus];
+
+
+export const DriverProfileReviewStatus = {
+  none: 'none',
+  pending: 'pending',
+  approved: 'approved',
+  rejected: 'rejected',
+} as const;
+
+export type DriverDocumentKind = typeof DriverDocumentKind[keyof typeof DriverDocumentKind];
+
+
+export const DriverDocumentKind = {
+  identity: 'identity',
+  license: 'license',
+  registration: 'registration',
+} as const;
+
+export type DriverDocumentStatus = typeof DriverDocumentStatus[keyof typeof DriverDocumentStatus];
+
+
+export const DriverDocumentStatus = {
+  pending: 'pending',
+  approved: 'approved',
+  rejected: 'rejected',
+} as const;
+
+export interface DriverDocument {
+  id: string;
+  kind: DriverDocumentKind;
+  status: DriverDocumentStatus;
+  submittedAt: string;
+  /** @nullable */
+  reviewedAt?: string | null;
+}
+
+export interface DriverRating {
+  id: string;
+  loadId: string;
+  score: number;
+  /** @nullable */
+  comment: string | null;
+  createdAt: string;
+}
+
 export interface DriverProfile {
+  operational?: boolean;
+  reviewStatus?: DriverProfileReviewStatus;
+  capacityKg?: number;
+  capacityM3?: number;
+  verifiedDocuments?: DriverDocument[];
+  ratingHistory?: DriverRating[];
   id: string;
   userId: string;
   user: User;
@@ -531,6 +583,144 @@ export interface DriverProfile {
   sharedLoadAvailableM3: number;
   /** @nullable */
   bio?: string | null;
+}
+
+export type DriverDocumentInputKind = typeof DriverDocumentInputKind[keyof typeof DriverDocumentInputKind];
+
+
+export const DriverDocumentInputKind = {
+  identity: 'identity',
+  license: 'license',
+  registration: 'registration',
+} as const;
+
+export type DriverDocumentInputMimeType = typeof DriverDocumentInputMimeType[keyof typeof DriverDocumentInputMimeType];
+
+
+export const DriverDocumentInputMimeType = {
+  'image/jpeg': 'image/jpeg',
+  'image/png': 'image/png',
+} as const;
+
+export interface DriverDocumentInput {
+  kind: DriverDocumentInputKind;
+  /** Base64 image */
+  data: string;
+  mimeType: DriverDocumentInputMimeType;
+}
+
+export type DriverReviewInputStatus = typeof DriverReviewInputStatus[keyof typeof DriverReviewInputStatus];
+
+
+export const DriverReviewInputStatus = {
+  pending: 'pending',
+  approved: 'approved',
+  rejected: 'rejected',
+} as const;
+
+export type DriverReviewInputDocumentsItemStatus = typeof DriverReviewInputDocumentsItemStatus[keyof typeof DriverReviewInputDocumentsItemStatus];
+
+
+export const DriverReviewInputDocumentsItemStatus = {
+  pending: 'pending',
+  approved: 'approved',
+  rejected: 'rejected',
+} as const;
+
+export type DriverReviewInputDocumentsItem = {
+  id: string;
+  status: DriverReviewInputDocumentsItemStatus;
+};
+
+export interface DriverReviewInput {
+  status: DriverReviewInputStatus;
+  revision: number;
+  /** @maxLength 1000 */
+  reason: string;
+  documents: DriverReviewInputDocumentsItem[];
+}
+
+export interface DriverRatingInput {
+  /**
+     * @minimum 1
+     * @maximum 5
+     */
+  score: number;
+  /** @maxLength 500 */
+  comment?: string;
+}
+
+export interface DriverVerificationInput {
+  /** @minimum 0 */
+  revision: number;
+  vehicleTypeId: string;
+  /**
+     * @minLength 3
+     * @maxLength 30
+     */
+  vehiclePlate: string;
+  /** @exclusiveMinimum 0 */
+  capacityKg: number;
+  /** @exclusiveMinimum 0 */
+  capacityM3: number;
+  /** @minimum 0 */
+  sharedLoadAvailableKg: number;
+  /** @minimum 0 */
+  sharedLoadAvailableM3: number;
+  availableFrom: string;
+  currentRegionId: string;
+  /**
+     * @maxLength 1000
+     * @nullable
+     */
+  bio?: string | null;
+}
+
+export type DriverVerificationStatus = typeof DriverVerificationStatus[keyof typeof DriverVerificationStatus];
+
+
+export const DriverVerificationStatus = {
+  none: 'none',
+  pending: 'pending',
+  approved: 'approved',
+  rejected: 'rejected',
+} as const;
+
+export type DriverVerificationReviewHistoryItemStatus = typeof DriverVerificationReviewHistoryItemStatus[keyof typeof DriverVerificationReviewHistoryItemStatus];
+
+
+export const DriverVerificationReviewHistoryItemStatus = {
+  pending: 'pending',
+  approved: 'approved',
+  rejected: 'rejected',
+} as const;
+
+export type DriverVerificationReviewHistoryItem = {
+  status: DriverVerificationReviewHistoryItemStatus;
+  reason: string;
+  createdAt: string;
+};
+
+export interface DriverVerification {
+  id: string;
+  userId: string;
+  name: string;
+  vehicleTypeId: string;
+  vehiclePlate: string;
+  capacityKg: number;
+  capacityM3: number;
+  sharedLoadAvailableKg: number;
+  sharedLoadAvailableM3: number;
+  availableFrom: string;
+  currentRegionId: string;
+  /** @nullable */
+  bio: string | null;
+  status: DriverVerificationStatus;
+  /** @nullable */
+  reason: string | null;
+  revision: number;
+  documents: DriverDocument[];
+  reviewHistory: DriverVerificationReviewHistoryItem[];
 }
 
 export type CargoLoadCargoType = typeof CargoLoadCargoType[keyof typeof CargoLoadCargoType];
@@ -881,5 +1071,9 @@ export const GetCargoLoadsStatus = {
 
 export type GetDriversParams = {
 regionId?: string;
+};
+
+export type GetDriverDocumentUrl200 = {
+  url: string;
 };
 

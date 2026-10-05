@@ -5,10 +5,19 @@
  * O'Savdo local marketplace API
  * OpenAPI spec version: 0.1.0
  */
+import type { DriverDocument } from './driverDocument';
+import type { DriverProfileReviewStatus } from './driverProfileReviewStatus';
+import type { DriverRating } from './driverRating';
 import type { User } from './user';
 import type { VehicleType } from './vehicleType';
 
 export interface DriverProfile {
+  operational?: boolean;
+  reviewStatus?: DriverProfileReviewStatus;
+  capacityKg?: number;
+  capacityM3?: number;
+  verifiedDocuments?: DriverDocument[];
+  ratingHistory?: DriverRating[];
   id: string;
   userId: string;
   user: User;

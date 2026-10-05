@@ -1,4 +1,5 @@
 import { Router, type RequestHandler, type Response } from "express";
+import { isOperationalDriver, publicDriverEvidence, canCarryCargo, withDriverWrite } from "../lib/driver-trust.js";
 import {
   cargoLoads,
   cargoNotifications,
@@ -49,6 +50,13 @@ function withCargoLock(
       if (mutationQueue.get(id) === current) mutationQueue.delete(id);
     }
   };
+}
+
+/** Eligibility checks, persistence and publication share the moderation queue. */
+function withDriverCargoLock(
+  handler: (req: AuthRequest, res: Response) => void | Promise<void>,
+): RequestHandler {
+  return withCargoLock((req, res) => withDriverWrite(async () => { await handler(req, res); }));
 }
 const cargoTypes: CargoType[] = ["general", "fragile", "perishable", "livestock", "hazardous", "construction"];
 const trackingStages: CargoTrackingStage[] = [
@@ -103,7 +111,19 @@ function hydrateDriver(profile: (typeof driverProfiles)[number], revealPrivateDe
   const vehicleType = vehicleTypes.find((item) => item.id === profile.vehicleTypeId);
   const sanitizedDriver = user ? sanitizeUser(user) : null;
   return {
-    ...profile,
+    id: profile.id,
+    userId: profile.userId,
+    vehicleTypeId: profile.vehicleTypeId,
+    vehiclePlate: profile.vehiclePlate,
+    availableFrom: profile.availableFrom,
+    currentRegionId: profile.currentRegionId,
+    rating: profile.rating,
+    ratingCount: profile.ratingCount,
+    completedTrips: profile.completedTrips,
+    sharedLoadAvailableKg: profile.sharedLoadAvailableKg,
+    sharedLoadAvailableM3: profile.sharedLoadAvailableM3,
+    bio: profile.bio,
+    ...publicDriverEvidence(profile),
     user: sanitizedDriver
       ? {
           ...sanitizedDriver,
@@ -128,15 +148,6 @@ function hydrateOffer(offer: StoredCargoOffer, revealDriverPhone = false) {
     ...offer,
     driver: driver ? hydrateDriver(driver, revealDriverPhone) : null,
   };
-}
-
-function isOperationalDriver(profile: (typeof driverProfiles)[number]): boolean {
-  const user = users.find((item) => item.id === profile.userId);
-  return (
-    user?.verificationStatus === "approved" &&
-    profile.vehiclePlate.trim().length > 0 &&
-    profile.vehiclePlate !== "PENDING"
-  );
 }
 
 function canViewPrivateLoadDetails(load: StoredCargoLoad, requesterId?: string): boolean {
@@ -443,7 +454,7 @@ router.put("/cargo-loads/:id/location", authenticateToken, withCargoLock((req, r
   res.json(hydrateTracking(load, req.userId));
 }));
 
-router.post("/cargo-loads/:id/offers", authenticateToken, withCargoLock(async (req, res) => {
+router.post("/cargo-loads/:id/offers", authenticateToken, withDriverCargoLock(async (req, res) => {
   const load = cargoLoads.find((item) => item.id === rawParam(req.params.id));
   const driver = driverProfiles.find((item) => item.userId === req.userId);
   const { amountUzs, message } = req.body as Record<string, unknown>;
@@ -460,16 +471,7 @@ router.post("/cargo-loads/:id/offers", authenticateToken, withCargoLock(async (r
   if (load.status !== "open" && load.status !== "negotiating") { res.status(409).json({ error: "conflict", message: "Cargo load is not accepting offers" }); return; }
   if (!hasActionablePickupDate(load)) { res.status(409).json({ error: "conflict", message: "Cargo pickup date has passed" }); return; }
   if (typeof amountUzs !== "number" || amountUzs <= 0) { res.status(400).json({ error: "validation", message: "A positive amountUzs is required" }); return; }
-  const vehicle = vehicleTypes.find((item) => item.id === driver.vehicleTypeId);
-  const supported =
-    vehicle?.supportedCargoTypes.includes(load.cargoType) &&
-    vehicle.capacityKg >= load.weightKg &&
-    vehicle.capacityM3 >= load.volumeM3;
-  const hasSharedCapacity =
-    !load.sharedLoadAllowed ||
-    (driver.sharedLoadAvailableKg >= load.weightKg &&
-      driver.sharedLoadAvailableM3 >= load.volumeM3);
-  if (!supported || !hasSharedCapacity) {
+  if (!canCarryCargo(driver, load)) {
     res.status(422).json({
       error: "incompatible_vehicle",
       message: load.sharedLoadAllowed
@@ -520,7 +522,7 @@ router.post("/cargo-loads/:id/offers/:offerId/counter", authenticateToken, withC
   res.json(hydrateOffer(offer));
 }));
 
-router.post("/cargo-loads/:id/offers/:offerId/counter-decision", authenticateToken, withCargoLock(async (req, res) => {
+router.post("/cargo-loads/:id/offers/:offerId/counter-decision", authenticateToken, withDriverCargoLock(async (req, res) => {
   const load = cargoLoads.find((item) => item.id === rawParam(req.params.id));
   const offer = cargoOffers.find((item) => item.id === rawParam(req.params.offerId) && item.loadId === load?.id);
   const driver = driverProfiles.find((item) => item.userId === req.userId);
@@ -541,6 +543,9 @@ router.post("/cargo-loads/:id/offers/:offerId/counter-decision", authenticateTok
       message: "Driver identity and vehicle must remain verified to accept a counter offer",
     });
     return;
+  }
+  if (accepted && !canCarryCargo(driver, load)) {
+    res.status(422).json({ error: "incompatible_vehicle", message: "Current approved vehicle capacity is insufficient." }); return;
   }
 
   const now = new Date().toISOString();
@@ -573,7 +578,7 @@ router.post("/cargo-loads/:id/offers/:offerId/counter-decision", authenticateTok
   res.json(hydrateOffer(offer));
 }));
 
-router.post("/cargo-loads/:id/offers/:offerId/accept", authenticateToken, withCargoLock(async (req, res) => {
+router.post("/cargo-loads/:id/offers/:offerId/accept", authenticateToken, withDriverCargoLock(async (req, res) => {
   const load = cargoLoads.find((item) => item.id === rawParam(req.params.id));
   const offer = cargoOffers.find((item) => item.id === rawParam(req.params.offerId) && item.loadId === load?.id);
   const offerDriver = driverProfiles.find((item) => item.id === offer?.driverId);
@@ -590,6 +595,9 @@ router.post("/cargo-loads/:id/offers/:offerId/accept", authenticateToken, withCa
   if ((load.status !== "open" && load.status !== "negotiating") || offer.status !== "pending" || cargoOffers.some((item) => item.loadId === load.id && item.status === "accepted")) {
     res.status(409).json({ error: "conflict", message: "This offer can no longer be accepted" });
     return;
+  }
+  if (!canCarryCargo(offerDriver, load)) {
+    res.status(422).json({ error: "incompatible_vehicle", message: "Current approved vehicle capacity is insufficient." }); return;
   }
   const now = new Date().toISOString();
   const nextOffer: StoredCargoOffer = { ...offer, status: "accepted", updatedAt: now };

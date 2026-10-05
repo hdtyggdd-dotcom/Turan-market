@@ -18,7 +18,7 @@ export default function DriverProfileScreen() {
   const insets = useSafeAreaInsets();
 
   const { data: driver, isLoading } = useGetDriver(id!, {
-    query: { enabled: !!id, queryKey: getGetDriverQueryKey(id!) },
+    query: { enabled: !!id, queryKey: getGetDriverQueryKey(id!), refetchInterval: 15_000, refetchOnMount: 'always' },
   });
 
   if (isLoading) {
@@ -39,9 +39,7 @@ export default function DriverProfileScreen() {
     );
   }
 
-  const isVerified =
-    driver.user.verificationStatus === 'approved' &&
-    driver.vehiclePlate !== 'PENDING';
+  const isVerified = driver.operational === true;
   const verificationColor = isVerified
     ? colors.statusConfirmed
     : colors.statusPending;
@@ -114,11 +112,11 @@ export default function DriverProfileScreen() {
               <View style={styles.capacityRow}>
                 <View style={styles.capacityItem}>
                   <Text style={[styles.capacityLabel, { color: colors.mutedForeground }]}>Yuk ko'tarish</Text>
-                  <Text style={[styles.capacityValue, { color: colors.text }]}>{driver.vehicleType.capacityKg} kg</Text>
+                  <Text style={[styles.capacityValue, { color: colors.text }]}>{driver.capacityKg ?? driver.vehicleType.capacityKg} kg</Text>
                 </View>
                 <View style={styles.capacityItem}>
                   <Text style={[styles.capacityLabel, { color: colors.mutedForeground }]}>Hajm</Text>
-                  <Text style={[styles.capacityValue, { color: colors.text }]}>{driver.vehicleType.capacityM3} m³</Text>
+                  <Text style={[styles.capacityValue, { color: colors.text }]}>{driver.capacityM3 ?? driver.vehicleType.capacityM3} m³</Text>
                 </View>
               </View>
             </View>
@@ -154,6 +152,31 @@ export default function DriverProfileScreen() {
           </View>
         )}
         
+        <Text style={[styles.sectionTitle, { color: colors.text }]}>Bo'sh bo'ladi</Text>
+        <View style={[styles.bioCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
+          <Text style={[styles.bio, { color: colors.text }]}>{new Date(driver.availableFrom).toLocaleString()}</Text>
+        </View>
+
+        <Text style={[styles.sectionTitle, { color: colors.text }]}>Tasdiqlangan hujjatlar</Text>
+        <View style={[styles.bioCard, { backgroundColor: colors.card, borderColor: colors.border, gap: 6 }]}>
+          {driver.verifiedDocuments?.length ? driver.verifiedDocuments.map((d) => (
+            <Text key={d.id} style={[styles.bio, { color: colors.text }]}>
+              {{ identity: 'Shaxs hujjati', license: 'Haydovchilik guvohnomasi', registration: 'Transport guvohnomasi' }[d.kind]}
+              {d.reviewedAt ? ` · ${new Date(d.reviewedAt).toLocaleDateString()}` : ''}
+            </Text>
+          )) : <Text style={[styles.bio, { color: colors.mutedForeground }]}>Tasdiqlangan hujjat yo'q.</Text>}
+        </View>
+
+        <Text style={[styles.sectionTitle, { color: colors.text }]}>Baholar</Text>
+        <View style={[styles.bioCard, { backgroundColor: colors.card, borderColor: colors.border, gap: 10 }]}>
+          {driver.ratingHistory?.length ? driver.ratingHistory.map((r) => (
+            <View key={r.id}>
+              <Text style={[styles.bio, { color: colors.text, fontFamily: 'Inter_600SemiBold' }]}>{r.score}/5 · {new Date(r.createdAt).toLocaleDateString()}</Text>
+              {!!r.comment && <Text style={[styles.bio, { color: colors.mutedForeground }]}>{r.comment}</Text>}
+            </View>
+          )) : <Text style={[styles.bio, { color: colors.mutedForeground }]}>Hali baho berilmagan.</Text>}
+        </View>
+
         {driver.bio && (
           <>
             <Text style={[styles.sectionTitle, { color: colors.text }]}>Qo'shimcha</Text>

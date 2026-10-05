@@ -8,10 +8,12 @@
     "build": "node ./build.mjs",
     "start": "node --enable-source-maps ./dist/index.mjs",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test:cargo-tracking": "pnpm --filter @workspace/scripts exec tsx --test ../artifacts/api-server/src/routes/cargo.test.ts"
+    "test:cargo-tracking": "pnpm --filter @workspace/scripts exec tsx --test ../artifacts/api-server/src/routes/cargo.test.ts",
+    "test:driver-verification": "pnpm --filter @workspace/scripts exec tsx --test ../artifacts/api-server/src/routes/drivers.test.ts ../artifacts/api-server/src/routes/auth.test.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.115.0",
+    "@google-cloud/storage": "^8.2.0",
     "@workspace/api-zod": "workspace:*",
     "@workspace/db": "workspace:*",
     "cookie-parser": "^1.4.7",

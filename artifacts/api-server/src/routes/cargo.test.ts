@@ -4,7 +4,7 @@ import express from "express";
 import type { Server } from "node:http";
 import { createCargoRouter } from "./cargo.js";
 import {
-  cargoLoads, cargoOffers, cargoNotifications, cargoTrackingUpdates, driverProfiles, generateToken,
+  cargoLoads, cargoOffers, cargoNotifications, cargoTrackingUpdates, driverProfiles, generateToken, vehicleTypes,
 } from "../data/store.js";
 
 const loadId = "tracking-regression-load";
@@ -32,6 +32,17 @@ async function request(path: string, userId: string, method = "GET", body?: unkn
 }
 
 before(async () => {
+  // Existing cargo regression scenarios use explicitly vetted fixtures.
+  for (const profile of driverProfiles) {
+    const vehicle = vehicleTypes.find(item => item.id === profile.vehicleTypeId)!;
+    profile.capacityKg = vehicle.capacityKg;
+    profile.capacityM3 = vehicle.capacityM3;
+    profile.reviewStatus = "approved";
+    profile.documents = (["identity", "license", "registration"] as const).map(kind => ({
+      id: `fixture-${profile.id}-${kind}`, kind, objectPath: "fixture-only", mimeType: "image/jpeg",
+      status: "approved", submittedAt: new Date().toISOString(), reviewedAt: new Date().toISOString(),
+    }));
+  }
   const original = cargoLoads[0]!;
   cargoLoads.push({ ...original, id: loadId, shipperId, status: "open" });
   cargoOffers.push({

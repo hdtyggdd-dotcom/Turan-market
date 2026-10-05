@@ -133,6 +133,32 @@ export interface StoredDriverProfile {
   sharedLoadAvailableKg: number;
   sharedLoadAvailableM3: number;
   bio: string | null;
+  capacityKg?: number;
+  capacityM3?: number;
+  reviewStatus?: 'none' | 'pending' | 'approved' | 'rejected';
+  reviewReason?: string | null;
+  revision?: number;
+  documents?: StoredDriverDocument[];
+  reviewHistory?: { status: 'pending' | 'approved' | 'rejected'; reason: string; createdAt: string; reviewerId: string }[];
+  ratingHistory?: StoredDriverRating[];
+}
+
+export interface StoredDriverDocument {
+  id: string;
+  kind: 'identity' | 'license' | 'registration';
+  objectPath: string;
+  mimeType: string;
+  status: 'pending' | 'approved' | 'rejected';
+  submittedAt: string;
+  reviewedAt: string | null;
+}
+
+export interface StoredDriverRating {
+  id: string;
+  loadId: string;
+  score: number;
+  comment: string | null;
+  createdAt: string;
 }
 
 export interface StoredCargoLoad {
