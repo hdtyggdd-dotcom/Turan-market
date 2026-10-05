@@ -47,7 +47,7 @@ paths:
     post:
       operationId: register
       tags: [auth]
-      summary: Register new user
+      summary: Register new user or sign into an existing account through the unified form
       requestBody:
         required: true
         content:
@@ -55,12 +55,24 @@ paths:
             schema:
               $ref: "#/components/schemas/RegisterRequest"
       responses:
+        "200":
+          description: Existing account authenticated when signInExisting is true
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
         "201":
           description: User created
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/AuthResponse"
+        "401":
+          description: Existing account password is incorrect
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "400":
           description: Validation error
           content:
@@ -1019,6 +1031,9 @@ components:
     RegisterRequest:
       type: object
       properties:
+        signInExisting:
+          type: boolean
+          description: Use the full form for existing accounts as well; new accounts still require a valid location.
         phone:
           type: string
         name:

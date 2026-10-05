@@ -1,6 +1,7 @@
 import { Router } from "express";
 import {
   driverProfiles,
+  districts,
   regions,
   users,
   generateId,
@@ -16,7 +17,7 @@ const router = Router();
 
 // POST /auth/register
 router.post("/auth/register", async (req, res) => {
-  const { phone, name, password, role, regionId, districtId, neighborhoodId } =
+  const { phone, name, password, role, regionId, districtId, neighborhoodId, signInExisting } =
     req.body as {
       phone: string;
       name: string;
@@ -25,15 +26,25 @@ router.post("/auth/register", async (req, res) => {
       regionId?: string;
       districtId?: string;
       neighborhoodId?: string;
+      signInExisting?: boolean;
     };
 
-  if (!phone || !name || !password || !role) {
+  if (typeof phone !== "string" || typeof name !== "string" || typeof password !== "string" || typeof role !== "string" || !phone || !name.trim() || !password || !role) {
     res.status(400).json({ error: "validation", message: "All fields required" });
     return;
   }
 
   const existing = users.find((u) => u.phone === phone);
   if (existing) {
+    if (signInExisting === true) {
+      if (!verifyPassword(password, existing.password)) {
+        res.status(401).json({ error: "unauthorized", message: "Telefon raqam yoki parol noto‘g‘ri." });
+        return;
+      }
+      // Sign in without replacing the existing identity, role, or saved data.
+      res.json({ token: generateToken(existing.id), user: sanitizeUser(existing) });
+      return;
+    }
     res
       .status(400)
       .json({ error: "conflict", message: "Phone number already registered" });
@@ -42,6 +53,19 @@ router.post("/auth/register", async (req, res) => {
   if (!["buyer", "seller", "driver"].includes(role)) {
     res.status(400).json({ error: "validation", message: "Invalid account role" });
     return;
+  }
+  if (signInExisting === true) {
+    const region = regions.find((item) => item.id === regionId);
+    const validDistrict = region && (districts.some((item) => item.id === districtId && item.regionId === region.id) ||
+      (region.countryId !== "uz" && districtId === region.id));
+    if (!region || !validDistrict) {
+      res.status(400).json({ error: "location_required", message: "GPS orqali joylashuvni aniqlang yoki viloyat va tumanni tanlang." });
+      return;
+    }
+    if (password.length < 6) {
+      res.status(400).json({ error: "validation", message: "Parol kamida 6 ta belgidan iborat bo‘lsin." });
+      return;
+    }
   }
   if (role === "driver" && (!regionId || !regions.some((region) => region.id === regionId))) {
     res.status(400).json({ error: "validation", message: "Drivers must provide a valid current region" });
