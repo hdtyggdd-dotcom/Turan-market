@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "Turan Market",
-    "slug": "osavdo-app",
+    "name": "Turan Market.",
+    "slug": "turanmarket",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/turan-logo.png",
-    "scheme": "osavdo-app",
+    "scheme": "turanmarket",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "splash": {
@@ -14,10 +14,11 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": false
+      "supportsTablet": false,
+      "bundleIdentifier": "com.turanmarket.app"
     },
     "android": {
-      "package": "uz.turanmarket.app",
+      "package": "com.turanmarket.app",
       "versionCode": 1,
       "permissions": [
         "ACCESS_COARSE_LOCATION",

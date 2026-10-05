@@ -14,7 +14,7 @@ import * as ExpoLocation from 'expo-location';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useColors } from '@/hooks/useColors';
 import { Feather } from '@expo/vector-icons';
-import { getGetUserListingsQueryKey, getGetListingsQueryKey, useCreateListing, useDetectLocation } from '@workspace/api-client-react';
+import { getGetUserListingsQueryKey, getGetListingsQueryKey, useCreateListing, useDetectLocation, useGetCategories } from '@workspace/api-client-react';
 import { ImageUploader } from '@/components/ImageUploader';
 import { useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
@@ -45,6 +45,9 @@ export function CreateListingForm({ hideHeader = false, onDone }: { hideHeader?:
   const [images, setImages] = useState<string[]>([]);
   const [analysisListingId, setAnalysisListingId] = useState<string | null>(null);
   const [isPreparing, setIsPreparing] = useState(false);
+  const [specialCategoryId, setSpecialCategoryId] = useState<string | null>(null);
+  const { data: categories } = useGetCategories();
+  const specialCategories = (categories ?? []).filter((category) => category.id === 'cat18' || category.id === 'cat19');
 
   const detectLocationMutation = useDetectLocation();
 
@@ -128,6 +131,7 @@ export function CreateListingForm({ hideHeader = false, onDone }: { hideHeader?:
         title: title.trim(),
         price: Number(price),
         images,
+        ...(specialCategoryId ? { categoryId: specialCategoryId } : {}),
         regionId: location.regionId,
         districtId: location.districtId,
       },
@@ -146,7 +150,7 @@ export function CreateListingForm({ hideHeader = false, onDone }: { hideHeader?:
         listingId={analysisListingId}
         onClose={() => {
           setAnalysisListingId(null);
-          setTitle(''); setPrice(''); setImages([]); setIsPreparing(false);
+          setTitle(''); setPrice(''); setImages([]); setIsPreparing(false); setSpecialCategoryId(null);
           if (onDone) onDone(); else router.push('/(tabs)');
         }}
       />
@@ -190,6 +194,30 @@ export function CreateListingForm({ hideHeader = false, onDone }: { hideHeader?:
           keyboardType="numeric"
         />
 
+        <FieldLabel label="Tovar bo'limi" colors={colors} />
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+          {[{ id: null, name: 'Avtomatik' }, ...specialCategories].map((category) => {
+            const selected = specialCategoryId === category.id;
+            return (
+              <TouchableOpacity
+                key={category.id ?? 'auto'}
+                accessibilityRole="button"
+                accessibilityState={{ selected }}
+                onPress={() => setSpecialCategoryId(category.id)}
+                style={{
+                  borderRadius: 12, borderWidth: 1, paddingHorizontal: 12, paddingVertical: 10,
+                  borderColor: selected ? colors.primary : colors.border,
+                  backgroundColor: selected ? colors.primary : colors.card,
+                }}
+              >
+                <Text style={{ color: selected ? colors.primaryForeground : colors.text, fontFamily: 'Inter_500Medium', fontSize: 13 }}>
+                  {category.name}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
+        </View>
+
         {/* AI-filled fields */}
         <View style={[styles.autoCard, { backgroundColor: colors.secondary, borderColor: colors.border }]}>
           <View style={styles.autoHeader}>
@@ -197,7 +225,7 @@ export function CreateListingForm({ hideHeader = false, onDone }: { hideHeader?:
             <View style={{ flex: 1 }}>
               <Text style={[styles.autoTitle, { color: colors.text }]}>Qolganini AI joylaydi</Text>
               <Text style={[styles.autoSubtitle, { color: colors.mutedForeground }]}>
-                Kategoriya, viloyat va tuman avtomatik aniqlanadi
+                {specialCategoryId ? "Tanlangan bo'lim saqlanadi; viloyat va tuman avtomatik aniqlanadi" : "Kategoriya, viloyat va tuman avtomatik aniqlanadi"}
               </Text>
             </View>
           </View>

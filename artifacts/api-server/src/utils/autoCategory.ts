@@ -77,6 +77,14 @@ const CATEGORY_KEYWORDS: Record<string, string[]> = {
  */
 export function findBestCategory(text: string): string {
   const norm = normalizeUz(text.toLowerCase());
+  const tokens = norm.match(/[\p{L}\p{N}]+/gu) ?? [];
+  const hasLabel = (labels: string[]) => tokens.some((word, index) =>
+    labels.includes(word) && tokens[index + 1] !== "emas" && tokens[index + 1] !== "yoq" &&
+    tokens[index - 1] !== "не",
+  );
+  // Condition labels take precedence over product words such as "telefon".
+  if (hasLabel(["shikastlangan", "shkaslangan", "shikastli", "singan", "nuqsonli", "nosoz", "defektli", "поврежденный", "повреждённый", "неисправный"])) return "cat18";
+  if (hasLabel(["aksiya", "aksiyada", "aksiyadagi", "chegirma", "chegirmali", "chegirmada", "скидка", "акция", "распродажа"])) return "cat19";
   const words = norm.split(/\s+/);
 
   let bestCatId = "cat7"; // default — maishiy xizmatlar

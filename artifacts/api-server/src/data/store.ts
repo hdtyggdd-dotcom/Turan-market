@@ -1073,6 +1073,24 @@ export const categories: StoredCategory[] = [
 ];
 
 // ─── USERS ────────────────────────────────────────────────────────────────────
+// Special sale sections use the same listing/filter contract as the catalog.
+categories.push(
+  {
+    id: 'cat18',
+    name: "Shikastlangan tovarlar",
+    nameRu: "Повреждённые товары",
+    icon: "🛠️",
+    subcategories: [],
+  },
+  {
+    id: 'cat19',
+    name: "Aksiyadagi tovarlar",
+    nameRu: "Акционные товары",
+    icon: "🏷️",
+    subcategories: [],
+  },
+);
+
 export const users: StoredUser[] = [
   {
     id: 'u1',
