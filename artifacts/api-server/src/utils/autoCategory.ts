@@ -75,7 +75,7 @@ const CATEGORY_KEYWORDS: Record<string, string[]> = {
  * Matnga mos keladigan kategoriyani toptiradi.
  * Qaytaradi: { categoryId, score } yoki eng kamida cat7 (xizmatlar)
  */
-export function findBestCategory(text: string): string {
+export function findSpecialSubcategory(text: string): string | undefined {
   const norm = normalizeUz(text.toLowerCase());
   const tokens = norm.match(/[\p{L}\p{N}]+/gu) ?? [];
   const hasLabel = (labels: string[]) => tokens.some((word, index) =>
@@ -83,8 +83,14 @@ export function findBestCategory(text: string): string {
     tokens[index - 1] !== "не",
   );
   // Condition labels take precedence over product words such as "telefon".
-  if (hasLabel(["shikastlangan", "shkaslangan", "shikastli", "singan", "nuqsonli", "nosoz", "defektli", "поврежденный", "повреждённый", "неисправный"])) return "cat18";
-  if (hasLabel(["aksiya", "aksiyada", "aksiyadagi", "chegirma", "chegirmali", "chegirmada", "скидка", "акция", "распродажа"])) return "cat19";
+  if (hasLabel(["shikastlangan", "shkaslangan", "shikastli", "singan", "nuqsonli", "nosoz", "defektli", "поврежденный", "повреждённый", "неисправный"])) return "sub18_damaged";
+  if (hasLabel(["aksiya", "aksiyada", "aksiyadagi", "chegirma", "chegirmali", "chegirmada", "скидка", "акция", "распродажа"])) return "sub18_sale";
+  return undefined;
+}
+
+export function findBestCategory(text: string): string {
+  if (findSpecialSubcategory(text)) return "cat18";
+  const norm = normalizeUz(text.toLowerCase());
   const words = norm.split(/\s+/);
 
   let bestCatId = "cat7"; // default — maishiy xizmatlar

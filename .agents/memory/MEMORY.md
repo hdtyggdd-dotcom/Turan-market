@@ -3,3 +3,4 @@
 - [Cargo negotiation integrity](cargo-negotiation-integrity.md) — a shipper counter becomes the payable amount only after the offering driver accepts it.
 - [Payment scope](payment-scope.md) — keep online card payments disabled until the owner explicitly requests re-enabling them.
 - [Cart retry integrity](cart-retry-integrity.md) — uncertain checkout responses must keep the original request identity; removing and re-adding can duplicate an order.
+- [Special goods taxonomy](special-goods-taxonomy.md) — damaged and promotional goods are sibling subcategories under one parent, not separate categories.

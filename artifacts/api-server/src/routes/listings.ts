@@ -16,7 +16,7 @@ import {
 import { authenticateToken, type AuthRequest } from "../middleware/auth.js";
 import { deleteItem, persistItem } from "../lib/persistence.js";
 import { scoreSearch, FUZZY_THRESHOLD } from "../utils/fuzzy.js";
-import { ensureSubcategory, findBestCategory } from "../utils/autoCategory.js";
+import { ensureSubcategory, findBestCategory, findSpecialSubcategory } from "../utils/autoCategory.js";
 
 function getAIClient() {
   const key = process.env.ANTHROPIC_API_KEY || process.env.OPENAI_API_KEY || "";
@@ -245,15 +245,23 @@ router.post("/listings", authenticateToken, async (req: AuthRequest, res) => {
 
   const owner = users.find((u) => u.id === req.userId);
   const sourceText = [body.title, body.description].filter(Boolean).join(" ");
-  const submittedCategory = body.categoryId && categories.some((c) => c.id === body.categoryId)
+  const submittedCategory = body.categoryId === "cat19" ? "cat18" : body.categoryId && categories.some((c) => c.id === body.categoryId)
     ? body.categoryId
     : undefined;
 
   // Kategoriya yuborilmasa, tovar ma'lumotidan avtomatik aniqlanadi.
   let resolvedCategoryId = submittedCategory ?? findBestCategory(sourceText);
   let resolvedSubcategoryId = body.subcategoryId ?? null;
+  if (resolvedCategoryId === "cat18") {
+    resolvedSubcategoryId = body.categoryId === "cat19" ? "sub18_sale" :
+      (body.subcategoryId || findSpecialSubcategory(sourceText) || "sub18_damaged");
+    if (!categories.find((category) => category.id === "cat18")?.subcategories.some((sub) => sub.id === resolvedSubcategoryId)) {
+      res.status(400).json({ error: "invalid_subcategory", message: "Shikastlangan yoki aksiyadagi tovarlar turini tanlang." });
+      return;
+    }
+  }
 
-  if (body.customSubcategoryName?.trim()) {
+  if (body.customSubcategoryName?.trim() && resolvedCategoryId !== "cat18") {
     const sub = ensureSubcategory(body.customSubcategoryName.trim(), resolvedCategoryId);
     resolvedSubcategoryId = sub.id;
     resolvedCategoryId = sub.categoryId; // AI boshqa kategoriyaga o'tkazgan bo'lishi mumkin

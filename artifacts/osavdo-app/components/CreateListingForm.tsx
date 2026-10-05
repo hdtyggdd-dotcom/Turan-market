@@ -45,9 +45,9 @@ export function CreateListingForm({ hideHeader = false, onDone }: { hideHeader?:
   const [images, setImages] = useState<string[]>([]);
   const [analysisListingId, setAnalysisListingId] = useState<string | null>(null);
   const [isPreparing, setIsPreparing] = useState(false);
-  const [specialCategoryId, setSpecialCategoryId] = useState<string | null>(null);
+  const [specialSubcategoryId, setSpecialSubcategoryId] = useState<string | null>(null);
   const { data: categories } = useGetCategories();
-  const specialCategories = (categories ?? []).filter((category) => category.id === 'cat18' || category.id === 'cat19');
+  const specialCategory = (categories ?? []).find((category) => category.id === 'cat18');
 
   const detectLocationMutation = useDetectLocation();
 
@@ -131,7 +131,7 @@ export function CreateListingForm({ hideHeader = false, onDone }: { hideHeader?:
         title: title.trim(),
         price: Number(price),
         images,
-        ...(specialCategoryId ? { categoryId: specialCategoryId } : {}),
+        ...(specialSubcategoryId ? { categoryId: 'cat18', subcategoryId: specialSubcategoryId } : {}),
         regionId: location.regionId,
         districtId: location.districtId,
       },
@@ -150,7 +150,7 @@ export function CreateListingForm({ hideHeader = false, onDone }: { hideHeader?:
         listingId={analysisListingId}
         onClose={() => {
           setAnalysisListingId(null);
-          setTitle(''); setPrice(''); setImages([]); setIsPreparing(false); setSpecialCategoryId(null);
+          setTitle(''); setPrice(''); setImages([]); setIsPreparing(false); setSpecialSubcategoryId(null);
           if (onDone) onDone(); else router.push('/(tabs)');
         }}
       />
@@ -195,15 +195,16 @@ export function CreateListingForm({ hideHeader = false, onDone }: { hideHeader?:
         />
 
         <FieldLabel label="Tovar bo'limi" colors={colors} />
+        {specialCategory && <Text style={{ color: colors.mutedForeground, fontSize: 13 }}>{specialCategory.name}</Text>}
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
-          {[{ id: null, name: 'Avtomatik' }, ...specialCategories].map((category) => {
-            const selected = specialCategoryId === category.id;
+          {[{ id: null, name: 'Avtomatik' }, ...(specialCategory?.subcategories ?? [])].map((category) => {
+            const selected = specialSubcategoryId === category.id;
             return (
               <TouchableOpacity
                 key={category.id ?? 'auto'}
                 accessibilityRole="button"
                 accessibilityState={{ selected }}
-                onPress={() => setSpecialCategoryId(category.id)}
+                onPress={() => setSpecialSubcategoryId(category.id)}
                 style={{
                   borderRadius: 12, borderWidth: 1, paddingHorizontal: 12, paddingVertical: 10,
                   borderColor: selected ? colors.primary : colors.border,
@@ -225,7 +226,7 @@ export function CreateListingForm({ hideHeader = false, onDone }: { hideHeader?:
             <View style={{ flex: 1 }}>
               <Text style={[styles.autoTitle, { color: colors.text }]}>Qolganini AI joylaydi</Text>
               <Text style={[styles.autoSubtitle, { color: colors.mutedForeground }]}>
-                {specialCategoryId ? "Tanlangan bo'lim saqlanadi; viloyat va tuman avtomatik aniqlanadi" : "Kategoriya, viloyat va tuman avtomatik aniqlanadi"}
+                {specialSubcategoryId ? "Tanlangan subkategoriya saqlanadi; viloyat va tuman avtomatik aniqlanadi" : "Kategoriya, viloyat va tuman avtomatik aniqlanadi"}
               </Text>
             </View>
           </View>

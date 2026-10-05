@@ -77,6 +77,15 @@ export async function initializePersistence(): Promise<void> {
     }
 
     const loaded = rows.map((row) => row.payload as unknown as PersistedItem);
+    if (collection.name === "listings") {
+      for (const item of loaded as StoredListing[]) {
+        if (item.categoryId === "cat19" || (item.categoryId === "cat18" && !item.subcategoryId)) {
+          item.subcategoryId = item.categoryId === "cat19" ? "sub18_sale" : "sub18_damaged";
+          item.categoryId = "cat18";
+          await persistItem("listings", item);
+        }
+      }
+    }
     if (collection.name === "users") {
       loaded.forEach((item) => normalizeUser(item as StoredUser));
     }

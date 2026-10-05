@@ -1077,17 +1077,13 @@ export const categories: StoredCategory[] = [
 categories.push(
   {
     id: 'cat18',
-    name: "Shikastlangan tovarlar",
-    nameRu: "Повреждённые товары",
+    name: "Shikastlangan va aksiyadagi tovarlar",
+    nameRu: "Повреждённые и акционные товары",
     icon: "🛠️",
-    subcategories: [],
-  },
-  {
-    id: 'cat19',
-    name: "Aksiyadagi tovarlar",
-    nameRu: "Акционные товары",
-    icon: "🏷️",
-    subcategories: [],
+    subcategories: [
+      { id: 'sub18_damaged', name: "Shikastlangan tovarlar", nameRu: "Повреждённые товары", categoryId: 'cat18' },
+      { id: 'sub18_sale', name: "Aksiyadagi tovarlar", nameRu: "Акционные товары", categoryId: 'cat18' },
+    ],
   },
 );
 
