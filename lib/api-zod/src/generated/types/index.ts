@@ -57,6 +57,7 @@ export * from './listingsResponse';
 export * from './listingStatus';
 export * from './loginRequest';
 export * from './marketAnalysis';
+export * from './marketAnalysisAdviceStatus';
 export * from './marketAnalysisPricePosition';
 export * from './marketAnalysisTopCategoriesItem';
 export * from './neighborhood';

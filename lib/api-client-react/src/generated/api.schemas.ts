@@ -456,6 +456,14 @@ export type MarketAnalysisTopCategoriesItem = {
   count: number;
 };
 
+export type MarketAnalysisAdviceStatus = typeof MarketAnalysisAdviceStatus[keyof typeof MarketAnalysisAdviceStatus];
+
+
+export const MarketAnalysisAdviceStatus = {
+  ready: 'ready',
+  unavailable: 'unavailable',
+} as const;
+
 export interface MarketAnalysis {
   listingId: string;
   subcategoryId?: string | null;
@@ -467,6 +475,8 @@ export interface MarketAnalysis {
   pricePosition: MarketAnalysisPricePosition;
   topCategories: MarketAnalysisTopCategoriesItem[];
   advice?: string | null;
+  adviceStatus?: MarketAnalysisAdviceStatus;
+  adviceError?: string | null;
 }
 
 export type StatsSummaryTopCategoriesItem = {

@@ -422,6 +422,8 @@ paths:
       operationId: analyseListingMarket
       tags: [listings]
       summary: Get market analysis for a listing
+      security:
+        - bearerAuth: []
       parameters:
         - name: id
           in: path
@@ -1520,6 +1522,12 @@ components:
               count:
                 type: integer
         advice:
+          type: string
+          nullable: true
+        adviceStatus:
+          type: string
+          enum: [ready, unavailable]
+        adviceError:
           type: string
           nullable: true
 

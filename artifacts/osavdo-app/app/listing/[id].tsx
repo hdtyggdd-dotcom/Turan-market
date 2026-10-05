@@ -23,6 +23,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useQueryClient } from '@tanstack/react-query';
 import { useCart } from '@/context/CartContext';
 import { useLocation } from '@/context/LocationContext';
+import { MarketAnalysisModal } from '@/components/MarketAnalysisModal';
 
 function formatPrice(price: number): string {
   return price.toLocaleString() + " so'm";
@@ -53,6 +54,7 @@ export default function ListingDetailScreen() {
   const queryClient = useQueryClient();
   const { addItem, items: cartItems } = useCart();
   const [adding, setAdding] = useState(false);
+  const [showAdvice, setShowAdvice] = useState(false);
   const [quantity, setQuantity] = useState(1);
   const [selectedDelivery, setSelectedDelivery] = useState<{
     vehicleType: string;
@@ -169,6 +171,7 @@ export default function ListingDetailScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <MarketAnalysisModal visible={showAdvice} listingId={listing.id} onClose={() => setShowAdvice(false)} />
       <ScrollView
         contentContainerStyle={{ paddingBottom: 120 }}
         showsVerticalScrollIndicator={false}
@@ -267,6 +270,16 @@ export default function ListingDetailScreen() {
           )}
 
           {/* Delivery estimate */}
+          {isOwner && (
+            <TouchableOpacity
+              testID="open-ai-advice"
+              onPress={() => setShowAdvice(true)}
+              style={[styles.deliveryBtn, { borderColor: colors.primary, backgroundColor: colors.secondary }]}
+            >
+              <Feather name="zap" size={18} color={colors.primary} />
+              <Text style={[styles.deliveryBtnText, { color: colors.primary }]}>AI maslahat</Text>
+            </TouchableOpacity>
+          )}
           {!isOwner && (
             <TouchableOpacity
               style={[styles.deliveryBtn, { borderColor: colors.border, backgroundColor: colors.secondary }]}

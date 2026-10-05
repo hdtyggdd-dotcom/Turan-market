@@ -5,6 +5,7 @@
  * O'Savdo local marketplace API
  * OpenAPI spec version: 0.1.0
  */
+import type { MarketAnalysisAdviceStatus } from './marketAnalysisAdviceStatus';
 import type { MarketAnalysisPricePosition } from './marketAnalysisPricePosition';
 import type { MarketAnalysisTopCategoriesItem } from './marketAnalysisTopCategoriesItem';
 
@@ -19,4 +20,6 @@ export interface MarketAnalysis {
   pricePosition: MarketAnalysisPricePosition;
   topCategories: MarketAnalysisTopCategoriesItem[];
   advice?: string | null;
+  adviceStatus?: MarketAnalysisAdviceStatus;
+  adviceError?: string | null;
 }

@@ -810,7 +810,9 @@ export const AnalyseListingMarketResponse = zod.object({
   "name": zod.string(),
   "count": zod.number()
 })),
-  "advice": zod.string().nullish()
+  "advice": zod.string().nullish(),
+  "adviceStatus": zod.enum(['ready', 'unavailable']).optional(),
+  "adviceError": zod.string().nullish()
 })
 
 
