@@ -8,6 +8,7 @@ export function normalizeUz(text: string): string {
     .replace(/g'/g, 'g')
     .replace(/ʻ/g, '')
     .replace(/ʼ/g, '')
+    .replace(/[‘’`]/g, '')
     .replace(/'/g, '')
     .replace(/'/g, '')
     .replace(/ё/g, 'yo')
@@ -89,6 +90,16 @@ export function wordMatch(query: string, target: string): number {
 export function scoreSearch(query: string, fields: string[]): number {
   const q = normalizeUz(query);
   if (!q) return 0;
+  const words = q.split(' ').filter(Boolean);
+  if (words.length > 1) {
+    // Every query word must match. A category word alone must not include
+    // unrelated products when a second, specific product word was entered.
+    const scores = words.map((word) =>
+      Math.max(0, ...fields.filter(Boolean).map((field) => wordMatch(word, field))),
+    );
+    if (scores.some((score) => score < 0.6)) return 0;
+    return scores.reduce((total, score) => total + score, 0) / scores.length;
+  }
   let best = 0;
   for (const field of fields) {
     if (!field) continue;

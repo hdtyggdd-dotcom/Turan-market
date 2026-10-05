@@ -138,6 +138,34 @@ export default function ProfileScreen() {
           </View>
         )}
 
+        <TouchableOpacity
+          style={[styles.ordersBtn, { backgroundColor: colors.card, borderColor: colors.border }]}
+          onPress={() => router.push('/(tabs)/my-products')}
+          testID="open-my-products"
+        >
+          <View style={styles.ordersBtnLeft}>
+            <View style={[styles.ordersBtnIcon, { backgroundColor: colors.primary + '15' }]}>
+              <Feather name="package" size={20} color={colors.primary} />
+            </View>
+            <Text style={[styles.ordersBtnText, { color: colors.text }]}>Mahsulotlarim</Text>
+          </View>
+          <Feather name="chevron-right" size={20} color={colors.mutedForeground} />
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[styles.ordersBtn, { backgroundColor: colors.card, borderColor: colors.border }]}
+          onPress={() => router.push('/(tabs)/cargo')}
+          testID="open-cargo"
+        >
+          <View style={styles.ordersBtnLeft}>
+            <View style={[styles.ordersBtnIcon, { backgroundColor: colors.primary + '15' }]}>
+              <Feather name="truck" size={20} color={colors.primary} />
+            </View>
+            <Text style={[styles.ordersBtnText, { color: colors.text }]}>Cargo</Text>
+          </View>
+          <Feather name="chevron-right" size={20} color={colors.mutedForeground} />
+        </TouchableOpacity>
+
         {/* Orders Link */}
         <TouchableOpacity
           style={[styles.ordersBtn, { backgroundColor: colors.card, borderColor: colors.border }]}
@@ -184,7 +212,7 @@ export default function ProfileScreen() {
                 title="E'lonlar yo'q"
                 subtitle="Birinchi e'loningizni joylang!"
                 actionLabel="E'lon joylash"
-                onAction={() => router.push('/(tabs)/create')}
+                onAction={() => router.push({ pathname: '/(tabs)/search', params: { mode: 'post' } })}
               />
             ) : (
               <View style={styles.listingsGrid}>

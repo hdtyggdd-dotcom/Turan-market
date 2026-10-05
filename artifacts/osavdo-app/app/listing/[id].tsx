@@ -21,6 +21,7 @@ import {
 } from '@workspace/api-client-react';
 import { useAuth } from '@/context/AuthContext';
 import { useQueryClient } from '@tanstack/react-query';
+import { useCart } from '@/context/CartContext';
 import { useLocation } from '@/context/LocationContext';
 
 function formatPrice(price: number): string {
@@ -50,6 +51,8 @@ export default function ListingDetailScreen() {
   const { user } = useAuth();
   const { districtId, lat, lng } = useLocation();
   const queryClient = useQueryClient();
+  const { addItem, items: cartItems } = useCart();
+  const [adding, setAdding] = useState(false);
   const [quantity, setQuantity] = useState(1);
   const [selectedDelivery, setSelectedDelivery] = useState<{
     vehicleType: string;
@@ -111,6 +114,22 @@ export default function ListingDetailScreen() {
     );
   }
 
+  async function handleAddToCart() {
+    if (!listing || adding) return;
+    setAdding(true);
+    try {
+      await addItem(listing, quantity);
+      Alert.alert("Savatga qo'shildi", listing.title, [
+        { text: "Davom etish", style: 'cancel' },
+        { text: "Savatni ochish", onPress: () => router.push('/(tabs)/cart') },
+      ]);
+    } catch (error) {
+      Alert.alert("Xato", error instanceof Error ? error.message : "Savatga qo'shib bo'lmadi");
+    } finally {
+      setAdding(false);
+    }
+  }
+
   function handleEstimateDelivery() {
     if (!listing?.districtId || !districtId) {
       Alert.alert("Joylashuv", "Yetkazib berish narxini hisoblash uchun joylashuvingizni tanlang");
@@ -142,6 +161,8 @@ export default function ListingDetailScreen() {
   }
 
   const isOwner = user?.id === listing.userId;
+   const unavailable = listing.status !== 'active';
+  const inCart = cartItems.find((c) => c.listing.id === listing.id)?.quantity ?? 0;
   const sellerBadge = listing.user?.sellerBadge;
   const badgeColor = sellerBadge === 'manufacturer' ? colors.manufacturerBadge : colors.resellerBadge;
   const bottomPad = Platform.OS === 'web' ? 84 + 34 : insets.bottom + 20;
@@ -329,23 +350,31 @@ export default function ListingDetailScreen() {
             <Text style={[styles.quantityText, { color: colors.text }]}>{quantity}</Text>
             <TouchableOpacity
               style={[styles.quantityBtn, { borderColor: colors.border }]}
-              onPress={() => setQuantity(quantity + 1)}
+              onPress={() => setQuantity(Math.min(999, quantity + 1))}
             >
               <Feather name="plus" size={16} color={colors.text} />
             </TouchableOpacity>
           </View>
 
           <TouchableOpacity
-            style={[styles.orderBtn, { backgroundColor: colors.primary, opacity: orderMutation.isPending ? 0.7 : 1 }]}
+            testID="add-to-cart"
+            style={[styles.cartBtn, { borderColor: colors.primary, opacity: unavailable || adding ? 0.5 : 1 }]}
+            onPress={handleAddToCart}
+            disabled={unavailable || adding}
+          >
+            <Feather name="shopping-cart" size={18} color={colors.primary} />
+            {inCart > 0 && <Text style={{ color: colors.primary, fontFamily: 'Inter_700Bold', fontSize: 12 }}>{inCart}</Text>}
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.orderBtn, { backgroundColor: colors.primary, opacity: orderMutation.isPending || unavailable ? 0.6 : 1 }]}
             onPress={handleOrder}
-            disabled={orderMutation.isPending}
+            disabled={orderMutation.isPending || unavailable}
           >
             {orderMutation.isPending ? (
               <ActivityIndicator color="#fff" />
             ) : (
               <>
-                <Feather name="shopping-cart" size={18} color="#fff" />
-                <Text style={styles.orderBtnText}>Buyurtma berish</Text>
+                <Text style={styles.orderBtnText}>{unavailable ? 'Sotuvda yo\'q' : 'Sotib olish'}</Text>
               </>
             )}
           </TouchableOpacity>
@@ -431,6 +460,7 @@ const styles = StyleSheet.create({
   quantityRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   quantityBtn: { width: 36, height: 36, borderRadius: 18, borderWidth: 1, alignItems: 'center', justifyContent: 'center' },
   quantityText: { fontSize: 18, fontFamily: 'Inter_600SemiBold', minWidth: 24, textAlign: 'center' },
+  cartBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, height: 48, paddingHorizontal: 12, borderRadius: 14, borderWidth: 1.5 },
   orderBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, paddingVertical: 14, borderRadius: 14 },
   orderBtnText: { color: '#fff', fontSize: 15, fontFamily: 'Inter_600SemiBold' },
 });

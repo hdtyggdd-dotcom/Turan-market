@@ -538,6 +538,12 @@ paths:
             schema:
               $ref: "#/components/schemas/CreateOrderRequest"
       responses:
+        "200":
+          description: Existing order returned for a repeated client request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
         "201":
           description: Order created
           content:
@@ -1453,6 +1459,11 @@ components:
     CreateOrderRequest:
       type: object
       properties:
+        clientRequestId:
+          type: string
+          description: Optional per-buyer idempotency key for retrying a cart checkout
+          minLength: 8
+          maxLength: 160
         listingId:
           type: string
         quantity:

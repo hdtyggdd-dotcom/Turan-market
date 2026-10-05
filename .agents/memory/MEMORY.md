@@ -2,3 +2,4 @@
 - [Operational driver trust](operational-driver-trust.md) — cargo bidding requires approved identity and verified real vehicle data, not a self-selected driver role.
 - [Cargo negotiation integrity](cargo-negotiation-integrity.md) — a shipper counter becomes the payable amount only after the offering driver accepts it.
 - [Payment scope](payment-scope.md) — keep online card payments disabled until the owner explicitly requests re-enabling them.
+- [Cart retry integrity](cart-retry-integrity.md) — uncertain checkout responses must keep the original request identity; removing and re-adding can duplicate an order.

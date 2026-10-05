@@ -7,6 +7,12 @@
  */
 
 export interface CreateOrderRequest {
+  /**
+     * Optional per-buyer idempotency key for retrying a cart checkout
+     * @minLength 8
+     * @maxLength 160
+     */
+  clientRequestId?: string;
   listingId: string;
   quantity: number;
   deliveryOption?: string;

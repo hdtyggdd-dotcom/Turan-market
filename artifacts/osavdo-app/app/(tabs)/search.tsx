@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -16,10 +16,15 @@ import { useColors } from '@/hooks/useColors';
 import { useGetListings, useGetCategories, useGetRegions, useGetDistricts, getGetDistrictsQueryKey, getGetListingsQueryKey } from '@workspace/api-client-react';
 import { ListingCard } from '@/components/ListingCard';
 import { EmptyState } from '@/components/EmptyState';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import { CreateListingForm } from '@/components/CreateListingForm';
 
 export default function SearchScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
+  const router = useRouter();
+  const params = useLocalSearchParams<{ categoryId?: string; subcategoryId?: string; mode?: string; ts?: string }>();
+  const [mode, setMode] = useState<'search' | 'post'>(params.mode === 'post' ? 'post' : 'search');
   const [query, setQuery] = useState('');
   const [search, setSearch] = useState('');
 
@@ -32,6 +37,17 @@ export default function SearchScreen() {
   const [minPrice, setMinPrice] = useState('');
   const [maxPrice, setMaxPrice] = useState('');
   const [showFilters, setShowFilters] = useState(false);
+
+  useEffect(() => {
+    if (params.mode === 'post') setMode('post');
+    else if (params.mode === 'search' || params.categoryId) setMode('search');
+    if (params.categoryId || params.subcategoryId) {
+      setSelectedCategory(params.categoryId ?? null);
+      setSelectedSubcategory(params.subcategoryId || null);
+      setQuery('');
+      setSearch('');
+    }
+  }, [params.categoryId, params.subcategoryId, params.mode, params.ts]);
 
   const { data: categories } = useGetCategories();
   const { data: regions } = useGetRegions();
@@ -53,7 +69,7 @@ export default function SearchScreen() {
       maxPrice: maxPrice ? Number(maxPrice) : undefined,
       limit: 40,
     },
-    { query: { enabled: search.length > 0 || selectedCategory !== null || selectedRegion !== null || !!minPrice || !!maxPrice, queryKey: getGetListingsQueryKey({
+    { query: { enabled: mode === 'search' && (search.length > 0 || selectedSubcategory !== null || selectedCategory !== null || selectedRegion !== null || !!minPrice || !!maxPrice), queryKey: getGetListingsQueryKey({
       search: search || undefined,
       categoryId: selectedCategory ?? undefined,
       subcategoryId: selectedSubcategory ?? undefined,
@@ -66,17 +82,39 @@ export default function SearchScreen() {
   );
 
   const listings = listingsData?.items ?? [];
-  const hasSearched = search.length > 0 || selectedCategory !== null || selectedRegion !== null || !!minPrice || !!maxPrice;
+  const hasSearched = search.length > 0 || selectedCategory !== null || selectedSubcategory !== null || selectedRegion !== null || !!minPrice || !!maxPrice;
   const topPadding = Platform.OS === 'web' ? 67 : insets.top;
 
+  const modeHeader = null;
+  void modeHeader;
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       {/* Header */}
       <View style={[styles.header, { paddingTop: topPadding + 12, backgroundColor: colors.card, borderBottomColor: colors.border }]}>
-        <Text style={[styles.headerTitle, { color: colors.text }]}>Qidirish</Text>
+        <View style={[styles.seg, { backgroundColor: colors.muted }]}>
+          {(['search', 'post'] as const).map((m) => (
+            <TouchableOpacity
+              key={m}
+              testID={`mode-${m}`}
+              style={[styles.segBtn, mode === m && { backgroundColor: colors.primary }]}
+              onPress={() => setMode(m)}
+            >
+              <Feather name={m === 'search' ? 'search' : 'plus-circle'} size={15} color={mode === m ? colors.primaryForeground : colors.text} />
+              <Text style={{ fontSize: 14, fontFamily: 'Inter_600SemiBold', color: mode === m ? colors.primaryForeground : colors.text }}>
+                {m === 'search' ? 'Qidirish' : "E'lon joylash"}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+        {mode === 'search' && (
+          <TouchableOpacity onPress={() => router.push('/(tabs)/categories')} style={styles.catLink}>
+            <Feather name="grid" size={14} color={colors.primary} />
+            <Text style={{ color: colors.primary, fontSize: 13, fontFamily: 'Inter_500Medium' }}>Barcha kategoriyalar</Text>
+          </TouchableOpacity>
+        )}
 
         {/* Search bar */}
-        <View style={[styles.searchBar, { backgroundColor: colors.muted, borderColor: colors.border }]}>
+        {mode === 'search' && <View style={[styles.searchBar, { backgroundColor: colors.muted, borderColor: colors.border }]}>
           <Feather name="search" size={18} color={colors.mutedForeground} />
           <TextInput
             style={[styles.searchInput, { color: colors.text }]}
@@ -92,10 +130,10 @@ export default function SearchScreen() {
               <Feather name="x" size={16} color={colors.mutedForeground} />
             </TouchableOpacity>
           )}
-        </View>
+        </View>}
 
         {/* Filter toggle */}
-        <TouchableOpacity
+        {mode === 'search' && <TouchableOpacity
           style={[styles.filterToggle, { borderColor: colors.border, backgroundColor: showFilters ? colors.secondary : colors.card }]}
           onPress={() => setShowFilters(!showFilters)}
         >
@@ -104,9 +142,12 @@ export default function SearchScreen() {
           {(selectedCategory || minPrice || maxPrice) && (
             <View style={[styles.filterDot, { backgroundColor: colors.primary }]} />
           )}
-        </TouchableOpacity>
+        </TouchableOpacity>}
       </View>
 
+      {mode === 'post' ? (
+        <CreateListingForm hideHeader onDone={() => setMode('search')} />
+      ) : (<>
       {/* Filters panel */}
       {showFilters && (
         <ScrollView style={[styles.filtersPanel, { backgroundColor: colors.card, borderBottomColor: colors.border }]} nestedScrollEnabled showsVerticalScrollIndicator={false}>
@@ -293,11 +334,15 @@ export default function SearchScreen() {
           }
         />
       )}
+      </>)}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  seg: { flexDirection: 'row', borderRadius: 12, padding: 3 },
+  segBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: 9, borderRadius: 10 },
+  catLink: { flexDirection: 'row', alignItems: 'center', gap: 6, alignSelf: 'flex-start' },
   container: { flex: 1 },
   header: {
     paddingHorizontal: 16,

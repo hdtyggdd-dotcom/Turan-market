@@ -1130,7 +1130,13 @@ export const GetOrdersResponse = zod.array(GetOrdersResponseItem)
 /**
  * @summary Create a new order
  */
+export const createOrderBodyClientRequestIdMin = 8;
+export const createOrderBodyClientRequestIdMax = 160;
+
+
+
 export const CreateOrderBody = zod.object({
+  "clientRequestId": zod.string().min(createOrderBodyClientRequestIdMin).max(createOrderBodyClientRequestIdMax).optional().describe('Optional per-buyer idempotency key for retrying a cart checkout'),
   "listingId": zod.string(),
   "quantity": zod.number(),
   "deliveryOption": zod.string().optional(),

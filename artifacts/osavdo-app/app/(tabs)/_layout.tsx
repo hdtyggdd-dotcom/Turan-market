@@ -10,6 +10,7 @@ import { SymbolView } from 'expo-symbols';
 import { useAuth } from '@/context/AuthContext';
 import { useI18n } from '@/context/I18nContext';
 import { ActivityIndicator } from 'react-native';
+import { useCart } from '@/context/CartContext';
 
 function NativeTabLayout() {
   const { t } = useI18n();
@@ -20,22 +21,26 @@ function NativeTabLayout() {
         <Icon sf={{ default: 'house', selected: 'house.fill' }} />
         <Label>{t('home')}</Label>
       </NativeTabs.Trigger>
+      <NativeTabs.Trigger name="categories">
+        <Icon sf={{ default: 'square.grid.2x2', selected: 'square.grid.2x2.fill' }} />
+        <Label>Katalog</Label>
+      </NativeTabs.Trigger>
       <NativeTabs.Trigger name="search">
-        <Icon sf={{ default: 'magnifyingglass', selected: 'magnifyingglass' }} />
-        <Label>{t('search')}</Label>
+        <Icon sf={{ default: 'plus.magnifyingglass', selected: 'plus.magnifyingglass' }} />
+        <Label>Izlash / E’lon</Label>
       </NativeTabs.Trigger>
-      <NativeTabs.Trigger name="create">
-        <Icon sf={{ default: 'plus.circle', selected: 'plus.circle.fill' }} />
-        <Label>{t('addListing')}</Label>
-      </NativeTabs.Trigger>
-      <NativeTabs.Trigger name="cargo">
-        <Icon sf={{ default: 'box.truck', selected: 'box.truck.fill' }} />
-        <Label>{t('cargo')}</Label>
+      <NativeTabs.Trigger name="cart">
+        <Icon sf={{ default: 'cart', selected: 'cart.fill' }} />
+        <Label>Savat</Label>
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name="profile">
         <Icon sf={{ default: 'person', selected: 'person.fill' }} />
         <Label>{t('profile')}</Label>
       </NativeTabs.Trigger>
+      <NativeTabs.Trigger name="create" hidden />
+      <NativeTabs.Trigger name="cargo" hidden />
+      <NativeTabs.Trigger name="orders" hidden />
+      <NativeTabs.Trigger name="my-products" hidden />
     </NativeTabs>
   );
 }
@@ -47,6 +52,7 @@ function ClassicTabLayout() {
   const isDark = colorScheme === 'dark';
   const isIOS = Platform.OS === 'ios';
   const isWeb = Platform.OS === 'web';
+  const { count } = useCart();
 
   return (
     <Tabs
@@ -112,44 +118,25 @@ function ClassicTabLayout() {
         }}
       />
       <Tabs.Screen
+        name="categories"
+        options={{
+          title: 'Katalog',
+          tabBarIcon: ({ color }) => <Feather name="grid" size={22} color={color} />,
+        }}
+      />
+      <Tabs.Screen
         name="search"
         options={{
-          title: t('search'),
-          tabBarIcon: ({ color }) =>
-            isIOS ? (
-              <SymbolView name="magnifyingglass" tintColor={color} size={24} />
-            ) : (
-              <Feather name="search" size={22} color={color} />
-            ),
+          title: 'Izlash / E’lon',
+          tabBarIcon: ({ color }) => <Feather name="plus-square" size={22} color={color} />,
         }}
       />
       <Tabs.Screen
-        name="create"
+        name="cart"
         options={{
-          title: t('addListing'),
-          tabBarItemStyle: {
-            borderRadius: 20,
-            marginHorizontal: 2,
-            marginVertical: 1,
-          },
-          tabBarIcon: ({ color }) =>
-            isIOS ? (
-              <SymbolView name="plus.circle.fill" tintColor={color} size={26} />
-            ) : (
-              <Feather name="plus-circle" size={24} color={color} />
-            ),
-        }}
-      />
-      <Tabs.Screen
-        name="cargo"
-        options={{
-          title: t('cargo'),
-          tabBarIcon: ({ color }) =>
-            isIOS ? (
-              <SymbolView name="box.truck.fill" tintColor={color} size={24} />
-            ) : (
-              <Feather name="truck" size={22} color={color} />
-            ),
+          title: 'Savat',
+          tabBarBadge: count > 0 ? count : undefined,
+          tabBarIcon: ({ color }) => <Feather name="shopping-cart" size={22} color={color} />,
         }}
       />
       <Tabs.Screen
@@ -164,12 +151,11 @@ function ClassicTabLayout() {
             ),
         }}
       />
-      <Tabs.Screen
-        name="orders"
-        options={{
-          href: null,
-        }}
-      />
+      <Tabs.Screen name="create" options={{ href: null }} />
+      <Tabs.Screen name="cargo" options={{ href: null }} />
+      <Tabs.Screen name="orders" options={{ href: null }} />
+      <Tabs.Screen name="my-products" options={{ href: null }} />
+
     </Tabs>
   );
 }

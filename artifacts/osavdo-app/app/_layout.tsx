@@ -16,6 +16,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { setBaseUrl, setAuthTokenGetter } from '@workspace/api-client-react';
 import { AuthProvider } from '@/context/AuthContext';
+import { CartProvider } from '@/context/CartContext';
 import { LocationProvider } from '@/context/LocationContext';
 import { I18nProvider } from '@/context/I18nContext';
 import { CountrySetupModal } from '@/components/CountrySetupModal';
@@ -92,6 +93,7 @@ export default function RootLayout() {
         <QueryClientProvider client={queryClient}>
           <I18nProvider>
             <AuthProvider>
+              <CartProvider>
               <LocationProvider>
                 <GestureHandlerRootView style={{ flex: 1 }}>
                   <KeyboardProvider>
@@ -103,6 +105,7 @@ export default function RootLayout() {
                   </KeyboardProvider>
                 </GestureHandlerRootView>
               </LocationProvider>
+              </CartProvider>
             </AuthProvider>
           </I18nProvider>
         </QueryClientProvider>
