@@ -635,6 +635,131 @@ export type CargoLoadDetail = CargoLoad & ({
   recommendation: TransportRecommendation | null;
 });
 
+export interface CargoRoutePoint {
+  lat: number;
+  lng: number;
+  label: string;
+}
+
+export type CargoTrackingUpdateStage = typeof CargoTrackingUpdateStage[keyof typeof CargoTrackingUpdateStage];
+
+
+export const CargoTrackingUpdateStage = {
+  accepted: 'accepted',
+  pickup_ready: 'pickup_ready',
+  picked_up: 'picked_up',
+  in_transit: 'in_transit',
+  border_control: 'border_control',
+  delivered: 'delivered',
+} as const;
+
+export interface CargoTrackingUpdate {
+  id: string;
+  loadId: string;
+  stage: CargoTrackingUpdateStage;
+  /** @nullable */
+  note: string | null;
+  /** @nullable */
+  lat: number | null;
+  /** @nullable */
+  lng: number | null;
+  createdAt: string;
+}
+
+/**
+ * @nullable
+ */
+export type CargoTrackingCurrentStage = typeof CargoTrackingCurrentStage[keyof typeof CargoTrackingCurrentStage] | null;
+
+
+export const CargoTrackingCurrentStage = {
+  accepted: 'accepted',
+  pickup_ready: 'pickup_ready',
+  picked_up: 'picked_up',
+  in_transit: 'in_transit',
+  border_control: 'border_control',
+  delivered: 'delivered',
+} as const;
+
+export interface CargoTracking {
+  loadId: string;
+  pickup: CargoRoutePoint;
+  delivery: CargoRoutePoint;
+  /** @nullable */
+  currentStage: CargoTrackingCurrentStage;
+  /** @nullable */
+  currentLat: number | null;
+  /** @nullable */
+  currentLng: number | null;
+  /** @nullable */
+  locationUpdatedAt: string | null;
+  updatedAt: string;
+  assigned: boolean;
+  canUpdate: boolean;
+  history: CargoTrackingUpdate[];
+}
+
+export type CargoTrackingUpdateInputStage = typeof CargoTrackingUpdateInputStage[keyof typeof CargoTrackingUpdateInputStage];
+
+
+export const CargoTrackingUpdateInputStage = {
+  accepted: 'accepted',
+  pickup_ready: 'pickup_ready',
+  picked_up: 'picked_up',
+  in_transit: 'in_transit',
+  border_control: 'border_control',
+  delivered: 'delivered',
+} as const;
+
+export interface CargoTrackingUpdateInput {
+  stage: CargoTrackingUpdateInputStage;
+  note?: string;
+  lat?: number;
+  lng?: number;
+}
+
+export interface CargoLocationInput {
+  /**
+     * @minimum -90
+     * @maximum 90
+     */
+  lat: number;
+  /**
+     * @minimum -180
+     * @maximum 180
+     */
+  lng: number;
+}
+
+export interface PushTokenInput {
+  /** @maxLength 256 */
+  token: string;
+}
+
+export interface PushRegistration {
+  registered: boolean;
+}
+
+export type CargoNotificationType = typeof CargoNotificationType[keyof typeof CargoNotificationType];
+
+
+export const CargoNotificationType = {
+  tracking: 'tracking',
+  offer: 'offer',
+  system: 'system',
+} as const;
+
+export interface CargoNotification {
+  id: string;
+  /** @nullable */
+  loadId: string | null;
+  title: string;
+  message: string;
+  type: CargoNotificationType;
+  read: boolean;
+  createdAt: string;
+}
+
 export type CargoLoadInputCargoType = typeof CargoLoadInputCargoType[keyof typeof CargoLoadInputCargoType];
 
 

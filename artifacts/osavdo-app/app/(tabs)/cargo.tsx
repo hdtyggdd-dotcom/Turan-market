@@ -74,6 +74,14 @@ export default function CargoHubScreen() {
         <View style={styles.headerTop}>
           <Text style={[styles.title, { color: colors.text }]}>Yuklar markazi</Text>
           <TouchableOpacity
+            testID="open-cargo-trips"
+            accessibilityLabel="Yuk tashuvlarim va xabarlar"
+            onPress={() => router.push('/(tabs)/orders')}
+            style={styles.filterBtn}
+          >
+            <Feather name="bell" size={20} color={colors.primary} />
+          </TouchableOpacity>
+          <TouchableOpacity
             style={[styles.filterBtn, { backgroundColor: colors.secondary }]}
           >
             <Feather name="filter" size={18} color={colors.primary} />

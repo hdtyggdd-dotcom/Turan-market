@@ -26,9 +26,13 @@ import type {
   CargoLoad,
   CargoLoadDetail,
   CargoLoadInput,
+  CargoLocationInput,
+  CargoNotification,
   CargoOffer,
   CargoOfferInput,
   CargoRecommendationInput,
+  CargoTracking,
+  CargoTrackingUpdateInput,
   Category,
   Country,
   CreateListingRequest,
@@ -53,6 +57,8 @@ import type {
   MarketAnalysis,
   Neighborhood,
   Order,
+  PushRegistration,
+  PushTokenInput,
   Region,
   RegisterRequest,
   StatsSummary,
@@ -2363,6 +2369,304 @@ export function useGetCargoLoad<TData = Awaited<ReturnType<typeof getCargoLoad>>
 
 
 
+export const getGetCargoTrackingUrl = (id: string,) => {
+
+
+
+
+  return `/api/cargo-loads/${id}/tracking`
+}
+
+/**
+ * @summary Get live cargo route and tracking history
+ */
+export const getCargoTracking = async (id: string, options?: RequestInit): Promise<CargoTracking> => {
+
+  return customFetch<CargoTracking>(getGetCargoTrackingUrl(id),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetCargoTrackingQueryKey = (id: string,) => {
+    return [
+    `/api/cargo-loads/${id}/tracking`
+    ] as const;
+    }
+
+
+export const getGetCargoTrackingQueryOptions = <TData = Awaited<ReturnType<typeof getCargoTracking>>, TError = ErrorType<void>>(id: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getCargoTracking>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetCargoTrackingQueryKey(id);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getCargoTracking>>> = ({ signal }) => getCargoTracking(id, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: id !== null && id !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getCargoTracking>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetCargoTrackingQueryResult = NonNullable<Awaited<ReturnType<typeof getCargoTracking>>>
+export type GetCargoTrackingQueryError = ErrorType<void>
+
+
+/**
+ * @summary Get live cargo route and tracking history
+ */
+
+export function useGetCargoTracking<TData = Awaited<ReturnType<typeof getCargoTracking>>, TError = ErrorType<void>>(
+ id: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getCargoTracking>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetCargoTrackingQueryOptions(id,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getUpdateCargoTrackingUrl = (id: string,) => {
+
+
+
+
+  return `/api/cargo-loads/${id}/tracking`
+}
+
+/**
+ * @summary Update the live cargo route stage
+ */
+export const updateCargoTracking = async (id: string,
+    cargoTrackingUpdateInput: CargoTrackingUpdateInput, options?: RequestInit): Promise<CargoTracking> => {
+
+  return customFetch<CargoTracking>(getUpdateCargoTrackingUrl(id),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(cargoTrackingUpdateInput)
+  }
+);}
+
+
+
+
+
+export const getUpdateCargoTrackingMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateCargoTracking>>, TError,{id: string;data: BodyType<CargoTrackingUpdateInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateCargoTracking>>, TError,{id: string;data: BodyType<CargoTrackingUpdateInput>}, TContext> => {
+
+const mutationKey = ['updateCargoTracking'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateCargoTracking>>, {id: string;data: BodyType<CargoTrackingUpdateInput>}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  updateCargoTracking(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateCargoTrackingMutationResult = NonNullable<Awaited<ReturnType<typeof updateCargoTracking>>>
+    export type UpdateCargoTrackingMutationBody = BodyType<CargoTrackingUpdateInput>
+    export type UpdateCargoTrackingMutationError = ErrorType<void>
+
+    /**
+ * @summary Update the live cargo route stage
+ */
+export const useUpdateCargoTracking = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateCargoTracking>>, TError,{id: string;data: BodyType<CargoTrackingUpdateInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof updateCargoTracking>>,
+        TError,
+        {id: string;data: BodyType<CargoTrackingUpdateInput>},
+        TContext
+      > => {
+      return useMutation(getUpdateCargoTrackingMutationOptions(options));
+    }
+
+export const getUpdateCargoLocationUrl = (id: string,) => {
+
+
+
+
+  return `/api/cargo-loads/${id}/location`
+}
+
+/**
+ * @summary Share assigned driver's latest GPS fix
+ */
+export const updateCargoLocation = async (id: string,
+    cargoLocationInput: CargoLocationInput, options?: RequestInit): Promise<CargoTracking> => {
+
+  return customFetch<CargoTracking>(getUpdateCargoLocationUrl(id),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(cargoLocationInput)
+  }
+);}
+
+
+
+
+
+export const getUpdateCargoLocationMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateCargoLocation>>, TError,{id: string;data: BodyType<CargoLocationInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateCargoLocation>>, TError,{id: string;data: BodyType<CargoLocationInput>}, TContext> => {
+
+const mutationKey = ['updateCargoLocation'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateCargoLocation>>, {id: string;data: BodyType<CargoLocationInput>}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  updateCargoLocation(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateCargoLocationMutationResult = NonNullable<Awaited<ReturnType<typeof updateCargoLocation>>>
+    export type UpdateCargoLocationMutationBody = BodyType<CargoLocationInput>
+    export type UpdateCargoLocationMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Share assigned driver's latest GPS fix
+ */
+export const useUpdateCargoLocation = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateCargoLocation>>, TError,{id: string;data: BodyType<CargoLocationInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof updateCargoLocation>>,
+        TError,
+        {id: string;data: BodyType<CargoLocationInput>},
+        TContext
+      > => {
+      return useMutation(getUpdateCargoLocationMutationOptions(options));
+    }
+
+export const getGetCargoTripsUrl = () => {
+
+
+
+
+  return `/api/cargo-trips`
+}
+
+/**
+ * @summary List cargo assigned to the current driver or owned by the current shipper
+ */
+export const getCargoTrips = async ( options?: RequestInit): Promise<CargoLoad[]> => {
+
+  return customFetch<CargoLoad[]>(getGetCargoTripsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetCargoTripsQueryKey = () => {
+    return [
+    `/api/cargo-trips`
+    ] as const;
+    }
+
+
+export const getGetCargoTripsQueryOptions = <TData = Awaited<ReturnType<typeof getCargoTrips>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getCargoTrips>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetCargoTripsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getCargoTrips>>> = ({ signal }) => getCargoTrips({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getCargoTrips>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetCargoTripsQueryResult = NonNullable<Awaited<ReturnType<typeof getCargoTrips>>>
+export type GetCargoTripsQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary List cargo assigned to the current driver or owned by the current shipper
+ */
+
+export function useGetCargoTrips<TData = Awaited<ReturnType<typeof getCargoTrips>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getCargoTrips>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetCargoTripsQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
 export const getCreateCargoOfferUrl = (id: string,) => {
 
 
@@ -2816,6 +3120,284 @@ export function useGetVehicleTypes<TData = Awaited<ReturnType<typeof getVehicleT
 
 
 
+
+export const getGetNotificationsUrl = () => {
+
+
+
+
+  return `/api/notifications`
+}
+
+/**
+ * @summary List in-app notifications for the current user
+ */
+export const getNotifications = async ( options?: RequestInit): Promise<CargoNotification[]> => {
+
+  return customFetch<CargoNotification[]>(getGetNotificationsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetNotificationsQueryKey = () => {
+    return [
+    `/api/notifications`
+    ] as const;
+    }
+
+
+export const getGetNotificationsQueryOptions = <TData = Awaited<ReturnType<typeof getNotifications>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getNotifications>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetNotificationsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getNotifications>>> = ({ signal }) => getNotifications({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getNotifications>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetNotificationsQueryResult = NonNullable<Awaited<ReturnType<typeof getNotifications>>>
+export type GetNotificationsQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary List in-app notifications for the current user
+ */
+
+export function useGetNotifications<TData = Awaited<ReturnType<typeof getNotifications>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getNotifications>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetNotificationsQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getMarkNotificationReadUrl = (id: string,) => {
+
+
+
+
+  return `/api/notifications/${id}/read`
+}
+
+/**
+ * @summary Mark an in-app notification as read
+ */
+export const markNotificationRead = async (id: string, options?: RequestInit): Promise<CargoNotification> => {
+
+  return customFetch<CargoNotification>(getMarkNotificationReadUrl(id),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getMarkNotificationReadMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof markNotificationRead>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof markNotificationRead>>, TError,{id: string}, TContext> => {
+
+const mutationKey = ['markNotificationRead'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof markNotificationRead>>, {id: string}> = (props) => {
+          const {id} = props ?? {};
+
+          return  markNotificationRead(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type MarkNotificationReadMutationResult = NonNullable<Awaited<ReturnType<typeof markNotificationRead>>>
+
+    export type MarkNotificationReadMutationError = ErrorType<void>
+
+    /**
+ * @summary Mark an in-app notification as read
+ */
+export const useMarkNotificationRead = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof markNotificationRead>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof markNotificationRead>>,
+        TError,
+        {id: string},
+        TContext
+      > => {
+      return useMutation(getMarkNotificationReadMutationOptions(options));
+    }
+
+export const getRegisterPushTokenUrl = () => {
+
+
+
+
+  return `/api/push-tokens`
+}
+
+export const registerPushToken = async (pushTokenInput: PushTokenInput, options?: RequestInit): Promise<PushRegistration> => {
+
+  return customFetch<PushRegistration>(getRegisterPushTokenUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(pushTokenInput)
+  }
+);}
+
+
+
+
+
+export const getRegisterPushTokenMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof registerPushToken>>, TError,{data: BodyType<PushTokenInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof registerPushToken>>, TError,{data: BodyType<PushTokenInput>}, TContext> => {
+
+const mutationKey = ['registerPushToken'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof registerPushToken>>, {data: BodyType<PushTokenInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  registerPushToken(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RegisterPushTokenMutationResult = NonNullable<Awaited<ReturnType<typeof registerPushToken>>>
+    export type RegisterPushTokenMutationBody = BodyType<PushTokenInput>
+    export type RegisterPushTokenMutationError = ErrorType<unknown>
+
+    export const useRegisterPushToken = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof registerPushToken>>, TError,{data: BodyType<PushTokenInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof registerPushToken>>,
+        TError,
+        {data: BodyType<PushTokenInput>},
+        TContext
+      > => {
+      return useMutation(getRegisterPushTokenMutationOptions(options));
+    }
+
+export const getUnregisterPushTokenUrl = () => {
+
+
+
+
+  return `/api/push-tokens`
+}
+
+export const unregisterPushToken = async (pushTokenInput: PushTokenInput, options?: RequestInit): Promise<PushRegistration> => {
+
+  return customFetch<PushRegistration>(getUnregisterPushTokenUrl(),
+  {
+    ...options,
+    method: 'DELETE',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(pushTokenInput)
+  }
+);}
+
+
+
+
+
+export const getUnregisterPushTokenMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof unregisterPushToken>>, TError,{data: BodyType<PushTokenInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof unregisterPushToken>>, TError,{data: BodyType<PushTokenInput>}, TContext> => {
+
+const mutationKey = ['unregisterPushToken'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof unregisterPushToken>>, {data: BodyType<PushTokenInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  unregisterPushToken(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UnregisterPushTokenMutationResult = NonNullable<Awaited<ReturnType<typeof unregisterPushToken>>>
+    export type UnregisterPushTokenMutationBody = BodyType<PushTokenInput>
+    export type UnregisterPushTokenMutationError = ErrorType<unknown>
+
+    export const useUnregisterPushToken = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof unregisterPushToken>>, TError,{data: BodyType<PushTokenInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof unregisterPushToken>>,
+        TError,
+        {data: BodyType<PushTokenInput>},
+        TContext
+      > => {
+      return useMutation(getUnregisterPushTokenMutationOptions(options));
+    }
 
 export const getGetDriverUrl = (id: string,) => {
 

@@ -151,6 +151,25 @@ export async function persistItem(collection: string, item: PersistedItem): Prom
   );
 }
 
+/** Commit related application records together, or roll all of them back. */
+export async function persistItems(
+  changes: readonly { collection: string; item: PersistedItem }[],
+): Promise<void> {
+  await db.transaction(async (transaction) => {
+    for (const { collection, item } of changes) {
+      const prepared = collection === "users" ? normalizeUser(item as StoredUser) : item;
+      const payload = prepared as unknown as Record<string, unknown>;
+      const updatedAt = new Date();
+      await transaction.insert(appRecords).values({
+        collection, id: prepared.id, payload, updatedAt,
+      }).onConflictDoUpdate({
+        target: [appRecords.collection, appRecords.id],
+        set: { payload, updatedAt },
+      });
+    }
+  });
+}
+
 export async function deleteItem(collection: string, id: string): Promise<void> {
   await db
     .delete(appRecords)

@@ -110,6 +110,7 @@ export type CargoType = 'general' | 'fragile' | 'perishable' | 'livestock' | 'ha
 export type CargoLoadStatus = 'open' | 'negotiating' | 'accepted' | 'in_transit' | 'delivered' | 'cancelled';
 export type CargoOfferStatus = 'pending' | 'countered' | 'accepted' | 'rejected' | 'withdrawn';
 
+export type CargoTrackingStage = 'accepted' | 'pickup_ready' | 'picked_up' | 'in_transit' | 'border_control' | 'delivered';
 export interface StoredVehicleType {
   id: string;
   name: string;
@@ -172,7 +173,15 @@ export interface StoredCargoOffer {
   updatedAt: string;
 }
 
-// ─── COUNTRIES ────────────────────────────────────────────────────────────────
+export interface StoredCargoTrackingUpdate {
+  id: string;
+  loadId: string;
+  stage: CargoTrackingStage;
+  note: string | null;
+  lat: number | null;
+  lng: number | null;
+  createdAt: string;
+}
 export const countries: StoredCountry[] = [
   { id: 'uz', name: "O'zbekiston",   nameRu: "Узбекистан",    flag: '🇺🇿', dialCode: '+998', currency: 'UZS' },
   { id: 'kz', name: "Qozog'iston",   nameRu: "Казахстан",     flag: '🇰🇿', dialCode: '+7',   currency: 'KZT' },
@@ -2755,7 +2764,7 @@ export const cargoOffers: StoredCargoOffer[] = [
   { id: 'offer-1', loadId: 'cargo-1', driverId: 'driver-2', amountUzs: 1950000, message: 'Ertalab yuklab, shu kunning o‘zida yetkazaman.', status: 'countered', counterAmountUzs: 1850000, counterMessage: '1 850 000 so‘mga kelishamizmi?', createdAt: '2025-01-08T09:00:00.000Z', updatedAt: '2025-01-08T10:00:00.000Z' },
 ];
 
-// ─── HELPERS ──────────────────────────────────────────────────────────────────
+export const cargoTrackingUpdates: StoredCargoTrackingUpdate[] = [];
 export function generateId(): string {
   return Date.now().toString() + Math.random().toString(36).slice(2, 9);
 }
@@ -2981,3 +2990,16 @@ export function sanitizeUser(user: StoredUser) {
   const neighborhood = neighborhoods.find(n => n.id === user.neighborhoodId) || null;
   return { ...rest, region, district, neighborhood };
 }
+
+export interface StoredCargoNotification {
+  id: string;
+  userId: string;
+  loadId: string | null;
+  title: string;
+  message: string;
+  type: 'tracking' | 'offer' | 'system';
+  read: boolean;
+  createdAt: string;
+}
+
+export const cargoNotifications: StoredCargoNotification[] = [];

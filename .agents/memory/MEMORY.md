@@ -5,3 +5,4 @@
 - [Cart retry integrity](cart-retry-integrity.md) — uncertain checkout responses must keep the original request identity; removing and re-adding can duplicate an order.
 - [Special goods taxonomy](special-goods-taxonomy.md) — damaged and promotional goods are sibling subcategories under one parent, not separate categories.
 - [AI advice billing](ai-advice-billing.md) — use owner-provided Anthropic access; do not switch advice to Replit credit billing without an explicit request.
+- [Mobile push runtime](mobile-push-runtime.md) — verify push support against the installed Expo SDK and native build, not general Expo Go guidance.

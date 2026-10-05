@@ -26,6 +26,7 @@ setBaseUrl(`https://${process.env.EXPO_PUBLIC_DOMAIN}`);
 setAuthTokenGetter(() => AsyncStorage.getItem('osavdo_token'));
 
 SplashScreen.preventAutoHideAsync();
+import { CargoPushListener } from '@/components/cargo/CargoNotifications';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -38,6 +39,8 @@ const queryClient = new QueryClient({
 
 function RootLayoutNav() {
   return (
+    <>
+    <CargoPushListener />
     <Stack>
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       <Stack.Screen
@@ -57,6 +60,7 @@ function RootLayoutNav() {
         }}
       />
     </Stack>
+    </>
   );
 }
 

@@ -28,6 +28,7 @@ import {
   CargoOfferStatus,
 } from '@workspace/api-client-react';
 import { KeyboardAwareScrollViewCompat } from '@/components/KeyboardAwareScrollViewCompat';
+import { CargoTrackingCard } from '@/components/cargo/CargoTrackingCard';
 import { useQueryClient } from '@tanstack/react-query';
 import { getGetCargoLoadQueryKey } from '@workspace/api-client-react';
 
@@ -58,7 +59,7 @@ export default function CargoDetailScreen() {
   const queryClient = useQueryClient();
 
   const { data: load, isLoading } = useGetCargoLoad(id!, {
-    query: { enabled: !!id, queryKey: getGetCargoLoadQueryKey(id!) },
+    query: { enabled: !!id, queryKey: getGetCargoLoadQueryKey(id!), refetchInterval: 10_000 },
   });
   const { data: regions } = useGetRegions();
   const { data: pickupDistricts } = useGetDistricts(
@@ -122,6 +123,11 @@ export default function CargoDetailScreen() {
       offer.status === CargoOfferStatus.pending ||
       offer.status === CargoOfferStatus.countered ||
       offer.status === CargoOfferStatus.accepted,
+  );
+  const isAssignedDriver = load.offers?.some(
+    (offer) =>
+      offer.status === CargoOfferStatus.accepted &&
+      offer.driver?.user?.id === user?.id,
   );
   const pickupRegionName =
     regions?.find((region) => region.id === load.pickupRegionId)?.name ??
@@ -239,7 +245,7 @@ export default function CargoDetailScreen() {
       />
       
       <KeyboardAwareScrollViewCompat
-        contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 20 }]}
+        contentContainerStyle={[styles.content, { paddingBottom: (Platform.OS === 'web' ? 34 : insets.bottom) + 20 }]}
         bottomOffset={40}
         keyboardShouldPersistTaps="handled"
       >
@@ -317,6 +323,11 @@ export default function CargoDetailScreen() {
             </View>
           </View>
         </View>
+
+        <CargoTrackingCard
+          loadId={load.id}
+          canUpdate={Boolean(isAssignedDriver)}
+        />
 
         {/* Recommendation */}
         {load.recommendation && (

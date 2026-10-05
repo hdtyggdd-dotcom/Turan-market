@@ -2009,6 +2009,204 @@ export const GetCargoLoadResponse = zod.object({
 
 
 /**
+ * @summary Get live cargo route and tracking history
+ */
+export const GetCargoTrackingParams = zod.object({
+  "id": zod.coerce.string()
+})
+
+export const GetCargoTrackingResponse = zod.object({
+  "loadId": zod.string(),
+  "pickup": zod.object({
+  "lat": zod.number(),
+  "lng": zod.number(),
+  "label": zod.string()
+}),
+  "delivery": zod.object({
+  "lat": zod.number(),
+  "lng": zod.number(),
+  "label": zod.string()
+}),
+  "currentStage": zod.union([zod.literal('accepted'),zod.literal('pickup_ready'),zod.literal('picked_up'),zod.literal('in_transit'),zod.literal('border_control'),zod.literal('delivered'),zod.literal(null)]).nullable(),
+  "currentLat": zod.number().nullable(),
+  "currentLng": zod.number().nullable(),
+  "locationUpdatedAt": zod.coerce.date().nullable(),
+  "updatedAt": zod.coerce.date(),
+  "assigned": zod.boolean(),
+  "canUpdate": zod.boolean(),
+  "history": zod.array(zod.object({
+  "id": zod.string(),
+  "loadId": zod.string(),
+  "stage": zod.enum(['accepted', 'pickup_ready', 'picked_up', 'in_transit', 'border_control', 'delivered']),
+  "note": zod.string().nullable(),
+  "lat": zod.number().nullable(),
+  "lng": zod.number().nullable(),
+  "createdAt": zod.coerce.date()
+}))
+})
+
+
+/**
+ * @summary Update the live cargo route stage
+ */
+export const UpdateCargoTrackingParams = zod.object({
+  "id": zod.coerce.string()
+})
+
+export const UpdateCargoTrackingBody = zod.object({
+  "stage": zod.enum(['accepted', 'pickup_ready', 'picked_up', 'in_transit', 'border_control', 'delivered']),
+  "note": zod.string().optional(),
+  "lat": zod.number().optional(),
+  "lng": zod.number().optional()
+})
+
+export const UpdateCargoTrackingResponse = zod.object({
+  "loadId": zod.string(),
+  "pickup": zod.object({
+  "lat": zod.number(),
+  "lng": zod.number(),
+  "label": zod.string()
+}),
+  "delivery": zod.object({
+  "lat": zod.number(),
+  "lng": zod.number(),
+  "label": zod.string()
+}),
+  "currentStage": zod.union([zod.literal('accepted'),zod.literal('pickup_ready'),zod.literal('picked_up'),zod.literal('in_transit'),zod.literal('border_control'),zod.literal('delivered'),zod.literal(null)]).nullable(),
+  "currentLat": zod.number().nullable(),
+  "currentLng": zod.number().nullable(),
+  "locationUpdatedAt": zod.coerce.date().nullable(),
+  "updatedAt": zod.coerce.date(),
+  "assigned": zod.boolean(),
+  "canUpdate": zod.boolean(),
+  "history": zod.array(zod.object({
+  "id": zod.string(),
+  "loadId": zod.string(),
+  "stage": zod.enum(['accepted', 'pickup_ready', 'picked_up', 'in_transit', 'border_control', 'delivered']),
+  "note": zod.string().nullable(),
+  "lat": zod.number().nullable(),
+  "lng": zod.number().nullable(),
+  "createdAt": zod.coerce.date()
+}))
+})
+
+
+/**
+ * @summary Share assigned driver's latest GPS fix
+ */
+export const UpdateCargoLocationParams = zod.object({
+  "id": zod.coerce.string()
+})
+
+export const updateCargoLocationBodyLatMin = -90;
+export const updateCargoLocationBodyLatMax = 90;
+
+export const updateCargoLocationBodyLngMin = -180;
+export const updateCargoLocationBodyLngMax = 180;
+
+
+
+export const UpdateCargoLocationBody = zod.object({
+  "lat": zod.number().min(updateCargoLocationBodyLatMin).max(updateCargoLocationBodyLatMax),
+  "lng": zod.number().min(updateCargoLocationBodyLngMin).max(updateCargoLocationBodyLngMax)
+})
+
+export const UpdateCargoLocationResponse = zod.object({
+  "loadId": zod.string(),
+  "pickup": zod.object({
+  "lat": zod.number(),
+  "lng": zod.number(),
+  "label": zod.string()
+}),
+  "delivery": zod.object({
+  "lat": zod.number(),
+  "lng": zod.number(),
+  "label": zod.string()
+}),
+  "currentStage": zod.union([zod.literal('accepted'),zod.literal('pickup_ready'),zod.literal('picked_up'),zod.literal('in_transit'),zod.literal('border_control'),zod.literal('delivered'),zod.literal(null)]).nullable(),
+  "currentLat": zod.number().nullable(),
+  "currentLng": zod.number().nullable(),
+  "locationUpdatedAt": zod.coerce.date().nullable(),
+  "updatedAt": zod.coerce.date(),
+  "assigned": zod.boolean(),
+  "canUpdate": zod.boolean(),
+  "history": zod.array(zod.object({
+  "id": zod.string(),
+  "loadId": zod.string(),
+  "stage": zod.enum(['accepted', 'pickup_ready', 'picked_up', 'in_transit', 'border_control', 'delivered']),
+  "note": zod.string().nullable(),
+  "lat": zod.number().nullable(),
+  "lng": zod.number().nullable(),
+  "createdAt": zod.coerce.date()
+}))
+})
+
+
+/**
+ * @summary List cargo assigned to the current driver or owned by the current shipper
+ */
+export const GetCargoTripsResponseItem = zod.object({
+  "id": zod.string(),
+  "shipperId": zod.string(),
+  "shipper": zod.object({
+  "id": zod.string(),
+  "phone": zod.string(),
+  "name": zod.string(),
+  "role": zod.enum(['buyer', 'seller', 'driver', 'admin']),
+  "sellerBadge": zod.enum(['manufacturer', 'reseller']).nullish(),
+  "verificationStatus": zod.enum(['none', 'pending', 'approved', 'rejected']),
+  "regionId": zod.string().nullish(),
+  "districtId": zod.string().nullish(),
+  "neighborhoodId": zod.string().nullish(),
+  "region": zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "nameRu": zod.string(),
+  "countryId": zod.string()
+}).nullish(),
+  "district": zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "nameRu": zod.string(),
+  "regionId": zod.string(),
+  "lat": zod.number().nullish(),
+  "lng": zod.number().nullish()
+}).nullish(),
+  "neighborhood": zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "nameRu": zod.string(),
+  "districtId": zod.string()
+}).nullish(),
+  "rating": zod.number().nullish(),
+  "totalSales": zod.number().nullish(),
+  "createdAt": zod.coerce.date()
+}),
+  "title": zod.string(),
+  "description": zod.string().nullish(),
+  "cargoType": zod.enum(['general', 'fragile', 'perishable', 'livestock', 'hazardous', 'construction']),
+  "weightKg": zod.number(),
+  "volumeM3": zod.number(),
+  "lengthCm": zod.number().nullish(),
+  "widthCm": zod.number().nullish(),
+  "heightCm": zod.number().nullish(),
+  "pickupRegionId": zod.string(),
+  "pickupDistrictId": zod.string(),
+  "pickupAddress": zod.string().nullish(),
+  "deliveryRegionId": zod.string(),
+  "deliveryDistrictId": zod.string(),
+  "deliveryAddress": zod.string().nullish(),
+  "distanceKm": zod.number(),
+  "pickupDate": zod.coerce.date().describe('Strict YYYY-MM-DD calendar date'),
+  "budgetUzs": zod.number().nullish(),
+  "sharedLoadAllowed": zod.boolean(),
+  "status": zod.enum(['open', 'negotiating', 'accepted', 'in_transit', 'delivered', 'cancelled']),
+  "createdAt": zod.coerce.date()
+})
+export const GetCargoTripsResponse = zod.array(GetCargoTripsResponseItem)
+
+
+/**
  * @summary Submit a driver offer for a cargo load
  */
 export const CreateCargoOfferParams = zod.object({
@@ -2406,6 +2604,65 @@ export const GetVehicleTypesResponseItem = zod.object({
   "supportedCargoTypes": zod.array(zod.enum(['general', 'fragile', 'perishable', 'livestock', 'hazardous', 'construction']))
 })
 export const GetVehicleTypesResponse = zod.array(GetVehicleTypesResponseItem)
+
+
+/**
+ * @summary List in-app notifications for the current user
+ */
+export const GetNotificationsResponseItem = zod.object({
+  "id": zod.string(),
+  "loadId": zod.string().nullable(),
+  "title": zod.string(),
+  "message": zod.string(),
+  "type": zod.enum(['tracking', 'offer', 'system']),
+  "read": zod.boolean(),
+  "createdAt": zod.coerce.date()
+})
+export const GetNotificationsResponse = zod.array(GetNotificationsResponseItem)
+
+
+/**
+ * @summary Mark an in-app notification as read
+ */
+export const MarkNotificationReadParams = zod.object({
+  "id": zod.coerce.string()
+})
+
+export const MarkNotificationReadResponse = zod.object({
+  "id": zod.string(),
+  "loadId": zod.string().nullable(),
+  "title": zod.string(),
+  "message": zod.string(),
+  "type": zod.enum(['tracking', 'offer', 'system']),
+  "read": zod.boolean(),
+  "createdAt": zod.coerce.date()
+})
+
+
+export const registerPushTokenBodyTokenMax = 256;
+
+
+
+export const RegisterPushTokenBody = zod.object({
+  "token": zod.string().max(registerPushTokenBodyTokenMax)
+})
+
+export const RegisterPushTokenResponse = zod.object({
+  "registered": zod.boolean()
+})
+
+
+export const unregisterPushTokenBodyTokenMax = 256;
+
+
+
+export const UnregisterPushTokenBody = zod.object({
+  "token": zod.string().max(unregisterPushTokenBodyTokenMax)
+})
+
+export const UnregisterPushTokenResponse = zod.object({
+  "registered": zod.boolean()
+})
 
 
 /**

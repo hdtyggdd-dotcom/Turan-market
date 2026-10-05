@@ -6,6 +6,9 @@ import React, {
   useCallback,
 } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { unregisterPushToken } from '@workspace/api-client-react';
+import { useQueryClient } from '@tanstack/react-query';
+import { Alert } from 'react-native';
 
 export interface UserProfile {
   id: string;
@@ -39,6 +42,7 @@ const TOKEN_KEY = 'osavdo_token';
 const USER_KEY = 'osavdo_user';
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const queryClient = useQueryClient();
   const [user, setUser] = useState<UserProfile | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -63,19 +67,32 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const signIn = useCallback(async (t: string, u: UserProfile) => {
+    queryClient.clear();
     await AsyncStorage.multiSet([
       [TOKEN_KEY, t],
       [USER_KEY, JSON.stringify(u)],
     ]);
     setToken(t);
     setUser(u);
-  }, []);
+  }, [queryClient]);
 
   const signOut = useCallback(async () => {
+    const pushToken = await AsyncStorage.getItem('osavdo_cargo_push_token');
+    // Do not leave a device subscribed to the previous account after logout.
+    if (pushToken) {
+      try {
+        await unregisterPushToken({ token: pushToken });
+      } catch {
+        Alert.alert('Chiqish amalga oshmadi', 'Push obunasini xavfsiz o‘chirish uchun internetga ulanib, qayta urinib ko‘ring.');
+        return;
+      }
+      await AsyncStorage.removeItem('osavdo_cargo_push_token');
+    }
     await AsyncStorage.multiRemove([TOKEN_KEY, USER_KEY]);
     setToken(null);
     setUser(null);
-  }, []);
+    queryClient.clear();
+  }, [queryClient]);
 
   const updateUser = useCallback(async (u: UserProfile) => {
     await AsyncStorage.setItem(USER_KEY, JSON.stringify(u));

@@ -701,6 +701,83 @@ paths:
               schema: { $ref: "#/components/schemas/CargoLoadDetail" }
         "404": { description: Cargo load not found }
 
+  /cargo-loads/{id}/tracking:
+    get:
+      operationId: getCargoTracking
+      tags: [cargo]
+      summary: Get live cargo route and tracking history
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Cargo tracking
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CargoTracking" }
+        "404": { description: Cargo load not found }
+    patch:
+      operationId: updateCargoTracking
+      tags: [cargo]
+      summary: Update the live cargo route stage
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CargoTrackingUpdateInput" }
+      responses:
+        "200":
+          description: Tracking updated
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CargoTracking" }
+        "403": { description: Only the assigned driver can update tracking }
+        "409": { description: Cargo has no accepted driver }
+
+  /cargo-loads/{id}/location:
+    put:
+      operationId: updateCargoLocation
+      tags: [cargo]
+      summary: Share assigned driver's latest GPS fix
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CargoLocationInput" }
+      responses:
+        "200":
+          description: Location saved
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CargoTracking" }
+
+  /cargo-trips:
+    get:
+      operationId: getCargoTrips
+      tags: [cargo]
+      summary: List cargo assigned to the current driver or owned by the current shipper
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200":
+          description: Participant cargo trips
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/CargoLoad" }
+
   /cargo-loads/{id}/offers:
     post:
       operationId: createCargoOffer
@@ -820,6 +897,72 @@ paths:
               schema:
                 type: array
                 items: { $ref: "#/components/schemas/VehicleType" }
+
+  /notifications:
+    get:
+      operationId: getNotifications
+      tags: [notifications]
+      summary: List in-app notifications for the current user
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200":
+          description: Notifications
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/CargoNotification" }
+
+  /notifications/{id}/read:
+    post:
+      operationId: markNotificationRead
+      tags: [notifications]
+      summary: Mark an in-app notification as read
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Notification marked as read
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CargoNotification" }
+        "404": { description: Notification not found }
+
+  /push-tokens:
+    post:
+      operationId: registerPushToken
+      tags: [notifications]
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/PushTokenInput" }
+      responses:
+        "200":
+          description: Registered
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/PushRegistration" }
+    delete:
+      operationId: unregisterPushToken
+      tags: [notifications]
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/PushTokenInput" }
+      responses:
+        "200":
+          description: Unregistered
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/PushRegistration" }
 
   /drivers/{id}:
     get:
@@ -1652,6 +1795,84 @@ components:
               anyOf:
                 - $ref: "#/components/schemas/TransportRecommendation"
                 - type: "null"
+
+    CargoRoutePoint:
+      type: object
+      required: [lat, lng, label]
+      properties:
+        lat: { type: number }
+        lng: { type: number }
+        label: { type: string }
+
+    CargoTrackingUpdate:
+      type: object
+      required: [id, loadId, stage, note, lat, lng, createdAt]
+      properties:
+        id: { type: string }
+        loadId: { type: string }
+        stage: { type: string, enum: [accepted, pickup_ready, picked_up, in_transit, border_control, delivered] }
+        note: { type: ["string", "null"] }
+        lat: { type: ["number", "null"] }
+        lng: { type: ["number", "null"] }
+        createdAt: { type: string, format: date-time }
+
+    CargoTracking:
+      type: object
+      required: [loadId, pickup, delivery, currentStage, currentLat, currentLng, locationUpdatedAt, updatedAt, history, assigned, canUpdate]
+      properties:
+        loadId: { type: string }
+        pickup: { $ref: "#/components/schemas/CargoRoutePoint" }
+        delivery: { $ref: "#/components/schemas/CargoRoutePoint" }
+        currentStage: { type: ["string", "null"], enum: [accepted, pickup_ready, picked_up, in_transit, border_control, delivered, null] }
+        currentLat: { type: ["number", "null"] }
+        currentLng: { type: ["number", "null"] }
+        locationUpdatedAt: { type: ["string", "null"], format: date-time }
+        updatedAt: { type: string, format: date-time }
+        assigned: { type: boolean }
+        canUpdate: { type: boolean }
+        history:
+          type: array
+          items: { $ref: "#/components/schemas/CargoTrackingUpdate" }
+
+    CargoTrackingUpdateInput:
+      type: object
+      required: [stage]
+      properties:
+        stage: { type: string, enum: [accepted, pickup_ready, picked_up, in_transit, border_control, delivered] }
+        note: { type: string }
+        lat: { type: number }
+        lng: { type: number }
+
+    CargoLocationInput:
+      type: object
+      required: [lat, lng]
+      properties:
+        lat: { type: number, minimum: -90, maximum: 90 }
+        lng: { type: number, minimum: -180, maximum: 180 }
+
+    PushTokenInput:
+      type: object
+      required: [token]
+      properties:
+        token: { type: string, maxLength: 256 }
+
+    PushRegistration:
+      type: object
+      required: [registered]
+      properties:
+        registered: { type: boolean }
+
+    CargoNotification:
+      type: object
+      required: [id, loadId, title, message, type, read, createdAt]
+      properties:
+        id: { type: string }
+        loadId: { type: ["string", "null"] }
+        title: { type: string }
+        message: { type: string }
+        type: { type: string, enum: [tracking, offer, system] }
+        read: { type: boolean }
+        createdAt: { type: string, format: date-time }
 
     CargoLoadInput:
       type: object

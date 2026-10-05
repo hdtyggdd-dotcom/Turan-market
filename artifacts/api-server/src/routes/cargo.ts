@@ -1,11 +1,15 @@
-import { Router } from "express";
+import { Router, type RequestHandler, type Response } from "express";
 import {
   cargoLoads,
+  cargoNotifications,
   cargoOffers,
+  cargoTrackingUpdates,
   districts,
   driverProfiles,
   generateId,
+  regions,
   sanitizeUser,
+  type CargoTrackingStage,
   type CargoType,
   type StoredCargoLoad,
   type StoredCargoOffer,
@@ -13,10 +17,57 @@ import {
   vehicleTypes,
 } from "../data/store.js";
 import { authenticateToken, type AuthRequest } from "../middleware/auth.js";
-import { persistItem } from "../lib/persistence.js";
+import { registerToken, unregisterToken, sendCargoNotification } from "../lib/cargo-notifications.js";
 
+type CargoChange = { collection: string; item: StoredCargoLoad | StoredCargoOffer };
+type SaveCargo = (changes: readonly CargoChange[]) => Promise<void>;
+
+// Inject storage for isolated route tests; production uses the existing repository.
+export function createCargoRouter(persistItems: SaveCargo = async (changes) => {
+  const storage = await import("../lib/persistence.js");
+  await storage.persistItems(changes);
+}) {
 const router = Router();
+const mutationQueue = new Map<string, Promise<void>>();
+
+function withCargoLock(
+  handler: (req: AuthRequest, res: Response) => void | Promise<void>,
+): RequestHandler {
+  return async (req: AuthRequest, res, next) => {
+    const id = rawParam(req.params.id);
+    const previous = mutationQueue.get(id) ?? Promise.resolve();
+    let release!: () => void;
+    const current = new Promise<void>(resolve => { release = resolve; });
+    mutationQueue.set(id, current);
+    await previous;
+    try {
+      if (!res.destroyed) await handler(req, res);
+    } catch (error) {
+      next(error);
+    } finally {
+      release();
+      if (mutationQueue.get(id) === current) mutationQueue.delete(id);
+    }
+  };
+}
 const cargoTypes: CargoType[] = ["general", "fragile", "perishable", "livestock", "hazardous", "construction"];
+const trackingStages: CargoTrackingStage[] = [
+  "accepted",
+  "pickup_ready",
+  "picked_up",
+  "in_transit",
+  "border_control",
+  "delivered",
+];
+const trackingStageLabels: Record<CargoTrackingStage, string> = {
+  accepted: "Tashuv tasdiqlandi",
+  pickup_ready: "Yuklashga tayyor",
+  picked_up: "Yuk olindi",
+  in_transit: "Yo'lda",
+  border_control: "Chegara nazoratida",
+  delivered: "Yetkazildi",
+};
+const latestLocations = new Map<string, { lat: number; lng: number; createdAt: string }>();
 
 function rawParam(value: string | string[]): string {
   return Array.isArray(value) ? value[0] : value;
@@ -100,6 +151,77 @@ function canViewPrivateLoadDetails(load: StoredCargoLoad, requesterId?: string):
   return acceptedDriver?.userId === requesterId;
 }
 
+function acceptedDriverFor(load: StoredCargoLoad) {
+  const offer = cargoOffers.find((item) => item.loadId === load.id && item.status === "accepted");
+  return driverProfiles.find((profile) => profile.id === offer?.driverId) ?? null;
+}
+
+function routePoint(districtId: string, regionId: string) {
+  const district = districts.find((item) => item.id === districtId);
+  const region = regions.find((item) => item.id === regionId);
+  return {
+    lat: district?.lat ?? region!.lat,
+    lng: district?.lng ?? region!.lng,
+    label: `${district?.name ?? districtId}, ${region?.name ?? regionId}`,
+  };
+}
+
+function stageFromLoadStatus(load: StoredCargoLoad): CargoTrackingStage {
+  if (load.status === "delivered") return "delivered";
+  if (load.status === "in_transit") return "in_transit";
+  return "accepted";
+}
+
+function hydrateTracking(load: StoredCargoLoad, requesterId?: string) {
+  const pickup = routePoint(load.pickupDistrictId, load.pickupRegionId);
+  const delivery = routePoint(load.deliveryDistrictId, load.deliveryRegionId);
+  const history = cargoTrackingUpdates
+    .filter((item) => item.loadId === load.id)
+    .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+  const lastUpdate = history[history.length - 1];
+  const driver = acceptedDriverFor(load);
+  const location = latestLocations.get(load.id);
+  const currentStage = driver ? lastUpdate?.stage ?? stageFromLoadStatus(load) : null;
+  return {
+    loadId: load.id,
+    pickup,
+    delivery,
+    currentStage,
+    currentLat: location?.lat ?? lastUpdate?.lat ?? null,
+    currentLng: location?.lng ?? lastUpdate?.lng ?? null,
+    locationUpdatedAt: location?.createdAt ?? (lastUpdate?.lat != null ? lastUpdate.createdAt : null),
+    assigned: !!driver,
+    canUpdate: !!driver && driver.userId === requesterId && load.status !== "delivered" && load.status !== "cancelled",
+    updatedAt: lastUpdate?.createdAt ?? load.createdAt,
+    history,
+  };
+}
+
+function notifyCargoParticipants(
+  load: StoredCargoLoad,
+  title: string,
+  message: string,
+  type: "tracking" | "offer" | "system",
+) {
+  const recipientIds = new Set<string>([load.shipperId]);
+  const driver = acceptedDriverFor(load);
+  if (driver) recipientIds.add(driver.userId);
+  recipientIds.forEach((userId) => {
+    sendCargoNotification(userId, load.id, title, message, type);
+  });
+}
+
+function validCoordinates(body: Record<string, unknown>): boolean {
+  return typeof body.lat === "number" && Number.isFinite(body.lat) && Math.abs(body.lat) <= 90 &&
+    typeof body.lng === "number" && Number.isFinite(body.lng) && Math.abs(body.lng) <= 180;
+}
+
+router.get("/cargo-trips", authenticateToken, (req: AuthRequest, res) => {
+  res.json(cargoLoads.filter((load) =>
+    load.shipperId === req.userId || acceptedDriverFor(load)?.userId === req.userId,
+  ).map((load) => hydrateLoad(load, req.userId)));
+});
+
 function hydrateLoad(load: StoredCargoLoad, requesterId?: string) {
   const shipper = users.find((item) => item.id === load.shipperId);
   const revealPrivateDetails = canViewPrivateLoadDetails(load, requesterId);
@@ -176,7 +298,7 @@ router.post("/cargo-loads/recommendation", authenticateToken, (req, res) => {
 });
 
 router.post("/cargo-loads", authenticateToken, async (req: AuthRequest, res) => {
-  const body = req.body as Record<string, unknown>;
+  const body = (req.body ?? {}) as Record<string, unknown>;
   if (!validCargoInput(body)) {
     res.status(400).json({ error: "validation", message: "Missing or invalid cargo load fields" });
     return;
@@ -196,7 +318,7 @@ router.post("/cargo-loads", authenticateToken, async (req: AuthRequest, res) => 
     distanceKm: Math.round(Math.hypot(pickup.lat - delivery.lat, pickup.lng - delivery.lng) * 111), pickupDate: body.pickupDate,
     budgetUzs: typeof body.budgetUzs === "number" ? body.budgetUzs : null, sharedLoadAllowed: body.sharedLoadAllowed, status: "open", createdAt: new Date().toISOString(),
   };
-  await persistItem("cargo_loads", load);
+  await persistItems([{ collection: "cargo_loads", item: load }]);
   cargoLoads.push(load);
   res.status(201).json(hydrateLoad(load, req.userId));
 });
@@ -223,7 +345,105 @@ router.get("/cargo-loads/:id", authenticateToken, (req: AuthRequest, res) => {
   });
 });
 
-router.post("/cargo-loads/:id/offers", authenticateToken, async (req: AuthRequest, res) => {
+router.get("/cargo-loads/:id/tracking", authenticateToken, (req: AuthRequest, res) => {
+  const load = cargoLoads.find((item) => item.id === rawParam(req.params.id));
+  if (!load) {
+    res.status(404).json({ error: "not_found", message: "Cargo load not found" });
+    return;
+  }
+  const hasAccess = canViewPrivateLoadDetails(load, req.userId) || load.status === "open" || load.status === "negotiating";
+  if (!hasAccess) {
+    res.status(403).json({ error: "forbidden", message: "Tracking is available to cargo participants" });
+    return;
+  }
+  res.json(hydrateTracking(load, req.userId));
+});
+
+router.patch("/cargo-loads/:id/tracking", authenticateToken, withCargoLock(async (req, res) => {
+  const load = cargoLoads.find((item) => item.id === rawParam(req.params.id));
+  if (!load) {
+    res.status(404).json({ error: "not_found", message: "Cargo load not found" });
+    return;
+  }
+  const driver = acceptedDriverFor(load);
+  if (!driver || driver.userId !== req.userId) {
+    res.status(403).json({ error: "forbidden", message: "Only the assigned driver can update tracking" });
+    return;
+  }
+  if (load.status === "delivered" || load.status === "cancelled") {
+    res.status(409).json({ error: "conflict", message: "Finished cargo cannot be updated" });
+    return;
+  }
+  const body = (req.body ?? {}) as Record<string, unknown>;
+  const stage = body.stage as CargoTrackingStage;
+  if (!trackingStages.includes(stage)) {
+    res.status(400).json({ error: "validation", message: "A valid tracking stage is required" });
+    return;
+  }
+  const hasCoordinates = body.lat !== undefined || body.lng !== undefined;
+  if (hasCoordinates && !validCoordinates(body)) {
+    res.status(400).json({ error: "validation", message: "Coordinates must be valid numbers" });
+    return;
+  }
+  const previous = hydrateTracking(load, req.userId).currentStage ?? "accepted";
+  const currentIndex = trackingStages.indexOf(previous);
+  // Border control is optional for domestic trips. All other milestones must be sequential.
+  const allowed = stage === trackingStages[currentIndex + 1] ||
+    (previous === "in_transit" && stage === "delivered");
+  if (!allowed) {
+    res.status(409).json({ error: "conflict", message: "Tracking stages must advance in order" });
+    return;
+  }
+  if (body.note !== undefined && (typeof body.note !== "string" || body.note.length > 1000)) {
+    res.status(400).json({ error: "validation", message: "Note must be at most 1000 characters" });
+    return;
+  }
+  const lat = hasCoordinates ? body.lat as number : null;
+  const lng = hasCoordinates ? body.lng as number : null;
+  const update = {
+    id: generateId(),
+    loadId: load.id,
+    stage,
+    note: typeof body.note === "string" && body.note.trim() ? body.note.trim() : null,
+    lat,
+    lng,
+    createdAt: new Date().toISOString(),
+  };
+  const nextLoad: StoredCargoLoad = {
+    ...load,
+    status: stage === "delivered" ? "delivered" : stage === "pickup_ready" ? "accepted" : "in_transit",
+  };
+  await persistItems([{ collection: "cargo_loads", item: nextLoad }]);
+  Object.assign(load, nextLoad);
+  cargoTrackingUpdates.push(update);
+  if (lat !== null && lng !== null) latestLocations.set(load.id, { lat, lng, createdAt: update.createdAt });
+  notifyCargoParticipants(
+    load,
+    `Yuk holati: ${trackingStageLabels[stage]}`,
+    update.note ?? `Haydovchi yuk holatini "${trackingStageLabels[stage]}" deb yangiladi.`,
+    "tracking",
+  );
+  res.json(hydrateTracking(load, req.userId));
+}));
+
+router.put("/cargo-loads/:id/location", authenticateToken, withCargoLock((req, res) => {
+  const load = cargoLoads.find((item) => item.id === rawParam(req.params.id));
+  if (!load) { res.status(404).json({ error: "not_found", message: "Cargo load not found" }); return; }
+  if (acceptedDriverFor(load)?.userId !== req.userId) {
+    res.status(403).json({ error: "forbidden", message: "Only the assigned driver can share location" }); return;
+  }
+  if (load.status === "delivered" || load.status === "cancelled") {
+    res.status(409).json({ error: "conflict", message: "Finished cargo cannot share location" }); return;
+  }
+  const body = (req.body ?? {}) as Record<string, unknown>;
+  if (!validCoordinates(body)) {
+    res.status(400).json({ error: "validation", message: "Valid latitude and longitude are required" }); return;
+  }
+  latestLocations.set(load.id, { lat: body.lat as number, lng: body.lng as number, createdAt: new Date().toISOString() });
+  res.json(hydrateTracking(load, req.userId));
+}));
+
+router.post("/cargo-loads/:id/offers", authenticateToken, withCargoLock(async (req, res) => {
   const load = cargoLoads.find((item) => item.id === rawParam(req.params.id));
   const driver = driverProfiles.find((item) => item.userId === req.userId);
   const { amountUzs, message } = req.body as Record<string, unknown>;
@@ -264,14 +484,17 @@ router.post("/cargo-loads/:id/offers", authenticateToken, async (req: AuthReques
   }
   const now = new Date().toISOString();
   const offer: StoredCargoOffer = { id: generateId(), loadId: load.id, driverId: driver.id, amountUzs, message: typeof message === "string" ? message : null, status: "pending", counterAmountUzs: null, counterMessage: null, createdAt: now, updatedAt: now };
-  await persistItem("cargo_offers", offer);
-  load.status = "negotiating";
-  await persistItem("cargo_loads", load);
+  const nextLoad: StoredCargoLoad = { ...load, status: "negotiating" };
+  await persistItems([
+    { collection: "cargo_offers", item: offer },
+    { collection: "cargo_loads", item: nextLoad },
+  ]);
+  Object.assign(load, nextLoad);
   cargoOffers.push(offer);
   res.status(201).json(hydrateOffer(offer));
-});
+}));
 
-router.post("/cargo-loads/:id/offers/:offerId/counter", authenticateToken, async (req: AuthRequest, res) => {
+router.post("/cargo-loads/:id/offers/:offerId/counter", authenticateToken, withCargoLock(async (req, res) => {
   const load = cargoLoads.find((item) => item.id === rawParam(req.params.id));
   const offer = cargoOffers.find((item) => item.id === rawParam(req.params.offerId) && item.loadId === load?.id);
   const { amountUzs, message } = req.body as Record<string, unknown>;
@@ -283,13 +506,21 @@ router.post("/cargo-loads/:id/offers/:offerId/counter", authenticateToken, async
     return;
   }
   if (typeof amountUzs !== "number" || amountUzs <= 0) { res.status(400).json({ error: "validation", message: "A positive amountUzs is required" }); return; }
-  offer.counterAmountUzs = amountUzs; offer.counterMessage = typeof message === "string" ? message : null; offer.status = "countered"; offer.updatedAt = new Date().toISOString(); load.status = "negotiating";
-  await persistItem("cargo_offers", offer);
-  await persistItem("cargo_loads", load);
+  const nextOffer: StoredCargoOffer = {
+    ...offer, counterAmountUzs: amountUzs, counterMessage: typeof message === "string" ? message : null,
+    status: "countered", updatedAt: new Date().toISOString(),
+  };
+  const nextLoad: StoredCargoLoad = { ...load, status: "negotiating" };
+  await persistItems([
+    { collection: "cargo_offers", item: nextOffer },
+    { collection: "cargo_loads", item: nextLoad },
+  ]);
+  Object.assign(offer, nextOffer);
+  Object.assign(load, nextLoad);
   res.json(hydrateOffer(offer));
-});
+}));
 
-router.post("/cargo-loads/:id/offers/:offerId/counter-decision", authenticateToken, async (req: AuthRequest, res) => {
+router.post("/cargo-loads/:id/offers/:offerId/counter-decision", authenticateToken, withCargoLock(async (req, res) => {
   const load = cargoLoads.find((item) => item.id === rawParam(req.params.id));
   const offer = cargoOffers.find((item) => item.id === rawParam(req.params.offerId) && item.loadId === load?.id);
   const driver = driverProfiles.find((item) => item.userId === req.userId);
@@ -313,15 +544,17 @@ router.post("/cargo-loads/:id/offers/:offerId/counter-decision", authenticateTok
   }
 
   const now = new Date().toISOString();
+  const nextOffer = { ...offer };
+  const nextLoad = { ...load };
   if (accepted) {
-    offer.amountUzs = offer.counterAmountUzs;
-    offer.status = "pending";
-    offer.counterAmountUzs = null;
-    offer.counterMessage = null;
-    load.status = "negotiating";
+    nextOffer.amountUzs = offer.counterAmountUzs;
+    nextOffer.status = "pending";
+    nextOffer.counterAmountUzs = null;
+    nextOffer.counterMessage = null;
+    nextLoad.status = "negotiating";
   } else {
-    offer.status = "rejected";
-    load.status = cargoOffers.some(
+    nextOffer.status = "rejected";
+    nextLoad.status = cargoOffers.some(
       (item) =>
         item.loadId === load.id &&
         item.id !== offer.id &&
@@ -330,13 +563,17 @@ router.post("/cargo-loads/:id/offers/:offerId/counter-decision", authenticateTok
       ? "negotiating"
       : "open";
   }
-  offer.updatedAt = now;
-  await persistItem("cargo_offers", offer);
-  await persistItem("cargo_loads", load);
+  nextOffer.updatedAt = now;
+  await persistItems([
+    { collection: "cargo_offers", item: nextOffer },
+    { collection: "cargo_loads", item: nextLoad },
+  ]);
+  Object.assign(offer, nextOffer);
+  Object.assign(load, nextLoad);
   res.json(hydrateOffer(offer));
-});
+}));
 
-router.post("/cargo-loads/:id/offers/:offerId/accept", authenticateToken, async (req: AuthRequest, res) => {
+router.post("/cargo-loads/:id/offers/:offerId/accept", authenticateToken, withCargoLock(async (req, res) => {
   const load = cargoLoads.find((item) => item.id === rawParam(req.params.id));
   const offer = cargoOffers.find((item) => item.id === rawParam(req.params.offerId) && item.loadId === load?.id);
   const offerDriver = driverProfiles.find((item) => item.id === offer?.driverId);
@@ -354,17 +591,35 @@ router.post("/cargo-loads/:id/offers/:offerId/accept", authenticateToken, async 
     res.status(409).json({ error: "conflict", message: "This offer can no longer be accepted" });
     return;
   }
-  offer.status = "accepted"; offer.updatedAt = new Date().toISOString(); load.status = "accepted";
-  cargoOffers.filter((item) => item.loadId === load.id && item.id !== offer.id && item.status !== "accepted").forEach((item) => { item.status = "rejected"; item.updatedAt = offer.updatedAt; });
-  await persistItem("cargo_offers", offer);
-  await persistItem("cargo_loads", load);
-  await Promise.all(
-    cargoOffers
-      .filter((item) => item.loadId === load.id && item.id !== offer.id && item.status === "rejected")
-      .map((item) => persistItem("cargo_offers", item)),
+  const now = new Date().toISOString();
+  const nextOffer: StoredCargoOffer = { ...offer, status: "accepted", updatedAt: now };
+  const nextLoad: StoredCargoLoad = { ...load, status: "accepted" };
+  const rejected = cargoOffers
+    .filter(item => item.loadId === load.id && item.id !== offer.id && item.status !== "accepted")
+    .map(original => ({
+      original,
+      candidate: { ...original, status: "rejected" as const, updatedAt: now },
+    }));
+  await persistItems([
+    { collection: "cargo_offers", item: nextOffer },
+    { collection: "cargo_loads", item: nextLoad },
+    ...rejected.map(({ candidate }) => ({ collection: "cargo_offers", item: candidate })),
+  ]);
+  Object.assign(offer, nextOffer);
+  Object.assign(load, nextLoad);
+  rejected.forEach(({ original, candidate }) => Object.assign(original, candidate));
+  cargoTrackingUpdates.push({
+    id: generateId(), loadId: load.id, stage: "accepted", note: null,
+    lat: null, lng: null, createdAt: offer.updatedAt,
+  });
+  notifyCargoParticipants(
+    load,
+    "Haydovchi biriktirildi",
+    "Taklif qabul qilindi. Yuk yo'lini jonli kuzatishingiz mumkin.",
+    "offer",
   );
   res.json(hydrateOffer(offer, true));
-});
+}));
 
 router.get("/drivers", authenticateToken, (req, res) => {
   const regionId = typeof req.query.regionId === "string" ? req.query.regionId : undefined;
@@ -383,10 +638,53 @@ router.get("/vehicle-types", authenticateToken, (_req, res) => {
   res.json(vehicleTypes);
 });
 
+router.get("/notifications", authenticateToken, (req: AuthRequest, res) => {
+  res.json(
+    cargoNotifications
+      .filter((item) => item.userId === req.userId)
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+      .slice(0, 50)
+      .map(({ userId: _userId, ...notification }) => notification),
+  );
+});
+
+router.post("/notifications/:id/read", authenticateToken, (req: AuthRequest, res) => {
+  const notification = cargoNotifications.find(
+    (item) => item.id === rawParam(req.params.id) && item.userId === req.userId,
+  );
+  if (!notification) {
+    res.status(404).json({ error: "not_found", message: "Notification not found" });
+    return;
+  }
+  notification.read = true;
+  const { userId: _userId, ...response } = notification;
+  res.json(response);
+});
+
+router.post("/push-tokens", authenticateToken, (req: AuthRequest, res) => {
+  const token = req.body?.token;
+  if (typeof token !== "string" || token.length > 256 || !/^(ExponentPushToken|ExpoPushToken)\[[A-Za-z0-9_-]+\]$/.test(token)) {
+    res.status(400).json({ error: "validation", message: "Valid Expo push token required" }); return;
+  }
+  registerToken(req.userId!, token);
+  res.json({ registered: true });
+});
+
+router.delete("/push-tokens", authenticateToken, (req: AuthRequest, res) => {
+  if (typeof req.body?.token !== "string") {
+    res.status(400).json({ error: "validation", message: "Push token required" }); return;
+  }
+  unregisterToken(req.userId!, req.body.token);
+  res.json({ registered: false });
+});
+
 router.get("/drivers/:id", authenticateToken, (req, res) => {
   const driver = driverProfiles.find((item) => item.id === rawParam(req.params.id));
   if (!driver) { res.status(404).json({ error: "not_found", message: "Driver not found" }); return; }
   res.json(hydrateDriver(driver));
 });
 
-export default router;
+return router;
+}
+
+export default createCargoRouter();

@@ -36,7 +36,14 @@
         }
       ],
       "expo-font",
-      "expo-web-browser"
+      "expo-web-browser",
+      "expo-notifications",
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Yuk egasiga yo‘ldagi GPS holatingizni ulashish uchun joylashuvga ruxsat bering."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,
