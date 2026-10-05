@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Platform } from 'react-native';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { KeyboardProvider } from 'react-native-keyboard-controller';
@@ -22,7 +23,11 @@ import { I18nProvider } from '@/context/I18nContext';
 import { CountrySetupModal } from '@/components/CountrySetupModal';
 
 // Configure API client — generated paths already include /api prefix
-setBaseUrl(`https://${process.env.EXPO_PUBLIC_DOMAIN}`);
+// Exported web builds use their published host, not the workspace's dev URL.
+// Expo Go and the development web preview still use the shared API domain.
+setBaseUrl(Platform.OS === 'web' && !__DEV__ && typeof window !== 'undefined'
+  ? window.location.origin
+  : `https://${process.env.EXPO_PUBLIC_DOMAIN}`);
 setAuthTokenGetter(() => AsyncStorage.getItem('osavdo_token'));
 
 SplashScreen.preventAutoHideAsync();
