@@ -25,10 +25,9 @@ Ilovada:
 - narx, hudud va kategoriya bo‘yicha tanlang;
 - yuk e’lon qiling va haydovchilar takliflarini ko‘ring;
 - buyurtma holatini kuzating;
-- Visa yoki boshqa bank kartasi orqali Stripe Checkout’da to‘lang;
 - sotuvchi va haydovchilar haqida tasdiqlash ma’lumotlarini ko‘ring.
 
-Turan Market’da karta raqamlari ilova serverida saqlanmaydi — karta to‘lovi Stripe’ning himoyalangan sahifasida amalga oshiriladi.
+Ilova ichida onlayn karta to‘lovlari hozircha mavjud emas. Turan Market bank karta ma’lumotlarini so‘ramaydi.
 
 ## Store assets still needed from the owner
 
@@ -44,6 +43,5 @@ Turan Market’da karta raqamlari ilova serverida saqlanmaydi — karta to‘lov
 - Turan Market marketplace launch
 - Product and service listings
 - Cargo posting and driver offers
-- Orders and payment status
-- Visa and bank-card checkout through Stripe
+- Order status tracking
 - Uzbek, Russian and regional language support

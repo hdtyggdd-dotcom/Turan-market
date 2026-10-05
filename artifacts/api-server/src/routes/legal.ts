@@ -27,17 +27,17 @@ router.get("/privacy-policy", (_req, res) => {
         <li>Ro‘yxatdan o‘tish uchun ism, telefon raqami, rol va tanlangan hudud.</li>
         <li>Foydalanuvchi joylagan e’lonlar, rasmlar, narxlar va yuk ma’lumotlari.</li>
         <li>Foydalanuvchi ruxsat bergandagina joylashuv ma’lumotlari — hududni aniqlash va yukni kuzatish uchun.</li>
-        <li>Buyurtma, to‘lov va transport taklifi holatlari.</li>
+        <li>Buyurtma va transport taklifi holatlari.</li>
       </ul>
 
       <h2>To‘lovlar</h2>
-      <p>Visa va boshqa bank karta ma’lumotlari Turan Market serverida saqlanmaydi. Karta ma’lumotlari xavfsiz Stripe Checkout sahifasida qayta ishlanadi. Turan Market faqat buyurtma va to‘lov holati hamda Stripe identifikatorlarini saqlaydi.</p>
+      <p>Ilova ichida onlayn karta to‘lovlari hozircha mavjud emas. Turan Market karta raqami, amal qilish muddati yoki xavfsizlik kodini so‘ramaydi va saqlamaydi.</p>
 
       <h2>Ma’lumotlardan foydalanish</h2>
-      <p>Ma’lumotlar akkauntni boshqarish, e’lonlarni ko‘rsatish, buyurtmalarni bajarish, yuk tashishni tashkil qilish, xavfsizlikni ta’minlash va to‘lov holatini tekshirish uchun ishlatiladi. Ma’lumotlar reklama maqsadida sotilmaydi.</p>
+      <p>Ma’lumotlar akkauntni boshqarish, e’lonlarni ko‘rsatish, buyurtmalarni bajarish, yuk tashishni tashkil qilish va xavfsizlikni ta’minlash uchun ishlatiladi. Ma’lumotlar reklama maqsadida sotilmaydi.</p>
 
       <h2>Uchinchi tomon xizmatlari</h2>
-      <p>Ma’lumotlar ilovaning API serveri va PostgreSQL bazasida saqlanadi. Karta to‘lovlari Stripe tomonidan qayta ishlanadi. Ushbu xizmatlar o‘zlarining maxfiylik va xavfsizlik qoidalariga ega.</p>
+      <p>Ma’lumotlar ilovaning API serveri va PostgreSQL bazasida saqlanadi. Ushbu xizmatlar o‘zlarining maxfiylik va xavfsizlik qoidalariga ega.</p>
 
       <h2>Saqlash va o‘chirish</h2>
       <p>Ma’lumotlar akkaunt va buyurtma munosabatlari zarur bo‘lgan muddatda saqlanadi. Akkaunt yoki ma’lumotlarni o‘chirish bo‘yicha so‘rov Play Console’dagi Turan Market developer kontaktiga yuborilishi mumkin.</p>

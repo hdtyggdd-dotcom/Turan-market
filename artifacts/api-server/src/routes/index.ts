@@ -11,7 +11,6 @@ import sellersRouter from "./sellers.js";
 import uploadsRouter from "./uploads.js";
 import aiRouter from "./ai.js";
 import cargoRouter from "./cargo.js";
-import stripeRouter from "./stripe.js";
 import legalRouter from "./legal.js";
 
 const router: IRouter = Router();
@@ -28,7 +27,6 @@ router.use(sellersRouter);
 router.use(uploadsRouter);
 router.use(aiRouter);
 router.use(cargoRouter);
-router.use(stripeRouter);
 router.use(legalRouter);
 
 export default router;

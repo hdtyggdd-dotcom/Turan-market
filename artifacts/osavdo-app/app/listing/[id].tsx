@@ -14,13 +14,11 @@ import { Feather } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useColors } from '@/hooks/useColors';
 import {
-  createPaymentCheckout,
-  getPaymentOrderStatus,
+  getGetOrdersQueryKey,
   useGetListing,
   useCreateOrder,
   useEstimateDelivery,
 } from '@workspace/api-client-react';
-import * as WebBrowser from 'expo-web-browser';
 import { useAuth } from '@/context/AuthContext';
 import { useQueryClient } from '@tanstack/react-query';
 import { useLocation } from '@/context/LocationContext';
@@ -64,51 +62,15 @@ export default function ListingDetailScreen() {
   const deliveryMutation = useEstimateDelivery();
   const orderMutation = useCreateOrder({
     mutation: {
-      onSuccess: (order) => {
-        queryClient.invalidateQueries({ queryKey: ['getOrders'] });
-        Alert.alert("Buyurtma yaratildi", "Visa yoki boshqa bank kartangiz bilan xavfsiz to'lang.", [
-          { text: "Keyinroq", onPress: () => router.push('/(tabs)/orders') },
-          { text: "Visa / karta bilan to'lash", onPress: () => { void openPaymentCheckout(order.id); } },
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: getGetOrdersQueryKey() });
+        Alert.alert("Buyurtma yaratildi", "Buyurtmangiz sotuvchiga yuborildi. Ilova ichida karta to‘lovi hozircha mavjud emas.", [
+          { text: "Buyurtmalarim", onPress: () => router.push('/(tabs)/orders') },
         ]);
       },
       onError: () => Alert.alert("Xato", "Buyurtma berishda xato yuz berdi"),
     },
   });
-
-  async function openPaymentCheckout(orderId: string) {
-    if (!user || !user.id) {
-      router.push('/auth/login');
-      return;
-    }
-    try {
-      const data = await createPaymentCheckout({ orderId, currency: 'uzs' });
-      await WebBrowser.openBrowserAsync(data.url);
-      await pollPaymentStatus(orderId);
-      queryClient.invalidateQueries({ queryKey: ['getOrders'] });
-    } catch (error) {
-      Alert.alert("To'lov xatosi", error instanceof Error ? error.message : "To'lovni boshlash imkoni bo'lmadi");
-    }
-  }
-
-  async function pollPaymentStatus(orderId: string) {
-    for (let attempt = 0; attempt < 5; attempt += 1) {
-      if (attempt > 0) {
-        await new Promise((resolve) => setTimeout(resolve, 2000));
-      }
-
-      const data = await getPaymentOrderStatus(orderId);
-      const paymentStatus = data.payment?.status;
-      if (paymentStatus === 'paid' || data.orderStatus === 'confirmed') {
-        Alert.alert("To'lov tasdiqlandi", "Buyurtmangiz sotuvchiga yuborildi.");
-        return;
-      }
-    }
-
-    Alert.alert(
-      "To'lov kutilmoqda",
-      "To'lov hali tasdiqlanmadi. Buyurtmalar bo'limida holatni keyinroq tekshirishingiz mumkin.",
-    );
-  }
 
   function handleOrder() {
     if (!user) {

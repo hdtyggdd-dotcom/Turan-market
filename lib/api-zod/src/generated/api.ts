@@ -1658,48 +1658,6 @@ export const UpdateOrderStatusResponse = zod.object({
 
 
 /**
- * @summary Create or resume a Stripe card checkout session for an order
- */
-export const createPaymentCheckoutBodyCurrencyDefault = `uzs`;
-
-export const CreatePaymentCheckoutBody = zod.object({
-  "orderId": zod.string(),
-  "currency": zod.enum(['uzs', 'usd']).default(createPaymentCheckoutBodyCurrencyDefault)
-})
-
-export const CreatePaymentCheckoutResponse = zod.object({
-  "orderId": zod.string(),
-  "sessionId": zod.string(),
-  "url": zod.string(),
-  "status": zod.enum(['pending', 'paid', 'failed', 'expired'])
-})
-
-
-/**
- * @summary Get payment and order status
- */
-export const GetPaymentOrderStatusParams = zod.object({
-  "orderId": zod.coerce.string()
-})
-
-export const GetPaymentOrderStatusResponse = zod.object({
-  "payment": zod.object({
-  "id": zod.string(),
-  "orderId": zod.string(),
-  "userId": zod.string(),
-  "sessionId": zod.string(),
-  "paymentIntentId": zod.string().nullable(),
-  "amount": zod.number(),
-  "currency": zod.string(),
-  "status": zod.enum(['pending', 'paid', 'failed', 'expired']),
-  "createdAt": zod.coerce.date(),
-  "updatedAt": zod.coerce.date()
-}).nullable(),
-  "orderStatus": zod.enum(['pending', 'confirmed', 'delivering', 'delivered', 'cancelled'])
-})
-
-
-/**
  * @summary Get platform stats summary
  */
 export const GetStatsSummaryResponse = zod.object({
