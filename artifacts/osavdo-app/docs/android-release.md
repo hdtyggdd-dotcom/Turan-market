@@ -4,6 +4,7 @@ Tayyorlangan: 2026-10-06. Bu tayyorgarlik hujjati; imzolangan AAB yaratilmadi va
 
 ## Mavjud identifikatorni saqlang
 - Android package: `com.turanmarket.app`.
+- Egasi tasdiqlagan ommaviy yordam emaili: `fazliddin.16.09.2004@gmail.com`. Play Console’da ham shu kontakt kiritilsin.
 - Version: `1.0.0`, versionCode: `1`. Shu package oldin Play Console’ga yuklangan bo‘lsa, keyingi AAB versionCode avvalgisidan yuqori bo‘lsin. Package yoki signing identity’ni o‘zboshimchalik bilan o‘zgartirmang.
 - SDK: Expo 54 / React Native 0.81.5. Dependency alignment tekshiruvi o‘tdi; bu imzolangan native build tekshiruvi emas.
 - Native release uchun build muhitida `EXPO_PUBLIC_DOMAIN=turanmarket.net` berilishi kerak. Bu ochiq API hostname, maxfiy kalit emas. Development `replit.dev` manzilini native release ichiga qo‘ymang.
@@ -30,8 +31,8 @@ Tayyorlangan: 2026-10-06. Bu tayyorgarlik hujjati; imzolangan AAB yaratilmadi va
 - Kamida 2 ta haqiqiy Android release skrinshoti kerak. 1080×1920 portret rasmlar tavsiya qilinadi. Browserdagi mocked AI natijalarini haqiqiy AI aniqligining dalili sifatida store’ga qo‘ymang.
 
 ## Chiqarishni to‘xtatadigan ochiq talablar
-1. **Akkaunt o‘chirish:** hozir ilovada ishlaydigan o‘chirish yo‘li va tashqi web o‘chirish sahifasi yo‘q. Privacy policy’dagi “developer kontaktiga yozing” jumlasi ikki talabni almashtirmaydi. Shaxsiy ma’lumotlarni o‘chirish, faol buyurtma/yuklar, qonuniy saqlanishi zarur tarix va muddatlar aniqlanib, xavfsiz oqim ishlab chiqilishi kerak. Bu tayyorgarlikda hech kimning ma’lumoti o‘chirilmadi.
-2. **Maxfiylik:** haqiqiy ommaviy yordam emaili va saqlash/o‘chirish shartlari kerak. Siyosat AI provayderiga vaqtincha yuboriladigan surat va matnlar, haydovchi hujjatlari, fon GPS va xabarlarga mos yangilansin.
+1. **Akkaunt o‘chirish:** hozir ilovada ishlaydigan o‘chirish yo‘li va tashqi web o‘chirish sahifasi yo‘q. Privacy policy’dagi yordam emaili ikki talabni almashtirmaydi. Shaxsiy ma’lumotlarni o‘chirish, faol buyurtma/yuklar, qonuniy saqlanishi zarur tarix va muddatlar aniqlanib, xavfsiz oqim ishlab chiqilishi kerak. Bu tayyorgarlikda hech kimning ma’lumoti o‘chirilmadi.
+2. **Maxfiylik:** ommaviy yordam emaili qo‘shilgan. Saqlash/o‘chirish shartlari kerak; siyosat AI provayderiga vaqtincha yuboriladigan surat va matnlar, haydovchi hujjatlari, fon GPS va xabarlarga mos yangilansin. Workspace’dagi siyosat o‘zgarishi production’ga avtomatik chiqarilgan deb hisoblanmasin.
 3. **Backend:** production API’da yangi photo-search va bildirishnoma funksiyalarini tekshiring; shunchaki development preview bilan chiqarib bo‘lmaydi.
 4. **Native AAB:** Android build va signing Replit ichida bu tayyorgarlik bilan bajarilmadi. Replit Expo Launch hozir Google Play submission’ni qo‘llamaydi; yakuniy native build va Google Play submission mustaqil Android chiqarish jarayonida qilinadi.
 5. **Native sinov:** kamera, gallery, hujjat yuklash, ruxsat rad etilishi, account/session, buyurtma, ekran o‘chiq va uzoq safardagi GPS, push, internet uzilishi tekshirilsin.

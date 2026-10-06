@@ -5,14 +5,14 @@ generated = []
 id = "uwYe4l5Psi6lyYBTRMyCK"
 uri = "file://artifacts/osavdo-app/docs/play-console-guide.html"
 type = "html"
-title = "Google Play uchun qo‘llanma"
-description = "Turan Market uchun tayyor tavsif, Play Console bosqichlari va hali bajarilishi kerak bo‘lgan talablar. Imzolangan AAB emas."
+title = "Yangilangan Google Play qo‘llanmasi"
+description = "Ommaviy yordam emaili qo‘shildi. Tayyor store tavsifi, chiqarish bosqichlari va qolgan talablar."
 logical_id = "cd3ad4fb-ca34-44fe-9501-752d4cc92a6f"
-content_hash = "sha256:1aa6a1f935eadf07ed80ad5390581394af3fc43c49d400380b250018d928956d"
-size = 6014
-mtime_ms = 1791307951747
-storage_uri = "gcs://replit-rams-assets-pike/rams/assets/repl:d034b3be-e147-4dab-ab59-99935cafc7da/cd3ad4fb-ca34-44fe-9501-752d4cc92a6f/1a8991b8-aabe-4b8e-82f9-40a93b44bd2f"
-storage_version_token = "1791308367982307"
+content_hash = "sha256:5b92cb76607feedc3ce8bc678cf9e9fa92cb7f3c93337a63519fa29c4367ef6d"
+size = 6039
+mtime_ms = 1791308741272
+storage_uri = "gcs://replit-rams-assets-pike/rams/assets/repl:d034b3be-e147-4dab-ab59-99935cafc7da/cd3ad4fb-ca34-44fe-9501-752d4cc92a6f/137b665d-b5aa-4830-b276-7c9ae847a0c5"
+storage_version_token = "1791308789783814"
 content_type = "text/html"
 
 [[outputs]]

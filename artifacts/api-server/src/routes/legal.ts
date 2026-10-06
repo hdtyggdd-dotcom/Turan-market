@@ -19,7 +19,7 @@ router.get("/privacy-policy", (_req, res) => {
   <body>
     <main>
       <h1>Turan Market maxfiylik siyosati</h1>
-      <p class="muted">Yangilangan sana: 30-avgust 2026</p>
+      <p class="muted">Yangilangan sana: 6-oktabr 2026</p>
       <p>Turan Market foydalanuvchilarga mahsulot, xizmat va yuk tashish e’lonlarini joylash, ko‘rish va kelishuv qilish imkonini beradi.</p>
 
       <h2>Qanday ma’lumotlar yig‘iladi</h2>
@@ -40,7 +40,10 @@ router.get("/privacy-policy", (_req, res) => {
       <p>Ma’lumotlar ilovaning API serveri va PostgreSQL bazasida saqlanadi. Ushbu xizmatlar o‘zlarining maxfiylik va xavfsizlik qoidalariga ega.</p>
 
       <h2>Saqlash va o‘chirish</h2>
-      <p>Ma’lumotlar akkaunt va buyurtma munosabatlari zarur bo‘lgan muddatda saqlanadi. Akkaunt yoki ma’lumotlarni o‘chirish bo‘yicha so‘rov Play Console’dagi Turan Market developer kontaktiga yuborilishi mumkin.</p>
+      <p>Ma’lumotlar akkaunt va buyurtma munosabatlari zarur bo‘lgan muddatda saqlanadi. Akkaunt yoki ma’lumotlarni o‘chirish bo‘yicha murojaatni quyidagi yordam emailiga yuborishingiz mumkin. Email orqali murojaat yuborish ma’lumotlar avtomatik o‘chirilganini anglatmaydi.</p>
+
+      <h2>Bog‘lanish</h2>
+      <p>Turan Market bo‘yicha yordam va maxfiylik savollari uchun: <a href="mailto:fazliddin.16.09.2004@gmail.com">fazliddin.16.09.2004@gmail.com</a>.</p>
 
       <h2>Bolalar xavfsizligi</h2>
       <p>Turan Market 13 yoshdan kichik bolalar uchun mo‘ljallanmagan. Biz bunday foydalanuvchilardan ataylab ma’lumot yig‘maymiz.</p>
