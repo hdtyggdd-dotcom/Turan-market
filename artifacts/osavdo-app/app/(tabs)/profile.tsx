@@ -19,6 +19,7 @@ import { EmptyState } from '@/components/EmptyState';
 import { useRouter } from 'expo-router';
 import * as Linking from 'expo-linking';
 import { getBaseUrl } from '@workspace/api-client-react';
+import { CargoNotifications } from '@/components/cargo/CargoNotifications';
 
 function StatBox({ label, value, colors }: { label: string; value: string | number; colors: ReturnType<typeof useColors> }) {
   return (
@@ -202,6 +203,8 @@ export default function ProfileScreen() {
           </View>
           <Feather name="chevron-right" size={20} color={colors.mutedForeground} />
         </TouchableOpacity>
+
+        <CargoNotifications scope="all" />
 
         <TouchableOpacity
           style={[styles.ordersBtn, { backgroundColor: colors.card, borderColor: colors.border }]}

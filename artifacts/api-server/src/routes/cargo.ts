@@ -19,6 +19,7 @@ import {
 } from "../data/store.js";
 import { authenticateToken, type AuthRequest } from "../middleware/auth.js";
 import { registerToken, unregisterToken, sendCargoNotification } from "../lib/cargo-notifications.js";
+import { getProductNotifications, readProductNotification } from "../lib/photo-search.js";
 
 type CargoChange = { collection: string; item: StoredCargoLoad | StoredCargoOffer };
 type SaveCargo = (changes: readonly CargoChange[]) => Promise<void>;
@@ -657,9 +658,9 @@ router.get("/vehicle-types", authenticateToken, (_req, res) => {
   res.json(vehicleTypes);
 });
 
-router.get("/notifications", authenticateToken, (req: AuthRequest, res) => {
+router.get("/notifications", authenticateToken, async (req: AuthRequest, res) => {
   res.json(
-    cargoNotifications
+    [...cargoNotifications, ...await getProductNotifications(req.userId!)]
       .filter((item) => item.userId === req.userId)
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
       .slice(0, 50)
@@ -667,10 +668,10 @@ router.get("/notifications", authenticateToken, (req: AuthRequest, res) => {
   );
 });
 
-router.post("/notifications/:id/read", authenticateToken, (req: AuthRequest, res) => {
+router.post("/notifications/:id/read", authenticateToken, async (req: AuthRequest, res) => {
   const notification = cargoNotifications.find(
     (item) => item.id === rawParam(req.params.id) && item.userId === req.userId,
-  );
+  ) ?? await readProductNotification(req.userId!, rawParam(req.params.id));
   if (!notification) {
     res.status(404).json({ error: "not_found", message: "Notification not found" });
     return;

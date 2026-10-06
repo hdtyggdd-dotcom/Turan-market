@@ -19,6 +19,7 @@ Foydalanuvchilarga quyidagi mavzularda yordam ber:
 
 Ilovaning hozirgi imkoniyatlari haqida ishonchli ma'lumot:
 - Turan Market mahsulot va xizmat e'lonlarini kategoriya bo'yicha qidirish va ko'rish imkonini beradi.
+- "Izlash" bo'limidagi "Rasm orqali qidirish" kamera yoki galereyadagi mahsulot rasmini AI orqali taniydi va katalogdan mos e'lonlarni izlaydi. Mos faol mahsulot topilmasa, shu kategoriyada mahsulot e'loni bor barcha sotuvchilarga talab xabari yuboriladi. Mijozning rasmi va shaxsiy ma'lumotlari sotuvchiga berilmaydi. AI xato qilishi mumkin; katalogda mos e'lon topilmagani barcha do'konlarda tovar tugaganini anglatmaydi.
 - Sotuvchi rasm, narx va tavsif bilan e'lon joylaydi hamda o'z e'lonlarini boshqaradi.
 - Xaridor savatchaga mahsulot qo'shadi, buyurtma beradi va buyurtmalarini kuzatadi.
 - Yuk egasi yuk tashish buyurtmasini joylaydi va haydovchilarning takliflarini ko'radi.

@@ -550,6 +550,30 @@ paths:
         "204":
           description: Deleted
 
+  /ai/photo-search:
+    post:
+      operationId: searchProductByPhoto
+      tags: [ai]
+      summary: Identify a photographed product and find catalogue matches
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/PhotoSearchInput" }
+      responses:
+        "200":
+          description: Recognition, matches and category seller demand notification result
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/PhotoSearchResult" }
+        "400": { description: Invalid image or request }
+        "401": { description: Sign in required }
+        "409": { description: Request identity reused for a different photo }
+        "429": { description: Shared AI budget exhausted }
+        "503": { description: Recognition unavailable or original request still processing }
+
   /ai/advice:
     post:
       operationId: requestAiAdvice
@@ -1280,6 +1304,30 @@ components:
         listing: { $ref: "#/components/schemas/Listing" }
         quantity: { type: integer, minimum: 1, maximum: 999 }
         requestId: { type: string, pattern: "^[A-Za-z0-9_-]{8,160}$" }
+    PhotoSearchInput:
+      type: object
+      additionalProperties: false
+      required: [data, mimeType, requestId]
+      properties:
+        data: { type: string, minLength: 8, maxLength: 2800000 }
+        mimeType: { type: string, enum: [image/jpeg, image/png, image/webp] }
+        requestId: { type: string, pattern: "^[A-Za-z0-9_-]{8,100}$" }
+    PhotoSearchResult:
+      type: object
+      required: [recognized, productName, categoryId, categoryName, listingIds, unavailableCount, notificationStatus, notifiedSellerCount]
+      properties:
+        recognized: { type: boolean }
+        productName: { type: ["string", "null"] }
+        categoryId: { type: ["string", "null"] }
+        categoryName: { type: ["string", "null"] }
+        listingIds:
+          type: array
+          items: { type: string }
+        unavailableCount: { type: integer }
+        notificationStatus:
+          type: string
+          enum: [not_needed, unrecognized, sent, already_sent, no_sellers]
+        notifiedSellerCount: { type: integer }
     AiAdviceInput:
       type: object
       required: [message]

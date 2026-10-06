@@ -1,4 +1,4 @@
-import { cargoNotifications, generateId } from "../data/store.js";
+import { cargoNotifications, generateId, type StoredCargoNotification } from "../data/store.js";
 import { logger } from "./logger.js";
 
 const tokens = new Map<string, string>();
@@ -24,6 +24,12 @@ export function sendCargoNotification(
     createdAt: new Date().toISOString(),
   };
   cargoNotifications.unshift(notification);
+  deliverStoredNotification(notification);
+}
+
+// Durable callers commit their in-app notification before invoking best-effort push.
+export function deliverStoredNotification(notification: StoredCargoNotification) {
+  const { userId, loadId, title, message } = notification;
   const recipients = [...tokens.entries()].filter(([, owner]) => owner === userId);
   if (!recipients.length) return;
   void (async () => {

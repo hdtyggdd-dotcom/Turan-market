@@ -35,6 +35,7 @@ interface Listing {
 
 interface ListingCardProps {
   listing: Listing;
+  onOpen?: () => void;
 }
 
 const CARD_WIDTH = (Dimensions.get('window').width - 48) / 2;
@@ -83,14 +84,14 @@ function SellerBadge({ badge }: { badge?: 'manufacturer' | 'reseller' | null }) 
   );
 }
 
-export function ListingCard({ listing }: ListingCardProps) {
+export function ListingCard({ listing, onOpen }: ListingCardProps) {
   const colors = useColors();
   const router = useRouter();
 
   return (
     <TouchableOpacity
       style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}
-      onPress={() => router.push(`/listing/${listing.id}`)}
+      onPress={() => { onOpen?.(); router.push(`/listing/${listing.id}`); }}
       activeOpacity={0.9}
     >
       {/* Image */}

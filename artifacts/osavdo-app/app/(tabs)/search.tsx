@@ -17,6 +17,7 @@ import { useGetListings, useGetCategories, useGetRegions, useGetDistricts, getGe
 import { ListingCard } from '@/components/ListingCard';
 import { EmptyState } from '@/components/EmptyState';
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import { PhotoProductSearch } from '@/components/PhotoProductSearch';
 import { CreateListingForm } from '@/components/CreateListingForm';
 
 export default function SearchScreen() {
@@ -131,6 +132,8 @@ export default function SearchScreen() {
             </TouchableOpacity>
           )}
         </View>}
+
+        {mode === 'search' && <PhotoProductSearch />}
 
         {/* Filter toggle */}
         {mode === 'search' && <TouchableOpacity

@@ -40,6 +40,7 @@ export function CargoPushListener() {
       const open = (response: NotificationResponse) => {
         const loadId = response.notification.request.content.data.loadId;
         if (typeof loadId === 'string') router.push(`/cargo/${encodeURIComponent(loadId)}`);
+        else if (typeof response.notification.request.content.data.notificationId === 'string') router.push('/(tabs)/profile');
         client.invalidateQueries({ queryKey: getGetNotificationsQueryKey() });
       };
       const responseListener = Notifications.addNotificationResponseReceivedListener(open);
@@ -63,7 +64,7 @@ export function CargoPushListener() {
   return null;
 }
 
-export function CargoNotifications() {
+export function CargoNotifications({ scope = 'cargo' }: { scope?: 'cargo' | 'all' } = {}) {
   const colors = useColors();
   const router = useRouter();
   const client = useQueryClient();
@@ -133,7 +134,7 @@ export function CargoNotifications() {
     <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
       <View style={styles.heading}>
         <Feather name="bell" size={18} color={colors.primary} />
-        <Text style={[styles.title, { color: colors.text }]}>Yuk xabarlari</Text>
+        <Text style={[styles.title, { color: colors.text }]}>{scope === 'all' ? 'Bildirishnomalar' : 'Yuk xabarlari'}</Text>
       </View>
       <TouchableOpacity testID="enable-cargo-push" onPress={togglePush} disabled={busy} style={[styles.pushButton, { backgroundColor: colors.secondary }]}>
         {busy ? <ActivityIndicator color={colors.primary} /> : <Text style={[styles.pushText, { color: colors.secondaryForeground }]}>
@@ -145,7 +146,7 @@ export function CargoNotifications() {
         <Text style={{ color: colors.primary }}>Sozlamalarni ochish</Text>
       </TouchableOpacity>}
       {isError && <Text style={{ color: colors.destructive }}>Xabarlar yuklanmadi. Sahifani yangilang.</Text>}
-      {notifications?.length === 0 && <Text style={[styles.message, { color: colors.mutedForeground }]}>Yuk holati o‘zgarsa, xabar shu yerda ko‘rinadi.</Text>}
+      {notifications?.length === 0 && <Text style={[styles.message, { color: colors.mutedForeground }]}>{scope === 'all' ? 'Mahsulotlarga talab va yuklar haqidagi xabarlar shu yerda ko‘rinadi.' : 'Yuk holati o‘zgarsa, xabar shu yerda ko‘rinadi.'}</Text>}
       {notifications?.map(notification => (
         <TouchableOpacity
           testID={`cargo-notification-${notification.id}`}
