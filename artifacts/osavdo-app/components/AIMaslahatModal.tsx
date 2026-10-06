@@ -19,6 +19,7 @@ import { requestAiAdvice, ApiError } from '@workspace/api-client-react';
 interface Message {
   role: 'user' | 'assistant';
   text: string;
+  kind?: 'guide';
 }
 
 interface AIMaslahatModalProps {
@@ -26,7 +27,22 @@ interface AIMaslahatModalProps {
   onClose: () => void;
 }
 
+const APP_GUIDE_QUESTION = "Ilova nimalar qila oladi?";
+const APP_GUIDE = `Turan Market ilovasiga xush kelibsiz!
+
+• Mahsulot va xizmat e’lonlarini qidirish, kategoriya bo‘yicha ko‘rish mumkin.
+• Sotuvchi mahsulot e’lonini rasm, narx va tavsif bilan joylaydi, keyin o‘z e’lonlarini boshqaradi.
+• Xaridor mahsulotni savatchaga qo‘shib, buyurtma beradi va buyurtmalarini kuzatadi.
+• Yuk egasi yuk tashish buyurtmasini joylaydi va haydovchilarning takliflarini ko‘radi.
+• Tasdiqlangan haydovchi yuk tashishga taklif beradi. Safar holati va ruxsat berilgan GPS joylashuvi kuzatiladi.
+• AI narx, e’lon matni, sotish usullari va ilovadan foydalanish haqida maslahat beradi.
+
+Boshlash uchun kerakli kategoriya yoki mahsulotni tanlang. Sotish uchun “E’lon joylash” tugmasidan, buyurtma berish uchun savatdan foydalaning.
+
+Muhim: onlayn karta to‘lovi va avtomatik komissiya undirish hozir yoqilmagan. AI hisobingiz nomidan e’lon yoki buyurtma yaratmaydi; amallarni o‘zingiz tasdiqlaysiz.`;
+
 const QUICK_QUESTIONS = [
+  APP_GUIDE_QUESTION,
   "Sigir narxim to'g'rimi?",
   "E'lonimni yaxshilang",
   "Tez sotish uchun nima qilish kerak?",
@@ -41,7 +57,8 @@ export function AIMaslahatModal({ visible, onClose }: AIMaslahatModalProps) {
   const [messages, setMessages] = useState<Message[]>([
     {
       role: 'assistant',
-      text: "Salom! Men O'Savdo AI yordamchisiman 🤖\n\nSizga narx, e'lon tavsifi, sotish strategiyasi yoki boshqa savollarda yordam bera olaman. Nima so'rashni istaysiz?",
+      kind: 'guide',
+      text: APP_GUIDE,
     },
   ]);
   const [input, setInput] = useState('');
@@ -52,6 +69,12 @@ export function AIMaslahatModal({ visible, onClose }: AIMaslahatModalProps) {
     if (!trimmed || loading) return;
 
     setInput('');
+    // Public product information is a labelled guide, not a paid AI fallback.
+    if (trimmed === APP_GUIDE_QUESTION) {
+      setMessages(prev => [...prev, { role: 'user', text: trimmed },
+        { role: 'assistant', kind: 'guide', text: APP_GUIDE }]);
+      return;
+    }
     setMessages((prev) => [...prev, { role: 'user', text: trimmed }]);
     setLoading(true);
 
@@ -114,7 +137,9 @@ export function AIMaslahatModal({ visible, onClose }: AIMaslahatModalProps) {
             style={{ flex: 1 }}
             contentContainerStyle={[styles.msgList, { paddingBottom: 12 }]}
             keyboardShouldPersistTaps="handled"
-            onContentSizeChange={() => scrollRef.current?.scrollToEnd({ animated: false })}
+            onContentSizeChange={() => {
+              if (messages.length > 1) scrollRef.current?.scrollToEnd({ animated: false });
+            }}
           >
             {messages.map((msg, i) => (
               <View
@@ -127,7 +152,7 @@ export function AIMaslahatModal({ visible, onClose }: AIMaslahatModalProps) {
                 ]}
               >
                 {msg.role === 'assistant' && (
-                  <Text style={styles.aiLabel}>🤖 AI</Text>
+                  <Text style={styles.aiLabel}>{msg.kind === 'guide' ? 'Ilova qo‘llanmasi' : '🤖 AI'}</Text>
                 )}
                 <Text style={[
                   styles.bubbleText,

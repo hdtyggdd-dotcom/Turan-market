@@ -20,6 +20,7 @@ let limits = { accountDaily: 2, globalDaily: 10, globalTotal: 20 };
 let providerCalls = 0;
 let failProvider = false;
 let failBudget = false;
+let lastSystemPrompt: string | undefined;
 let server: Server;
 let base: string;
 
@@ -39,7 +40,8 @@ before(async () => {
     if (failBudget) throw new Error("Database unavailable");
     await reserveAdvice(userId, limits, collection);
   });
-  mock.method(adviceProvider, "generate", async () => {
+  mock.method(adviceProvider, "generate", async (_prompt: string, system?: string) => {
+    lastSystemPrompt = system;
     providerCalls++;
     await new Promise(resolve => setTimeout(resolve, 10));
     if (failProvider) throw new Error("Uncertain provider timeout");
@@ -149,6 +151,20 @@ test("atomic durable budgets and both advice entry points", async t => {
     assert.equal(results.filter(r => r.status === 200).length, 3);
     assert.equal(results.filter(r => r.status === 429).length, 9);
     assert.equal(providerCalls - before, 3);
+  });
+  await t.test("app help reaches AI with accurate capabilities and safety boundaries", async () => {
+    collection = `${prefix}-app-help`;
+    limits = { accountDaily: 2, globalDaily: 10, globalTotal: 10 };
+    const before = providerCalls;
+    const result = await request("/ai/advice", owner.id, { message: "Ilovadan qanday foydalanaman?" });
+    assert.equal(result.status, 200);
+    assert.equal(result.data.reply, "Aniq AI maslahat");
+    assert.equal(providerCalls, before + 1);
+    assert.match(lastSystemPrompt!, /savatchaga mahsulot/);
+    assert.match(lastSystemPrompt!, /hujjati va transporti tasdiqlangan/);
+    assert.match(lastSystemPrompt!, /komissiya undirish hozir yoqilmagan/);
+    assert.match(lastSystemPrompt!, /foydalanuvchi nomidan bajarmaydi/);
+    assert.match(lastSystemPrompt!, /Expo Go yoki brauzerda/);
   });
   await t.test("failed generations stay charged; database failures block provider calls", async () => {
     collection = `${prefix}-failure`;
