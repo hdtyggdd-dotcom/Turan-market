@@ -11,3 +11,4 @@
 - [Single authentication form](single-authentication-form.md) — keep the full name/country/GPS/phone/password entry; do not restore a separate phone-only form.
 - [Browser distribution](browser-distribution.md) — always-available phone access uses the published browser app; Expo Go remains a development preview.
 - [Background location runtime](background-location-runtime.md) — background GPS needs separate consent and a native build; force-quit and browser continuity cannot be promised.
+- [Local security patches](local-security-patches.md) — version-based audits still flag local fixes; verify patched behavior and never claim a clean scan.

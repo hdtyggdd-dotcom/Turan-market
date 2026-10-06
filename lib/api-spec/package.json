@@ -7,6 +7,6 @@
     "check:schemas": "pnpm --filter @workspace/scripts exec tsx -e \"import '../lib/api-zod/src/index.ts'\""
   },
   "devDependencies": {
-    "orval": "^8.21.0"
+    "orval": "^8.40.0"
   }
 }
