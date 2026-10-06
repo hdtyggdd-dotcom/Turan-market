@@ -5,15 +5,6 @@
  * O'Savdo local marketplace API
  * OpenAPI spec version: 0.1.0
  */
-export interface HealthStatus {
-  status: string;
-}
-
-export interface ErrorResponse {
-  error: string;
-  message?: string;
-}
-
 export type UserRole = typeof UserRole[keyof typeof UserRole];
 
 
@@ -81,95 +72,6 @@ export interface User {
   rating?: number | null;
   totalSales?: number | null;
   createdAt: string;
-}
-
-export interface AuthResponse {
-  token: string;
-  user: User;
-}
-
-export type RegisterRequestRole = typeof RegisterRequestRole[keyof typeof RegisterRequestRole];
-
-
-export const RegisterRequestRole = {
-  buyer: 'buyer',
-  seller: 'seller',
-  driver: 'driver',
-} as const;
-
-export interface RegisterRequest {
-  /** Use the full form for existing accounts as well; new accounts still require a valid location. */
-  signInExisting?: boolean;
-  phone: string;
-  name: string;
-  password: string;
-  role: RegisterRequestRole;
-  regionId?: string;
-  districtId?: string;
-  neighborhoodId?: string;
-}
-
-export interface LoginRequest {
-  phone: string;
-  password: string;
-}
-
-export interface UpdateUserRequest {
-  name?: string;
-  regionId?: string;
-  districtId?: string;
-  neighborhoodId?: string;
-}
-
-export interface Country {
-  id: string;
-  name: string;
-  nameRu: string;
-  flag: string;
-  dialCode: string;
-  currency: string;
-}
-
-export interface DetectLocationRequest {
-  lat: number;
-  lng: number;
-}
-
-export interface DetectedLocation {
-  countryId: string;
-  countryName: string;
-  countryFlag: string;
-  dialCode: string;
-  currency: string;
-  regionId: string;
-  regionName: string;
-  districtId?: string;
-  districtName?: string;
-  distanceKm: number;
-}
-
-export type SubcategoryBookingMode = typeof SubcategoryBookingMode[keyof typeof SubcategoryBookingMode] | null;
-
-
-export const SubcategoryBookingMode = {
-  full: 'full',
-  showcase: 'showcase',
-} as const;
-
-export interface Subcategory {
-  id: string;
-  name: string;
-  nameRu: string;
-  categoryId: string;
-  bookingMode?: SubcategoryBookingMode;
-}
-
-export interface Category {
-  id: string;
-  name: string;
-  nameRu: string;
-  icon: string;
-  subcategories: Subcategory[];
 }
 
 export type ListingDistanceColor = typeof ListingDistanceColor[keyof typeof ListingDistanceColor] | null;
@@ -261,6 +163,175 @@ export interface Listing {
   priceColor?: ListingPriceColor;
   viewCount: number;
   createdAt: string;
+}
+
+export interface CartItem {
+  listing: Listing;
+  /**
+     * @minimum 1
+     * @maximum 999
+     */
+  quantity: number;
+  /** @pattern ^[A-Za-z0-9_-]{8,160}$ */
+  requestId: string;
+}
+
+export interface Cart {
+  /** @minimum 0 */
+  revision: number;
+  items: CartItem[];
+}
+
+export interface CartAddInput {
+  /** @minLength 1 */
+  listingId: string;
+  /**
+     * @minimum 1
+     * @maximum 999
+     */
+  quantity: number;
+  /** @pattern ^[A-Za-z0-9_-]{8,160}$ */
+  requestId: string;
+  /** @pattern ^[A-Za-z0-9_-]{8,160}$ */
+  operationId: string;
+}
+
+export interface CartQuantityInput {
+  /**
+     * @minimum 1
+     * @maximum 999
+     */
+  quantity: number;
+  /** @pattern ^[A-Za-z0-9_-]{8,160}$ */
+  requestId: string;
+  /** @pattern ^[A-Za-z0-9_-]{8,160}$ */
+  operationId: string;
+  /** @minimum 0 */
+  revision: number;
+  refreshListing?: boolean;
+}
+
+export interface CartRemoveInput {
+  /** @pattern ^[A-Za-z0-9_-]{8,160}$ */
+  requestId: string;
+  /** @pattern ^[A-Za-z0-9_-]{8,160}$ */
+  operationId: string;
+  /**
+     * @minimum 1
+     * @maximum 999
+     */
+  quantity: number;
+}
+
+export interface CartClearInput {
+  /** @minimum 0 */
+  revision: number;
+  /** @pattern ^[A-Za-z0-9_-]{8,160}$ */
+  operationId: string;
+}
+
+export interface CartMergeInput {
+  /** @pattern ^[A-Za-z0-9_-]{8,160}$ */
+  operationId: string;
+  items: CartItem[];
+}
+
+export interface HealthStatus {
+  status: string;
+}
+
+export interface ErrorResponse {
+  error: string;
+  message?: string;
+}
+
+export interface AuthResponse {
+  token: string;
+  user: User;
+}
+
+export type RegisterRequestRole = typeof RegisterRequestRole[keyof typeof RegisterRequestRole];
+
+
+export const RegisterRequestRole = {
+  buyer: 'buyer',
+  seller: 'seller',
+  driver: 'driver',
+} as const;
+
+export interface RegisterRequest {
+  /** Use the full form for existing accounts as well; new accounts still require a valid location. */
+  signInExisting?: boolean;
+  phone: string;
+  name: string;
+  password: string;
+  role: RegisterRequestRole;
+  regionId?: string;
+  districtId?: string;
+  neighborhoodId?: string;
+}
+
+export interface LoginRequest {
+  phone: string;
+  password: string;
+}
+
+export interface UpdateUserRequest {
+  name?: string;
+  regionId?: string;
+  districtId?: string;
+  neighborhoodId?: string;
+}
+
+export interface Country {
+  id: string;
+  name: string;
+  nameRu: string;
+  flag: string;
+  dialCode: string;
+  currency: string;
+}
+
+export interface DetectLocationRequest {
+  lat: number;
+  lng: number;
+}
+
+export interface DetectedLocation {
+  countryId: string;
+  countryName: string;
+  countryFlag: string;
+  dialCode: string;
+  currency: string;
+  regionId: string;
+  regionName: string;
+  districtId?: string;
+  districtName?: string;
+  distanceKm: number;
+}
+
+export type SubcategoryBookingMode = typeof SubcategoryBookingMode[keyof typeof SubcategoryBookingMode] | null;
+
+
+export const SubcategoryBookingMode = {
+  full: 'full',
+  showcase: 'showcase',
+} as const;
+
+export interface Subcategory {
+  id: string;
+  name: string;
+  nameRu: string;
+  categoryId: string;
+  bookingMode?: SubcategoryBookingMode;
+}
+
+export interface Category {
+  id: string;
+  name: string;
+  nameRu: string;
+  icon: string;
+  subcategories: Subcategory[];
 }
 
 export type CreateListingRequestSellerType = typeof CreateListingRequestSellerType[keyof typeof CreateListingRequestSellerType];

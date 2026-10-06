@@ -7,6 +7,24 @@
  */
 import * as zod from 'zod';
 
+export const getCartResponseRevisionMin = 0;
+export const getCartResponseItemsItemQuantityMax = 999;
+export const clearCartBodyRevisionMin = 0;
+export const clearCartResponseRevisionMin = 0;
+export const clearCartResponseItemsItemQuantityMax = 999;
+export const addCartItemBodyQuantityMax = 999;
+export const addCartItemResponseRevisionMin = 0;
+export const addCartItemResponseItemsItemQuantityMax = 999;
+export const updateCartItemBodyQuantityMax = 999;
+export const updateCartItemBodyRevisionMin = 0;
+export const updateCartItemResponseRevisionMin = 0;
+export const updateCartItemResponseItemsItemQuantityMax = 999;
+export const removeCartItemBodyQuantityMax = 999;
+export const removeCartItemResponseRevisionMin = 0;
+export const removeCartItemResponseItemsItemQuantityMax = 999;
+export const mergeCartBodyItemsItemQuantityMax = 999;
+export const mergeCartResponseRevisionMin = 0;
+export const mergeCartResponseItemsItemQuantityMax = 999;
 export const getListingsQueryPageDefault = 1;
 export const getListingsQueryLimitDefault = 20;
 export const createOrderBodyClientRequestIdMin = 8;
@@ -28,6 +46,766 @@ export const submitDriverVerificationBodyBioMax = 1000;
 export const reviewDriverVerificationBodyReasonMax = 1000;
 export const rateCargoDriverBodyScoreMax = 5;
 export const rateCargoDriverBodyCommentMax = 500;
+
+
+
+
+export const getCartResponseItemsItemListingListingTypeDefault = `savdo`;
+export const getCartResponseItemsItemListingElanTurDefault = `oddiy`;
+
+
+export const getCartResponseItemsItemRequestIdRegExp = new RegExp('^[A-Za-z0-9_-]{8,160}$');
+
+
+export const GetCartResponse = zod.object({
+  "revision": zod.number().min(getCartResponseRevisionMin),
+  "items": zod.array(zod.object({
+  "listing": zod.object({
+  "id": zod.string(),
+  "title": zod.string(),
+  "titleRu": zod.string().nullish(),
+  "description": zod.string().nullish(),
+  "price": zod.number(),
+  "priceUnit": zod.string().nullish(),
+  "images": zod.array(zod.string()),
+  "categoryId": zod.string(),
+  "subcategoryId": zod.string().nullish(),
+  "userId": zod.string(),
+  "user": zod.object({
+  "id": zod.string(),
+  "phone": zod.string(),
+  "name": zod.string(),
+  "role": zod.enum(['buyer', 'seller', 'driver', 'admin']),
+  "sellerBadge": zod.enum(['manufacturer', 'reseller']).nullish(),
+  "verificationStatus": zod.enum(['none', 'pending', 'approved', 'rejected']),
+  "regionId": zod.string().nullish(),
+  "districtId": zod.string().nullish(),
+  "neighborhoodId": zod.string().nullish(),
+  "region": zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "nameRu": zod.string(),
+  "countryId": zod.string()
+}).nullish(),
+  "district": zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "nameRu": zod.string(),
+  "regionId": zod.string(),
+  "lat": zod.number().nullish(),
+  "lng": zod.number().nullish()
+}).nullish(),
+  "neighborhood": zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "nameRu": zod.string(),
+  "districtId": zod.string()
+}).nullish(),
+  "rating": zod.number().nullish(),
+  "totalSales": zod.number().nullish(),
+  "createdAt": zod.coerce.date()
+}),
+  "regionId": zod.string(),
+  "districtId": zod.string(),
+  "neighborhoodId": zod.string().nullish(),
+  "region": zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "nameRu": zod.string(),
+  "countryId": zod.string()
+}),
+  "district": zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "nameRu": zod.string(),
+  "regionId": zod.string(),
+  "lat": zod.number().nullish(),
+  "lng": zod.number().nullish()
+}),
+  "neighborhood": zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "nameRu": zod.string(),
+  "districtId": zod.string()
+}).nullish(),
+  "lat": zod.number().nullish(),
+  "lng": zod.number().nullish(),
+  "distanceKm": zod.number().nullish(),
+  "distanceColor": zod.enum(['green', 'yellow', 'red']).nullish(),
+  "status": zod.enum(['active', 'sold', 'paused']),
+  "sellerType": zod.enum(['sotuvchi', 'ishlab_chiqaruvchi']).nullish(),
+  "listingType": zod.enum(['savdo', 'xizmat']).default(getCartResponseItemsItemListingListingTypeDefault),
+  "elanTur": zod.enum(['oddiy', 'vip']).default(getCartResponseItemsItemListingElanTurDefault),
+  "adminStatus": zod.enum(['pending', 'approved']).nullish(),
+  "priceColor": zod.enum(['green', 'yellow', 'red']).nullish(),
+  "viewCount": zod.number(),
+  "createdAt": zod.coerce.date()
+}),
+  "quantity": zod.number().min(1).max(getCartResponseItemsItemQuantityMax),
+  "requestId": zod.string().regex(getCartResponseItemsItemRequestIdRegExp)
+}))
+})
+
+
+
+
+export const clearCartBodyOperationIdRegExp = new RegExp('^[A-Za-z0-9_-]{8,160}$');
+
+
+export const ClearCartBody = zod.object({
+  "revision": zod.number().min(clearCartBodyRevisionMin),
+  "operationId": zod.string().regex(clearCartBodyOperationIdRegExp)
+})
+
+
+
+export const clearCartResponseItemsItemListingListingTypeDefault = `savdo`;
+export const clearCartResponseItemsItemListingElanTurDefault = `oddiy`;
+
+
+export const clearCartResponseItemsItemRequestIdRegExp = new RegExp('^[A-Za-z0-9_-]{8,160}$');
+
+
+export const ClearCartResponse = zod.object({
+  "revision": zod.number().min(clearCartResponseRevisionMin),
+  "items": zod.array(zod.object({
+  "listing": zod.object({
+  "id": zod.string(),
+  "title": zod.string(),
+  "titleRu": zod.string().nullish(),
+  "description": zod.string().nullish(),
+  "price": zod.number(),
+  "priceUnit": zod.string().nullish(),
+  "images": zod.array(zod.string()),
+  "categoryId": zod.string(),
+  "subcategoryId": zod.string().nullish(),
+  "userId": zod.string(),
+  "user": zod.object({
+  "id": zod.string(),
+  "phone": zod.string(),
+  "name": zod.string(),
+  "role": zod.enum(['buyer', 'seller', 'driver', 'admin']),
+  "sellerBadge": zod.enum(['manufacturer', 'reseller']).nullish(),
+  "verificationStatus": zod.enum(['none', 'pending', 'approved', 'rejected']),
+  "regionId": zod.string().nullish(),
+  "districtId": zod.string().nullish(),
+  "neighborhoodId": zod.string().nullish(),
+  "region": zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "nameRu": zod.string(),
+  "countryId": zod.string()
+}).nullish(),
+  "district": zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "nameRu": zod.string(),
+  "regionId": zod.string(),
+  "lat": zod.number().nullish(),
+  "lng": zod.number().nullish()
+}).nullish(),
+  "neighborhood": zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "nameRu": zod.string(),
+  "districtId": zod.string()
+}).nullish(),
+  "rating": zod.number().nullish(),
+  "totalSales": zod.number().nullish(),
+  "createdAt": zod.coerce.date()
+}),
+  "regionId": zod.string(),
+  "districtId": zod.string(),
+  "neighborhoodId": zod.string().nullish(),
+  "region": zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "nameRu": zod.string(),
+  "countryId": zod.string()
+}),
+  "district": zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "nameRu": zod.string(),
+  "regionId": zod.string(),
+  "lat": zod.number().nullish(),
+  "lng": zod.number().nullish()
+}),
+  "neighborhood": zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "nameRu": zod.string(),
+  "districtId": zod.string()
+}).nullish(),
+  "lat": zod.number().nullish(),
+  "lng": zod.number().nullish(),
+  "distanceKm": zod.number().nullish(),
+  "distanceColor": zod.enum(['green', 'yellow', 'red']).nullish(),
+  "status": zod.enum(['active', 'sold', 'paused']),
+  "sellerType": zod.enum(['sotuvchi', 'ishlab_chiqaruvchi']).nullish(),
+  "listingType": zod.enum(['savdo', 'xizmat']).default(clearCartResponseItemsItemListingListingTypeDefault),
+  "elanTur": zod.enum(['oddiy', 'vip']).default(clearCartResponseItemsItemListingElanTurDefault),
+  "adminStatus": zod.enum(['pending', 'approved']).nullish(),
+  "priceColor": zod.enum(['green', 'yellow', 'red']).nullish(),
+  "viewCount": zod.number(),
+  "createdAt": zod.coerce.date()
+}),
+  "quantity": zod.number().min(1).max(clearCartResponseItemsItemQuantityMax),
+  "requestId": zod.string().regex(clearCartResponseItemsItemRequestIdRegExp)
+}))
+})
+
+
+
+
+
+export const addCartItemBodyRequestIdRegExp = new RegExp('^[A-Za-z0-9_-]{8,160}$');
+export const addCartItemBodyOperationIdRegExp = new RegExp('^[A-Za-z0-9_-]{8,160}$');
+
+
+export const AddCartItemBody = zod.object({
+  "listingId": zod.string().min(1),
+  "quantity": zod.number().min(1).max(addCartItemBodyQuantityMax),
+  "requestId": zod.string().regex(addCartItemBodyRequestIdRegExp),
+  "operationId": zod.string().regex(addCartItemBodyOperationIdRegExp)
+})
+
+
+
+export const addCartItemResponseItemsItemListingListingTypeDefault = `savdo`;
+export const addCartItemResponseItemsItemListingElanTurDefault = `oddiy`;
+
+
+export const addCartItemResponseItemsItemRequestIdRegExp = new RegExp('^[A-Za-z0-9_-]{8,160}$');
+
+
+export const AddCartItemResponse = zod.object({
+  "revision": zod.number().min(addCartItemResponseRevisionMin),
+  "items": zod.array(zod.object({
+  "listing": zod.object({
+  "id": zod.string(),
+  "title": zod.string(),
+  "titleRu": zod.string().nullish(),
+  "description": zod.string().nullish(),
+  "price": zod.number(),
+  "priceUnit": zod.string().nullish(),
+  "images": zod.array(zod.string()),
+  "categoryId": zod.string(),
+  "subcategoryId": zod.string().nullish(),
+  "userId": zod.string(),
+  "user": zod.object({
+  "id": zod.string(),
+  "phone": zod.string(),
+  "name": zod.string(),
+  "role": zod.enum(['buyer', 'seller', 'driver', 'admin']),
+  "sellerBadge": zod.enum(['manufacturer', 'reseller']).nullish(),
+  "verificationStatus": zod.enum(['none', 'pending', 'approved', 'rejected']),
+  "regionId": zod.string().nullish(),
+  "districtId": zod.string().nullish(),
+  "neighborhoodId": zod.string().nullish(),
+  "region": zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "nameRu": zod.string(),
+  "countryId": zod.string()
+}).nullish(),
+  "district": zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "nameRu": zod.string(),
+  "regionId": zod.string(),
+  "lat": zod.number().nullish(),
+  "lng": zod.number().nullish()
+}).nullish(),
+  "neighborhood": zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "nameRu": zod.string(),
+  "districtId": zod.string()
+}).nullish(),
+  "rating": zod.number().nullish(),
+  "totalSales": zod.number().nullish(),
+  "createdAt": zod.coerce.date()
+}),
+  "regionId": zod.string(),
+  "districtId": zod.string(),
+  "neighborhoodId": zod.string().nullish(),
+  "region": zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "nameRu": zod.string(),
+  "countryId": zod.string()
+}),
+  "district": zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "nameRu": zod.string(),
+  "regionId": zod.string(),
+  "lat": zod.number().nullish(),
+  "lng": zod.number().nullish()
+}),
+  "neighborhood": zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "nameRu": zod.string(),
+  "districtId": zod.string()
+}).nullish(),
+  "lat": zod.number().nullish(),
+  "lng": zod.number().nullish(),
+  "distanceKm": zod.number().nullish(),
+  "distanceColor": zod.enum(['green', 'yellow', 'red']).nullish(),
+  "status": zod.enum(['active', 'sold', 'paused']),
+  "sellerType": zod.enum(['sotuvchi', 'ishlab_chiqaruvchi']).nullish(),
+  "listingType": zod.enum(['savdo', 'xizmat']).default(addCartItemResponseItemsItemListingListingTypeDefault),
+  "elanTur": zod.enum(['oddiy', 'vip']).default(addCartItemResponseItemsItemListingElanTurDefault),
+  "adminStatus": zod.enum(['pending', 'approved']).nullish(),
+  "priceColor": zod.enum(['green', 'yellow', 'red']).nullish(),
+  "viewCount": zod.number(),
+  "createdAt": zod.coerce.date()
+}),
+  "quantity": zod.number().min(1).max(addCartItemResponseItemsItemQuantityMax),
+  "requestId": zod.string().regex(addCartItemResponseItemsItemRequestIdRegExp)
+}))
+})
+
+
+
+
+
+export const UpdateCartItemParams = zod.object({
+  "listingId": zod.coerce.string().min(1)
+})
+
+
+
+export const updateCartItemBodyRequestIdRegExp = new RegExp('^[A-Za-z0-9_-]{8,160}$');
+export const updateCartItemBodyOperationIdRegExp = new RegExp('^[A-Za-z0-9_-]{8,160}$');
+
+
+
+
+export const UpdateCartItemBody = zod.object({
+  "quantity": zod.number().min(1).max(updateCartItemBodyQuantityMax),
+  "requestId": zod.string().regex(updateCartItemBodyRequestIdRegExp),
+  "operationId": zod.string().regex(updateCartItemBodyOperationIdRegExp),
+  "revision": zod.number().min(updateCartItemBodyRevisionMin),
+  "refreshListing": zod.boolean().optional()
+})
+
+
+
+export const updateCartItemResponseItemsItemListingListingTypeDefault = `savdo`;
+export const updateCartItemResponseItemsItemListingElanTurDefault = `oddiy`;
+
+
+export const updateCartItemResponseItemsItemRequestIdRegExp = new RegExp('^[A-Za-z0-9_-]{8,160}$');
+
+
+export const UpdateCartItemResponse = zod.object({
+  "revision": zod.number().min(updateCartItemResponseRevisionMin),
+  "items": zod.array(zod.object({
+  "listing": zod.object({
+  "id": zod.string(),
+  "title": zod.string(),
+  "titleRu": zod.string().nullish(),
+  "description": zod.string().nullish(),
+  "price": zod.number(),
+  "priceUnit": zod.string().nullish(),
+  "images": zod.array(zod.string()),
+  "categoryId": zod.string(),
+  "subcategoryId": zod.string().nullish(),
+  "userId": zod.string(),
+  "user": zod.object({
+  "id": zod.string(),
+  "phone": zod.string(),
+  "name": zod.string(),
+  "role": zod.enum(['buyer', 'seller', 'driver', 'admin']),
+  "sellerBadge": zod.enum(['manufacturer', 'reseller']).nullish(),
+  "verificationStatus": zod.enum(['none', 'pending', 'approved', 'rejected']),
+  "regionId": zod.string().nullish(),
+  "districtId": zod.string().nullish(),
+  "neighborhoodId": zod.string().nullish(),
+  "region": zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "nameRu": zod.string(),
+  "countryId": zod.string()
+}).nullish(),
+  "district": zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "nameRu": zod.string(),
+  "regionId": zod.string(),
+  "lat": zod.number().nullish(),
+  "lng": zod.number().nullish()
+}).nullish(),
+  "neighborhood": zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "nameRu": zod.string(),
+  "districtId": zod.string()
+}).nullish(),
+  "rating": zod.number().nullish(),
+  "totalSales": zod.number().nullish(),
+  "createdAt": zod.coerce.date()
+}),
+  "regionId": zod.string(),
+  "districtId": zod.string(),
+  "neighborhoodId": zod.string().nullish(),
+  "region": zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "nameRu": zod.string(),
+  "countryId": zod.string()
+}),
+  "district": zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "nameRu": zod.string(),
+  "regionId": zod.string(),
+  "lat": zod.number().nullish(),
+  "lng": zod.number().nullish()
+}),
+  "neighborhood": zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "nameRu": zod.string(),
+  "districtId": zod.string()
+}).nullish(),
+  "lat": zod.number().nullish(),
+  "lng": zod.number().nullish(),
+  "distanceKm": zod.number().nullish(),
+  "distanceColor": zod.enum(['green', 'yellow', 'red']).nullish(),
+  "status": zod.enum(['active', 'sold', 'paused']),
+  "sellerType": zod.enum(['sotuvchi', 'ishlab_chiqaruvchi']).nullish(),
+  "listingType": zod.enum(['savdo', 'xizmat']).default(updateCartItemResponseItemsItemListingListingTypeDefault),
+  "elanTur": zod.enum(['oddiy', 'vip']).default(updateCartItemResponseItemsItemListingElanTurDefault),
+  "adminStatus": zod.enum(['pending', 'approved']).nullish(),
+  "priceColor": zod.enum(['green', 'yellow', 'red']).nullish(),
+  "viewCount": zod.number(),
+  "createdAt": zod.coerce.date()
+}),
+  "quantity": zod.number().min(1).max(updateCartItemResponseItemsItemQuantityMax),
+  "requestId": zod.string().regex(updateCartItemResponseItemsItemRequestIdRegExp)
+}))
+})
+
+
+
+
+
+export const RemoveCartItemParams = zod.object({
+  "listingId": zod.coerce.string().min(1)
+})
+
+export const removeCartItemBodyRequestIdRegExp = new RegExp('^[A-Za-z0-9_-]{8,160}$');
+export const removeCartItemBodyOperationIdRegExp = new RegExp('^[A-Za-z0-9_-]{8,160}$');
+
+
+
+
+export const RemoveCartItemBody = zod.object({
+  "requestId": zod.string().regex(removeCartItemBodyRequestIdRegExp),
+  "operationId": zod.string().regex(removeCartItemBodyOperationIdRegExp),
+  "quantity": zod.number().min(1).max(removeCartItemBodyQuantityMax)
+})
+
+
+
+export const removeCartItemResponseItemsItemListingListingTypeDefault = `savdo`;
+export const removeCartItemResponseItemsItemListingElanTurDefault = `oddiy`;
+
+
+export const removeCartItemResponseItemsItemRequestIdRegExp = new RegExp('^[A-Za-z0-9_-]{8,160}$');
+
+
+export const RemoveCartItemResponse = zod.object({
+  "revision": zod.number().min(removeCartItemResponseRevisionMin),
+  "items": zod.array(zod.object({
+  "listing": zod.object({
+  "id": zod.string(),
+  "title": zod.string(),
+  "titleRu": zod.string().nullish(),
+  "description": zod.string().nullish(),
+  "price": zod.number(),
+  "priceUnit": zod.string().nullish(),
+  "images": zod.array(zod.string()),
+  "categoryId": zod.string(),
+  "subcategoryId": zod.string().nullish(),
+  "userId": zod.string(),
+  "user": zod.object({
+  "id": zod.string(),
+  "phone": zod.string(),
+  "name": zod.string(),
+  "role": zod.enum(['buyer', 'seller', 'driver', 'admin']),
+  "sellerBadge": zod.enum(['manufacturer', 'reseller']).nullish(),
+  "verificationStatus": zod.enum(['none', 'pending', 'approved', 'rejected']),
+  "regionId": zod.string().nullish(),
+  "districtId": zod.string().nullish(),
+  "neighborhoodId": zod.string().nullish(),
+  "region": zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "nameRu": zod.string(),
+  "countryId": zod.string()
+}).nullish(),
+  "district": zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "nameRu": zod.string(),
+  "regionId": zod.string(),
+  "lat": zod.number().nullish(),
+  "lng": zod.number().nullish()
+}).nullish(),
+  "neighborhood": zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "nameRu": zod.string(),
+  "districtId": zod.string()
+}).nullish(),
+  "rating": zod.number().nullish(),
+  "totalSales": zod.number().nullish(),
+  "createdAt": zod.coerce.date()
+}),
+  "regionId": zod.string(),
+  "districtId": zod.string(),
+  "neighborhoodId": zod.string().nullish(),
+  "region": zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "nameRu": zod.string(),
+  "countryId": zod.string()
+}),
+  "district": zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "nameRu": zod.string(),
+  "regionId": zod.string(),
+  "lat": zod.number().nullish(),
+  "lng": zod.number().nullish()
+}),
+  "neighborhood": zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "nameRu": zod.string(),
+  "districtId": zod.string()
+}).nullish(),
+  "lat": zod.number().nullish(),
+  "lng": zod.number().nullish(),
+  "distanceKm": zod.number().nullish(),
+  "distanceColor": zod.enum(['green', 'yellow', 'red']).nullish(),
+  "status": zod.enum(['active', 'sold', 'paused']),
+  "sellerType": zod.enum(['sotuvchi', 'ishlab_chiqaruvchi']).nullish(),
+  "listingType": zod.enum(['savdo', 'xizmat']).default(removeCartItemResponseItemsItemListingListingTypeDefault),
+  "elanTur": zod.enum(['oddiy', 'vip']).default(removeCartItemResponseItemsItemListingElanTurDefault),
+  "adminStatus": zod.enum(['pending', 'approved']).nullish(),
+  "priceColor": zod.enum(['green', 'yellow', 'red']).nullish(),
+  "viewCount": zod.number(),
+  "createdAt": zod.coerce.date()
+}),
+  "quantity": zod.number().min(1).max(removeCartItemResponseItemsItemQuantityMax),
+  "requestId": zod.string().regex(removeCartItemResponseItemsItemRequestIdRegExp)
+}))
+})
+
+
+/**
+ * Import a legacy device cart once. Overlapping unsubmitted items use the higher quantity, not a sum. Distinct purchase identities with existing orders remain separate rows for safe retries.
+ */
+export const mergeCartBodyOperationIdRegExp = new RegExp('^[A-Za-z0-9_-]{8,160}$');
+export const mergeCartBodyItemsItemListingListingTypeDefault = `savdo`;
+export const mergeCartBodyItemsItemListingElanTurDefault = `oddiy`;
+
+
+export const mergeCartBodyItemsItemRequestIdRegExp = new RegExp('^[A-Za-z0-9_-]{8,160}$');
+
+
+export const MergeCartBody = zod.object({
+  "operationId": zod.string().regex(mergeCartBodyOperationIdRegExp),
+  "items": zod.array(zod.object({
+  "listing": zod.object({
+  "id": zod.string(),
+  "title": zod.string(),
+  "titleRu": zod.string().nullish(),
+  "description": zod.string().nullish(),
+  "price": zod.number(),
+  "priceUnit": zod.string().nullish(),
+  "images": zod.array(zod.string()),
+  "categoryId": zod.string(),
+  "subcategoryId": zod.string().nullish(),
+  "userId": zod.string(),
+  "user": zod.object({
+  "id": zod.string(),
+  "phone": zod.string(),
+  "name": zod.string(),
+  "role": zod.enum(['buyer', 'seller', 'driver', 'admin']),
+  "sellerBadge": zod.enum(['manufacturer', 'reseller']).nullish(),
+  "verificationStatus": zod.enum(['none', 'pending', 'approved', 'rejected']),
+  "regionId": zod.string().nullish(),
+  "districtId": zod.string().nullish(),
+  "neighborhoodId": zod.string().nullish(),
+  "region": zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "nameRu": zod.string(),
+  "countryId": zod.string()
+}).nullish(),
+  "district": zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "nameRu": zod.string(),
+  "regionId": zod.string(),
+  "lat": zod.number().nullish(),
+  "lng": zod.number().nullish()
+}).nullish(),
+  "neighborhood": zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "nameRu": zod.string(),
+  "districtId": zod.string()
+}).nullish(),
+  "rating": zod.number().nullish(),
+  "totalSales": zod.number().nullish(),
+  "createdAt": zod.coerce.date()
+}),
+  "regionId": zod.string(),
+  "districtId": zod.string(),
+  "neighborhoodId": zod.string().nullish(),
+  "region": zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "nameRu": zod.string(),
+  "countryId": zod.string()
+}),
+  "district": zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "nameRu": zod.string(),
+  "regionId": zod.string(),
+  "lat": zod.number().nullish(),
+  "lng": zod.number().nullish()
+}),
+  "neighborhood": zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "nameRu": zod.string(),
+  "districtId": zod.string()
+}).nullish(),
+  "lat": zod.number().nullish(),
+  "lng": zod.number().nullish(),
+  "distanceKm": zod.number().nullish(),
+  "distanceColor": zod.enum(['green', 'yellow', 'red']).nullish(),
+  "status": zod.enum(['active', 'sold', 'paused']),
+  "sellerType": zod.enum(['sotuvchi', 'ishlab_chiqaruvchi']).nullish(),
+  "listingType": zod.enum(['savdo', 'xizmat']).default(mergeCartBodyItemsItemListingListingTypeDefault),
+  "elanTur": zod.enum(['oddiy', 'vip']).default(mergeCartBodyItemsItemListingElanTurDefault),
+  "adminStatus": zod.enum(['pending', 'approved']).nullish(),
+  "priceColor": zod.enum(['green', 'yellow', 'red']).nullish(),
+  "viewCount": zod.number(),
+  "createdAt": zod.coerce.date()
+}),
+  "quantity": zod.number().min(1).max(mergeCartBodyItemsItemQuantityMax),
+  "requestId": zod.string().regex(mergeCartBodyItemsItemRequestIdRegExp)
+}))
+})
+
+
+
+export const mergeCartResponseItemsItemListingListingTypeDefault = `savdo`;
+export const mergeCartResponseItemsItemListingElanTurDefault = `oddiy`;
+
+
+export const mergeCartResponseItemsItemRequestIdRegExp = new RegExp('^[A-Za-z0-9_-]{8,160}$');
+
+
+export const MergeCartResponse = zod.object({
+  "revision": zod.number().min(mergeCartResponseRevisionMin),
+  "items": zod.array(zod.object({
+  "listing": zod.object({
+  "id": zod.string(),
+  "title": zod.string(),
+  "titleRu": zod.string().nullish(),
+  "description": zod.string().nullish(),
+  "price": zod.number(),
+  "priceUnit": zod.string().nullish(),
+  "images": zod.array(zod.string()),
+  "categoryId": zod.string(),
+  "subcategoryId": zod.string().nullish(),
+  "userId": zod.string(),
+  "user": zod.object({
+  "id": zod.string(),
+  "phone": zod.string(),
+  "name": zod.string(),
+  "role": zod.enum(['buyer', 'seller', 'driver', 'admin']),
+  "sellerBadge": zod.enum(['manufacturer', 'reseller']).nullish(),
+  "verificationStatus": zod.enum(['none', 'pending', 'approved', 'rejected']),
+  "regionId": zod.string().nullish(),
+  "districtId": zod.string().nullish(),
+  "neighborhoodId": zod.string().nullish(),
+  "region": zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "nameRu": zod.string(),
+  "countryId": zod.string()
+}).nullish(),
+  "district": zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "nameRu": zod.string(),
+  "regionId": zod.string(),
+  "lat": zod.number().nullish(),
+  "lng": zod.number().nullish()
+}).nullish(),
+  "neighborhood": zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "nameRu": zod.string(),
+  "districtId": zod.string()
+}).nullish(),
+  "rating": zod.number().nullish(),
+  "totalSales": zod.number().nullish(),
+  "createdAt": zod.coerce.date()
+}),
+  "regionId": zod.string(),
+  "districtId": zod.string(),
+  "neighborhoodId": zod.string().nullish(),
+  "region": zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "nameRu": zod.string(),
+  "countryId": zod.string()
+}),
+  "district": zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "nameRu": zod.string(),
+  "regionId": zod.string(),
+  "lat": zod.number().nullish(),
+  "lng": zod.number().nullish()
+}),
+  "neighborhood": zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "nameRu": zod.string(),
+  "districtId": zod.string()
+}).nullish(),
+  "lat": zod.number().nullish(),
+  "lng": zod.number().nullish(),
+  "distanceKm": zod.number().nullish(),
+  "distanceColor": zod.enum(['green', 'yellow', 'red']).nullish(),
+  "status": zod.enum(['active', 'sold', 'paused']),
+  "sellerType": zod.enum(['sotuvchi', 'ishlab_chiqaruvchi']).nullish(),
+  "listingType": zod.enum(['savdo', 'xizmat']).default(mergeCartResponseItemsItemListingListingTypeDefault),
+  "elanTur": zod.enum(['oddiy', 'vip']).default(mergeCartResponseItemsItemListingElanTurDefault),
+  "adminStatus": zod.enum(['pending', 'approved']).nullish(),
+  "priceColor": zod.enum(['green', 'yellow', 'red']).nullish(),
+  "viewCount": zod.number(),
+  "createdAt": zod.coerce.date()
+}),
+  "quantity": zod.number().min(1).max(mergeCartResponseItemsItemQuantityMax),
+  "requestId": zod.string().regex(mergeCartResponseItemsItemRequestIdRegExp)
+}))
+})
 
 
 /**
