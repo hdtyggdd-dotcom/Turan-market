@@ -3,6 +3,7 @@ import { logger } from "./lib/logger";
 import { initializePersistence } from "./lib/persistence.js";
 import { imageStore } from "./routes/uploads.js";
 import { initializeImagePersistence } from "./lib/persistence.js";
+import { adviceLimits } from "./lib/advice-budget.js";
 
 const rawPort = process.env["PORT"];
 
@@ -19,6 +20,7 @@ if (Number.isNaN(port) || port <= 0) {
 }
 
 async function bootstrap() {
+  adviceLimits(); // Reject invalid budget settings before accepting requests.
   const databaseUrl = process.env.DATABASE_URL;
   if (!databaseUrl) throw new Error("DATABASE_URL is required");
   await initializePersistence();

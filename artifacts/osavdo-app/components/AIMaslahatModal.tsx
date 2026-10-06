@@ -14,6 +14,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import { useColors } from '@/hooks/useColors';
+import { requestAiAdvice, ApiError } from '@workspace/api-client-react';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -57,19 +58,16 @@ export function AIMaslahatModal({ visible, onClose }: AIMaslahatModalProps) {
     setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 100);
 
     try {
-      const baseUrl = `https://${process.env.EXPO_PUBLIC_DOMAIN}`;
-      const res = await fetch(`${baseUrl}/api/ai/advice`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: trimmed }),
-      });
-      const data = await res.json();
-      const reply: string = data.reply ?? data.error ?? 'Xatolik yuz berdi';
+      const data = await requestAiAdvice({ message: trimmed });
+      const reply = data.reply;
       setMessages((prev) => [...prev, { role: 'assistant', text: reply }]);
-    } catch {
+    } catch (error) {
+      const detail = error instanceof ApiError ? error.data as { message?: string } | null : null;
       setMessages((prev) => [
         ...prev,
-        { role: 'assistant', text: "❌ Tarmoq xatoligi. Internet aloqasini tekshiring." },
+        { role: 'assistant', text: (error instanceof ApiError && error.status === 401
+          ? "AI maslahat olish uchun akkauntingizga kiring."
+          : detail?.message ?? "Tarmoq yoki AI xatoligi. Birozdan keyin qayta urinib ko‘ring.") },
       ]);
     } finally {
       setLoading(false);
@@ -190,10 +188,10 @@ export function AIMaslahatModal({ visible, onClose }: AIMaslahatModalProps) {
               }]}
               placeholder="Savolingizni yozing..."
               placeholderTextColor={colors.mutedForeground}
-              value={input}
+                value={input}
+                maxLength={4000}
               onChangeText={setInput}
               multiline
-              maxLength={500}
               returnKeyType="send"
               onSubmitEditing={() => sendMessage(input)}
             />

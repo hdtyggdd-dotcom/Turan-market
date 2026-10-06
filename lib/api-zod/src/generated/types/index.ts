@@ -6,6 +6,8 @@
  * OpenAPI spec version: 0.1.0
  */
 
+export * from './aiAdviceInput';
+export * from './aiAdviceInputContext';
 export * from './authResponse';
 export * from './cargoCounterDecisionInput';
 export * from './cargoCounterInput';
@@ -104,6 +106,7 @@ export * from './pushTokenInput';
 export * from './region';
 export * from './registerRequest';
 export * from './registerRequestRole';
+export * from './requestAiAdvice200';
 export * from './statsSummary';
 export * from './statsSummaryTopCategoriesItem';
 export * from './subcategory';

@@ -27,6 +27,9 @@ export const mergeCartResponseRevisionMin = 0;
 export const mergeCartResponseItemsItemQuantityMax = 999;
 export const getListingsQueryPageDefault = 1;
 export const getListingsQueryLimitDefault = 20;
+export const requestAiAdviceBodyMessageMax = 4000;
+export const requestAiAdviceBodyContextCategoryMax = 200;
+export const requestAiAdviceBodyContextRegionMax = 200;
 export const createOrderBodyClientRequestIdMin = 8;
 export const createOrderBodyClientRequestIdMax = 160;
 export const updateCargoLocationBodyLatMin = -90;
@@ -1592,6 +1595,32 @@ export const DeleteListingResponse = zod.void()
 
 
 /**
+ * @summary Request authenticated advice within the shared usage budget
+ */
+
+
+
+
+
+
+
+
+export const RequestAiAdviceBody = zod.object({
+  "message": zod.string().min(1).max(requestAiAdviceBodyMessageMax),
+  "context": zod.object({
+  "category": zod.string().max(requestAiAdviceBodyContextCategoryMax).optional(),
+  "region": zod.string().max(requestAiAdviceBodyContextRegionMax).optional(),
+  "price": zod.number().optional()
+}).optional()
+})
+
+export const RequestAiAdviceResponse = zod.object({
+  "reply": zod.string()
+})
+
+
+/**
+ * Owner only. Successful AI advice is cached for five minutes without consuming allowance. Limit messages appear in adviceError while market statistics remain available.
  * @summary Get market analysis for a listing
  */
 export const AnalyseListingMarketParams = zod.object({

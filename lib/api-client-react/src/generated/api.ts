@@ -20,6 +20,7 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  AiAdviceInput,
   AuthResponse,
   CargoCounterDecisionInput,
   CargoCounterInput,
@@ -74,6 +75,7 @@ import type {
   PushTokenInput,
   Region,
   RegisterRequest,
+  RequestAiAdvice200,
   StatsSummary,
   TransportRecommendation,
   UpdateOrderStatusRequest,
@@ -1809,6 +1811,77 @@ export const useDeleteListing = <TError = ErrorType<unknown>,
       return useMutation(getDeleteListingMutationOptions(options));
     }
 
+export const getRequestAiAdviceUrl = () => {
+
+
+
+
+  return `/api/ai/advice`
+}
+
+/**
+ * @summary Request authenticated advice within the shared usage budget
+ */
+export const requestAiAdvice = async (aiAdviceInput: AiAdviceInput, options?: RequestInit): Promise<RequestAiAdvice200> => {
+
+  return customFetch<RequestAiAdvice200>(getRequestAiAdviceUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(aiAdviceInput)
+  }
+);}
+
+
+
+
+
+export const getRequestAiAdviceMutationOptions = <TError = ErrorType<void | ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof requestAiAdvice>>, TError,{data: BodyType<AiAdviceInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof requestAiAdvice>>, TError,{data: BodyType<AiAdviceInput>}, TContext> => {
+
+const mutationKey = ['requestAiAdvice'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof requestAiAdvice>>, {data: BodyType<AiAdviceInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  requestAiAdvice(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RequestAiAdviceMutationResult = NonNullable<Awaited<ReturnType<typeof requestAiAdvice>>>
+    export type RequestAiAdviceMutationBody = BodyType<AiAdviceInput>
+    export type RequestAiAdviceMutationError = ErrorType<void | ErrorResponse>
+
+    /**
+ * @summary Request authenticated advice within the shared usage budget
+ */
+export const useRequestAiAdvice = <TError = ErrorType<void | ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof requestAiAdvice>>, TError,{data: BodyType<AiAdviceInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof requestAiAdvice>>,
+        TError,
+        {data: BodyType<AiAdviceInput>},
+        TContext
+      > => {
+      return useMutation(getRequestAiAdviceMutationOptions(options));
+    }
+
 export const getAnalyseListingMarketUrl = (id: string,) => {
 
 
@@ -1818,6 +1891,7 @@ export const getAnalyseListingMarketUrl = (id: string,) => {
 }
 
 /**
+ * Owner only. Successful AI advice is cached for five minutes without consuming allowance. Limit messages appear in adviceError while market statistics remain available.
  * @summary Get market analysis for a listing
  */
 export const analyseListingMarket = async (id: string, options?: RequestInit): Promise<MarketAnalysis> => {

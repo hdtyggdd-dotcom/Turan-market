@@ -182,6 +182,23 @@ export interface Cart {
   items: CartItem[];
 }
 
+export type AiAdviceInputContext = {
+  /** @maxLength 200 */
+  category?: string;
+  /** @maxLength 200 */
+  region?: string;
+  price?: number;
+};
+
+export interface AiAdviceInput {
+  /**
+     * @minLength 1
+     * @maxLength 4000
+     */
+  message: string;
+  context?: AiAdviceInputContext;
+}
+
 export interface CartAddInput {
   /** @minLength 1 */
   listingId: string;
@@ -1116,6 +1133,10 @@ sellerLat?: number;
 sellerLng?: number;
 page?: number;
 limit?: number;
+};
+
+export type RequestAiAdvice200 = {
+  reply: string;
 };
 
 export type GetCargoLoadsParams = {

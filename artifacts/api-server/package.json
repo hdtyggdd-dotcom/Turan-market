@@ -8,6 +8,7 @@
     "build": "node ./build.mjs",
     "start": "node --enable-source-maps ./dist/index.mjs",
     "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test:advice-budget": "pnpm --filter @workspace/scripts exec tsx --test ../artifacts/api-server/src/routes/advice.test.ts",
     "test:cargo-tracking": "pnpm --filter @workspace/scripts exec tsx --test ../artifacts/api-server/src/routes/cargo.test.ts",
     "test:cart-sync": "pnpm --filter @workspace/scripts exec tsx --test ../artifacts/api-server/src/routes/cart.test.ts",
     "test:driver-verification": "pnpm --filter @workspace/scripts exec tsx --test ../artifacts/api-server/src/routes/drivers.test.ts ../artifacts/api-server/src/routes/auth.test.ts"

@@ -550,11 +550,54 @@ paths:
         "204":
           description: Deleted
 
+  /ai/advice:
+    post:
+      operationId: requestAiAdvice
+      tags: [ai]
+      summary: Request authenticated advice within the shared usage budget
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AiAdviceInput"
+      responses:
+        "200":
+          description: Advice generated
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [reply]
+                properties:
+                  reply: { type: string }
+        "400":
+          description: Invalid or oversized input
+        "401":
+          description: Sign in required
+        "429":
+          description: Account allowance or global budget exhausted
+          headers:
+            Retry-After:
+              schema: { type: integer }
+              description: Seconds until the daily allowance resets, if applicable
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+        "503":
+          description: Advice service unavailable
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+
   /listings/{id}/analyse:
     get:
       operationId: analyseListingMarket
       tags: [listings]
       summary: Get market analysis for a listing
+      description: Owner only. Successful AI advice is cached for five minutes without consuming allowance. Limit messages appear in adviceError while market statistics remain available.
       security:
         - bearerAuth: []
       parameters:
@@ -1237,6 +1280,18 @@ components:
         listing: { $ref: "#/components/schemas/Listing" }
         quantity: { type: integer, minimum: 1, maximum: 999 }
         requestId: { type: string, pattern: "^[A-Za-z0-9_-]{8,160}$" }
+    AiAdviceInput:
+      type: object
+      required: [message]
+      properties:
+        message: { type: string, minLength: 1, maxLength: 4000 }
+        context:
+          type: object
+          additionalProperties: false
+          properties:
+            category: { type: string, maxLength: 200 }
+            region: { type: string, maxLength: 200 }
+            price: { type: number }
     CartAddInput:
       type: object
       required: [listingId, quantity, requestId, operationId]
