@@ -14,8 +14,9 @@ When publication is blocked by the live Stripe requirement, removing code alone 
 
 The owner stated: downloading the app is free, and using it is free for one month.
 The owner specified household services ("maishiy xizmatlar") at 30,000 per month
-after introductory access. Currency, who pays, trial start event, pricing for
-other categories, and collection method remain unconfirmed.
+after introductory access, payable by the service-providing ustalar, not the
+customers ordering those services. Currency, trial start event, pricing for other
+categories, and collection method remain unconfirmed.
 
 **Why:** The owner clarified the intended pricing while preparing the Google Play
 listing. Free download is distinct from free ongoing access.
