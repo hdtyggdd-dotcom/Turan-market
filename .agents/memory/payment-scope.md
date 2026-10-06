@@ -28,14 +28,15 @@ trial/paywall or reconnect payments until its terms are confirmed.
 
 ## Seller commission
 
-Seller commission ranges from 5% to 30%. The owner explicitly says selling more
+Seller commission ranges from 5% to 20%. The owner explicitly says selling more
 increases the rate, while selling less reduces it. Do not reverse this into a
 volume discount.
 
 **Why:** The owner stated "sotuvchi qancha ko‘p sotsa shuncha ko‘p ... kam sotsa
-foiz ham kam bo‘ladi" while defining the app's commercial terms.
+foiz ham kam bo‘ladi" while defining the app's commercial terms, then changed
+the maximum to 20% ("maksimal 20 foiz qilamiz").
 
-**How to apply:** Preserve the increasing rate and 30% cap. Sales measurement
+**How to apply:** Preserve the increasing rate and 20% cap. Sales measurement
 is the total monetary sales amount, not the number of products sold, as confirmed
 by the owner. The owner confirmed each month's sales are measured separately,
 not lifetime sales. Exact thresholds, commission base, and interaction with the
