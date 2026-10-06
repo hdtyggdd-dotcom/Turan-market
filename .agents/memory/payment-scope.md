@@ -1,6 +1,6 @@
 ---
 name: Payment scope
-description: Owner's payment suspension and intended introductory access pricing.
+description: Owner's payment suspension, introductory access pricing, and seller commission policy.
 ---
 
 Keep online card payments disabled and Stripe disconnected until the owner explicitly requests re-enabling them. This is a temporary suspension, not authorization to delete historical data.
@@ -16,7 +16,8 @@ The owner stated: downloading the app is free, and using it is free for one mont
 The owner specified household services ("maishiy xizmatlar") at 30,000 per month
 after introductory access, payable by the service-providing ustalar, not the
 customers ordering those services. Currency, trial start event, pricing for other
-categories, and collection method remain unconfirmed.
+categories apart from the seller commission below, and collection method remain
+unconfirmed.
 
 **Why:** The owner clarified the intended pricing while preparing the Google Play
 listing. Free download is distinct from free ongoing access.
@@ -24,3 +25,17 @@ listing. Free download is distinct from free ongoing access.
 **How to apply:** Treat the store download as free. Do not apply the household
 services price to every category, invent missing terms, or implement a
 trial/paywall or reconnect payments until its terms are confirmed.
+
+## Seller commission
+
+Seller commission ranges from 5% to 30%. The owner explicitly says selling more
+increases the rate, while selling less reduces it. Do not reverse this into a
+volume discount.
+
+**Why:** The owner stated "sotuvchi qancha ko‘p sotsa shuncha ko‘p ... kam sotsa
+foiz ham kam bo‘ladi" while defining the app's commercial terms.
+
+**How to apply:** Preserve the increasing rate and 30% cap. Sales measurement
+(amount versus quantity), measurement period, exact thresholds, commission base,
+and interaction with the free introductory month are not confirmed. Do not invent
+a tier table or enable deductions before these terms are settled.
