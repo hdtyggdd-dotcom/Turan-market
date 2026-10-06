@@ -450,7 +450,18 @@ router.put("/cargo-loads/:id/location", authenticateToken, withCargoLock((req, r
   if (!validCoordinates(body)) {
     res.status(400).json({ error: "validation", message: "Valid latitude and longitude are required" }); return;
   }
-  latestLocations.set(load.id, { lat: body.lat as number, lng: body.lng as number, createdAt: new Date().toISOString() });
+  const now = Date.now();
+  const sampledAt = body.sampledAt === undefined ? now
+    : typeof body.sampledAt === "string" ? Date.parse(body.sampledAt) : NaN;
+  if (!Number.isFinite(sampledAt) || sampledAt > now + 30_000 || sampledAt < now - 24 * 60 * 60_000) {
+    res.status(400).json({ error: "validation", message: "GPS sample time is invalid or too old" }); return;
+  }
+  // Delayed OS batches must neither replace newer fixes nor appear live on arrival.
+  const previous = latestLocations.get(load.id);
+  const boundedTime = Math.min(sampledAt, now);
+  if (!previous || boundedTime > Date.parse(previous.createdAt)) {
+    latestLocations.set(load.id, { lat: body.lat as number, lng: body.lng as number, createdAt: new Date(boundedTime).toISOString() });
+  }
   res.json(hydrateTracking(load, req.userId));
 }));
 

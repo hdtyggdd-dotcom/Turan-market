@@ -42,7 +42,11 @@
       [
         "expo-location",
         {
-          "locationWhenInUsePermission": "Yuk egasiga yo‘ldagi GPS holatingizni ulashish uchun joylashuvga ruxsat bering."
+          "locationWhenInUsePermission": "Yuk egasiga yo‘ldagi GPS holatingizni ulashish uchun joylashuvga ruxsat bering.",
+          "locationAlwaysAndWhenInUsePermission": "Faqat siz yoqqan yuk kuzatuvida ekran yopiq paytda ham GPS yuk egasiga yuboriladi. Istalgan payt to‘xtatishingiz mumkin.",
+          "isIosBackgroundLocationEnabled": true,
+          "isAndroidBackgroundLocationEnabled": true,
+          "isAndroidForegroundServiceEnabled": true
         }
       ]
     ],

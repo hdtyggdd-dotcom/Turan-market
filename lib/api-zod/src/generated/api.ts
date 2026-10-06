@@ -2956,7 +2956,8 @@ export const UpdateCargoLocationParams = zod.object({
 
 export const UpdateCargoLocationBody = zod.object({
   "lat": zod.number().min(updateCargoLocationBodyLatMin).max(updateCargoLocationBodyLatMax),
-  "lng": zod.number().min(updateCargoLocationBodyLngMin).max(updateCargoLocationBodyLngMax)
+  "lng": zod.number().min(updateCargoLocationBodyLngMin).max(updateCargoLocationBodyLngMax),
+  "sampledAt": zod.coerce.date().optional().describe('Time of the GPS fix, not the time an offline or deferred batch was uploaded.')
 })
 
 export const UpdateCargoLocationResponse = zod.object({

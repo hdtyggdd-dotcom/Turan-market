@@ -1009,6 +1009,8 @@ export interface CargoLocationInput {
      * @maximum 180
      */
   lng: number;
+  /** Time of the GPS fix, not the time an offline or deferred batch was uploaded. */
+  sampledAt?: string;
 }
 
 export interface PushTokenInput {

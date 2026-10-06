@@ -2296,6 +2296,10 @@ components:
       properties:
         lat: { type: number, minimum: -90, maximum: 90 }
         lng: { type: number, minimum: -180, maximum: 180 }
+        sampledAt:
+          type: string
+          format: date-time
+          description: Time of the GPS fix, not the time an offline or deferred batch was uploaded.
 
     PushTokenInput:
       type: object

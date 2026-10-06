@@ -5,6 +5,7 @@ import type { Server } from "node:http";
 import { createCargoRouter } from "./cargo.js";
 import {
   cargoLoads, cargoOffers, cargoNotifications, cargoTrackingUpdates, driverProfiles, generateToken, vehicleTypes,
+  type StoredCargoLoad,
 } from "../data/store.js";
 
 const loadId = "tracking-regression-load";
@@ -166,8 +167,42 @@ test("domestic delivery can skip border control without skipping pickup mileston
   }
 });
 
+test("background GPS preserves fix age, ignores reordered batches and rejects finished cargo", async () => {
+  const id = `${loadId}-background`;
+  const { load } = createFixture(id, "in_transit");
+  const oldFix = new Date(Date.now() - 10 * 60_000).toISOString();
+  let result = await request(`/cargo-loads/${id}/location`, driver.userId, "PUT", {
+    lat: 41, lng: 69, sampledAt: oldFix,
+  });
+  assert.equal(result.status, 200);
+  assert.equal(result.data.locationUpdatedAt, oldFix, "old fix must not look freshly sampled on upload");
+  const newerFix = new Date(Date.now() - 60_000).toISOString();
+  result = await request(`/cargo-loads/${id}/location`, driver.userId, "PUT", {
+    lat: 42, lng: 70, sampledAt: newerFix,
+  });
+  assert.equal(result.data.currentLat, 42);
+  result = await request(`/cargo-loads/${id}/location`, driver.userId, "PUT", {
+    lat: 40, lng: 68, sampledAt: oldFix,
+  });
+  assert.equal(result.data.currentLat, 42, "reordered fixes cannot move the truck backwards");
+  assert.equal(result.data.locationUpdatedAt, newerFix);
+  for (const sampledAt of ["invalid", 123, new Date(Date.now() + 120_000).toISOString(),
+    new Date(Date.now() - 25 * 60 * 60_000).toISOString()]) {
+    assert.equal((await request(`/cargo-loads/${id}/location`, driver.userId, "PUT", {
+      lat: 41, lng: 69, sampledAt,
+    })).status, 400);
+  }
+  assert.equal((await request(`/cargo-loads/${id}/tracking`, outsiderId)).status, 403);
+  assert.equal((await request(`/cargo-loads/${id}/tracking`, driver.userId, "PATCH", { stage: "delivered" })).status, 200);
+  assert.equal((await request(`/cargo-loads/${id}/location`, driver.userId, "PUT", {
+    lat: 41, lng: 69, sampledAt: new Date().toISOString(),
+  })).status, 409);
+  load.status = "cancelled";
+  assert.equal((await request(`/cargo-loads/${id}/location`, driver.userId, "PUT", { lat: 41, lng: 69 })).status, 409);
+});
+
 function createFixture(id: string, status: "negotiating" | "in_transit" | "accepted") {
-  const load = { ...cargoLoads[0]!, id, shipperId, status, pickupDate: "2999-01-01" };
+  const load: StoredCargoLoad = { ...cargoLoads[0]!, id, shipperId, status, pickupDate: "2999-01-01" };
   const offer = {
     ...cargoOffers.find(item => item.loadId === loadId)!,
     id: `${id}-offer`, loadId: id, status: status === "negotiating" ? "pending" as const : "accepted" as const,

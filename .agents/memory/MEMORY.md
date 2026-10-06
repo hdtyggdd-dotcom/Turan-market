@@ -10,3 +10,4 @@
 - [Generated schema initialization](generated-schema-initialization.md) — generation must check runtime imports, not only types; eager schemas require initialized bounds.
 - [Single authentication form](single-authentication-form.md) — keep the full name/country/GPS/phone/password entry; do not restore a separate phone-only form.
 - [Browser distribution](browser-distribution.md) — always-available phone access uses the published browser app; Expo Go remains a development preview.
+- [Background location runtime](background-location-runtime.md) — background GPS needs separate consent and a native build; force-quit and browser continuity cannot be promised.

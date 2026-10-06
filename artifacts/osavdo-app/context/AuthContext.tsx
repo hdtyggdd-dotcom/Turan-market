@@ -9,6 +9,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { unregisterPushToken } from '@workspace/api-client-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { Alert } from 'react-native';
+import { stopCargoBackgroundSharing } from '@/services/cargo-background-location';
 
 export interface UserProfile {
   id: string;
@@ -67,16 +68,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const signIn = useCallback(async (t: string, u: UserProfile) => {
+    await stopCargoBackgroundSharing();
     queryClient.clear();
     await AsyncStorage.multiSet([
       [TOKEN_KEY, t],
       [USER_KEY, JSON.stringify(u)],
+      ['osavdo_auth_session', `${Date.now()}-${Math.random().toString(36).slice(2)}`],
     ]);
     setToken(t);
     setUser(u);
   }, [queryClient]);
 
   const signOut = useCallback(async () => {
+    await stopCargoBackgroundSharing();
     const pushToken = await AsyncStorage.getItem('osavdo_cargo_push_token');
     // Do not leave a device subscribed to the previous account after logout.
     if (pushToken) {
@@ -88,7 +92,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
       await AsyncStorage.removeItem('osavdo_cargo_push_token');
     }
-    await AsyncStorage.multiRemove([TOKEN_KEY, USER_KEY]);
+    await AsyncStorage.multiRemove([TOKEN_KEY, USER_KEY, 'osavdo_auth_session']);
     setToken(null);
     setUser(null);
     queryClient.clear();

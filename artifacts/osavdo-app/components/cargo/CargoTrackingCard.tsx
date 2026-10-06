@@ -28,6 +28,11 @@ import {
 } from '@workspace/api-client-react';
 import { useColors } from '@/hooks/useColors';
 import { CargoRouteMap } from './CargoRouteMap';
+import { useAuth } from '@/context/AuthContext';
+import {
+  cargoBackgroundAvailable, getCargoBackgroundSharing,
+  startCargoBackgroundSharing, stopCargoBackgroundSharing,
+} from '@/services/cargo-background-location';
 
 const stages = [
   CargoTrackingCurrentStage.accepted,
@@ -75,11 +80,16 @@ export function CargoTrackingCard({
   canUpdate: boolean;
 }) {
   const colors = useColors();
+  const { user } = useAuth();
   const queryClient = useQueryClient();
   const [note, setNote] = useState('');
   const [sharing, setSharing] = useState(false);
   const [locationError, setLocationError] = useState('');
   const [gettingLocation, setGettingLocation] = useState(false);
+  const [backgroundSharing, setBackgroundSharing] = useState(false);
+  const [backgroundAvailable, setBackgroundAvailable] = useState(false);
+  const [backgroundBusy, setBackgroundBusy] = useState(false);
+  const [clock, setClock] = useState(Date.now());
   const liveRequest = useRef(false);
   const [permission, requestPermission] = Location.useForegroundPermissions();
   const { data: tracking, isLoading } = useGetCargoTracking(loadId, {
@@ -96,7 +106,67 @@ export function CargoTrackingCard({
 
   const allowedToUpdate = canUpdate && tracking?.canUpdate;
   const freshGps = !!tracking?.locationUpdatedAt &&
-    Date.now() - new Date(tracking.locationUpdatedAt).getTime() < 60_000;
+    clock - new Date(tracking.locationUpdatedAt).getTime() < 180_000 &&
+    tracking.currentStage !== 'delivered';
+
+  useEffect(() => {
+    let active = true;
+    const check = async () => {
+      const available = await cargoBackgroundAvailable();
+      const activeLoad = available ? await getCargoBackgroundSharing() : null;
+      if (active) {
+        setBackgroundAvailable(available);
+        setBackgroundSharing(activeLoad === loadId);
+        setClock(Date.now());
+      }
+    };
+    void check().catch(() => {});
+    const timer = setInterval(() => { void check().catch(() => {}); }, 5_000);
+    return () => { active = false; clearInterval(timer); };
+  }, [loadId]);
+
+  useEffect(() => {
+    if (tracking && !allowedToUpdate) {
+      setSharing(false);
+      void stopCargoBackgroundSharing(loadId).then(() => setBackgroundSharing(false))
+        .catch(() => setLocationError('Fon GPS to‘xtashini tekshirish uchun ilova sozlamalarini oching.'));
+    }
+  }, [tracking?.canUpdate, tracking?.currentStage, allowedToUpdate, loadId]);
+
+  const toggleBackground = async () => {
+    if (backgroundSharing) {
+      setBackgroundBusy(true);
+      try {
+        await stopCargoBackgroundSharing(loadId);
+        setBackgroundSharing(false);
+        setLocationError('');
+      } catch {
+        setLocationError('GPS to‘xtatilmadi. Ilova sozlamalarida joylashuvni o‘chiring.');
+      } finally { setBackgroundBusy(false); }
+      return;
+    }
+    Alert.alert(
+      'Fon GPS ulashishga rozimisiz?',
+      'GPS faqat ushbu yuk egasiga ekran yopiq paytda ham yuboriladi. Taxminan 1 daqiqa / 100 metr oralig‘ida, batareyani tejovchi aniqlikda ishlaydi. Yetkazilganda yoki siz to‘xtatganda tugaydi. Android ruxsat sozlamalarini ochishi mumkin: “Har doim”ni tanlang. Ilovani majburan yopish yoki telefon cheklovlari GPSni to‘xtatishi mumkin.',
+      [
+        { text: 'Bekor qilish', style: 'cancel' },
+        { text: 'Roziman, yoqish', onPress: () => {
+          setBackgroundBusy(true);
+          void (async () => {
+            try {
+              if (!user) throw new Error('Hisobga kiring.');
+              setSharing(false);
+              await startCargoBackgroundSharing(loadId, user.id);
+              setBackgroundSharing(true);
+              setLocationError('');
+            } catch (error) {
+              setLocationError(error instanceof Error ? error.message : 'Fon GPS yoqilmadi.');
+            } finally { setBackgroundBusy(false); }
+          })();
+        } },
+      ],
+    );
+  };
 
   const getCurrentCoordinate = async (): Promise<Coordinate> => {
     if (Platform.OS === 'web') return getWebPosition();
@@ -124,7 +194,7 @@ export function CargoTrackingCard({
   };
 
   useEffect(() => {
-    if (!sharing || !allowedToUpdate) return;
+    if (!sharing || !allowedToUpdate || backgroundSharing || backgroundBusy) return;
     let active = true;
     const sendPosition = async () => {
       if (liveRequest.current || AppState.currentState !== 'active') return;
@@ -148,7 +218,7 @@ export function CargoTrackingCard({
     void sendPosition();
     const timer = setInterval(() => { void sendPosition(); }, 15_000);
     return () => { active = false; clearInterval(timer); };
-  }, [sharing, allowedToUpdate, loadId, queryClient]);
+  }, [sharing, allowedToUpdate, backgroundSharing, backgroundBusy, loadId, queryClient]);
 
   const toggleSharing = async () => {
     if (sharing) { setSharing(false); return; }
@@ -167,7 +237,12 @@ export function CargoTrackingCard({
     updateTracking.mutate(
       { id: loadId, data: { stage, note: note.trim() || undefined } },
       {
-        onSuccess: () => {
+        onSuccess: (result) => {
+          if (!result.canUpdate) {
+            setSharing(false);
+            void stopCargoBackgroundSharing(loadId).then(() => setBackgroundSharing(false))
+              .catch(() => setLocationError('GPS ruxsatini ilova sozlamalarida o‘chiring.'));
+          }
           setNote('');
           queryClient.invalidateQueries({ queryKey: getGetCargoTrackingQueryKey(loadId) });
           queryClient.invalidateQueries({ queryKey: getGetCargoLoadQueryKey(loadId) });
@@ -208,8 +283,8 @@ export function CargoTrackingCard({
           </Text>
         </View>
         <View style={[styles.liveBadge, { backgroundColor: colors.accent }]}>
-          <View style={[styles.liveDot, { backgroundColor: colors.primary }]} />
-          <Text style={[styles.liveText, { color: colors.accentForeground }]}>{freshGps ? 'GPS faol' : tracking.currentLat !== null ? 'Eski GPS' : 'GPS yo‘q'}</Text>
+          <View style={[styles.liveDot, { backgroundColor: freshGps ? colors.primary : colors.mutedForeground }]} />
+          <Text style={[styles.liveText, { color: colors.accentForeground }]}>{tracking.currentStage === 'delivered' ? 'Kuzatuv tugadi' : freshGps ? 'GPS faol' : tracking.currentLat !== null ? 'GPS eskirgan / oflayn' : 'GPS yo‘q'}</Text>
         </View>
       </View>
 
@@ -219,6 +294,11 @@ export function CargoTrackingCard({
           ? `GPS oxirgi yangilanishi: ${new Date(tracking.locationUpdatedAt).toLocaleString()}`
           : 'Haydovchi GPS joylashuvini hali ulashmagan.'}
       </Text>
+      {!freshGps && tracking.currentLat !== null && tracking.currentStage !== 'delivered' && (
+        <Text style={[styles.mutedText, { color: colors.mutedForeground }]}>
+          Bu oxirgi ma’lum nuqta, hozirgi joylashuv emas. Internet, GPS ruxsati yoki telefon cheklovi sabab yangilanish to‘xtagan bo‘lishi mumkin.
+        </Text>
+      )}
 
       <View style={styles.routeLabels}>
         <View style={styles.routeLabelBlock}>
@@ -322,16 +402,34 @@ export function CargoTrackingCard({
           <TouchableOpacity
             testID="toggle-live-gps"
             onPress={toggleSharing}
-            disabled={gettingLocation}
+            disabled={gettingLocation || backgroundSharing || backgroundBusy}
             style={[styles.advanceButton, { backgroundColor: colors.secondary }]}
           >
             <Text style={[styles.advanceText, { color: colors.secondaryForeground }]}>
               {gettingLocation ? 'GPS aniqlanmoqda...' : sharing ? 'GPS ulashishni to‘xtatish' : 'Jonli GPS ulashishni yoqish'}
             </Text>
           </TouchableOpacity>
+          {Platform.OS !== 'web' && (
+            <TouchableOpacity
+              testID="toggle-background-gps"
+              onPress={toggleBackground}
+              disabled={backgroundBusy || !backgroundAvailable}
+              style={[styles.advanceButton, { backgroundColor: colors.secondary, opacity: backgroundAvailable ? 1 : 0.5 }]}
+            >
+              <Text style={[styles.advanceText, { color: colors.secondaryForeground }]}>
+                {backgroundBusy ? 'Kutilmoqda...' : backgroundSharing ? 'Fon GPS ulashishni to‘xtatish' : 'Ekran yopiq paytda ham GPS ulashish'}
+              </Text>
+            </TouchableOpacity>
+          )}
+          {Platform.OS !== 'web' && <TouchableOpacity onPress={() => Linking.openSettings()}>
+            <Text style={[styles.gpsHint, { color: colors.primary }]}>Joylashuv ruxsati sozlamalari</Text>
+          </TouchableOpacity>}
           {!!locationError && <Text style={{ color: colors.destructive }}>{locationError}</Text>}
           <Text style={[styles.gpsHint, { color: colors.mutedForeground }]}>
-            GPS yoqilsa, shu ekran ochiq va ilova faol turganda har 15 soniyada yuboriladi. Ekrandan chiqsangiz ulashish to‘xtaydi.
+            {backgroundSharing
+              ? 'Fon GPS yoqilgan: boshqa ekranga o‘tsangiz ham ulashiladi. Telefonning batareya yoki majburan yopish cheklovlari uzilish keltirishi mumkin.'
+              : 'Jonli GPS: faqat shu ekran ochiq va ilova faol bo‘lganda har 15 soniyada. Fon GPS alohida rozilik bilan yoqiladi.'}
+            {!backgroundAvailable ? ' Fon GPS brauzer va Expo Go’da ishlamaydi; alohida o‘rnatilgan Android/iOS ilovasi kerak.' : ''}
           </Text>
         </View>
       )}

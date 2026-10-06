@@ -15,20 +15,15 @@ import {
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { setBaseUrl, setAuthTokenGetter } from '@workspace/api-client-react';
+import '@/services/cargo-background-location';
+import { reconcileCargoBackgroundSharing } from '@/services/cargo-background-location';
+import { AppState } from 'react-native';
 import { AuthProvider } from '@/context/AuthContext';
 import { CartProvider } from '@/context/CartContext';
 import { LocationProvider } from '@/context/LocationContext';
 import { I18nProvider } from '@/context/I18nContext';
 import { CountrySetupModal } from '@/components/CountrySetupModal';
-
-// Configure API client — generated paths already include /api prefix
-// Exported web builds use their published host, not the workspace's dev URL.
-// Expo Go and the development web preview still use the shared API domain.
-setBaseUrl(Platform.OS === 'web' && !__DEV__ && typeof window !== 'undefined'
-  ? window.location.origin
-  : `https://${process.env.EXPO_PUBLIC_DOMAIN}`);
-setAuthTokenGetter(() => AsyncStorage.getItem('osavdo_token'));
+import { CargoBackgroundStatus } from '@/components/cargo/CargoBackgroundStatus';
 
 SplashScreen.preventAutoHideAsync();
 import { CargoPushListener } from '@/components/cargo/CargoNotifications';
@@ -43,6 +38,18 @@ const queryClient = new QueryClient({
 });
 
 function RootLayoutNav() {
+  useEffect(() => {
+    if (Platform.OS === 'web') return;
+    const check = () => { void reconcileCargoBackgroundSharing().catch(() => {}); };
+    check();
+    const listener = AppState.addEventListener('change', state => {
+      if (state === 'active') check();
+    });
+    const timer = setInterval(() => {
+      if (AppState.currentState === 'active') check();
+    }, 30_000);
+    return () => { listener.remove(); clearInterval(timer); };
+  }, []);
   return (
     <>
     <CargoPushListener />
@@ -65,6 +72,7 @@ function RootLayoutNav() {
         }}
       />
     </Stack>
+    <CargoBackgroundStatus />
     </>
   );
 }
