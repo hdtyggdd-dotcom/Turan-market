@@ -1,7 +1,7 @@
 - [Cargo privacy boundary](cargo-privacy-boundary.md) — reveal exact addresses and personal profile locality only after a transport offer is accepted.
 - [Operational driver trust](operational-driver-trust.md) — cargo bidding requires approved identity and verified real vehicle data, not a self-selected driver role.
 - [Cargo negotiation integrity](cargo-negotiation-integrity.md) — a shipper counter becomes the payable amount only after the offering driver accepts it.
-- [Payment scope](payment-scope.md) — keep online card payments disabled until the owner explicitly requests re-enabling them.
+- [Payment scope](payment-scope.md) — payments stay disabled; preserve confirmed free access, household-service pricing, and increasing seller commission terms.
 - [Cart retry integrity](cart-retry-integrity.md) — uncertain checkout responses must keep the original request identity; removing and re-adding can duplicate an order.
 - [Special goods taxonomy](special-goods-taxonomy.md) — damaged and promotional goods are sibling subcategories under one parent, not separate categories.
 - [AI advice billing](ai-advice-billing.md) — use owner-provided Anthropic access; do not switch advice to Replit credit billing without an explicit request.
