@@ -4,9 +4,10 @@ import React, {
   useState,
   useEffect,
   useCallback,
+  useRef,
 } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { unregisterPushToken } from '@workspace/api-client-react';
+import { getMe, unregisterPushToken } from '@workspace/api-client-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { Alert } from 'react-native';
 import { stopCargoBackgroundSharing } from '@/services/cargo-background-location';
@@ -34,6 +35,7 @@ interface AuthContextType {
   isLoading: boolean;
   signIn: (token: string, user: UserProfile) => Promise<void>;
   signOut: () => Promise<void>;
+  finishAccountDeletion: () => Promise<void>;
   updateUser: (user: UserProfile) => Promise<void>;
 }
 
@@ -46,9 +48,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const queryClient = useQueryClient();
   const [user, setUser] = useState<UserProfile | null>(null);
   const [token, setToken] = useState<string | null>(null);
+  const identityRef = useRef<string | undefined>(user?.id);
+  const sessionVersion = useRef(0);
+  identityRef.current = user?.id;
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    const bootVersion = sessionVersion.current;
     (async () => {
       try {
         const [[, storedToken], [, storedUser]] = await AsyncStorage.multiGet([
@@ -56,8 +62,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           USER_KEY,
         ]);
         if (storedToken && storedUser) {
+          const cached = JSON.parse(storedUser) as UserProfile;
+          try {
+            await getMe({ headers: { Authorization: `Bearer ${storedToken}` } });
+          } catch (error) {
+            if ((error as { status?: number }).status === 410) {
+              if (sessionVersion.current !== bootVersion) return;
+              await stopCargoBackgroundSharing();
+              await AsyncStorage.multiRemove([TOKEN_KEY, USER_KEY, 'osavdo_auth_session', 'osavdo_cargo_push_token', 'osavdo_location',
+                `turan_cart:${cached.id}`, `turan_cart_pending:${cached.id}`, `turan_cart_migration:${cached.id}`, `turan_account_deletion:${cached.id}`]);
+              return;
+            }
+            // Offline or expired auth is not proof of account deletion.
+          }
+          if (sessionVersion.current !== bootVersion) return;
           setToken(storedToken);
-          setUser(JSON.parse(storedUser) as UserProfile);
+          setUser(cached);
         }
       } catch {
         // ignore storage errors
@@ -68,6 +88,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const signIn = useCallback(async (t: string, u: UserProfile) => {
+    sessionVersion.current++;
     await stopCargoBackgroundSharing();
     queryClient.clear();
     await AsyncStorage.multiSet([
@@ -86,9 +107,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (pushToken) {
       try {
         await unregisterPushToken({ token: pushToken });
-      } catch {
-        Alert.alert('Chiqish amalga oshmadi', 'Push obunasini xavfsiz o‘chirish uchun internetga ulanib, qayta urinib ko‘ring.');
-        return;
+      } catch (error) {
+        if ((error as { status?: number }).status !== 410) {
+          Alert.alert('Chiqish amalga oshmadi', 'Push obunasini xavfsiz o‘chirish uchun internetga ulanib, qayta urinib ko‘ring.');
+          return;
+        }
       }
       await AsyncStorage.removeItem('osavdo_cargo_push_token');
     }
@@ -103,8 +126,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(u);
   }, []);
 
+  const finishAccountDeletion = useCallback(async () => {
+    const owner = user?.id;
+    if (identityRef.current !== owner) return;
+    sessionVersion.current++;
+    let backgroundError: unknown;
+    try { await stopCargoBackgroundSharing(); } catch (error) { backgroundError = error; }
+    if (identityRef.current !== owner) return;
+    setToken(null);
+    setUser(null);
+    queryClient.clear();
+    const keys = [TOKEN_KEY, USER_KEY, 'osavdo_auth_session', 'osavdo_cargo_push_token', 'osavdo_location'];
+    if (owner) keys.push(`turan_cart:${owner}`, `turan_cart_pending:${owner}`, `turan_cart_migration:${owner}`, `turan_account_deletion:${owner}`);
+    // No unregister HTTP call: the deleted account is already unauthorized.
+    await AsyncStorage.multiRemove(keys);
+    if (backgroundError) throw new Error("Akkaunt serverda yopildi. Telefonning fon GPS holatini tekshiring va joylashuv ruxsatini o‘chiring.");
+  }, [user?.id, queryClient]);
+
   return (
-    <AuthContext.Provider value={{ user, token, isLoading, signIn, signOut, updateUser }}>
+    <AuthContext.Provider value={{ user, token, isLoading, signIn, signOut, finishAccountDeletion, updateUser }}>
       {children}
     </AuthContext.Provider>
   );

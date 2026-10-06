@@ -62,9 +62,16 @@ export async function initializePersistence(): Promise<void> {
       .where(eq(appRecords.collection, collection.name));
 
     if (rows.length === 0) {
-      const preparedItems = collection.name === "users"
+      let preparedItems = collection.name === "users"
         ? collection.items.map((item) => normalizeUser(item as StoredUser))
         : collection.items;
+      // Empty collections must not resurrect seed PII for a closed account.
+      preparedItems = preparedItems.filter(item => {
+        const record = item as unknown as Record<string, unknown>;
+        const owner = record.userId ?? record.shipperId ?? record.sellerId;
+        return typeof owner !== "string" || !users.find(user => user.id === owner)?.deleted;
+      });
+      collection.items.splice(0, collection.items.length, ...preparedItems);
       if (preparedItems.length > 0) {
         await db.insert(appRecords).values(
           preparedItems.map((item) => ({

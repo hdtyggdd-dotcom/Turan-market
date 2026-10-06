@@ -25,6 +25,9 @@ export const removeCartItemResponseItemsItemQuantityMax = 999;
 export const mergeCartBodyItemsItemQuantityMax = 999;
 export const mergeCartResponseRevisionMin = 0;
 export const mergeCartResponseItemsItemQuantityMax = 999;
+export const deleteAccountBodyPhoneMin = 3;
+export const deleteAccountBodyPhoneMax = 32;
+export const deleteAccountBodyPasswordMax = 256;
 export const getListingsQueryPageDefault = 1;
 export const getListingsQueryLimitDefault = 20;
 export const searchProductByPhotoBodyDataMin = 8;
@@ -918,6 +921,29 @@ export const LoginResponse = zod.object({
   "totalSales": zod.number().int().nullish(),
   "createdAt": zod.coerce.date()
 })
+})
+
+
+/**
+ * @summary Permanently close an account after password confirmation
+ */
+
+
+
+
+
+
+
+export const DeleteAccountBody = zod.object({
+  "phone": zod.string().min(deleteAccountBodyPhoneMin).max(deleteAccountBodyPhoneMax),
+  "password": zod.string().min(1).max(deleteAccountBodyPasswordMax),
+  "confirmation": zod.literal(true),
+  "requestId": zod.string().uuid()
+})
+
+export const DeleteAccountResponse = zod.object({
+  "status": zod.enum(['deleted']),
+  "filesPending": zod.boolean()
 })
 
 

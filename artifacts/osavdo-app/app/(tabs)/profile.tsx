@@ -219,6 +219,20 @@ export default function ProfileScreen() {
           <Feather name="external-link" size={20} color={colors.mutedForeground} />
         </TouchableOpacity>
 
+        <TouchableOpacity
+          style={[styles.ordersBtn, { backgroundColor: colors.card, borderColor: colors.destructive + '60' }]}
+          onPress={() => router.push('/delete-account' as never)}
+          testID="open-delete-account"
+        >
+          <View style={styles.ordersBtnLeft}>
+            <View style={[styles.ordersBtnIcon, { backgroundColor: colors.destructive + '15' }]}>
+              <Feather name="trash-2" size={20} color={colors.destructive} />
+            </View>
+            <Text style={[styles.ordersBtnText, { color: colors.destructive }]}>Hisobni o'chirish</Text>
+          </View>
+          <Feather name="chevron-right" size={20} color={colors.mutedForeground} />
+        </TouchableOpacity>
+
         {/* Stats */}
         {user.role === 'seller' && (
           <View style={styles.statsRow}>

@@ -226,6 +226,29 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
 
+  /account-deletion:
+    post:
+      operationId: deleteAccount
+      tags: [auth]
+      summary: Permanently close an account after password confirmation
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AccountDeletionInput" }
+      responses:
+        "200":
+          description: Account closed; private-file removal may still be retrying
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AccountDeletionResult" }
+        "400": { description: Invalid input or missing explicit confirmation }
+        "401": { description: Invalid account credentials }
+        "409": { description: "Active order, active transport, or last administrator" }
+        "429": { description: Too many attempts }
+        "503": { description: Storage temporarily unavailable; retry with the same request identity }
+
   /auth/me:
     get:
       operationId: getMe
@@ -1289,6 +1312,21 @@ components:
       bearerFormat: JWT
 
   schemas:
+    AccountDeletionInput:
+      type: object
+      additionalProperties: false
+      required: [phone, password, confirmation, requestId]
+      properties:
+        phone: { type: string, minLength: 3, maxLength: 32 }
+        password: { type: string, minLength: 1, maxLength: 256 }
+        confirmation: { type: boolean, enum: [true] }
+        requestId: { type: string, format: uuid }
+    AccountDeletionResult:
+      type: object
+      required: [status, filesPending]
+      properties:
+        status: { type: string, enum: [deleted] }
+        filesPending: { type: boolean }
     Cart:
       type: object
       required: [items, revision]

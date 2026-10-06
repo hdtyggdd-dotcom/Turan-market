@@ -3,6 +3,13 @@ import { logger } from "./logger.js";
 
 const tokens = new Map<string, string>();
 
+export function forgetAccountNotifications(userId: string) {
+  for (const [token, owner] of tokens) if (owner === userId) tokens.delete(token);
+  for (let index = cargoNotifications.length - 1; index >= 0; index--) {
+    if (cargoNotifications[index]!.userId === userId) cargoNotifications.splice(index, 1);
+  }
+}
+
 export function registerToken(userId: string, token: string) {
   // One device token belongs to only its currently signed-in account.
   tokens.set(token, userId);

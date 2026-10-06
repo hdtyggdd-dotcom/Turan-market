@@ -35,8 +35,9 @@ Ilova versiyasi: 1.0.0
 Android versionCode: 1 (agar oldin yuklangan bo‘lsa, undan katta qiymat kerak)
 Website: https://turanmarket.net
 Privacy policy: https://turanmarket.net/api/privacy-policy
+Account deletion: https://turanmarket.net/api/account-deletion (backend yangi versiyasi chiqarilgandan keyin)
 Ommaviy yordam emaili: fazliddin.16.09.2004@gmail.com
 Kategoriya taklifi: Shopping / Xaridlar (yakuniy tanlov egasiniki)
 
 HALI TO‘LDIRILADIGAN QISMLAR
-Akkauntni o‘chirishning ishlaydigan ilova ichidagi yo‘li va tashqi web manzili, haqiqiy Android skrinshotlari, kontent reytingi, auditoriya va Data safety deklaratsiyasi. Yordam emaili egasi tomonidan tasdiqlangan; uni Play Console’da ham kiriting. Bu matn imzolangan AAB yoki Google tasdig‘i emas.
+Haqiqiy Android skrinshotlari, kontent reytingi, auditoriya va Data safety deklaratsiyasi. Akkauntni o‘chirishning ilova ichidagi yo‘li va web sahifasi qo‘shilgan; production backend yangilanib, shu sahifa ochilishi tekshirilsin. Yordam emailini Play Console’da ham kiriting. Bu matn imzolangan AAB yoki Google tasdig‘i emas.

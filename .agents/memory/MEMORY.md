@@ -1,4 +1,5 @@
 - [Cargo privacy boundary](cargo-privacy-boundary.md) — reveal exact addresses and personal profile locality only after a transport offer is accepted.
+- [Account closure policy](account-closure-policy.md) — erase contacts and revoke sessions while preserving anonymous third-party receipts; active commitments block closure.
 - [Operational driver trust](operational-driver-trust.md) — cargo bidding requires approved identity and verified real vehicle data, not a self-selected driver role.
 - [Cargo negotiation integrity](cargo-negotiation-integrity.md) — a shipper counter becomes the payable amount only after the offering driver accepts it.
 - [Payment scope](payment-scope.md) — payments stay disabled; preserve confirmed free access, household-service pricing, and increasing seller commission terms.

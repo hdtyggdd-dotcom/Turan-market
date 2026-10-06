@@ -5,6 +5,33 @@
  * O'Savdo local marketplace API
  * OpenAPI spec version: 0.1.0
  */
+export interface AccountDeletionInput {
+  /**
+     * @minLength 3
+     * @maxLength 32
+     */
+  phone: string;
+  /**
+     * @minLength 1
+     * @maxLength 256
+     */
+  password: string;
+  confirmation: true;
+  requestId: string;
+}
+
+export type AccountDeletionResultStatus = typeof AccountDeletionResultStatus[keyof typeof AccountDeletionResultStatus];
+
+
+export const AccountDeletionResultStatus = {
+  deleted: 'deleted',
+} as const;
+
+export interface AccountDeletionResult {
+  status: AccountDeletionResultStatus;
+  filesPending: boolean;
+}
+
 export type UserRole = typeof UserRole[keyof typeof UserRole];
 
 

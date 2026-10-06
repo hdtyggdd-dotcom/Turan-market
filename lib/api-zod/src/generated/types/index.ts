@@ -6,6 +6,9 @@
  * OpenAPI spec version: 0.1.0
  */
 
+export * from './accountDeletionInput';
+export * from './accountDeletionResult';
+export * from './accountDeletionResultStatus';
 export * from './aiAdviceInput';
 export * from './aiAdviceInputContext';
 export * from './authResponse';

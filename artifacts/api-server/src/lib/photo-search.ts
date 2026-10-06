@@ -49,7 +49,7 @@ export async function notifyCategorySellers(categoryId: string, productName: str
   const sellerIds = new Set(listings.filter(item => item.categoryId === categoryId && item.listingType !== "xizmat" && item.adminStatus !== "pending")
     .map(item => item.userId));
   // Listing ownership makes someone a seller here; a buyer/driver role can also post goods.
-  const recipients = users.filter(user => user.id !== searchingUser && sellerIds.has(user.id));
+  const recipients = users.filter(user => !user.deleted && user.id !== searchingUser && sellerIds.has(user.id));
   if (!recipients.length) return { notificationStatus: "no_sellers" as const, notifiedSellerCount: 0 };
   // One demand alert per product/category/seller/day, even across users and processes.
   const day = new Date().toISOString().slice(0, 10);

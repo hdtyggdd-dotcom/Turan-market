@@ -15,8 +15,13 @@ import photoSearchRouter from "./photo-search.js";
 import cargoRouter from "./cargo.js";
 import legalRouter from "./legal.js";
 import driversRouter from "./drivers.js";
+import accountDeletionRouter from "./account-deletion.js";
+import { accountLifecycleGuard } from "../lib/account-lifecycle.js";
+import { startDeletionFileCleanup } from "../lib/account-deletion.js";
 
 const router: IRouter = Router();
+router.use(accountLifecycleGuard);
+startDeletionFileCleanup();
 
 router.use(healthRouter);
 router.use(authRouter);
@@ -34,5 +39,6 @@ router.use(photoSearchRouter);
 router.use(driversRouter);
 router.use(cargoRouter);
 router.use(legalRouter);
+router.use(accountDeletionRouter);
 
 export default router;

@@ -28,6 +28,8 @@ router.get("/privacy-policy", (_req, res) => {
         <li>Foydalanuvchi joylagan e’lonlar, rasmlar, narxlar va yuk ma’lumotlari.</li>
         <li>Foydalanuvchi ruxsat bergandagina joylashuv ma’lumotlari — hududni aniqlash va yukni kuzatish uchun.</li>
         <li>Buyurtma va transport taklifi holatlari.</li>
+        <li>Haydovchi o‘zi topshirgan shaxsiy hujjatlar va transport ma’lumotlari — administrator tekshiruvi uchun.</li>
+        <li>AI maslahat matni, rasmli mahsulot qidiruvi va ruxsat berilgan telefon bildirishnomalari uchun texnik push token.</li>
       </ul>
 
       <h2>To‘lovlar</h2>
@@ -37,10 +39,15 @@ router.get("/privacy-policy", (_req, res) => {
       <p>Ma’lumotlar akkauntni boshqarish, e’lonlarni ko‘rsatish, buyurtmalarni bajarish, yuk tashishni tashkil qilish va xavfsizlikni ta’minlash uchun ishlatiladi. Ma’lumotlar reklama maqsadida sotilmaydi.</p>
 
       <h2>Uchinchi tomon xizmatlari</h2>
-      <p>Ma’lumotlar ilovaning API serveri va PostgreSQL bazasida saqlanadi. Ushbu xizmatlar o‘zlarining maxfiylik va xavfsizlik qoidalariga ega.</p>
+      <p>Akkaunt, e’lon va buyurtma ma’lumotlari API serveri va PostgreSQL bazasida saqlanadi. Haydovchi hujjat fayllari shaxsiy App Storage’da saqlanadi va faqat vakolatli tekshiruv uchun ochiladi.</p>
+      <p>AI maslahat uchun yuborilgan matn va rasm orqali qidirishda tanlangan surat Anthropic AI xizmatiga ishlov berish uchun yuboriladi. Rasmli qidiruvning asl surati qidiruv tarixi sifatida bazaga saqlanmaydi; rasm va shaxsiy kontakt sotuvchilarga yuborilmaydi. Anthropic o‘z ma’lumotlarni saqlash va xavfsizlik shartlariga ega. Suratga ortiqcha shaxsiy ma’lumot kiritmang.</p>
+      <p>Telefon bildirishnomalari yoqilganda texnik push token va xabar Expo push xizmatiga yuboriladi. Haydovchi alohida rozilik bilan faqat faol tashish uchun fon GPS’ni ulashadi; ekran yopiq holatdagi ish operatsion tizim cheklovlariga bog‘liq va kuzatuvni to‘xtatish mumkin.</p>
 
       <h2>Saqlash va o‘chirish</h2>
-      <p>Ma’lumotlar akkaunt va buyurtma munosabatlari zarur bo‘lgan muddatda saqlanadi. Akkaunt yoki ma’lumotlarni o‘chirish bo‘yicha murojaatni quyidagi yordam emailiga yuborishingiz mumkin. Email orqali murojaat yuborish ma’lumotlar avtomatik o‘chirilganini anglatmaydi.</p>
+      <p>Akkauntni profil ichidagi “Hisobni o‘chirish” orqali yoki ilovani o‘rnatmasdan <a href="./account-deletion">akkauntni o‘chirish sahifasi</a> orqali yopish mumkin. Amaldagi parol va aniq tasdiq talab qilinadi. O‘chirish qaytarilmaydi; faol buyurtma yoki qabul qilingan tashish avval yakunlanishi yoki bekor qilinishi kerak.</p>
+      <p>Ism, telefon, profil hududi, savatcha, e’lon rasmlari va haydovchi hujjatlari olib tashlanadi, eski sessiyalar va bildirishnoma obunalari bekor bo‘ladi. Shaxsiy hujjat fayllari serverdagi navbat orqali o‘chiriladi; saqlash xizmati vaqtincha ishlamasa tizim qayta urinadi va natijada fayl o‘chirish kutilayotgani ko‘rsatiladi.</p>
+      <p>Boshqa ishtirokchining tugallangan buyurtma va tashish tarixi ism, telefon, aniq manzil, surat va shaxsiy izohlarsiz saqlanadi. Akkauntni qayta tiklanib ketishdan himoyalash uchun minimal texnik identifikatorlar saqlanadi; ular bilan kirib bo‘lmaydi. Noaniq o‘chirish javobini xavfsiz qayta tekshirish uchun kontakt yoki parolning o‘zi emas, so‘rov identifikatori bilan aralashtirilgan texnik nazorat izi 7 kungacha saqlanadi va avtomatik tozalanadi. Umumiy AI xarajatining anonim hisoblagichi saqlanadi.</p>
+      <p>Avval boshqa foydalanuvchilarga ochiq tarqatilgan e’lon rasmlari yoki ulardagi nusxalarni qaytarib olish kafolatlanmaydi. Parolni unutish yoki faol buyurtma bo‘yicha muammo bo‘lsa, yordam emailiga murojaat qiling; parol va hujjat suratlarini email orqali yubormang.</p>
 
       <h2>Bog‘lanish</h2>
       <p>Turan Market bo‘yicha yordam va maxfiylik savollari uchun: <a href="mailto:fazliddin.16.09.2004@gmail.com">fazliddin.16.09.2004@gmail.com</a>.</p>

@@ -35,7 +35,7 @@ router.post("/auth/register", async (req, res) => {
     return;
   }
 
-  const existing = users.find((u) => u.phone === phone);
+  const existing = users.find((u) => u.phone === phone && !u.deleted);
   if (existing) {
     if (signInExisting === true) {
       if (!verifyPassword(password, existing.password)) {
@@ -124,7 +124,7 @@ router.post("/auth/register", async (req, res) => {
 router.post("/auth/login", (req, res) => {
   const { phone, password } = req.body as { phone: string; password: string };
 
-  const user = users.find((u) => u.phone === phone);
+  const user = users.find((u) => u.phone === phone && !u.deleted);
   if (!user || !verifyPassword(password, user.password)) {
     res.status(401).json({ error: "unauthorized", message: "Invalid phone or password" });
     return;

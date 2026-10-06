@@ -101,6 +101,10 @@ router.post("/orders", authenticateToken, async (req: AuthRequest, res) => {
     res.status(404).json({ error: "not_found", message: "Listing not found" });
     return;
   }
+  if (listing.status !== "active" || users.find(u => u.id === listing.userId)?.deleted) {
+    res.status(409).json({ error: "unavailable", message: "Bu mahsulotga buyurtma berib bo‘lmaydi." });
+    return;
+  }
   if (listing.userId === req.userId) {
     res.status(403).json({ error: "forbidden", message: "O‘z mahsulotingizga buyurtma bera olmaysiz." });
     return;

@@ -5,7 +5,8 @@ import { persistRecord } from "../lib/persistence.js";
 const router = Router();
 
 // Xotirada saqlanadigan rasmlar: id → base64 data URL
-export const imageStore = new Map<string, string>();
+import { imageStore } from "../lib/image-store.js";
+export { imageStore } from "../lib/image-store.js";
 let imgCounter = 0;
 
 function genImgId() {
@@ -60,7 +61,7 @@ router.get("/images/:id", (req, res) => {
   const [, mime, b64] = matches;
   const buf = Buffer.from(b64, "base64");
   res.setHeader("Content-Type", mime);
-  res.setHeader("Cache-Control", "public, max-age=86400");
+  res.setHeader("Cache-Control", "no-store");
   res.send(buf);
 });
 

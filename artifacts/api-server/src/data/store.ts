@@ -52,6 +52,7 @@ export interface StoredCategory {
 }
 
 export interface StoredUser {
+  deleted?: boolean;
   id: string;
   phone: string;
   name: string;

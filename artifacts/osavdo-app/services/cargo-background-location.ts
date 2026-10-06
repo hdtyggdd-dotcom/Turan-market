@@ -181,7 +181,7 @@ async function handleLocation(data?: { locations: Location.LocationObject[] }, e
       }
     });
   } catch (err) {
-    if (err instanceof ApiError && [401, 403, 404, 409].includes(err.status)) {
+    if (err instanceof ApiError && [401, 403, 404, 409, 410].includes(err.status)) {
       await stopCargoBackgroundSharing(session.loadId);
     }
     // Offline/transient errors drop this fix. Never replay old coordinates as live.
@@ -213,7 +213,7 @@ export async function reconcileCargoBackgroundSharing() {
     const tracking = await getCargoTracking(loadId, { signal: controller.signal });
     if (!tracking.canUpdate) await stopCargoBackgroundSharing(loadId);
   } catch (error) {
-    if (error instanceof ApiError && [401, 403, 404, 409].includes(error.status)) {
+    if (error instanceof ApiError && [401, 403, 404, 409, 410].includes(error.status)) {
       await stopCargoBackgroundSharing(loadId);
     }
   } finally { clearTimeout(timeout); }
