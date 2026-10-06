@@ -1,6 +1,6 @@
 ---
 name: Payment scope
-description: Owner's decision to remove Stripe from Turan Market.
+description: Owner's payment suspension and intended introductory access pricing.
 ---
 
 Keep online card payments disabled and Stripe disconnected until the owner explicitly requests re-enabling them. This is a temporary suspension, not authorization to delete historical data.
@@ -13,11 +13,13 @@ When publication is blocked by the live Stripe requirement, removing code alone 
 ## Download and introductory access pricing
 
 The owner stated: downloading the app is free, and using it is free for one month.
-The price after that month, trial start event, eligible roles, and collection
-method have not yet been specified.
+The owner specified household services ("maishiy xizmatlar") at 30,000 per month
+after introductory access. Currency, who pays, trial start event, pricing for
+other categories, and collection method remain unconfirmed.
 
 **Why:** The owner clarified the intended pricing while preparing the Google Play
 listing. Free download is distinct from free ongoing access.
 
-**How to apply:** Treat the store download as free. Do not invent the later price
-or implement a trial/paywall or reconnect payments until its terms are confirmed.
+**How to apply:** Treat the store download as free. Do not apply the household
+services price to every category, invent missing terms, or implement a
+trial/paywall or reconnect payments until its terms are confirmed.
