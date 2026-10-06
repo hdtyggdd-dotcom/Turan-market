@@ -109,9 +109,6 @@ export default function DriverVerificationScreen() {
       if (camera && Platform.OS !== 'web') {
         const p = await ImagePicker.requestCameraPermissionsAsync();
         if (!p.granted) return setErr('Kamera ruxsati berilmadi');
-      } else if (Platform.OS !== 'web') {
-        const p = await ImagePicker.requestMediaLibraryPermissionsAsync();
-        if (!p.granted) return setErr('Galereya ruxsati berilmadi');
       }
       const opts: ImagePicker.ImagePickerOptions = { mediaTypes: ['images'], base64: true, quality: 0.7 };
       const r = camera ? await ImagePicker.launchCameraAsync(opts) : await ImagePicker.launchImageLibraryAsync(opts);

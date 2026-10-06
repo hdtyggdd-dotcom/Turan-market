@@ -1,0 +1,44 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "uwYe4l5Psi6lyYBTRMyCK"
+uri = "file://artifacts/osavdo-app/docs/play-console-guide.html"
+type = "html"
+title = "Google Play uchun qo‘llanma"
+description = "Turan Market uchun tayyor tavsif, Play Console bosqichlari va hali bajarilishi kerak bo‘lgan talablar. Imzolangan AAB emas."
+logical_id = "cd3ad4fb-ca34-44fe-9501-752d4cc92a6f"
+content_hash = "sha256:1aa6a1f935eadf07ed80ad5390581394af3fc43c49d400380b250018d928956d"
+size = 6014
+mtime_ms = 1791307951747
+storage_uri = "gcs://replit-rams-assets-pike/rams/assets/repl:d034b3be-e147-4dab-ab59-99935cafc7da/cd3ad4fb-ca34-44fe-9501-752d4cc92a6f/1a8991b8-aabe-4b8e-82f9-40a93b44bd2f"
+storage_version_token = "1791308367982307"
+content_type = "text/html"
+
+[[outputs]]
+id = "ZwwRbCTq52F4MKa_TNybS"
+uri = "file://release-assets/turan-market/play-icon.png"
+type = "image"
+title = "Play Store ikonkasi"
+description = "512×512 RGB PNG — mavjud Turan Market logosi asosida."
+logical_id = "48d4f63f-c470-4f12-8526-23151289d073"
+content_hash = "sha256:99de631eda45d99424277325f146ef3f6cb0025974cf4a6cbd08f893353cb5f5"
+size = 179487
+mtime_ms = 1791307979279
+storage_uri = "gcs://replit-rams-assets-pike/rams/assets/repl:d034b3be-e147-4dab-ab59-99935cafc7da/48d4f63f-c470-4f12-8526-23151289d073/89a3d5e8-adb3-4583-a10c-76cac8179489"
+storage_version_token = "1791308369354175"
+content_type = "image/png"
+
+[[outputs]]
+id = "Oryv3ga4qOpTNKRy26___"
+uri = "file://release-assets/turan-market/feature-graphic.png"
+type = "image"
+title = "Play Store reklama rasmi"
+description = "1024×500 RGB PNG — Play Console feature graphic uchun."
+logical_id = "2c064db9-b9ff-49db-86db-da09924efc38"
+content_hash = "sha256:f2f0192a233ff96b36cded1f3717654dc9f12187e25cbc14c8b014ac322c2544"
+size = 158831
+mtime_ms = 1791308131620
+storage_uri = "gcs://replit-rams-assets-pike/rams/assets/repl:d034b3be-e147-4dab-ab59-99935cafc7da/2c064db9-b9ff-49db-86db-da09924efc38/3641b011-1b44-4eb8-ad8e-8e88a093ff13"
+storage_version_token = "1791308370694276"
+content_type = "image/png"

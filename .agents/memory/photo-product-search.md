@@ -21,3 +21,15 @@ goods in that category.
 separate facts. A failed match does not prove that stock is exhausted. Send only
 the identified product demand, not the customer's photo, location or identity.
 Suppress repetitive same-product alerts; don't alert on uncertain recognition.
+
+Use the system's selected-image picker, not permission to read the entire
+Android photo/video library, for marketplace photos and driver document images.
+
+**Why:** These flows only need images the user explicitly selects. Broad media
+permissions are unnecessary and create Google Play photo-permission review
+problems. SDK 54's image picker supports selected-image access without a library
+permission request.
+
+**How to apply:** Keep camera consent separate. Do not reintroduce a blanket
+gallery permission check that prevents a system picker from opening when broad
+media permissions are blocked in a native release.

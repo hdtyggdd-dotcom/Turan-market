@@ -22,6 +22,7 @@ import {
   type PhotoSearchResult,
 } from '@workspace/api-client-react';
 import { ListingCard } from '@/components/ListingCard';
+import { usePathname } from 'expo-router';
 
 const MAX_IMAGE_BYTES = 2 * 1024 * 1024;
 type Mime = 'image/jpeg' | 'image/png' | 'image/webp';
@@ -78,6 +79,7 @@ function MatchItem({ id, onOpen }: { id: string; onOpen: () => void }) {
 }
 
 export function PhotoProductSearch() {
+  const pathname = usePathname();
   const colors = useColors();
   const { user } = useAuth();
   const userId = user?.id ?? null;
@@ -109,6 +111,15 @@ export function PhotoProductSearch() {
     setFileError(null);
     keyRef.current = newKey();
   }, [abort]);
+
+  // Tabs can stay mounted beneath a pushed detail screen. A native Modal must
+  // also follow the route, independently of the listing card's press callback.
+  useEffect(() => {
+    if (pathname !== '/search') {
+      reset();
+      setOpen(false);
+    }
+  }, [pathname, reset]);
 
   // account change -> drop everything
   const lastUser = useRef(userId);
@@ -153,13 +164,13 @@ export function PhotoProductSearch() {
     setPermIssue(null);
     setFileError(null);
     try {
-      const perm = source === 'camera'
-        ? await ImagePicker.requestCameraPermissionsAsync()
-        : await ImagePicker.requestMediaLibraryPermissionsAsync();
-      if (version !== selectionVersion.current) return;
-      if (!perm.granted) {
-        setPermIssue({ source, canAskAgain: perm.canAskAgain });
-        return;
+      if (source === 'camera') {
+        const perm = await ImagePicker.requestCameraPermissionsAsync();
+        if (version !== selectionVersion.current) return;
+        if (!perm.granted) {
+          setPermIssue({ source, canAskAgain: perm.canAskAgain });
+          return;
+        }
       }
       const opts: ImagePicker.ImagePickerOptions = { mediaTypes: 'images', quality: 0.6, base64: true, allowsEditing: false };
       const res = source === 'camera'
@@ -334,7 +345,7 @@ export function PhotoProductSearch() {
         <Text style={[styles.btnText, { color: colors.primary }]}>Rasm orqali qidirish</Text>
       </TouchableOpacity>
 
-      <Modal visible={open} animationType="slide" onRequestClose={close} presentationStyle="pageSheet">
+      <Modal visible={open && pathname === '/search'} animationType="slide" onRequestClose={close} presentationStyle="pageSheet">
         <View style={[styles.modal, { backgroundColor: colors.background }]} testID="photo-search-modal">
           <View style={[styles.mHead, { borderBottomColor: colors.border, backgroundColor: colors.card }]}>
             <Text style={[styles.h, { color: colors.text, flex: 1 }]}>Rasm orqali qidirish</Text>
