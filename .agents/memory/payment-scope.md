@@ -37,6 +37,7 @@ foiz ham kam bo‘ladi" while defining the app's commercial terms.
 
 **How to apply:** Preserve the increasing rate and 30% cap. Sales measurement
 is the total monetary sales amount, not the number of products sold, as confirmed
-by the owner. Measurement period, exact thresholds, commission base, and
-interaction with the free introductory month are not confirmed. Do not invent a
-tier table or enable deductions before these terms are settled.
+by the owner. The owner confirmed each month's sales are measured separately,
+not lifetime sales. Exact thresholds, commission base, and interaction with the
+free introductory month are not confirmed. Do not implement an unapproved tier
+table or enable deductions before these terms are settled.
