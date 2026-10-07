@@ -3,9 +3,10 @@
 ## Hozirgi bosqich
 
 GitHub Actions’da kompyutersiz standalone APK yig‘ish uchun
-`.github/workflows/android-cloud-test.yml` tayyorlandi.
-Bu fayl tayyorlangani build ishladi degani emas: xavfsiz source sync, repository
-o‘zgaruvchilari, workflow dispatch va haqiqiy build natijasi hali kerak.
+`.github/workflows/android-cloud-test.yml` ishga tushirildi va Android test APK
+muvaffaqiyatli yig‘ildi. Joriy source `android-phone-test-...` branchida;
+`main`dagi eski loyiha fayllari almashtirilmadi. Artifact har builddan keyin
+7 kun saqlanadi. Bu native telefonda sinov yoki Google Play tasdig‘i emas.
 
 GitHub’dagi eski kodni to‘g‘ridan-to‘g‘ri build qilmang: u hozirgi login,
 kategoriya, savatcha, cargo va obuna o‘zgarishlaridan oldingi holat bo‘lishi mumkin.
@@ -15,8 +16,9 @@ eksportiga kiritilmasin. Existing remote-only kodni o‘zboshimchalik bilan o‘
 
 ## GitHub sozlamalari
 
-- Repository visibility egasi bilan tasdiqlansin. Ochiq repository’ga source
-  yuborish kodni ommaga chiqaradi; tavsiya — alohida private build repository.
+- Egasi joriy source’ni mavjud ommaviy GitHub repository’sining alohida
+  branchida saqlashni tasdiqlagan. Keyingi yangi kodni export qilishdan oldin
+  unda foydalanuvchi ma’lumoti va maxfiy kalit yo‘qligini qayta tekshiring.
 - Actions repository variable `TURAN_API_DOMAIN` tasdiqlangan production
   hostname bo‘lsin. Native build development hostname bilan chiqarilmaydi.
 - `EXPO_PUBLIC_REVENUECAT_TEST_API_KEY` faqat Test Store public SDK key.
