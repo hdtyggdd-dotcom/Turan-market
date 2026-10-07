@@ -28,6 +28,10 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          case "$GITHUB_REF_NAME" in
+            android-phone-test-*) ;;
+            *) echo "Select the android-phone-test-... branch to build the current mobile app." >&2; exit 1 ;;
+          esac
           node -e '
             const domain = process.env.EXPO_PUBLIC_DOMAIN;
             if (!domain || !/^[a-zA-Z0-9.-]+$/.test(domain) || domain.endsWith(".replit.dev")) {
