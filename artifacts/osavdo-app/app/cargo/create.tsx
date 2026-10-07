@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -11,10 +11,11 @@ import {
   ScrollView,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useRouter, Stack } from 'expo-router';
+import { useRouter, Stack, useLocalSearchParams } from 'expo-router';
 import { useColors } from '@/hooks/useColors';
 import { KeyboardAwareScrollViewCompat } from '@/components/KeyboardAwareScrollViewCompat';
 import { useLocation } from '@/context/LocationContext';
+import { useAuth } from '@/context/AuthContext';
 import {
   useCreateCargoLoad,
   CargoLoadInputCargoType,
@@ -23,6 +24,8 @@ import {
   useGetDistricts,
   getGetDistrictsQueryKey,
   TransportRecommendation,
+  useGetOrder,
+  getGetOrderQueryKey,
 } from '@workspace/api-client-react';
 
 const cargoTypeLabels: Record<string, string> = {
@@ -38,7 +41,16 @@ export default function CreateCargoLoadScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const { countryId } = useLocation();
+  const { countryId, regionId, districtId } = useLocation();
+  const { user, token } = useAuth();
+  const params = useLocalSearchParams<{ orderId?: string }>();
+  const sourceId = typeof params.orderId === 'string' ? params.orderId : '';
+  const { data: sourceOrder, isLoading: sourceLoading, isError: sourceError } = useGetOrder(sourceId, {
+    query: { enabled: !!sourceId && !!token, queryKey: [...getGetOrderQueryKey(sourceId), user?.id] },
+    request: { headers: { Authorization: `Bearer ${token}` } },
+  });
+  const sourceAllowed = !sourceId || (sourceOrder?.buyerId === user?.id && ['pending', 'confirmed'].includes(sourceOrder?.status ?? ''));
+  const applied = useRef('');
   
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -74,6 +86,38 @@ export default function CreateCargoLoadScreen() {
   const createLoad = useCreateCargoLoad();
   const recommendTransport = useRecommendCargoTransport();
   const [recommendation, setRecommendation] = useState<TransportRecommendation | null>(null);
+  const [recommendationError, setRecommendationError] = useState<string | null>(null);
+  useEffect(() => {
+    if (!sourceId || !sourceOrder || !user || !sourceAllowed || applied.current === `${user.id}:${sourceId}`) return;
+    applied.current = `${user.id}:${sourceId}`;
+    setTitle(`${sourceOrder.listing?.title ?? 'Xarid qilingan tovar'} — ${sourceOrder.quantity} ${sourceOrder.listing?.priceUnit || 'birlik'}`);
+    if (sourceOrder.listing?.categoryId === 'cat1') setCargoType(CargoLoadInputCargoType.livestock);
+    setPickupRegionId(sourceOrder.listing?.regionId ?? '');
+    setPickupDistrictId(sourceOrder.listing?.districtId ?? '');
+    setDeliveryRegionId(regionId ?? '');
+    setDeliveryDistrictId(districtId ?? '');
+    // Never invent mass/volume, exact seller addresses, budget, or a departure date.
+  }, [sourceId, sourceOrder, user?.id, sourceAllowed, regionId, districtId]);
+  useEffect(() => {
+    if (!sourceId || !sourceAllowed || !token) return;
+    const weight = Number(weightKg), volume = Number(volumeM3);
+    if (!Number.isFinite(weight) || !Number.isFinite(volume) || weight <= 0 || volume <= 0) {
+      setRecommendation(null); return;
+    }
+    let active = true;
+    setRecommendation(null);
+    setRecommendationError(null);
+    const timer = setTimeout(() => recommendTransport.mutate({ data: {
+      cargoType, weightKg: weight, volumeM3: volume,
+      lengthCm: lengthCm ? Number(lengthCm) : undefined,
+      widthCm: widthCm ? Number(widthCm) : undefined,
+      heightCm: heightCm ? Number(heightCm) : undefined,
+    } }, {
+      onSuccess: data => { if (active) setRecommendation(data); },
+      onError: () => { if (active) setRecommendationError('Transport tavsiyasi olinmadi. O‘lchamlar va internetni tekshiring yoki qayta tavsiya oling.'); },
+    }), 600);
+    return () => { active = false; clearTimeout(timer); };
+  }, [sourceId, sourceAllowed, token, cargoType, weightKg, volumeM3, lengthCm, widthCm, heightCm]);
 
   const handleRecommend = () => {
     if (!weightKg || !volumeM3) {
@@ -96,6 +140,7 @@ export default function CreateCargoLoadScreen() {
   };
 
   const handleSave = () => {
+    if (!sourceAllowed) return;
     if (!title || !weightKg || !volumeM3 || !pickupRegionId || !pickupDistrictId || !deliveryRegionId || !deliveryDistrictId || !pickupDate) {
       Alert.alert("Xato", "Iltimos, barcha majburiy maydonlarni to'ldiring.");
       return;
@@ -141,6 +186,12 @@ export default function CreateCargoLoadScreen() {
     });
   };
 
+  if (sourceId && (!token || sourceLoading || sourceError || !sourceAllowed)) {
+    return <View style={[styles.container, { backgroundColor: colors.background, padding: 24, justifyContent: 'center', gap: 16 }]}>
+      <Text style={{ color: colors.text }}>{sourceLoading && token ? 'Xarid tekshirilmoqda…' : 'Xarid topilmadi yoki bu xarid uchun yangi yuk tayyorlash mumkin emas. Buyurtmalaringizni tekshiring.'}</Text>
+      <TouchableOpacity onPress={() => router.replace(token ? '/(tabs)/orders' : '/auth/login')}><Text style={{ color: colors.primary }}>{token ? 'Buyurtmalarim' : 'Qayta kirish'}</Text></TouchableOpacity>
+    </View>;
+  }
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <Stack.Screen
@@ -287,6 +338,8 @@ export default function CreateCargoLoadScreen() {
           </Text>
         </TouchableOpacity>
 
+        {!!sourceId && <Text style={{ color: colors.mutedForeground, marginBottom: 12 }}>Xariddagi mahsulot va hududlar kiritildi. Yuk turini tekshiring. Haqiqiy og‘irlik va hajmni to‘ldirsangiz, transport avtomatik tavsiya qilinadi. Manzillarni tekshiring; faqat saqlashni tasdiqlaganingizda yuk yaratiladi.</Text>}
+        {recommendationError && <Text style={{ color: colors.destructive, marginBottom: 12 }}>{recommendationError}</Text>}
         {recommendation && (
           <View style={[styles.recommendationBox, { backgroundColor: colors.secondary, borderColor: colors.border }]}>
             <Text style={[styles.recTitle, { color: colors.primary }]}>Tavsiya: {recommendation.vehicleType.name}</Text>
@@ -323,7 +376,7 @@ export default function CreateCargoLoadScreen() {
             </TouchableOpacity>
           ))}
         </ScrollView>
-        {pickupRegionId && (pickupDistricts ?? []).length > 0 && (
+        {!!pickupRegionId && (pickupDistricts ?? []).length > 0 && (
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.horizontalScroll}>
             {pickupDistricts?.map((dist) => (
               <TouchableOpacity
@@ -366,7 +419,7 @@ export default function CreateCargoLoadScreen() {
             </TouchableOpacity>
           ))}
         </ScrollView>
-        {deliveryRegionId && (deliveryDistricts ?? []).length > 0 && (
+        {!!deliveryRegionId && (deliveryDistricts ?? []).length > 0 && (
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.horizontalScroll}>
             {deliveryDistricts?.map((dist) => (
               <TouchableOpacity

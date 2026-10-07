@@ -23,7 +23,7 @@ function NativeTabLayout() {
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name="categories">
         <Icon sf={{ default: 'square.grid.2x2', selected: 'square.grid.2x2.fill' }} />
-        <Label>Katalog</Label>
+        <Label>Kategoriyalar</Label>
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name="search">
         <Icon sf={{ default: 'plus.magnifyingglass', selected: 'plus.magnifyingglass' }} />
@@ -120,7 +120,7 @@ function ClassicTabLayout() {
       <Tabs.Screen
         name="categories"
         options={{
-          title: 'Katalog',
+          title: 'Kategoriyalar',
           tabBarIcon: ({ color }) => <Feather name="grid" size={22} color={color} />,
         }}
       />

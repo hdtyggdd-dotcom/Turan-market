@@ -2720,7 +2720,7 @@ return customFetch<Order>(getCreateOrderUrl(),
 
 export const getCreateOrderMutationKey = () => ['createOrder'] as const;
 
-export const getCreateOrderMutationOptions = <TError = ErrorType<unknown>,
+export const getCreateOrderMutationOptions = <TError = ErrorType<ErrorResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createOrder>>, TError,CreateOrderMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof createOrder>>, TError,CreateOrderMutationVariables, TContext> => {
 
@@ -2749,13 +2749,13 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
     export type CreateOrderMutationResult = NonNullable<Awaited<ReturnType<typeof createOrder>>>
     export type CreateOrderMutationBody = BodyType<CreateOrderRequest>
-    export type CreateOrderMutationError = ErrorType<unknown>
+    export type CreateOrderMutationError = ErrorType<ErrorResponse>
     export type CreateOrderMutationVariables = {data: BodyType<CreateOrderRequest>}
 
     /**
  * @summary Create a new order
  */
-export const useCreateOrder = <TError = ErrorType<unknown>,
+export const useCreateOrder = <TError = ErrorType<ErrorResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createOrder>>, TError,CreateOrderMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
  ): UseMutationResult<
         Awaited<ReturnType<typeof createOrder>>,

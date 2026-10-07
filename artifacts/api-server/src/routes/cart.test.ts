@@ -13,7 +13,8 @@ import { readCart, listingSnapshot } from "../lib/cart.js";
 const prefix = `cart-test-${randomUUID()}`;
 const buyer = { ...users[0]!, id: `${prefix}-buyer` };
 const other = { ...users[0]!, id: `${prefix}-other` };
-const product = { ...listings[0]!, id: `${prefix}-product`, userId: users[1]!.id, status: "active" as const };
+const seller = { ...users[1]!, id: `${prefix}-seller` };
+const product = { ...listings[0]!, id: `${prefix}-product`, userId: seller.id, status: "active" as const };
 const second = { ...product, id: `${prefix}-second` };
 const tokens = [generateToken(buyer.id), generateToken(other.id)];
 let server: Server;
@@ -31,8 +32,12 @@ async function request(path: string, method = "GET", body?: unknown, account: nu
 }
 const id = () => randomUUID();
 before(async () => {
-  users.push(buyer, other);
+  users.push(buyer, other, seller);
   listings.push(product, second);
+  await db.insert(appRecords).values([
+    ...[buyer, other, seller].map(user => ({ collection: "users", id: user.id, payload: user as unknown as Record<string, unknown> })),
+    ...[product, second].map(listing => ({ collection: "listings", id: listing.id, payload: listing as unknown as Record<string, unknown> })),
+  ]);
   const app = express();
   app.use(express.json());
   app.use(cartRouter);
@@ -46,6 +51,7 @@ after(async () => {
   await db.delete(appRecords).where(and(eq(appRecords.collection, "carts"), inArray(appRecords.id, [buyer.id, other.id])));
   await db.delete(appRecords).where(and(eq(appRecords.collection, "cart_operations"), like(appRecords.id, `${prefix}%`)));
   if (orderIds.length) await db.delete(appRecords).where(and(eq(appRecords.collection, "orders"), inArray(appRecords.id, orderIds)));
+  await db.delete(appRecords).where(and(inArray(appRecords.collection, ["users", "listings"]), inArray(appRecords.id, [buyer.id, other.id, seller.id, product.id, second.id])));
   for (const records of [users, listings]) {
     for (let i = records.length - 1; i >= 0; i--) if (records[i]!.id.startsWith(prefix)) records.splice(i, 1);
   }

@@ -9,6 +9,12 @@ Keep one full entry form containing name, country, GPS permission/location selec
 
 **How to apply:** Preserve returning-account access through the same form. Authentication must verify the existing password without overwriting the stored name, role, location, or orders. GPS denial must allow manual location selection rather than block account access.
 
+Preserve the published authentication entry appearance when changing cart, categories, or cargo.
+
+**Why:** The owner clarified that only the entry screen should return to the published version, while category navigation, cart, and cargo changes must remain.
+
+**How to apply:** Keep the published language/manual-country chooser and full entry form. Do not force the first-install chooser to reopen on every authentication route. Keep session-expiry security and unrelated cart/cargo functionality intact.
+
 Bound the entire GPS attempt, including permission acquisition and location detection, not only the final coordinate request.
 
 **Why:** Expo's web permission request can itself invoke geolocation without a timeout. A timeout added only after permission resolves does not prevent the entry form from waiting indefinitely.

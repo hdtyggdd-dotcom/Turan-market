@@ -15,3 +15,5 @@
 - [Browser distribution](browser-distribution.md) — always-available phone access uses the published browser app; Expo Go remains a development preview.
 - [Background location runtime](background-location-runtime.md) — background GPS needs separate consent and a native build; force-quit and browser continuity cannot be promised.
 - [Local security patches](local-security-patches.md) — version-based audits still flag local fixes; verify patched behavior and never claim a clean scan.
+- [Home and category navigation](home-catalog-navigation.md) — category browsing belongs under Kategoriyalar; home displays products and ads without a category grid.
+- [Post-purchase cargo](post-purchase-cargo.md) — automatically suggest cargo after buying; do not book transport or invent shipment measurements.

@@ -63,7 +63,7 @@ const definitive = (error: unknown) => {
 };
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
-  const { user, token } = useAuth();
+  const { user, token, expireSession } = useAuth();
   const owner = user?.id ?? null;
   const [state, setState] = useState<State>(() => empty(null));
   const current = useRef(state);
@@ -85,7 +85,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     return operation;
   }, []);
 
-  const refresh = useCallback(() => queue(async () => {
+  const refreshNow = useCallback(async () => {
     if (!owner || !token || !active()) return;
     const pendingKey = `turan_cart_pending:${owner}`;
     try {
@@ -120,11 +120,13 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       const cart = await getCart(options());
       publish({ ...cart, owner, ready: true, syncing: false, error: null });
     } catch (error) {
+      if ((error as { status?: number }).status === 401 && token && active()) await expireSession(token);
       publish({ ...current.current, owner, ready: false, syncing: false,
         error: `${message(error)} Eski savatcha va noaniq so‘rovlar qurilmada saqlanadi. Qayta urinib ko‘ring.` });
       throw error;
     }
-  }), [owner, token, active, publish, options, queue]);
+  }, [owner, token, active, publish, options, expireSession]);
+  const refresh = useCallback(() => queue(refreshNow), [queue, refreshNow]);
 
   useEffect(() => {
     const initial = empty(owner);
@@ -142,10 +144,14 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   }, [owner, refresh]);
 
   const mutate = useCallback((prepare: (cart: Cart) => Pending) => queue(async () => {
-    if (!owner || !token || !active() || current.current.owner !== owner || !current.current.ready) {
-      throw new Error('Savatcha tayyor emas. Uni yangilab, qayta urinib ko‘ring.');
-    }
+    if (!owner || !token || !active()) throw new Error('Savatdan foydalanish uchun qayta kiring.');
     const key = `turan_cart_pending:${owner}`;
+    const previous = await AsyncStorage.getItem(key);
+    if (current.current.owner !== owner || !current.current.ready || previous) {
+      await refreshNow();
+      if (!active()) throw new Error('Kirish ruxsati yangilanishi kerak. Qayta kiring.');
+      if (previous) throw new Error('Oldingi savatcha so‘rovi qayta tekshirildi. Savatdagi miqdorni tekshiring; zarur bo‘lsa keyin yangi mahsulot qo‘shing.');
+    }
     let journaled = false;
     try {
       const pending = prepare(current.current);
@@ -159,6 +165,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       await AsyncStorage.removeItem(key);
       publish({ ...cart, owner, ready: true, syncing: false, error: null });
     } catch (error) {
+      if ((error as { status?: number }).status === 401 && active()) await expireSession(token);
       let certain = definitive(error);
       if (journaled && certain) {
         try { await AsyncStorage.removeItem(key); } catch { certain = false; }
@@ -167,7 +174,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         error: `${message(error)}${journaled && !certain ? ' So‘rov holati noaniq. Savatchani yangilab, aynan shu so‘rovni qayta tekshiring.' : ''}` });
       throw error;
     }
-  }), [owner, token, active, options, publish, queue]);
+  }), [owner, token, active, options, publish, queue, refreshNow, expireSession]);
 
   const addItem = useCallback((listing: Listing, quantity = 1) => mutate(() => {
     if (listing.userId === owner) throw new Error('O‘z mahsulotingizni savatchaga qo‘sha olmaysiz.');

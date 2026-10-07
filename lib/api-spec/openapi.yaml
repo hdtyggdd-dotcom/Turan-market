@@ -775,6 +775,18 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Order"
+        "409":
+          description: Existing purchase identity conflicts with changed input or the product is unavailable; review existing orders
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "503":
+          description: Storage outcome is uncertain; retry using the original clientRequestId, never a new purchase identity
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 
   /orders/{id}:
     get:

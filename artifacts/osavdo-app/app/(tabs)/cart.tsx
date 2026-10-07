@@ -9,6 +9,7 @@ import { useColors } from '@/hooks/useColors';
 import { useAuth } from '@/context/AuthContext';
 import { useCart } from '@/context/CartContext';
 import { EmptyState } from '@/components/EmptyState';
+import { PurchaseCargoSuggestion, type CargoPurchase } from '@/components/PurchaseCargoSuggestion';
 
 const fmt = (n: number) => n.toLocaleString() + " so'm";
 
@@ -24,10 +25,11 @@ export default function CartScreen() {
   const [busy, setBusy] = useState(false);
   const lock = useRef(false);
   const [report, setReport] = useState<{ ok: number; failed: string[] } | null>(null);
+  const [purchases, setPurchases] = useState<CargoPurchase[]>([]);
   const top = Platform.OS === 'web' ? 67 : insets.top;
   const total = items.reduce((s, i) => s + i.listing.price * i.quantity, 0);
   useFocusEffect(useCallback(() => { void refresh().catch(() => {}); }, [refresh]));
-  useEffect(() => { setReport(null); }, [user?.id]);
+  useEffect(() => { setReport(null); setPurchases([]); }, [user?.id]);
   const disabled = busy || syncing || !ready;
 
   async function checkout() {
@@ -39,6 +41,7 @@ export default function CartScreen() {
     setReport(null);
     let ok = 0;
     const failed: string[] = [];
+    const successful: CargoPurchase[] = [];
     const snapshot = [...items];
     try {
       for (const it of snapshot) {
@@ -55,12 +58,14 @@ export default function CartScreen() {
             failed.push(`${name}: narx ${fmt(fresh.price)} ga o'zgardi. Yangi jami summani tekshirib, qayta tasdiqlang.`);
             continue;
           }
-          await createOrder({
+          const order = await createOrder({
             listingId: it.listing.id,
             quantity: it.quantity,
             clientRequestId: it.requestId,
           }, options);
+          if (account.current !== owner) break;
           ok += 1;
+          if (order.status === 'pending' || order.status === 'confirmed') successful.push({ orderId: order.id, title: name, quantity: order.quantity, unit: fresh.priceUnit });
           try {
             await removeItem(it.listing.id, it);
           } catch {
@@ -75,7 +80,7 @@ export default function CartScreen() {
       }
       await qc.invalidateQueries({ queryKey: getGetOrdersQueryKey() });
     } finally {
-      if (account.current === owner) setReport({ ok, failed });
+      if (account.current === owner) { setReport({ ok, failed }); setPurchases(successful); }
       setBusy(false);
       lock.current = false;
     }
@@ -83,6 +88,7 @@ export default function CartScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <PurchaseCargoSuggestion purchases={purchases} onClose={() => setPurchases([])} />
       <View style={[styles.header, { paddingTop: top + 12, backgroundColor: colors.card, borderBottomColor: colors.border }]}>
         <Text style={[styles.title, { color: colors.text }]}>Savat</Text>
         <TouchableOpacity disabled={syncing || busy} onPress={() => { void refresh().catch(() => {}); }} testID="refresh-cart">

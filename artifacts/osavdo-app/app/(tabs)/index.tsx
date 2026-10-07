@@ -12,8 +12,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import { useColors } from '@/hooks/useColors';
-import { useGetCategories, useGetListings } from '@workspace/api-client-react';
-import { CategoryGrid } from '@/components/CategoryGrid';
+import { useGetListings } from '@workspace/api-client-react';
 import { ListingCard } from '@/components/ListingCard';
 import { EmptyState } from '@/components/EmptyState';
 import { LocationPicker } from '@/components/LocationPicker';
@@ -26,14 +25,10 @@ export default function HomeScreen() {
   const insets = useSafeAreaInsets();
   const { districtName, regionName, districtId, regionId } = useLocation();
   const { user } = useAuth();
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [showLocationPicker, setShowLocationPicker] = useState(false);
   const [showAI, setShowAI] = useState(false);
 
-  const { data: categories } = useGetCategories();
-
   const { data: listingsData, isLoading, refetch, isRefetching } = useGetListings({
-    categoryId: selectedCategory ?? undefined,
     districtId: districtId ?? undefined,
     regionId: districtId ? undefined : regionId ?? undefined,
     limit: 40,
@@ -69,16 +64,6 @@ export default function HomeScreen() {
             <Feather name="chevron-down" size={14} color={colors.primary} />
           </TouchableOpacity>
         </View>
-      </View>
-
-      {/* Categories */}
-      <View style={[styles.categoriesBar, { backgroundColor: colors.card, borderBottomColor: colors.border }]}>
-        <Text style={[styles.categoriesLabel, { color: colors.mutedForeground }]}>Kategoriyalar</Text>
-        <CategoryGrid
-          categories={categories ?? []}
-          selected={selectedCategory}
-          onSelect={setSelectedCategory}
-        />
       </View>
 
       {/* Listings Grid */}
@@ -179,18 +164,6 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontFamily: 'Inter_500Medium',
     flex: 1,
-  },
-  categoriesBar: {
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    paddingTop: 8,
-  },
-  categoriesLabel: {
-    fontSize: 12,
-    fontFamily: 'Inter_500Medium',
-    paddingHorizontal: 16,
-    marginBottom: 2,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
   },
   list: {
     paddingHorizontal: 16,
