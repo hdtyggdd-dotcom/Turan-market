@@ -1,0 +1,92 @@
+name: Turan Market - Android phone test
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: android-phone-test-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  apk:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    env:
+      CI: "1"
+      EXPO_NO_TELEMETRY: "1"
+      EXPO_PUBLIC_DOMAIN: ${{ vars.TURAN_API_DOMAIN }}
+      EXPO_PUBLIC_REVENUECAT_MODE: test
+      EXPO_PUBLIC_REVENUECAT_TEST_API_KEY: ${{ vars.EXPO_PUBLIC_REVENUECAT_TEST_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Require the configured production API
+        shell: bash
+        run: |
+          set -euo pipefail
+          node -e '
+            const domain = process.env.EXPO_PUBLIC_DOMAIN;
+            if (!domain || !/^[a-zA-Z0-9.-]+$/.test(domain) || domain.endsWith(".replit.dev")) {
+              throw new Error("Set TURAN_API_DOMAIN to the confirmed public production hostname.");
+            }
+          '
+          curl --fail --silent --show-error --retry 2 "https://${EXPO_PUBLIC_DOMAIN}/api/healthz"
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.26.1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: pnpm
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - name: Install the complete, locked workspace
+        run: pnpm install --frozen-lockfile
+      - name: Validate Android preparation
+        run: pnpm --filter @workspace/osavdo-app run check:android-preparation
+      - name: Generate Android only in the disposable cloud checkout
+        working-directory: artifacts/osavdo-app
+        run: pnpm exec expo prebuild --platform android --no-install
+      - name: Install Android SDK platform
+        run: sdkmanager "platforms;android-36" "build-tools;36.0.0"
+      - name: Build standalone APK for internal phone testing
+        working-directory: artifacts/osavdo-app/android
+        run: |
+          chmod +x gradlew
+          ./gradlew :app:assembleRelease --no-daemon --max-workers=2 \
+            -PreactNativeArchitectures=arm64-v8a,armeabi-v7a \
+            -Dorg.gradle.jvmargs="-Xmx4g -XX:MaxMetaspaceSize=1g"
+      - name: Validate and name the test artifact
+        shell: bash
+        run: |
+          set -euo pipefail
+          APK=artifacts/osavdo-app/android/app/build/outputs/apk/release/app-release.apk
+          test -s "$APK"
+          mkdir -p android-delivery
+          cp "$APK" android-delivery/turan-market-internal-test.apk
+          sha256sum android-delivery/turan-market-internal-test.apk > android-delivery/SHA256SUMS.txt
+          printf '%s\n' \
+            'Internal phone test only. Uses Expo-generated debug signing, not a Play upload key.' \
+            'This APK is NOT an AAB and cannot be submitted as a production Play release.' \
+            'No live billing enabled. Camera, GPS, session, orders and SDK behavior need real-device tests.' \
+            > android-delivery/READ-ME.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: turan-market-internal-phone-test
+          path: android-delivery/
+          if-no-files-found: error
+          retention-days: 7
+      - name: Report the exact release boundary
+        run: |
+          {
+            echo "## Internal Android APK"
+            echo "Download the artifact ZIP, extract it on your phone and install the APK."
+            echo "**Not a Google Play release:** no upload key or signed AAB was created."
+            echo "No app-store submission or live-money charge was performed."
+          } >> "$GITHUB_STEP_SUMMARY"
