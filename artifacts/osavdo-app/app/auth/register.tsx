@@ -13,7 +13,7 @@ import { useAuth, type UserProfile } from '@/context/AuthContext';
 import { useRouter } from 'expo-router';
 import { useI18n } from '@/context/I18nContext';
 import { useLocation } from '@/context/LocationContext';
-import { PHONE_FORMATS, buildFullPhone, type LangCode } from '@/constants/i18n';
+import { LANGUAGE_OPTIONS, PHONE_FORMATS, buildFullPhone, type LangCode } from '@/constants/i18n';
 
 type Role = 'buyer' | 'seller' | 'driver';
 
@@ -22,7 +22,7 @@ export default function RegisterScreen() {
   const insets = useSafeAreaInsets();
   const { signIn } = useAuth();
   const router = useRouter();
-  const { t, setLangByCountry } = useI18n();
+  const { t, lang, setLang } = useI18n();
   const { setLocation, countryId, regionId: savedRegionId, districtId: savedDistrictId } = useLocation();
   const topPad = Platform.OS === 'web' ? 67 : insets.top;
   const botPad = Platform.OS === 'web' ? 34 : insets.bottom;
@@ -37,7 +37,7 @@ export default function RegisterScreen() {
   const [role, setRole] = useState<Role>('buyer');
   const [regionId, setRegionId] = useState(savedRegionId ?? '');
   const [districtId, setDistrictId] = useState(savedDistrictId ?? '');
-  const [step, setStep] = useState<1 | 2>(1);
+  const [showLanguagePicker, setShowLanguagePicker] = useState(false);
   const [showCountryPicker, setShowCountryPicker] = useState(false);
   const [isDetecting, setIsDetecting] = useState(false);
   const [gpsNotice, setGpsNotice] = useState('');
@@ -72,13 +72,12 @@ export default function RegisterScreen() {
     mutation: {
       onSuccess: async (data) => {
         await signIn(data.token, data.user as UserProfile);
-        router.replace(role === 'driver' ? '/driver/verification' : '/(tabs)');
+        router.replace(data.user.role === 'driver' ? '/driver/verification' : '/(tabs)');
       },
       onError: (err: unknown) => {
         const details = (err as { data?: { error?: string; message?: string } })?.data;
         if (details?.error === 'location_required') {
-          setFormError(details.message ?? '');
-          setStep(2);
+          setFormError(details.message ?? t('selectRegion'));
           return;
         }
         setFormError(details?.message ?? 'Kirish amalga oshmadi. Internetni tekshirib, qayta urinib ko‘ring.');
@@ -96,14 +95,10 @@ export default function RegisterScreen() {
     if (!name.trim())          { setFormError(t('enterName')); return; }
     if (phoneDigits.length !== fmt.maxDigits) { setFormError(t('enterPhone')); return; }
     if (password.length < 6)   { setFormError(t('passwordTooShort')); return; }
-    handleRegister(false);
+    handleRegister();
   }
 
-  function handleRegister(requireLocation = true) {
-    if (requireLocation && (!regionId || !districtId)) {
-      setFormError(t('selectRegion'));
-      return;
-    }
+  function handleRegister() {
     const fullPhone = buildFullPhone(fmt.dialCode, phoneDigits);
     registerMutation.mutate({
       data: { name: name.trim(), phone: fullPhone, password, role, signInExisting: true, regionId: regionId || undefined, districtId: districtId || undefined },
@@ -112,7 +107,6 @@ export default function RegisterScreen() {
 
   function handleSelectCountry(c: { id: string; name: string; flag: string; currency: string; dialCode: string }) {
     setLocation({ countryId: c.id, countryName: c.name, countryFlag: c.flag, currency: c.currency, regionId: null, regionName: null, districtId: null, districtName: null, lat: null, lng: null });
-    setLangByCountry(c.id);
     setPhoneDigits('');
     setRegionId('');
     setDistrictId('');
@@ -163,7 +157,6 @@ export default function RegisterScreen() {
         districtId: detectedDistrict || null, districtName: detected.districtName ?? null,
         lat: coords.latitude, lng: coords.longitude,
       });
-      setLangByCountry(detected.countryId);
       setRegionId(detected.regionId);
       setDistrictId(detectedDistrict);
       setGpsNotice(`${detected.countryName} · ${detected.regionName}${detected.districtName ? ` · ${detected.districtName}` : ''}`);
@@ -183,20 +176,13 @@ export default function RegisterScreen() {
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       {/* Header */}
       <View style={[styles.header, { paddingTop: topPad + 16, backgroundColor: colors.card, borderBottomColor: colors.border }]}>
-        <TouchableOpacity onPress={() => setStep(1)} disabled={step === 1} style={styles.backBtn}>
-          {step === 2 && <Feather name="arrow-left" size={22} color={colors.text} />}
+        <TouchableOpacity onPress={() => router.replace('/(tabs)')} style={styles.backBtn} accessibilityLabel="Bosh sahifaga qaytish">
+          <Feather name="arrow-left" size={22} color={colors.text} />
         </TouchableOpacity>
         <Text style={[styles.headerTitle, { color: colors.text }]}>
-          {step === 1 ? 'Kirish / Ro‘yxatdan o‘tish' : t('locationStep')}
+          {t('login')} / {t('register')}
         </Text>
         <View style={{ width: 40 }} />
-      </View>
-
-      {/* Step indicator */}
-      <View style={[styles.stepBar, { backgroundColor: colors.card }]}>
-        <View style={[styles.stepDot, { backgroundColor: colors.primary }]} />
-        <View style={[styles.stepLine, { backgroundColor: step === 2 ? colors.primary : colors.border }]} />
-        <View style={[styles.stepDot, { backgroundColor: step === 2 ? colors.primary : colors.border }]} />
       </View>
 
       <ScrollView
@@ -205,11 +191,36 @@ export default function RegisterScreen() {
         keyboardShouldPersistTaps="handled"
       >
         {!!formError && <Text accessibilityRole="alert" style={{ color: colors.destructive }}>{formError}</Text>}
-        {step === 1 ? (
-          <>
+        <>
             <Text style={{ color: colors.mutedForeground, fontSize: 13 }}>
-              Yangi hisob shu yerda yaratiladi. Avval ro‘yxatdan o‘tgan bo‘lsangiz, eski telefon raqamingiz va parolingiz bilan kirasiz.
+              Kirish kodini o‘zingiz tanlaysiz. Oldin ro‘yxatdan o‘tgan bo‘lsangiz, eski telefon raqamingiz va parolingiz bilan kiring. Keyingi safar sessiya saqlanadi.
             </Text>
+            <TouchableOpacity
+              testID="auth-language-selector"
+              onPress={() => setShowLanguagePicker(!showLanguagePicker)}
+              style={[styles.countrySelector, { backgroundColor: colors.card, borderColor: colors.border }]}
+            >
+              <Feather name="globe" size={20} color={colors.primary} />
+              <Text style={[styles.countrySelectorName, { flex: 1, color: colors.text }]}>
+                Til / Language: {LANGUAGE_OPTIONS.find(option => option.code === lang)?.label}
+              </Text>
+              <Feather name={showLanguagePicker ? 'chevron-up' : 'chevron-down'} size={16} color={colors.mutedForeground} />
+            </TouchableOpacity>
+            {showLanguagePicker && (
+              <View style={[styles.pickerDropdown, { backgroundColor: colors.card, borderColor: colors.border }]}>
+                {LANGUAGE_OPTIONS.map(option => (
+                  <TouchableOpacity
+                    key={option.code}
+                    testID={`auth-language-${option.code}`}
+                    style={[styles.pickerRow, { borderBottomColor: colors.border }]}
+                    onPress={() => { setLang(option.code); setShowLanguagePicker(false); }}
+                  >
+                    <Text style={[styles.pickerName, { color: lang === option.code ? colors.primary : colors.text }]}>{option.label}</Text>
+                    {lang === option.code && <Feather name="check" size={16} color={colors.primary} />}
+                  </TouchableOpacity>
+                ))}
+              </View>
+            )}
             <TouchableOpacity testID="registration-gps" onPress={() => { void handleGps(); }} disabled={isDetecting || registerMutation.isPending}
               style={[styles.countrySelector, { borderColor: colors.primary, backgroundColor: colors.secondary }]}>
               {isDetecting ? <ActivityIndicator color={colors.primary} /> : <Feather name="map-pin" size={20} color={colors.primary} />}
@@ -282,18 +293,20 @@ export default function RegisterScreen() {
               </View>
             </View>
 
-            {/* Password */}
+            {/* Owner-selected secret; the server still verifies the account's existing password. */}
             <View style={styles.fieldGroup}>
-              <Text style={[styles.label, { color: colors.mutedForeground }]}>{t('password')}</Text>
+              <Text style={[styles.label, { color: colors.mutedForeground }]}>{lang === 'uz' ? 'Kirish kodi' : t('password')}</Text>
               <View style={[styles.inputRow, { borderColor: colors.border, backgroundColor: colors.muted }]}>
                 <Feather name="lock" size={16} color={colors.mutedForeground} />
                 <TextInput
+                  testID="auth-code"
                   style={[styles.input, { color: colors.text }]}
-                  placeholder="••••••"
+                  placeholder={lang === 'uz' ? 'Kamida 6 ta belgi' : t('enterPassword')}
                   placeholderTextColor={colors.mutedForeground}
                   value={password}
                   onChangeText={setPassword}
                   secureTextEntry={!showPassword}
+                  autoCapitalize="none"
                 />
                 <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
                   <Feather name={showPassword ? 'eye-off' : 'eye'} size={16} color={colors.mutedForeground} />
@@ -325,20 +338,9 @@ export default function RegisterScreen() {
               </View>
             </View>
 
-            <TouchableOpacity
-              style={[styles.nextBtn, { backgroundColor: colors.primary, opacity: registerMutation.isPending || isDetecting ? 0.7 : 1 }]}
-              onPress={handleNext}
-              disabled={registerMutation.isPending || isDetecting}
-            >
-              {registerMutation.isPending ? <ActivityIndicator color="#fff" /> : <Text style={styles.nextBtnText}>{t('nextBtn')}</Text>}
-              <Feather name="arrow-right" size={18} color="#fff" />
-            </TouchableOpacity>
-          </>
-        ) : (
-          <>
             <Text style={[styles.stepTitle, { color: colors.text }]}>{t('locationStep')}</Text>
             <Text style={[styles.stepSubtitle, { color: colors.mutedForeground }]}>
-              Bu sizga eng yaqin e'lonlarni ko'rsatish uchun kerak
+              Yangi hisob uchun viloyat va tumanni tanlang. Oldingi hisobga kirishda saqlangan joylashuvingiz o‘zgarmaydi.
             </Text>
 
             {/* Region */}
@@ -392,21 +394,21 @@ export default function RegisterScreen() {
             )}
 
             <TouchableOpacity
-              style={[styles.nextBtn, { backgroundColor: colors.primary, opacity: registerMutation.isPending ? 0.7 : 1 }]}
-              onPress={() => handleRegister()}
-              disabled={registerMutation.isPending}
+              testID="auth-submit"
+              style={[styles.nextBtn, { backgroundColor: colors.primary, opacity: registerMutation.isPending || isDetecting ? 0.7 : 1 }]}
+              onPress={handleNext}
+              disabled={registerMutation.isPending || isDetecting}
             >
               {registerMutation.isPending ? (
                 <ActivityIndicator color="#fff" />
               ) : (
                 <>
-                  <Text style={styles.nextBtnText}>{t('registerBtn')}</Text>
+                  <Text style={styles.nextBtnText}>{t('login')} / {t('register')}</Text>
                   <Feather name="check" size={18} color="#fff" />
                 </>
               )}
             </TouchableOpacity>
-          </>
-        )}
+        </>
 
         <TouchableOpacity onPress={() => { void Linking.openURL(`${getBaseUrl()}/api/privacy-policy`); }}>
           <Text style={{ color: colors.primary, textAlign: 'center', fontSize: 13 }}>Maxfiylik siyosati</Text>
@@ -424,12 +426,6 @@ const styles = StyleSheet.create({
   },
   headerTitle: { fontSize: 17, fontFamily: 'Inter_600SemiBold' },
   backBtn: { width: 40 },
-  stepBar: {
-    flexDirection: 'row', alignItems: 'center',
-    paddingHorizontal: 24, paddingVertical: 12,
-  },
-  stepDot: { width: 12, height: 12, borderRadius: 6 },
-  stepLine: { flex: 1, height: 2 },
   content: { padding: 20, gap: 16 },
   stepTitle: { fontSize: 20, fontFamily: 'Inter_700Bold' },
   stepSubtitle: { fontSize: 14, fontFamily: 'Inter_400Regular', marginTop: -8 },

@@ -71,16 +71,24 @@ export default function ProfileScreen() {
     query: { enabled: !!user?.id, queryKey: getGetUserListingsQueryKey(user?.id ?? '') },
   });
 
+  async function confirmSignOut() {
+    const signedOut = await signOut();
+    if (signedOut) router.replace('/auth/login');
+  }
+
   function handleSignOut() {
+    if (Platform.OS === 'web') {
+      if (typeof window !== 'undefined' && window.confirm('Rostdan ham hisobdan chiqmoqchimisiz?')) {
+        void confirmSignOut();
+      }
+      return;
+    }
     Alert.alert("Chiqish", "Rostdan ham chiqmoqchimisiz?", [
       { text: "Bekor qilish", style: "cancel" },
       {
         text: "Chiqish",
         style: "destructive",
-        onPress: async () => {
-          await signOut();
-          router.replace('/auth/login');
-        },
+        onPress: () => { void confirmSignOut(); },
       },
     ]);
   }
