@@ -2,6 +2,11 @@ name: Turan Market - Android phone test
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - android-phone-test-20261007130437
+    paths:
+      - '.github/workflows/android-cloud-test.yml'
 
 permissions:
   contents: read
