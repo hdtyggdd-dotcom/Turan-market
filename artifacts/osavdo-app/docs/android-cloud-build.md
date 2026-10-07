@@ -29,7 +29,8 @@ eksportiga kiritilmasin. Existing remote-only kodni o‘zboshimchalik bilan o‘
 ## Telefonda olish
 
 GitHub → repository → Actions → **Turan Market - Android phone test**
-→ **Run workflow**. Muvaffaqiyatli run ichidagi
+→ **Run workflow**. Branch sifatida `android-phone-test-...` ni tanlang;
+`main`da eski kod turibdi. Muvaffaqiyatli run ichidagi
 **turan-market-internal-phone-test** ZIP’ni yuklab olib oching.
 Ichidagi `turan-market-internal-test.apk` ni o‘rnating.
 Android kerak bo‘lsa aynan shu brauzer/file manager uchun o‘rnatish ruxsatini
