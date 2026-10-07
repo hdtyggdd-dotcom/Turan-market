@@ -14,9 +14,11 @@ When publication is blocked by the live Stripe requirement, removing code alone 
 
 The owner wants payments within Uzbekistan first, with international payment functions added later. The domestic phase includes both customer product-purchase payments and household-service provider subscriptions / seller commissions.
 
-**Why:** The owner explicitly set this order while preparing the app for Google Play and confirmed both payment purposes.
+Include the requested card-acceptance scope for Uzum, AVO and other banks, including Visa where supported. Do not treat an issuer name as proof of the card network or guaranteed acceptance.
 
-**How to apply:** Scope the first payment phase to Uzbekistan. Confirm the payment purpose and provider eligibility before integration; do not assume a global provider supports an Uzbekistan merchant or activate international payments as part of this phase. Preserve the already agreed pricing rules.
+**Why:** The owner explicitly set this order while preparing the app for Google Play, confirmed both payment purposes, and authorized support for these cards.
+
+**How to apply:** Scope the first payment phase to Uzbekistan. Confirm merchant eligibility and actual card acceptance before integration; do not assume a global provider supports an Uzbekistan merchant or activate international payments as part of this phase. Preserve the already agreed pricing rules.
 
 ## Download and introductory access pricing
 

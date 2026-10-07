@@ -19,7 +19,7 @@ router.get("/privacy-policy", (_req, res) => {
   <body>
     <main>
       <h1>Turan Market maxfiylik siyosati</h1>
-      <p class="muted">Yangilangan sana: 6-oktabr 2026</p>
+      <p class="muted">Yangilangan sana: 7-oktabr 2026</p>
       <p>Turan Market foydalanuvchilarga mahsulot, xizmat va yuk tashish e’lonlarini joylash, ko‘rish va kelishuv qilish imkonini beradi.</p>
 
       <h2>Qanday ma’lumotlar yig‘iladi</h2>
@@ -34,12 +34,14 @@ router.get("/privacy-policy", (_req, res) => {
 
       <h2>To‘lovlar</h2>
       <p>Ilova ichida onlayn karta to‘lovlari hozircha mavjud emas. Turan Market karta raqami, amal qilish muddati yoki xavfsizlik kodini so‘ramaydi va saqlamaydi.</p>
+      <p>Ustalar obunasi bo‘limida faqat RevenueCat Test Store sinov xaridlari mavjud. Ekrandagi sinov narxi haqiqiy tarif emas va pul yechilmaydi. Haqiqiy obuna, bepul oy va bank orqali to‘lovlar hozircha yoqilmagan.</p>
 
       <h2>Ma’lumotlardan foydalanish</h2>
       <p>Ma’lumotlar akkauntni boshqarish, e’lonlarni ko‘rsatish, buyurtmalarni bajarish, yuk tashishni tashkil qilish va xavfsizlikni ta’minlash uchun ishlatiladi. Ma’lumotlar reklama maqsadida sotilmaydi.</p>
 
       <h2>Uchinchi tomon xizmatlari</h2>
       <p>Akkaunt, e’lon va buyurtma ma’lumotlari API serveri va PostgreSQL bazasida saqlanadi. Haydovchi hujjat fayllari shaxsiy App Storage’da saqlanadi va faqat vakolatli tekshiruv uchun ochiladi.</p>
+      <p>Ustalar obunasi bo‘limi ochilganda RevenueCat xizmatiga ichki akkaunt identifikatori va SDK so‘rovlari yuboriladi; sinov xaridi va obuna holati shu xizmatda qayd qilinadi. Integratsiya ism, telefon raqami yoki GPS ma’lumotini RevenueCat’ga yubormaydi. Xizmat tarmoq so‘rovlari orqali texnik ma’lumotlarni ham qayta ishlashi mumkin. Xaridni tiklash va holatni ko‘rsatish uchun shu xizmatdan foydalaniladi.</p>
       <p>AI maslahat uchun yuborilgan matn va rasm orqali qidirishda tanlangan surat Anthropic AI xizmatiga ishlov berish uchun yuboriladi. Rasmli qidiruvning asl surati qidiruv tarixi sifatida bazaga saqlanmaydi; rasm va shaxsiy kontakt sotuvchilarga yuborilmaydi. Anthropic o‘z ma’lumotlarni saqlash va xavfsizlik shartlariga ega. Suratga ortiqcha shaxsiy ma’lumot kiritmang.</p>
       <p>Telefon bildirishnomalari yoqilganda texnik push token va xabar Expo push xizmatiga yuboriladi. Haydovchi alohida rozilik bilan faqat faol tashish uchun fon GPS’ni ulashadi; ekran yopiq holatdagi ish operatsion tizim cheklovlariga bog‘liq va kuzatuvni to‘xtatish mumkin.</p>
 

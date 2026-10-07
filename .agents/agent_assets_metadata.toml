@@ -42,3 +42,17 @@ mtime_ms = 1791308131620
 storage_uri = "gcs://replit-rams-assets-pike/rams/assets/repl:d034b3be-e147-4dab-ab59-99935cafc7da/2c064db9-b9ff-49db-86db-da09924efc38/3641b011-1b44-4eb8-ad8e-8e88a093ff13"
 storage_version_token = "1791308370694276"
 content_type = "image/png"
+
+[[outputs]]
+id = "FgDOKKbFlzTj2HNvt7VC6"
+uri = "file://artifacts/osavdo-app/docs/payment-merchant-brief.html"
+type = "html"
+title = "Turan Market — bankka to‘lov ulash uchun murojaat"
+description = "Bankka yuboriladigan tayyor matn, karta qabul qilish talablari, kelishilgan tariflar va ulanishdan oldingi tekshiruvlar."
+logical_id = "4cbd2d96-edcb-4b99-8699-14d3c2afdb39"
+content_hash = "sha256:76f2ff42b8405d01a15b0ad8f6365bf84c942da6a1aece6eb668a0379d53bb65"
+size = 6472
+mtime_ms = 1791357622777
+storage_uri = "gcs://replit-rams-assets-pike/rams/assets/repl:d034b3be-e147-4dab-ab59-99935cafc7da/4cbd2d96-edcb-4b99-8699-14d3c2afdb39/dc14a139-669e-46ab-8792-0321cc358751"
+storage_version_token = "1791357675215318"
+content_type = "text/html"

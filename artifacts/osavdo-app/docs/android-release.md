@@ -57,6 +57,7 @@ Tayyorlangan: 2026-10-06. Bu tayyorgarlik hujjati; imzolangan AAB yaratilmadi va
 | AI matni | Maslahat va mahsulot tasnifi | Anthropic provider, ephemeral processing va retention shartlari |
 | Haydovchi hujjatlari va transport ma’lumoti | Admin tekshiruvi | Personal/other information, private access, retention |
 | Buyurtma narxi va tarixi | Savatcha, savdo, tashish | Purchase history; bank karta ma’lumoti yig‘ilmaydi |
+| Ichki akkaunt IDsi, sinov obunasi/xaridi va SDK texnik so‘rovlari | RevenueCat Test Store’dagi ustalar obunasi sinovi | Pseudonymous user ID, purchase history, SDK data; live billing disabled; provider retention/deletion reviewed before launch |
 | Xabarlar va push token | Ilova ichidagi bildirishnoma va telefon xabarlari | Messages/device identifiers, optional notification permission |
 
 Ma’lumot almashish bo‘yicha Google’dagi “service provider” istisnolari va shartnomalar tekshirilsin; “hech narsa yig‘ilmaydi” yoki “hech narsa uchinchi tomonga uzatilmaydi” deb noto‘g‘ri belgilanmasin. To‘lovlar hozir yoqilmagan. Kelajakdagi ustalar obunasi va sotuvchi komissiyasining billing talablari alohida ko‘rib chiqilishi kerak.

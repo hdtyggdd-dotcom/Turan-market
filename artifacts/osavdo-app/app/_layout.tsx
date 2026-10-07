@@ -55,6 +55,7 @@ function RootLayoutNav() {
     <CargoPushListener />
     <Stack>
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+      <Stack.Screen name="subscription" options={{ headerShown: false }} />
       <Stack.Screen
         name="auth/login"
         options={{ headerShown: false, animation: 'fade' }}

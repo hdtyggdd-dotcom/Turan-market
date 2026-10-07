@@ -3,17 +3,23 @@ name: Single authentication form
 description: Owner's single-entry requirement and bounded GPS permission handling.
 ---
 
-Keep one full entry form containing name, country, GPS permission/location selection, phone, and password. Do not reintroduce a separate phone-only sign-in screen.
+Keep one full entry form containing language selection, manual country selection or optional GPS permission/location selection, name, phone, and the authentication credential. Do not reintroduce a separate phone-only sign-in screen or put required entry controls only in an initial popup or second step.
 
-**Why:** The owner explicitly asked to remove the short phone/password/country form and keep the fuller registration experience.
+**Why:** The owner explicitly asked to keep the fuller registration experience and repeated that language, country or GPS, name, phone, and code must all be in the entry section itself.
 
-**How to apply:** Preserve returning-account access through the same form. Authentication must verify the existing password without overwriting the stored name, role, location, or orders. GPS denial must allow manual location selection rather than block account access.
+**How to apply:** Preserve returning-account access through the same form without overwriting the stored name, role, location, or orders. GPS denial must allow manual location selection rather than block account access. Any retained password path must still verify the existing password.
+
+The owner explicitly chose a code received by SMS, not a self-selected password, for the unified entry form.
+
+**Why:** The owner was offered both meanings of “code” and selected SMS verification.
+
+**How to apply:** Implement actual phone verification through a connected SMS provider. Do not substitute a password field, mock delivery, accept a fixed test code, or remove working account access before real delivery and verification are available. Preserve existing account identities and profile data during the authentication transition.
 
 Preserve the published authentication entry appearance when changing cart, categories, or cargo.
 
 **Why:** The owner clarified that only the entry screen should return to the published version, while category navigation, cart, and cargo changes must remain.
 
-**How to apply:** Keep the published language/manual-country chooser and full entry form. Do not force the first-install chooser to reopen on every authentication route. Keep session-expiry security and unrelated cart/cargo functionality intact.
+**How to apply:** Keep language/manual-country selection available inside the full entry form. Do not force an additional first-install chooser to reopen on authentication routes. Keep session-expiry security and unrelated cart/cargo functionality intact.
 
 Bound the entire GPS attempt, including permission acquisition and location detection, not only the final coordinate request.
 

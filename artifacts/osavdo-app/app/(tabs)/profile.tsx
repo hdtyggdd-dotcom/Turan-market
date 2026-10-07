@@ -190,6 +190,24 @@ export default function ProfileScreen() {
           <Feather name="chevron-right" size={20} color={colors.mutedForeground} />
         </TouchableOpacity>
 
+        {user.role === 'seller' && (
+          <TouchableOpacity
+            style={[styles.ordersBtn, { backgroundColor: colors.card, borderColor: colors.border }]}
+            onPress={() => router.push('/subscription' as never)}
+            testID="open-subscription"
+            accessibilityRole="button"
+            accessibilityLabel="Ustalar obunasi (sinov)"
+          >
+            <View style={styles.ordersBtnLeft}>
+              <View style={[styles.ordersBtnIcon, { backgroundColor: colors.primary + '15' }]}>
+                <Feather name="award" size={20} color={colors.primary} />
+              </View>
+              <Text style={[styles.ordersBtnText, { color: colors.text }]}>Ustalar obunasi (sinov)</Text>
+            </View>
+            <Feather name="chevron-right" size={20} color={colors.mutedForeground} />
+          </TouchableOpacity>
+        )}
+
         {/* Orders Link */}
         <TouchableOpacity
           style={[styles.ordersBtn, { backgroundColor: colors.card, borderColor: colors.border }]}

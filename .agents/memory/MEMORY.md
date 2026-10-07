@@ -17,3 +17,5 @@
 - [Local security patches](local-security-patches.md) — version-based audits still flag local fixes; verify patched behavior and never claim a clean scan.
 - [Home and category navigation](home-catalog-navigation.md) — category browsing belongs under Kategoriyalar; home displays products and ads without a category grid.
 - [Post-purchase cargo](post-purchase-cargo.md) — automatically suggest cargo after buying; do not book transport or invent shipment measurements.
+- [RevenueCat sandbox](revenuecat-sandbox.md) — keep provider subscriptions test-only; generic projects may lack a Test Store, and the USD sample is not live pricing.
+- [Android cloud release](android-cloud-release.md) — approve source visibility before export; cloud test APK is not a signed Play AAB or a completed release.

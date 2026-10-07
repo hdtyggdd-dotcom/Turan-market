@@ -6,6 +6,7 @@ import { fileURLToPath } from "node:url";
 const appDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const root = path.resolve(appDir, "../..");
 const config = JSON.parse(fs.readFileSync(path.join(appDir, "app.json"), "utf8")).expo;
+assert(config.name && !config.name.startsWith(".") && !config.name.endsWith("."), "Android Gradle project name cannot start or end with a dot");
 assert.equal(config.android.package, "com.turanmarket.app", "Preserve the existing Android application identity");
 assert(Number.isSafeInteger(config.android.versionCode) && config.android.versionCode > 0);
 assert.match(config.version, /^\d+\.\d+\.\d+$/);
