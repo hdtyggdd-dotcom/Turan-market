@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { Platform } from 'react-native';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -14,7 +14,6 @@ import {
 } from '@expo-google-fonts/inter';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import '@/services/cargo-background-location';
 import { reconcileCargoBackgroundSharing } from '@/services/cargo-background-location';
 import { AppState } from 'react-native';
@@ -22,10 +21,11 @@ import { AuthProvider } from '@/context/AuthContext';
 import { CartProvider } from '@/context/CartContext';
 import { LocationProvider } from '@/context/LocationContext';
 import { I18nProvider } from '@/context/I18nContext';
-import { CountrySetupModal } from '@/components/CountrySetupModal';
 import { CargoBackgroundStatus } from '@/components/cargo/CargoBackgroundStatus';
 
-SplashScreen.preventAutoHideAsync();
+if (Platform.OS !== 'web') {
+  void SplashScreen.preventAutoHideAsync();
+}
 import { CargoPushListener } from '@/components/cargo/CargoNotifications';
 
 const queryClient = new QueryClient({
@@ -78,8 +78,6 @@ function RootLayoutNav() {
   );
 }
 
-const COUNTRY_SETUP_KEY = 'osavdo_country_setup_done';
-
 export default function RootLayout() {
   const [fontsLoaded, fontError] = useFonts({
     Inter_400Regular,
@@ -87,23 +85,13 @@ export default function RootLayout() {
     Inter_600SemiBold,
     Inter_700Bold,
   });
-  const [showCountrySetup, setShowCountrySetup] = useState(false);
-
   useEffect(() => {
     if (fontsLoaded || fontError) {
-      SplashScreen.hideAsync();
-      AsyncStorage.getItem(COUNTRY_SETUP_KEY).then((done) => {
-        if (!done) setShowCountrySetup(true);
-      });
+      void SplashScreen.hideAsync();
     }
   }, [fontsLoaded, fontError]);
 
   if (!fontsLoaded && !fontError) return null;
-
-  function handleCountrySetupDone() {
-    AsyncStorage.setItem(COUNTRY_SETUP_KEY, '1').catch(() => {});
-    setShowCountrySetup(false);
-  }
 
   return (
     <SafeAreaProvider>
@@ -116,10 +104,6 @@ export default function RootLayout() {
                 <GestureHandlerRootView style={{ flex: 1 }}>
                   <KeyboardProvider>
                     <RootLayoutNav />
-                    <CountrySetupModal
-                      visible={showCountrySetup}
-                      onDone={handleCountrySetupDone}
-                    />
                   </KeyboardProvider>
                 </GestureHandlerRootView>
               </LocationProvider>

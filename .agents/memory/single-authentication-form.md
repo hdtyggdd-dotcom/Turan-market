@@ -9,11 +9,11 @@ Keep one full entry form containing language selection, manual country selection
 
 **How to apply:** Preserve returning-account access through the same form without overwriting the stored name, role, location, or orders. GPS denial must allow manual location selection rather than block account access. Any retained password path must still verify the existing password.
 
-The owner explicitly chose a code received by SMS, not a self-selected password, for the unified entry form.
+The owner clarified that the account holder chooses their own code; it is not an SMS-delivered code. A valid login should remain saved rather than requesting the code at every app launch.
 
-**Why:** The owner was offered both meanings of “code” and selected SMS verification.
+**Why:** After the SMS option was presented, the owner explicitly corrected it to a self-chosen, remembered code.
 
-**How to apply:** Implement actual phone verification through a connected SMS provider. Do not substitute a password field, mock delivery, accept a fixed test code, or remove working account access before real delivery and verification are available. Preserve existing account identities and profile data during the authentication transition.
+**How to apply:** Retain the existing hashed password credential behind the user-facing “kirish kodi” wording, including verification for returning users. Persist the authenticated session until explicit sign-out, server expiry, or revocation; do not prompt on every app launch. Preserve existing account identities and profile data. Do not add SMS or a fixed test code.
 
 Preserve the published authentication entry appearance when changing cart, categories, or cargo.
 

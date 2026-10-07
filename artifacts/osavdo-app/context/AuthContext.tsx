@@ -34,7 +34,7 @@ interface AuthContextType {
   token: string | null;
   isLoading: boolean;
   signIn: (token: string, user: UserProfile) => Promise<void>;
-  signOut: () => Promise<void>;
+  signOut: () => Promise<boolean>;
   finishAccountDeletion: () => Promise<void>;
   updateUser: (user: UserProfile) => Promise<void>;
   expireSession: (expectedToken: string) => Promise<void>;
@@ -143,15 +143,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       } catch (error) {
         if ((error as { status?: number }).status !== 410) {
           Alert.alert('Chiqish amalga oshmadi', 'Push obunasini xavfsiz o‘chirish uchun internetga ulanib, qayta urinib ko‘ring.');
-          return;
+          return false;
         }
       }
       await AsyncStorage.removeItem('osavdo_cargo_push_token');
     }
     await AsyncStorage.multiRemove([TOKEN_KEY, USER_KEY, 'osavdo_auth_session']);
+    sessionVersion.current++;
+    tokenRef.current = null;
     setToken(null);
     setUser(null);
     queryClient.clear();
+    return true;
   }, [queryClient]);
 
   const updateUser = useCallback(async (u: UserProfile) => {

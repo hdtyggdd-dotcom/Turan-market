@@ -20,3 +20,9 @@ Declare Metro/Babel plugins and presets used by the mobile app directly in that 
 **Why:** The local development workspace could bundle successfully while a clean pnpm cloud checkout failed to resolve the Expo Babel preset during the native release bundle. Transitive Expo dependencies are not a substitute for direct package ownership in a strict workspace install.
 
 **How to apply:** For native cloud builds, verify a clean frozen install and the release JavaScript bundle; do not use a successful dev-server preview as proof that production Android bundling works.
+
+Connected GitHub workflow-dispatch requests in this workspace returned empty HTTP 500 responses through both the proxy and its SDK. A separate, temporary branch push trigger did eventually queue an Actions run, but it only appeared in the runs API after a delay; the branch was restored to manual-only afterward.
+
+**Why:** An immediate runs API check showed no new run even though GitHub later queued the event. A successfully updated source branch by itself was still not proof that an APK was built.
+
+**How to apply:** Allow for delayed Actions event indexing, then verify both a successful run and its artifact before calling an APK current. Keep the workflow manual-only rather than leaving an automatic cost-bearing trigger as a workaround. If the connected API still cannot start a run, direct the owner to the exact branch and workflow in GitHub Actions for a manual start.
