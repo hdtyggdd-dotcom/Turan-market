@@ -53,6 +53,10 @@ jobs:
       - name: Generate Android only in the disposable cloud checkout
         working-directory: artifacts/osavdo-app
         run: pnpm exec expo prebuild --platform android --no-install
+      - uses: android-actions/setup-android@v3
+        with:
+          packages: ""
+          log-accepted-android-sdk-licenses: false
       - name: Install Android SDK platform
         run: sdkmanager "platforms;android-36" "build-tools;36.0.0"
       - name: Build standalone APK for internal phone testing
