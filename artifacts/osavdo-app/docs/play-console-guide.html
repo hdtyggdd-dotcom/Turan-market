@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="uz"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Turan Market — Google Play tayyorgarligi</title>
+<style>
+body{font:16px/1.65 system-ui,sans-serif;color:#17212b;background:#f4f7f6;margin:0;padding:30px 16px}
+main{max-width:820px;margin:auto;background:#fff;padding:32px;border-radius:16px}
+h1,h2{line-height:1.25}h1{font-size:30px}h2{margin-top:30px;font-size:21px}
+.notice{padding:18px;background:#fff3d8;border-left:4px solid #bd7c06;border-radius:6px}
+.ready{padding:18px;background:#eaf8ef;border-left:4px solid #15834b;border-radius:6px}
+code{background:#eef2f4;padding:3px 6px;overflow-wrap:anywhere}a{color:#087c57}li{margin:8px 0}
+textarea{width:100%;box-sizing:border-box;font:15px/1.6 system-ui;padding:14px;border:1px solid #cfdad7;border-radius:8px}
+small{color:#59656f} @media print{body{background:#fff;padding:0}main{padding:0}.notice,.ready{break-inside:avoid}}
+</style>
+<main>
+<small>2026-10-06 • Tayyorlangan materiallar, hali store tasdig‘i emas</small>
+<h1>Turan Market’ni Google Play’ga tayyorlash</h1>
+<div class="notice"><strong>Imzolangan AAB fayli hali yaratilmagan.</strong> Replit hozir Google Play’ga to‘g‘ridan-to‘g‘ri submission’ni qo‘llamaydi. Native Android build, signing va Play Console yuklash mustaqil chiqarish jarayonida bajariladi.</div>
+<h2>Tayyorlangan qismlar</h2>
+<div class="ready">Android package <code>com.turanmarket.app</code>; versiya <code>1.0.0</code>; birinchi versionCode <code>1</code>. Mavjud Turan logosi asosida launcher va Play Store ikonkalari, feature graphic hamda o‘zbekcha tavsif tayyorlandi. Galereya faqat tanlangan suratga kiradigan tizim picker’idan foydalanadi; mikrofon va keng storage/media ruxsatlari bloklangan.</div>
+<h2>Play Console’ga ko‘chirish</h2>
+<p><strong>App name:</strong> Turan Market</p>
+<p><strong>Short description:</strong></p>
+<textarea rows="2" readonly>Mahsulotlar, xizmatlar va yuk tashishni bir joydan toping.</textarea>
+<p><strong>Description:</strong></p>
+<textarea rows="17" readonly>Turan Market — mahsulot sotib olish, e’lon joylash, xizmat topish va yuk tashishni tashkil qilish uchun savdo ilovasi.
+
+Kategoriya, hudud, narx va matn bo‘yicha e’lonlarni izlang. O‘zingizning mahsulot yoki xizmat e’lonlaringizni joylang va boshqaring.
+
+Mahsulotni suratga oling yoki galereyadan rasm tanlang. AI katalogdagi mos tovarlarni izlashga yordam beradi. Mos faol e’lon topilmasa, shu kategoriyadagi sotuvchilarga talab xabari yuboriladi. Mijozning rasmi sotuvchilarga yuborilmaydi. AI xato qilishi mumkin.
+
+Mahsulotlarni savatchaga qo‘shing, buyurtma yuboring va buyurtmalaringizni kuzating.
+
+Yuk e’loni joylang, haydovchi takliflarini ko‘ring va tashish jarayonini kuzating. Haydovchi alohida rozilik bilan faol yukda GPS ulashishi mumkin. Fon GPS telefon va operatsion tizim cheklovlariga bog‘liq.
+
+AI maslahat orqali ilovadan foydalanish haqida savol bering. Mahsulotlarga talab va yuklar haqidagi xabarlarni ilova ichida ko‘ring.
+
+Yuklab olish bepul. Onlayn karta to‘lovlari hozir yoqilmagan. Narx, mavjudlik va yetkazish shartlarini sotuvchi bilan aniqlashtiring.</textarea>
+<p><strong>Website:</strong> <a href="https://turanmarket.net">https://turanmarket.net</a><br>
+<strong>Privacy policy:</strong> <a href="https://turanmarket.net/api/privacy-policy">https://turanmarket.net/api/privacy-policy</a><br>
+<strong>Account deletion:</strong> <a href="https://turanmarket.net/api/account-deletion">https://turanmarket.net/api/account-deletion</a> (yangi backend chiqarilgandan keyin)<br>
+<strong>Yordam emaili:</strong> <a href="mailto:fazliddin.16.09.2004@gmail.com">fazliddin.16.09.2004@gmail.com</a></p>
+<h2>Hali hal qilinadigan talablar</h2>
+<ol>
+<li><strong>Akkaunt o‘chirish:</strong> profil ichidagi “Hisobni o‘chirish” va tashqi web sahifa qo‘shildi. Production backend yangi versiyasini chiqaring va yuqoridagi manzil ochilishini tekshiring. Faol buyurtmalar oldin yopiladi; boshqa tomonning tugallangan tarixi kontaktsiz saqlanadi.</li>
+<li><strong>Maxfiylik va Data safety:</strong> ism/telefon, manzil/GPS, AI’ga yuboriladigan surat/matn, hujjatlar, buyurtma tarixi va push ma’lumotlari bilan mos deklaratsiyalar kerak. Hozirgi siyosat yakuniy store-ready siyosat deb tasdiqlanmagan.</li>
+<li><strong>Fon GPS:</strong> background location va foreground service deklaratsiyalari, disclosure va tushuntiruvchi video. Haqiqiy Android release’da ekran o‘chiq holat ham sinovdan o‘tsin.</li>
+<li><strong>Haqiqiy skrinshotlar:</strong> kamida 2 ta Android telefon skrinshoti; mocked AI test natijalarini haqiqiy aniqlik isboti sifatida ishlatmang.</li>
+<li><strong>Production API va native build:</strong> yangi funksiyalar internetdagi backend’da bo‘lsin. Native build’da <code>EXPO_PUBLIC_DOMAIN=turanmarket.net</code> berilsin; development manzili kiritilmasin. Imzolangan AAB’da target API 36+, signing va 16 KB native kutubxona mosligi tekshirilsin.</li>
+</ol>
+<h2>Yuklash tartibi</h2>
+<ol><li>Play Console → Create app → App → Free.</li><li>Main store listing: tavsif, 512×512 ikonka, 1024×500 feature graphic, haqiqiy skrinshotlar.</li><li>App content: privacy policy, Data safety, audience, content rating, app access va permission deklaratsiyalari.</li><li>Internal testing: imzolangan AAB; pre-launch report va haqiqiy qurilma sinovi.</li><li>Akkauntingiz talab qilsa Closed testing va Production access. Muddat va testchi sonini Console ko‘rsatadi.</li><li>Kamchiliklar yopilgach Production review’ga yuboring. Google tasdig‘i oldindan kafolatlanmaydi.</li></ol>
+<p>To‘lovlarni bu tayyorgarlik davomida yoqmadik. Keyingi obuna/komissiya shartlari va store billing qoidalari alohida ko‘rib chiqiladi.</p>
+<h2>Rasmiy manbalar</h2>
+<p><a href="https://docs.replit.com/features/artifact-types/building-mobile-apps">Replit mobile publishing</a> •
+<a href="https://support.google.com/googleplay/android-developer/answer/11926878">Google target API</a> •
+<a href="https://support.google.com/googleplay/android-developer/answer/17190352">Google developer policy</a> •
+<a href="https://docs.expo.dev/versions/v54.0.0/sdk/imagepicker/">Expo system photo picker</a></p>
+</main></html>

@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "Turan Market",
-    "slug": "osavdo-app",
+    "name": "Turan Market.",
+    "slug": "turanmarket",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/turan-logo.png",
-    "scheme": "osavdo-app",
+    "icon": "./assets/images/android-icon.png",
+    "scheme": "turanmarket",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "splash": {
@@ -14,10 +14,30 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": false
+      "supportsTablet": false,
+      "bundleIdentifier": "com.turanmarket.app"
     },
-    "android": {},
+    "android": {
+      "package": "com.turanmarket.app",
+      "versionCode": 1,
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/android-adaptive-foreground.png",
+        "backgroundColor": "#000000"
+      },
+      "blockedPermissions": [
+        "android.permission.RECORD_AUDIO",
+        "android.permission.READ_MEDIA_IMAGES",
+        "android.permission.READ_MEDIA_VIDEO",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE"
+      ],
+      "permissions": [
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION"
+      ]
+    },
     "web": {
+      "output": "single",
       "favicon": "./assets/images/icon.png"
     },
     "plugins": [
@@ -28,7 +48,26 @@
         }
       ],
       "expo-font",
-      "expo-web-browser"
+      "expo-web-browser",
+      "expo-notifications",
+      [
+        "expo-image-picker",
+        {
+          "cameraPermission": "Mahsulotni izlash, e’lon va haydovchi hujjatlarini suratga olish uchun kamera kerak.",
+          "photosPermission": "E’lon yoki hujjat uchun o‘zingiz tanlagan rasmni yuklash mumkin.",
+          "microphonePermission": false
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Yuk egasiga yo‘ldagi GPS holatingizni ulashish uchun joylashuvga ruxsat bering.",
+          "locationAlwaysAndWhenInUsePermission": "Faqat siz yoqqan yuk kuzatuvida ekran yopiq paytda ham GPS yuk egasiga yuboriladi. Istalgan payt to‘xtatishingiz mumkin.",
+          "isIosBackgroundLocationEnabled": true,
+          "isAndroidBackgroundLocationEnabled": true,
+          "isAndroidForegroundServiceEnabled": true
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,

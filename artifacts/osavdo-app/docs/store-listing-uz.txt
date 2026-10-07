@@ -1,0 +1,43 @@
+ILOVA NOMI (30 belgigacha)
+Turan Market
+
+QISQA TAVSIF (80 belgigacha)
+Mahsulotlar, xizmatlar va yuk tashishni bir joydan toping.
+
+TO‘LIQ TAVSIF
+Turan Market — mahsulot sotib olish, e’lon joylash, xizmat topish va yuk tashishni tashkil qilish uchun savdo ilovasi.
+
+Mahsulotlar va xizmatlar
+Kategoriya, hudud, narx va matn bo‘yicha e’lonlarni izlang. Narx, tavsif va sotuvchi ma’lumotlarini ko‘ring. O‘zingizning mahsulot yoki xizmat e’lonlaringizni joylang va boshqaring.
+
+Rasm orqali qidirish
+Mahsulotni suratga oling yoki galereyadan rasm tanlang. AI katalogdagi mos tovar e’lonlarini izlashga yordam beradi. Mos faol e’lon topilmasa, shu kategoriyada tovar e’loni bor sotuvchilarga mahsulotga talab haqida xabar yuboriladi. Mijozning rasmi va shaxsiy ma’lumotlari sotuvchilarga yuborilmaydi. AI natijasi xato bo‘lishi mumkin; katalogda mos e’lon topilmagani barcha do‘konlarda mahsulot tugaganini anglatmaydi.
+
+Savatcha va buyurtmalar
+Mahsulotlarni savatchaga qo‘shing, buyurtma yuboring va buyurtmalaringizni kuzating.
+
+Yuk tashish
+Yuk e’loni joylang, haydovchi takliflarini ko‘ring va tashish jarayonini kuzating. Tasdiqlangan haydovchi o‘zi yoqqan faol tashish vaqtida joylashuvini yuk egasi bilan ulashishi mumkin. Fon GPS alohida ruxsat talab qiladi va operatsion tizim cheklovlariga bog‘liq.
+
+AI maslahat
+Ilova imkoniyatlari va undan foydalanish haqida savol bering. AI tavsiyalari kafolatlangan professional maslahat emas.
+
+Bildirishnomalar
+Mahsulotlarga talab va yuklar haqidagi xabarlarni ilova ichida ko‘ring. Telefon bildirishnomalari alohida ruxsat va mos native sozlamalarni talab qiladi.
+
+Yuklab olish bepul. Hozir ilova ichida onlayn karta to‘lovlari yoqilmagan. Ilk oy bepul foydalanish va keyingi tariflar bo‘yicha yakuniy chiqarish shartlari Play Console va ilovadagi amaldagi funksiyalar bilan mos bo‘lishi kerak.
+
+E’lonlar va mahsulotlar foydalanuvchilar tomonidan joylanadi. Mavjudlik, narx va yetkazib berish shartlarini sotuvchi bilan aniqlashtiring.
+
+TEXNIK MA’LUMOT
+Android package: com.turanmarket.app
+Ilova versiyasi: 1.0.0
+Android versionCode: 1 (agar oldin yuklangan bo‘lsa, undan katta qiymat kerak)
+Website: https://turanmarket.net
+Privacy policy: https://turanmarket.net/api/privacy-policy
+Account deletion: https://turanmarket.net/api/account-deletion (backend yangi versiyasi chiqarilgandan keyin)
+Ommaviy yordam emaili: fazliddin.16.09.2004@gmail.com
+Kategoriya taklifi: Shopping / Xaridlar (yakuniy tanlov egasiniki)
+
+HALI TO‘LDIRILADIGAN QISMLAR
+Haqiqiy Android skrinshotlari, kontent reytingi, auditoriya va Data safety deklaratsiyasi. Akkauntni o‘chirishning ilova ichidagi yo‘li va web sahifasi qo‘shilgan; production backend yangilanib, shu sahifa ochilishi tekshirilsin. Yordam emailini Play Console’da ham kiriting. Bu matn imzolangan AAB yoki Google tasdig‘i emas.

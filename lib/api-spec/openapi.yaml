@@ -26,8 +26,131 @@ tags:
     description: Delivery estimation
   - name: sellers
     description: Seller management
+  - name: cargo
+    description: Turan Market cargo logistics
 
 paths:
+  /cart:
+    get:
+      operationId: getCart
+      tags: [cart]
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200":
+          description: Account cart
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Cart" }
+        "401":
+          description: Authentication required
+        "503": { description: Cart storage temporarily unavailable }
+    delete:
+      operationId: clearCart
+      tags: [cart]
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CartClearInput" }
+      responses:
+        "200":
+          description: Updated cart
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Cart" }
+        "400": { description: Invalid input }
+        "401": { description: Authentication required }
+        "409": { description: Cart changed; refresh before clearing }
+        "503": { description: Cart storage temporarily unavailable }
+  /cart/items:
+    post:
+      operationId: addCartItem
+      tags: [cart]
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CartAddInput" }
+      responses:
+        "200":
+          description: Updated cart; repeated operation is not applied twice
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Cart" }
+        "400": { description: Invalid input }
+        "401": { description: Authentication required }
+        "403": { description: Own listing }
+        "404": { description: Listing not found }
+        "409": { description: Unavailable listing or quantity conflict }
+        "503": { description: Cart storage temporarily unavailable }
+  /cart/items/{listingId}:
+    parameters:
+      - name: listingId
+        in: path
+        required: true
+        schema: { type: string, minLength: 1 }
+    patch:
+      operationId: updateCartItem
+      tags: [cart]
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CartQuantityInput" }
+      responses:
+        "200":
+          description: Updated cart; checkout request identity is unchanged
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Cart" }
+        "400": { description: Invalid input }
+        "401": { description: Authentication required }
+        "409": { description: Item changed; refresh cart }
+        "503": { description: Cart storage temporarily unavailable }
+    delete:
+      operationId: removeCartItem
+      tags: [cart]
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CartRemoveInput" }
+      responses:
+        "200":
+          description: Updated cart
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Cart" }
+        "400": { description: Invalid input }
+        "401": { description: Authentication required }
+        "409": { description: Item changed; refresh cart }
+        "503": { description: Cart storage temporarily unavailable }
+  /cart/merge:
+    post:
+      operationId: mergeCart
+      tags: [cart]
+      security: [{ bearerAuth: [] }]
+      description: Import a legacy device cart once. Overlapping unsubmitted items use the higher quantity, not a sum. Distinct purchase identities with existing orders remain separate rows for safe retries.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CartMergeInput" }
+      responses:
+        "200":
+          description: Merged account cart
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Cart" }
+        "400": { description: Invalid input }
+        "401": { description: Authentication required }
+        "409": { description: Purchase identity conflict; local data remains intact }
+        "403": { description: Own listing }
+        "503": { description: Cart storage temporarily unavailable }
   /healthz:
     get:
       operationId: healthCheck
@@ -45,7 +168,7 @@ paths:
     post:
       operationId: register
       tags: [auth]
-      summary: Register new user
+      summary: Register new user or sign into an existing account through the unified form
       requestBody:
         required: true
         content:
@@ -53,12 +176,24 @@ paths:
             schema:
               $ref: "#/components/schemas/RegisterRequest"
       responses:
+        "200":
+          description: Existing account authenticated when signInExisting is true
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
         "201":
           description: User created
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/AuthResponse"
+        "401":
+          description: Existing account password is incorrect
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "400":
           description: Validation error
           content:
@@ -90,6 +225,29 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+
+  /account-deletion:
+    post:
+      operationId: deleteAccount
+      tags: [auth]
+      summary: Permanently close an account after password confirmation
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AccountDeletionInput" }
+      responses:
+        "200":
+          description: Account closed; private-file removal may still be retrying
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AccountDeletionResult" }
+        "400": { description: Invalid input or missing explicit confirmation }
+        "401": { description: Invalid account credentials }
+        "409": { description: "Active order, active transport, or last administrator" }
+        "429": { description: Too many attempts }
+        "503": { description: Storage temporarily unavailable; retry with the same request identity }
 
   /auth/me:
     get:
@@ -415,11 +573,80 @@ paths:
         "204":
           description: Deleted
 
+  /ai/photo-search:
+    post:
+      operationId: searchProductByPhoto
+      tags: [ai]
+      summary: Identify a photographed product and find catalogue matches
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/PhotoSearchInput" }
+      responses:
+        "200":
+          description: Recognition, matches and category seller demand notification result
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/PhotoSearchResult" }
+        "400": { description: Invalid image or request }
+        "401": { description: Sign in required }
+        "409": { description: Request identity reused for a different photo }
+        "429": { description: Shared AI budget exhausted }
+        "503": { description: Recognition unavailable or original request still processing }
+
+  /ai/advice:
+    post:
+      operationId: requestAiAdvice
+      tags: [ai]
+      summary: Request authenticated advice within the shared usage budget
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AiAdviceInput"
+      responses:
+        "200":
+          description: Advice generated
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [reply]
+                properties:
+                  reply: { type: string }
+        "400":
+          description: Invalid or oversized input
+        "401":
+          description: Sign in required
+        "429":
+          description: Account allowance or global budget exhausted
+          headers:
+            Retry-After:
+              schema: { type: integer }
+              description: Seconds until the daily allowance resets, if applicable
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+        "503":
+          description: Advice service unavailable
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+
   /listings/{id}/analyse:
     get:
       operationId: analyseListingMarket
       tags: [listings]
       summary: Get market analysis for a listing
+      description: Owner only. Successful AI advice is cached for five minutes without consuming allowance. Limit messages appear in adviceError while market statistics remain available.
+      security:
+        - bearerAuth: []
       parameters:
         - name: id
           in: path
@@ -536,12 +763,30 @@ paths:
             schema:
               $ref: "#/components/schemas/CreateOrderRequest"
       responses:
+        "200":
+          description: Existing order returned for a repeated client request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
         "201":
           description: Order created
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/Order"
+        "409":
+          description: Existing purchase identity conflicts with changed input or the product is unavailable; review existing orders
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "503":
+          description: Storage outcome is uncertain; retry using the original clientRequestId, never a new purchase identity
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 
   /orders/{id}:
     get:
@@ -604,6 +849,473 @@ paths:
               schema:
                 $ref: "#/components/schemas/StatsSummary"
 
+  /cargo-loads:
+    get:
+      operationId: getCargoLoads
+      tags: [cargo]
+      summary: List cargo loads
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - name: status
+          in: query
+          schema: { type: string, enum: [open, negotiating, accepted, in_transit, delivered, cancelled] }
+        - name: pickupRegionId
+          in: query
+          schema: { type: string }
+        - name: deliveryRegionId
+          in: query
+          schema: { type: string }
+        - name: mine
+          in: query
+          description: Return only cargo loads owned by the authenticated user
+          schema: { type: boolean }
+      responses:
+        "200":
+          description: Cargo loads
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/CargoLoad" }
+    post:
+      operationId: createCargoLoad
+      tags: [cargo]
+      summary: Create a cargo load
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CargoLoadInput" }
+      responses:
+        "201":
+          description: Cargo load created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CargoLoad" }
+
+  /cargo-loads/recommendation:
+    post:
+      operationId: recommendCargoTransport
+      tags: [cargo]
+      summary: Get a deterministic transport recommendation
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CargoRecommendationInput" }
+      responses:
+        "200":
+          description: Transport recommendation
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/TransportRecommendation" }
+        "422":
+          description: No configured vehicle can carry this cargo
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+
+  /cargo-loads/{id}:
+    get:
+      operationId: getCargoLoad
+      tags: [cargo]
+      summary: Get cargo load detail including offers
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Cargo load
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CargoLoadDetail" }
+        "404": { description: Cargo load not found }
+
+  /cargo-loads/{id}/tracking:
+    get:
+      operationId: getCargoTracking
+      tags: [cargo]
+      summary: Get live cargo route and tracking history
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Cargo tracking
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CargoTracking" }
+        "404": { description: Cargo load not found }
+    patch:
+      operationId: updateCargoTracking
+      tags: [cargo]
+      summary: Update the live cargo route stage
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CargoTrackingUpdateInput" }
+      responses:
+        "200":
+          description: Tracking updated
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CargoTracking" }
+        "403": { description: Only the assigned driver can update tracking }
+        "409": { description: Cargo has no accepted driver }
+
+  /cargo-loads/{id}/location:
+    put:
+      operationId: updateCargoLocation
+      tags: [cargo]
+      summary: Share assigned driver's latest GPS fix
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CargoLocationInput" }
+      responses:
+        "200":
+          description: Location saved
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CargoTracking" }
+
+  /cargo-trips:
+    get:
+      operationId: getCargoTrips
+      tags: [cargo]
+      summary: List cargo assigned to the current driver or owned by the current shipper
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200":
+          description: Participant cargo trips
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/CargoLoad" }
+
+  /cargo-loads/{id}/offers:
+    post:
+      operationId: createCargoOffer
+      tags: [cargo]
+      summary: Submit a driver offer for a cargo load
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CargoOfferInput" }
+      responses:
+        "201":
+          description: Offer created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CargoOffer" }
+        "422":
+          description: Driver vehicle or remaining capacity is incompatible with the cargo
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+
+  /cargo-loads/{id}/offers/{offerId}/counter:
+    post:
+      operationId: counterCargoOffer
+      tags: [cargo]
+      summary: Counter a driver offer
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+        - { name: offerId, in: path, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CargoCounterInput" }
+      responses:
+        "200":
+          description: Countered offer
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CargoOffer" }
+
+  /cargo-loads/{id}/offers/{offerId}/counter-decision:
+    post:
+      operationId: respondCargoCounter
+      tags: [cargo]
+      summary: Let the offering driver accept or reject a shipper counter offer
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+        - { name: offerId, in: path, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CargoCounterDecisionInput" }
+      responses:
+        "200":
+          description: Counter decision recorded
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CargoOffer" }
+
+  /cargo-loads/{id}/offers/{offerId}/accept:
+    post:
+      operationId: acceptCargoOffer
+      tags: [cargo]
+      summary: Accept an offer and reserve the load
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+        - { name: offerId, in: path, required: true, schema: { type: string } }
+      responses:
+        "200":
+          description: Accepted offer
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CargoOffer" }
+
+  /drivers:
+    get:
+      operationId: getDrivers
+      tags: [cargo]
+      summary: List available driver profiles
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - name: regionId
+          in: query
+          schema: { type: string }
+      responses:
+        "200":
+          description: Drivers
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/DriverProfile" }
+
+  /vehicle-types:
+    get:
+      operationId: getVehicleTypes
+      tags: [cargo]
+      summary: List cargo vehicle types and capacities
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200":
+          description: Vehicle types
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/VehicleType" }
+
+  /notifications:
+    get:
+      operationId: getNotifications
+      tags: [notifications]
+      summary: List in-app notifications for the current user
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200":
+          description: Notifications
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/CargoNotification" }
+
+  /notifications/{id}/read:
+    post:
+      operationId: markNotificationRead
+      tags: [notifications]
+      summary: Mark an in-app notification as read
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Notification marked as read
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CargoNotification" }
+        "404": { description: Notification not found }
+
+  /push-tokens:
+    post:
+      operationId: registerPushToken
+      tags: [notifications]
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/PushTokenInput" }
+      responses:
+        "200":
+          description: Registered
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/PushRegistration" }
+    delete:
+      operationId: unregisterPushToken
+      tags: [notifications]
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/PushTokenInput" }
+      responses:
+        "200":
+          description: Unregistered
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/PushRegistration" }
+
+  /drivers/me/verification:
+    get:
+      operationId: getMyDriverVerification
+      tags: [Cargo]
+      responses:
+        "200":
+          description: Private driver application
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/DriverVerification" }
+    put:
+      operationId: submitDriverVerification
+      tags: [Cargo]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/DriverVerificationInput" }
+      responses:
+        "200":
+          description: Application saved for moderation
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/DriverVerification" }
+  /drivers/me/documents:
+    post:
+      operationId: uploadDriverDocument
+      tags: [Cargo]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/DriverDocumentInput" }
+      responses:
+        "201":
+          description: Private document saved
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/DriverVerification" }
+  /drivers/{id}/documents/{documentId}:
+    get:
+      operationId: getDriverDocumentUrl
+      tags: [Cargo]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+        - { name: documentId, in: path, required: true, schema: { type: string } }
+      responses:
+        "200":
+          description: Short-lived read URL for owner or moderator only
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [url]
+                properties:
+                  url: { type: string }
+  /admin/drivers:
+    get:
+      operationId: listDriverVerifications
+      tags: [Cargo]
+      responses:
+        "200":
+          description: Moderator driver queue
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/DriverVerification" }
+  /admin/drivers/{id}/verification:
+    patch:
+      operationId: reviewDriverVerification
+      tags: [Cargo]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/DriverReviewInput" }
+      responses:
+        "200":
+          description: Review persisted
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/DriverVerification" }
+  /cargo-loads/{id}/driver-rating:
+    post:
+      operationId: rateCargoDriver
+      tags: [Cargo]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/DriverRatingInput" }
+      responses:
+        "201":
+          description: Verified trip rating saved
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/DriverRating" }
+  /drivers/{id}:
+    get:
+      operationId: getDriver
+      tags: [cargo]
+      summary: Get a driver profile
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      responses:
+        "200":
+          description: Driver
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/DriverProfile" }
+
 components:
   securitySchemes:
     bearerAuth:
@@ -612,6 +1324,110 @@ components:
       bearerFormat: JWT
 
   schemas:
+    AccountDeletionInput:
+      type: object
+      additionalProperties: false
+      required: [phone, password, confirmation, requestId]
+      properties:
+        phone: { type: string, minLength: 3, maxLength: 32 }
+        password: { type: string, minLength: 1, maxLength: 256 }
+        confirmation: { type: boolean, enum: [true] }
+        requestId: { type: string, format: uuid }
+    AccountDeletionResult:
+      type: object
+      required: [status, filesPending]
+      properties:
+        status: { type: string, enum: [deleted] }
+        filesPending: { type: boolean }
+    Cart:
+      type: object
+      required: [items, revision]
+      properties:
+        revision: { type: integer, minimum: 0 }
+        items:
+          type: array
+          items: { $ref: "#/components/schemas/CartItem" }
+    CartItem:
+      type: object
+      required: [listing, quantity, requestId]
+      properties:
+        listing: { $ref: "#/components/schemas/Listing" }
+        quantity: { type: integer, minimum: 1, maximum: 999 }
+        requestId: { type: string, pattern: "^[A-Za-z0-9_-]{8,160}$" }
+    PhotoSearchInput:
+      type: object
+      additionalProperties: false
+      required: [data, mimeType, requestId]
+      properties:
+        data: { type: string, minLength: 8, maxLength: 2800000 }
+        mimeType: { type: string, enum: [image/jpeg, image/png, image/webp] }
+        requestId: { type: string, pattern: "^[A-Za-z0-9_-]{8,100}$" }
+    PhotoSearchResult:
+      type: object
+      required: [recognized, productName, categoryId, categoryName, listingIds, unavailableCount, notificationStatus, notifiedSellerCount]
+      properties:
+        recognized: { type: boolean }
+        productName: { type: ["string", "null"] }
+        categoryId: { type: ["string", "null"] }
+        categoryName: { type: ["string", "null"] }
+        listingIds:
+          type: array
+          items: { type: string }
+        unavailableCount: { type: integer }
+        notificationStatus:
+          type: string
+          enum: [not_needed, unrecognized, sent, already_sent, no_sellers]
+        notifiedSellerCount: { type: integer }
+    AiAdviceInput:
+      type: object
+      required: [message]
+      properties:
+        message: { type: string, minLength: 1, maxLength: 4000 }
+        context:
+          type: object
+          additionalProperties: false
+          properties:
+            category: { type: string, maxLength: 200 }
+            region: { type: string, maxLength: 200 }
+            price: { type: number }
+    CartAddInput:
+      type: object
+      required: [listingId, quantity, requestId, operationId]
+      properties:
+        listingId: { type: string, minLength: 1 }
+        quantity: { type: integer, minimum: 1, maximum: 999 }
+        requestId: { type: string, pattern: "^[A-Za-z0-9_-]{8,160}$" }
+        operationId: { type: string, pattern: "^[A-Za-z0-9_-]{8,160}$" }
+    CartQuantityInput:
+      type: object
+      required: [quantity, requestId, operationId, revision]
+      properties:
+        quantity: { type: integer, minimum: 1, maximum: 999 }
+        requestId: { type: string, pattern: "^[A-Za-z0-9_-]{8,160}$" }
+        operationId: { type: string, pattern: "^[A-Za-z0-9_-]{8,160}$" }
+        revision: { type: integer, minimum: 0 }
+        refreshListing: { type: boolean }
+    CartRemoveInput:
+      type: object
+      required: [requestId, operationId, quantity]
+      properties:
+        requestId: { type: string, pattern: "^[A-Za-z0-9_-]{8,160}$" }
+        operationId: { type: string, pattern: "^[A-Za-z0-9_-]{8,160}$" }
+        quantity: { type: integer, minimum: 1, maximum: 999 }
+    CartClearInput:
+      type: object
+      required: [revision, operationId]
+      properties:
+        revision: { type: integer, minimum: 0 }
+        operationId: { type: string, pattern: "^[A-Za-z0-9_-]{8,160}$" }
+    CartMergeInput:
+      type: object
+      required: [items, operationId]
+      properties:
+        operationId: { type: string, pattern: "^[A-Za-z0-9_-]{8,160}$" }
+        items:
+          type: array
+          items: { $ref: "#/components/schemas/CartItem" }
     HealthStatus:
       type: object
       properties:
@@ -644,6 +1460,9 @@ components:
     RegisterRequest:
       type: object
       properties:
+        signInExisting:
+          type: boolean
+          description: Use the full form for existing accounts as well; new accounts still require a valid location.
         phone:
           type: string
         name:
@@ -792,6 +1611,10 @@ components:
         regionId:
           type: string
         regionName:
+          type: string
+        districtId:
+          type: string
+        districtName:
           type: string
         distanceKm:
           type: number
@@ -1055,9 +1878,6 @@ components:
       required:
         - title
         - price
-        - categoryId
-        - regionId
-        - districtId
 
     ListingsResponse:
       type: object
@@ -1228,6 +2048,11 @@ components:
     CreateOrderRequest:
       type: object
       properties:
+        clientRequestId:
+          type: string
+          description: Optional per-buyer idempotency key for retrying a cart checkout
+          minLength: 8
+          maxLength: 160
         listingId:
           type: string
         quantity:
@@ -1286,6 +2111,12 @@ components:
         advice:
           type: string
           nullable: true
+        adviceStatus:
+          type: string
+          enum: [ready, unavailable]
+        adviceError:
+          type: string
+          nullable: true
 
     StatsSummary:
       type: object
@@ -1319,3 +2150,336 @@ components:
         - totalOrders
         - activeListings
         - topCategories
+
+    VehicleType:
+      type: object
+      required: [id, name, nameRu, capacityKg, capacityM3, supportedCargoTypes]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        nameRu: { type: string }
+        capacityKg: { type: number }
+        capacityM3: { type: number }
+        supportedCargoTypes:
+          type: array
+          items: { type: string, enum: [general, fragile, perishable, livestock, hazardous, construction] }
+
+    DriverProfile:
+      type: object
+      required: [id, userId, user, vehicleType, vehiclePlate, availableFrom, currentRegionId, rating, ratingCount, completedTrips, sharedLoadAvailableKg, sharedLoadAvailableM3]
+      properties:
+        operational: { type: boolean }
+        reviewStatus: { type: string, enum: [none, pending, approved, rejected] }
+        capacityKg: { type: number }
+        capacityM3: { type: number }
+        verifiedDocuments:
+          type: array
+          items: { $ref: "#/components/schemas/DriverDocument" }
+        ratingHistory:
+          type: array
+          items: { $ref: "#/components/schemas/DriverRating" }
+        id: { type: string }
+        userId: { type: string }
+        user: { $ref: "#/components/schemas/User" }
+        vehicleType: { $ref: "#/components/schemas/VehicleType" }
+        vehiclePlate: { type: string }
+        availableFrom: { type: string, format: date-time }
+        currentRegionId: { type: string }
+        rating: { type: number }
+        ratingCount: { type: integer }
+        completedTrips: { type: integer }
+        sharedLoadAvailableKg: { type: number }
+        sharedLoadAvailableM3: { type: number }
+        bio: { type: ["string", "null"] }
+
+    DriverDocumentInput:
+      type: object
+      required: [kind, data, mimeType]
+      properties:
+        kind: { type: string, enum: [identity, license, registration] }
+        data: { type: string, description: Base64 image, maximum 5 MB decoded }
+        mimeType: { type: string, enum: [image/jpeg, image/png] }
+    DriverReviewInput:
+      type: object
+      required: [status, revision, reason, documents]
+      properties:
+        status: { type: string, enum: [pending, approved, rejected] }
+        revision: { type: integer }
+        reason: { type: string, maxLength: 1000 }
+        documents:
+          type: array
+          items:
+            type: object
+            required: [id, status]
+            properties:
+              id: { type: string }
+              status: { type: string, enum: [pending, approved, rejected] }
+    DriverRatingInput:
+      type: object
+      required: [score]
+      properties:
+        score: { type: integer, minimum: 1, maximum: 5 }
+        comment: { type: string, maxLength: 500 }
+    DriverDocument:
+      type: object
+      required: [id, kind, status, submittedAt]
+      properties:
+        id: { type: string }
+        kind: { type: string, enum: [identity, license, registration] }
+        status: { type: string, enum: [pending, approved, rejected] }
+        submittedAt: { type: string }
+        reviewedAt: { type: ["string", "null"] }
+    DriverRating:
+      type: object
+      required: [id, loadId, score, comment, createdAt]
+      properties:
+        id: { type: string }
+        loadId: { type: string }
+        score: { type: integer }
+        comment: { type: ["string", "null"] }
+        createdAt: { type: string }
+    DriverVerificationInput:
+      type: object
+      required: [vehicleTypeId, vehiclePlate, capacityKg, capacityM3, sharedLoadAvailableKg, sharedLoadAvailableM3, availableFrom, currentRegionId, revision]
+      properties:
+        revision: { type: integer, minimum: 0 }
+        vehicleTypeId: { type: string }
+        vehiclePlate: { type: string, minLength: 3, maxLength: 30 }
+        capacityKg: { type: number, exclusiveMinimum: 0 }
+        capacityM3: { type: number, exclusiveMinimum: 0 }
+        sharedLoadAvailableKg: { type: number, minimum: 0 }
+        sharedLoadAvailableM3: { type: number, minimum: 0 }
+        availableFrom: { type: string, format: date-time }
+        currentRegionId: { type: string }
+        bio: { type: ["string", "null"], maxLength: 1000 }
+    DriverVerification:
+      type: object
+      required: [id, userId, name, vehicleTypeId, vehiclePlate, capacityKg, capacityM3, sharedLoadAvailableKg, sharedLoadAvailableM3, availableFrom, currentRegionId, bio, status, reason, revision, documents, reviewHistory]
+      properties:
+        id: { type: string }
+        userId: { type: string }
+        name: { type: string }
+        vehicleTypeId: { type: string }
+        vehiclePlate: { type: string }
+        capacityKg: { type: number }
+        capacityM3: { type: number }
+        sharedLoadAvailableKg: { type: number }
+        sharedLoadAvailableM3: { type: number }
+        availableFrom: { type: string }
+        currentRegionId: { type: string }
+        bio: { type: ["string", "null"] }
+        status: { type: string, enum: [none, pending, approved, rejected] }
+        reason: { type: ["string", "null"] }
+        revision: { type: integer }
+        documents:
+          type: array
+          items: { $ref: "#/components/schemas/DriverDocument" }
+        reviewHistory:
+          type: array
+          items:
+            type: object
+            required: [status, reason, createdAt]
+            properties:
+              status: { type: string, enum: [pending, approved, rejected] }
+              reason: { type: string }
+              createdAt: { type: string }
+    CargoLoad:
+      type: object
+      required: [id, shipperId, shipper, title, cargoType, weightKg, volumeM3, pickupRegionId, pickupDistrictId, deliveryRegionId, deliveryDistrictId, distanceKm, pickupDate, sharedLoadAllowed, status, createdAt]
+      properties:
+        id: { type: string }
+        shipperId: { type: string }
+        shipper: { $ref: "#/components/schemas/User" }
+        title: { type: string }
+        description: { type: ["string", "null"] }
+        cargoType: { type: string, enum: [general, fragile, perishable, livestock, hazardous, construction] }
+        weightKg: { type: number }
+        volumeM3: { type: number }
+        lengthCm: { type: ["number", "null"] }
+        widthCm: { type: ["number", "null"] }
+        heightCm: { type: ["number", "null"] }
+        pickupRegionId: { type: string }
+        pickupDistrictId: { type: string }
+        pickupAddress: { type: ["string", "null"] }
+        deliveryRegionId: { type: string }
+        deliveryDistrictId: { type: string }
+        deliveryAddress: { type: ["string", "null"] }
+        distanceKm: { type: number }
+        pickupDate: { type: string, format: date, description: Strict YYYY-MM-DD calendar date }
+        budgetUzs: { type: ["number", "null"] }
+        sharedLoadAllowed: { type: boolean }
+        status: { type: string, enum: [open, negotiating, accepted, in_transit, delivered, cancelled] }
+        createdAt: { type: string, format: date-time }
+
+    CargoOffer:
+      type: object
+      required: [id, loadId, driverId, driver, amountUzs, status, createdAt, updatedAt]
+      properties:
+        id: { type: string }
+        loadId: { type: string }
+        driverId: { type: string }
+        driver: { $ref: "#/components/schemas/DriverProfile" }
+        amountUzs: { type: number }
+        message: { type: ["string", "null"] }
+        status: { type: string, enum: [pending, countered, accepted, rejected, withdrawn] }
+        counterAmountUzs: { type: ["number", "null"] }
+        counterMessage: { type: ["string", "null"] }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+
+    CargoLoadDetail:
+      allOf:
+        - $ref: "#/components/schemas/CargoLoad"
+        - type: object
+          required: [offers, recommendation]
+          properties:
+            offers:
+              type: array
+              items: { $ref: "#/components/schemas/CargoOffer" }
+            recommendation:
+              anyOf:
+                - $ref: "#/components/schemas/TransportRecommendation"
+                - type: "null"
+
+    CargoRoutePoint:
+      type: object
+      required: [lat, lng, label]
+      properties:
+        lat: { type: number }
+        lng: { type: number }
+        label: { type: string }
+
+    CargoTrackingUpdate:
+      type: object
+      required: [id, loadId, stage, note, lat, lng, createdAt]
+      properties:
+        id: { type: string }
+        loadId: { type: string }
+        stage: { type: string, enum: [accepted, pickup_ready, picked_up, in_transit, border_control, delivered] }
+        note: { type: ["string", "null"] }
+        lat: { type: ["number", "null"] }
+        lng: { type: ["number", "null"] }
+        createdAt: { type: string, format: date-time }
+
+    CargoTracking:
+      type: object
+      required: [loadId, pickup, delivery, currentStage, currentLat, currentLng, locationUpdatedAt, updatedAt, history, assigned, canUpdate]
+      properties:
+        loadId: { type: string }
+        pickup: { $ref: "#/components/schemas/CargoRoutePoint" }
+        delivery: { $ref: "#/components/schemas/CargoRoutePoint" }
+        currentStage: { type: ["string", "null"], enum: [accepted, pickup_ready, picked_up, in_transit, border_control, delivered, null] }
+        currentLat: { type: ["number", "null"] }
+        currentLng: { type: ["number", "null"] }
+        locationUpdatedAt: { type: ["string", "null"], format: date-time }
+        updatedAt: { type: string, format: date-time }
+        assigned: { type: boolean }
+        canUpdate: { type: boolean }
+        history:
+          type: array
+          items: { $ref: "#/components/schemas/CargoTrackingUpdate" }
+
+    CargoTrackingUpdateInput:
+      type: object
+      required: [stage]
+      properties:
+        stage: { type: string, enum: [accepted, pickup_ready, picked_up, in_transit, border_control, delivered] }
+        note: { type: string }
+        lat: { type: number }
+        lng: { type: number }
+
+    CargoLocationInput:
+      type: object
+      required: [lat, lng]
+      properties:
+        lat: { type: number, minimum: -90, maximum: 90 }
+        lng: { type: number, minimum: -180, maximum: 180 }
+        sampledAt:
+          type: string
+          format: date-time
+          description: Time of the GPS fix, not the time an offline or deferred batch was uploaded.
+
+    PushTokenInput:
+      type: object
+      required: [token]
+      properties:
+        token: { type: string, maxLength: 256 }
+
+    PushRegistration:
+      type: object
+      required: [registered]
+      properties:
+        registered: { type: boolean }
+
+    CargoNotification:
+      type: object
+      required: [id, loadId, title, message, type, read, createdAt]
+      properties:
+        id: { type: string }
+        loadId: { type: ["string", "null"] }
+        title: { type: string }
+        message: { type: string }
+        type: { type: string, enum: [tracking, offer, system] }
+        read: { type: boolean }
+        createdAt: { type: string, format: date-time }
+
+    CargoLoadInput:
+      type: object
+      required: [title, cargoType, weightKg, volumeM3, pickupRegionId, pickupDistrictId, deliveryRegionId, deliveryDistrictId, pickupDate, sharedLoadAllowed]
+      properties:
+        title: { type: string }
+        description: { type: string }
+        cargoType: { type: string, enum: [general, fragile, perishable, livestock, hazardous, construction] }
+        weightKg: { type: number }
+        volumeM3: { type: number }
+        lengthCm: { type: number }
+        widthCm: { type: number }
+        heightCm: { type: number }
+        pickupRegionId: { type: string }
+        pickupDistrictId: { type: string }
+        pickupAddress: { type: string }
+        deliveryRegionId: { type: string }
+        deliveryDistrictId: { type: string }
+        deliveryAddress: { type: string }
+        pickupDate: { type: string, format: date, description: Strict YYYY-MM-DD calendar date }
+        budgetUzs: { type: number }
+        sharedLoadAllowed: { type: boolean }
+
+    CargoOfferInput:
+      type: object
+      required: [amountUzs]
+      properties:
+        amountUzs: { type: number }
+        message: { type: string }
+
+    CargoCounterInput:
+      type: object
+      required: [amountUzs]
+      properties:
+        amountUzs: { type: number }
+        message: { type: string }
+
+    CargoCounterDecisionInput:
+      type: object
+      required: [accepted]
+      properties:
+        accepted: { type: boolean }
+
+    CargoRecommendationInput:
+      type: object
+      required: [cargoType, weightKg, volumeM3]
+      properties:
+        cargoType: { type: string, enum: [general, fragile, perishable, livestock, hazardous, construction] }
+        weightKg: { type: number }
+        volumeM3: { type: number }
+        lengthCm: { type: number }
+        widthCm: { type: number }
+        heightCm: { type: number }
+
+    TransportRecommendation:
+      type: object
+      required: [vehicleType, reason, source]
+      properties:
+        vehicleType: { $ref: "#/components/schemas/VehicleType" }
+        reason: { type: string }
+        source: { type: string, enum: [deterministic_fallback] }

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   View,
   Text,
@@ -8,15 +8,26 @@ import {
   Alert,
   ActivityIndicator,
   Platform,
+  Modal,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useColors } from '@/hooks/useColors';
-import { useGetListing, useCreateOrder, useEstimateDelivery } from '@workspace/api-client-react';
+import {
+  getGetOrdersQueryKey,
+  useGetListing,
+  createOrder,
+  useEstimateDelivery,
+} from '@workspace/api-client-react';
 import { useAuth } from '@/context/AuthContext';
 import { useQueryClient } from '@tanstack/react-query';
+import { useCart } from '@/context/CartContext';
 import { useLocation } from '@/context/LocationContext';
+import { MarketAnalysisModal } from '@/components/MarketAnalysisModal';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { submitPurchase } from '@/services/purchase-attempt';
+import { PurchaseCargoSuggestion, type CargoPurchase } from '@/components/PurchaseCargoSuggestion';
 
 function formatPrice(price: number): string {
   return price.toLocaleString() + " so'm";
@@ -42,9 +53,20 @@ export default function ListingDetailScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const { user } = useAuth();
+  const { user, token, expireSession } = useAuth();
+  const session = useRef({ owner: user?.id, token });
+  session.current = { owner: user?.id, token };
   const { districtId, lat, lng } = useLocation();
   const queryClient = useQueryClient();
+  const { addItem, items: cartItems } = useCart();
+  const [adding, setAdding] = useState(false);
+  const [buying, setBuying] = useState(false);
+  const purchaseLock = useRef(false);
+  const [confirmPurchase, setConfirmPurchase] = useState(false);
+  const [notice, setNotice] = useState<{ title: string; message: string; cart?: boolean } | null>(null);
+  const [purchases, setPurchases] = useState<CargoPurchase[]>([]);
+  useEffect(() => { setConfirmPurchase(false); setNotice(null); setPurchases([]); }, [user?.id]);
+  const [showAdvice, setShowAdvice] = useState(false);
   const [quantity, setQuantity] = useState(1);
   const [selectedDelivery, setSelectedDelivery] = useState<{
     vehicleType: string;
@@ -55,17 +77,6 @@ export default function ListingDetailScreen() {
   const { data: listing, isLoading } = useGetListing(id);
 
   const deliveryMutation = useEstimateDelivery();
-  const orderMutation = useCreateOrder({
-    mutation: {
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ['getOrders'] });
-        Alert.alert("Buyurtma qabul qilindi!", "Sotuvchi tez orada siz bilan bog'lanadi.", [
-          { text: "OK", onPress: () => router.push('/(tabs)/orders') },
-        ]);
-      },
-      onError: () => Alert.alert("Xato", "Buyurtma berishda xato yuz berdi"),
-    },
-  });
 
   function handleOrder() {
     if (!user) {
@@ -74,36 +85,53 @@ export default function ListingDetailScreen() {
     }
     if (!listing) return;
 
-    const goodsTotal = listing.price * quantity;
-    const deliveryTotal = selectedDelivery ? selectedDelivery.price : 0;
-    const grandTotal = goodsTotal + deliveryTotal;
+    setConfirmPurchase(true);
+  }
 
-    const deliveryLine = selectedDelivery
-      ? `\nYetkazib berish (${selectedDelivery.vehicleName}): ${formatPrice(selectedDelivery.price)}`
-      : '\nYetkazib berish: tanlanmagan';
+  async function confirmOrder() {
+    if (!listing || !user || !token || purchaseLock.current) return;
+    const owner = user.id;
+    const capturedToken = token;
+    const current = () => session.current.owner === owner && session.current.token === capturedToken;
+    purchaseLock.current = true;
+    setBuying(true);
+    try {
+      const result = await submitPurchase(AsyncStorage, owner, {
+        listingId: listing.id, quantity,
+        ...(selectedDelivery && { deliveryOption: selectedDelivery.vehicleType, deliveryPrice: selectedDelivery.price }),
+      }, input => createOrder(input, { headers: { Authorization: `Bearer ${capturedToken}` } }), current);
+      if (!current()) return;
+      await queryClient.invalidateQueries({ queryKey: getGetOrdersQueryKey() });
+      if (!current()) return;
+      setConfirmPurchase(false);
+      if (result.order.status === 'pending' || result.order.status === 'confirmed') {
+        setPurchases([{ orderId: result.order.id, title: listing.title, quantity: result.order.quantity, unit: listing.priceUnit }]);
+      } else setNotice({ title: 'Buyurtma mavjud', message: 'Bu xarid avval yuborilgan. Buyurtmalarimni tekshiring.' });
+    } catch (error) {
+      if ((error as { status?: number }).status === 401) await expireSession(capturedToken);
+      if (current()) setNotice({ title: 'Xarid tasdiqlanmadi', message: error instanceof Error ? error.message : 'Buyurtmalarimni tekshiring va aynan shu so‘rovni qayta yuboring.' });
+    } finally {
+      purchaseLock.current = false;
+      setBuying(false);
+    }
+  }
 
-    Alert.alert(
-      "Buyurtma berish",
-      `${quantity} ta × ${formatPrice(listing.price)} = ${formatPrice(goodsTotal)}${deliveryLine}\n\nJami: ${formatPrice(grandTotal)}`,
-      [
-        { text: "Bekor qilish", style: "cancel" },
-        {
-          text: "Tasdiqlash",
-          onPress: () => {
-            orderMutation.mutate({
-              data: {
-                listingId: listing.id,
-                quantity,
-                ...(selectedDelivery && {
-                  deliveryOption: selectedDelivery.vehicleType,
-                  deliveryPrice: selectedDelivery.price,
-                }),
-              },
-            });
-          },
-        },
-      ],
-    );
+  async function handleAddToCart() {
+    if (!user || !token) { router.push('/auth/login'); return; }
+    if (!listing || adding) return;
+    const owner = user.id, capturedToken = token;
+    const current = () => session.current.owner === owner && session.current.token === capturedToken;
+    setAdding(true);
+    try {
+      await addItem(listing, quantity);
+      if (!current()) return;
+      setNotice({ title: "Savatga qo'shildi", message: listing.title, cart: true });
+    } catch (error) {
+      if (!current()) return;
+      setNotice({ title: 'Xato', message: error instanceof Error ? error.message : "Savatga qo'shib bo'lmadi" });
+    } finally {
+      setAdding(false);
+    }
   }
 
   function handleEstimateDelivery() {
@@ -137,12 +165,48 @@ export default function ListingDetailScreen() {
   }
 
   const isOwner = user?.id === listing.userId;
+   const unavailable = listing.status !== 'active';
+  const inCart = cartItems.find((c) => c.listing.id === listing.id)?.quantity ?? 0;
   const sellerBadge = listing.user?.sellerBadge;
   const badgeColor = sellerBadge === 'manufacturer' ? colors.manufacturerBadge : colors.resellerBadge;
   const bottomPad = Platform.OS === 'web' ? 84 + 34 : insets.bottom + 20;
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <Modal visible={confirmPurchase || !!notice || purchases.length > 0} transparent animationType="fade" onRequestClose={() => {
+        if (!buying) { setConfirmPurchase(false); setNotice(null); setPurchases([]); }
+      }}>
+        {purchases.length > 0 ? <PurchaseCargoSuggestion inline purchases={purchases} onClose={() => setPurchases([])} /> : notice ? (
+        <View style={styles.dialogOverlay}>
+          <View style={[styles.dialog, { backgroundColor: colors.card }]}>
+            <Text style={{ color: colors.text, fontFamily: 'Inter_700Bold', fontSize: 20 }}>{notice.title}</Text>
+            <Text style={{ color: colors.text }}>{notice.message}</Text>
+            <TouchableOpacity testID="purchase-notice-action" style={[styles.dialogButton, { backgroundColor: colors.primary }]}
+              onPress={() => { const cart = notice.cart; setNotice(null); setConfirmPurchase(false); router.push(cart ? '/(tabs)/cart' : '/(tabs)/orders'); }}>
+              <Text style={{ color: colors.primaryForeground }}>{notice.cart ? 'Savatni ochish' : 'Buyurtmalarimni tekshirish'}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.dialogButton} onPress={() => setNotice(null)}><Text style={{ color: colors.mutedForeground }}>Yopish</Text></TouchableOpacity>
+          </View>
+        </View>
+        ) : (
+        <View style={styles.dialogOverlay}>
+          <View style={[styles.dialog, { backgroundColor: colors.card }]}>
+            <Text style={{ color: colors.text, fontFamily: 'Inter_700Bold', fontSize: 20 }}>Buyurtmani tasdiqlash</Text>
+            <Text style={{ color: colors.text }}>{listing.title}{'\n'}{quantity} {listing.priceUnit} × {formatPrice(listing.price)}</Text>
+            {selectedDelivery && <Text style={{ color: colors.mutedForeground }}>Yetkazish hisobi: {selectedDelivery.vehicleName} — {formatPrice(selectedDelivery.price)}</Text>}
+            <Text style={{ color: colors.primary, fontFamily: 'Inter_700Bold' }}>Jami: {formatPrice(listing.price * quantity + (selectedDelivery?.price ?? 0))}</Text>
+            <Text style={{ color: colors.mutedForeground }}>To‘lov ilova ichida amalga oshirilmaydi. Xariddan keyin cargo taklif qilinadi.</Text>
+            <TouchableOpacity testID="confirm-purchase" disabled={buying} style={[styles.dialogButton, { backgroundColor: colors.primary }]} onPress={confirmOrder}>
+              <Text style={{ color: colors.primaryForeground }}>{buying ? 'Yuborilmoqda…' : 'Tasdiqlash'}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity disabled={buying} style={styles.dialogButton} onPress={() => setConfirmPurchase(false)}>
+              <Text style={{ color: colors.mutedForeground }}>Bekor qilish</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+        )}
+      </Modal>
+      <MarketAnalysisModal visible={showAdvice} listingId={listing.id} onClose={() => setShowAdvice(false)} />
       <ScrollView
         contentContainerStyle={{ paddingBottom: 120 }}
         showsVerticalScrollIndicator={false}
@@ -241,6 +305,16 @@ export default function ListingDetailScreen() {
           )}
 
           {/* Delivery estimate */}
+          {isOwner && (
+            <TouchableOpacity
+              testID="open-ai-advice"
+              onPress={() => setShowAdvice(true)}
+              style={[styles.deliveryBtn, { borderColor: colors.primary, backgroundColor: colors.secondary }]}
+            >
+              <Feather name="zap" size={18} color={colors.primary} />
+              <Text style={[styles.deliveryBtnText, { color: colors.primary }]}>AI maslahat</Text>
+            </TouchableOpacity>
+          )}
           {!isOwner && (
             <TouchableOpacity
               style={[styles.deliveryBtn, { borderColor: colors.border, backgroundColor: colors.secondary }]}
@@ -324,23 +398,31 @@ export default function ListingDetailScreen() {
             <Text style={[styles.quantityText, { color: colors.text }]}>{quantity}</Text>
             <TouchableOpacity
               style={[styles.quantityBtn, { borderColor: colors.border }]}
-              onPress={() => setQuantity(quantity + 1)}
+              onPress={() => setQuantity(Math.min(999, quantity + 1))}
             >
               <Feather name="plus" size={16} color={colors.text} />
             </TouchableOpacity>
           </View>
 
           <TouchableOpacity
-            style={[styles.orderBtn, { backgroundColor: colors.primary, opacity: orderMutation.isPending ? 0.7 : 1 }]}
-            onPress={handleOrder}
-            disabled={orderMutation.isPending}
+            testID="add-to-cart"
+            style={[styles.cartBtn, { borderColor: colors.primary, opacity: unavailable || adding ? 0.5 : 1 }]}
+            onPress={handleAddToCart}
+            disabled={unavailable || adding}
           >
-            {orderMutation.isPending ? (
+            <Feather name="shopping-cart" size={18} color={colors.primary} />
+            {inCart > 0 && <Text style={{ color: colors.primary, fontFamily: 'Inter_700Bold', fontSize: 12 }}>{inCart}</Text>}
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.orderBtn, { backgroundColor: colors.primary, opacity: buying || unavailable ? 0.6 : 1 }]}
+            onPress={handleOrder}
+            disabled={buying || unavailable}
+          >
+            {buying ? (
               <ActivityIndicator color="#fff" />
             ) : (
               <>
-                <Feather name="shopping-cart" size={18} color="#fff" />
-                <Text style={styles.orderBtnText}>Buyurtma berish</Text>
+                <Text style={styles.orderBtnText}>{unavailable ? 'Sotuvda yo\'q' : 'Sotib olish'}</Text>
               </>
             )}
           </TouchableOpacity>
@@ -351,6 +433,9 @@ export default function ListingDetailScreen() {
 }
 
 const styles = StyleSheet.create({
+  dialogOverlay: { flex: 1, backgroundColor: '#0008', alignItems: 'center', justifyContent: 'center', padding: 20 },
+  dialog: { width: '100%', maxWidth: 440, borderRadius: 20, padding: 20, gap: 16 },
+  dialogButton: { padding: 12, borderRadius: 12, alignItems: 'center' },
   container: { flex: 1 },
   centered: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   imagePlaceholder: {
@@ -426,6 +511,7 @@ const styles = StyleSheet.create({
   quantityRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   quantityBtn: { width: 36, height: 36, borderRadius: 18, borderWidth: 1, alignItems: 'center', justifyContent: 'center' },
   quantityText: { fontSize: 18, fontFamily: 'Inter_600SemiBold', minWidth: 24, textAlign: 'center' },
+  cartBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, height: 48, paddingHorizontal: 12, borderRadius: 14, borderWidth: 1.5 },
   orderBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, paddingVertical: 14, borderRadius: 14 },
   orderBtnText: { color: '#fff', fontSize: 15, fontFamily: 'Inter_600SemiBold' },
 });

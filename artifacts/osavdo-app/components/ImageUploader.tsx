@@ -48,7 +48,7 @@ export function ImageUploader({ images, onChange, max = 5, label = "Rasmlar" }: 
   async function getToken(): Promise<string | null> {
     try {
       const AsyncStorage = (await import('@react-native-async-storage/async-storage')).default;
-      return await AsyncStorage.getItem('auth_token');
+      return await AsyncStorage.getItem('osavdo_token');
     } catch {
       return null;
     }
@@ -77,11 +77,7 @@ export function ImageUploader({ images, onChange, max = 5, label = "Rasmlar" }: 
           aspect: [4, 3],
         });
       } else {
-        const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
-        if (!perm.granted) {
-          Alert.alert('Ruxsat kerak', 'Galereya ruxsatini bering');
-          return;
-        }
+        // The system photo picker grants access only to the chosen image.
         result = await ImagePicker.launchImageLibraryAsync({
           mediaTypes: 'images',
           quality: 0.6,

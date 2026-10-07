@@ -1,7 +1,22 @@
 // O'Savdo — Multi-language translations
-// 9 countries: uz, kz, kg, tj, tm, af, ru, cn, ir
+// Supported languages: Uzbek, Kazakh, Kyrgyz, Tajik, Turkmen, Dari,
+// Russian, Chinese, Persian, Turkish, and English.
 
-export type LangCode = 'uz' | 'kz' | 'kg' | 'tj' | 'tm' | 'af' | 'ru' | 'cn' | 'ir';
+export type LangCode = 'uz' | 'kz' | 'kg' | 'tj' | 'tm' | 'af' | 'ru' | 'cn' | 'ir' | 'tr' | 'en';
+
+export const LANGUAGE_OPTIONS: Array<{ code: LangCode; label: string }> = [
+  { code: 'uz', label: "O'zbekcha" },
+  { code: 'kz', label: "Қазақша" },
+  { code: 'kg', label: "Кыргызча" },
+  { code: 'cn', label: "中文" },
+  { code: 'tr', label: "Türkçe" },
+  { code: 'ru', label: "Русский" },
+  { code: 'ir', label: "فارسی" },
+  { code: 'tj', label: "Тоҷикӣ" },
+  { code: 'af', label: "دری" },
+  { code: 'tm', label: "Türkmençe" },
+  { code: 'en', label: "English" },
+];
 
 export interface PhoneFormat {
   dialCode: string;
@@ -20,6 +35,8 @@ export const PHONE_FORMATS: Record<LangCode, PhoneFormat> = {
   ru: { dialCode: '+7',   maxDigits: 10, placeholder: '912 345 67 89', mask: 'XXX XXX XX XX' },
   cn: { dialCode: '+86',  maxDigits: 11, placeholder: '138 0013 8000', mask: 'XXX XXXX XXXX' },
   ir: { dialCode: '+98',  maxDigits: 10, placeholder: '912 345 6789',  mask: 'XXX XXX XXXX'  },
+  tr: { dialCode: '+90',  maxDigits: 10, placeholder: '532 123 45 67',  mask: 'XXX XXX XX XX'  },
+  en: { dialCode: '+998', maxDigits: 9,  placeholder: '90 123 45 67',  mask: 'XX XXX XX XX'  },
 };
 
 /** Apply mask formatting to raw digits */
@@ -50,7 +67,7 @@ export type TranslationKey =
   | 'buyer' | 'seller' | 'driver'
   | 'buyerDesc' | 'sellerDesc' | 'driverDesc'
   | 'locationStep' | 'infoStep'
-  | 'home' | 'search' | 'addListing' | 'orders' | 'profile'
+  | 'home' | 'search' | 'addListing' | 'orders' | 'cargo' | 'profile'
   | 'category' | 'subcategory' | 'price' | 'description' | 'title' | 'images'
   | 'publish' | 'publishing'
   | 'wrongCredentials' | 'fillAllFields' | 'passwordTooShort' | 'selectRegion'
@@ -73,7 +90,7 @@ const uz: Translations = {
   buyer: "Xaridor", seller: "Sotuvchi", driver: "Haydovchi",
   buyerDesc: "Mahsulot sotib olaman", sellerDesc: "E'lon joylayman va sotaman", driverDesc: "Yetkazib beraman",
   locationStep: "Joylashuv", infoStep: "Ma'lumotlar",
-  home: "Bosh sahifa", search: "Qidirish", addListing: "E'lon", orders: "Buyurtmalar", profile: "Profil",
+  home: "Bosh sahifa", search: "Qidirish", addListing: "E'lon", orders: "Buyurtmalar", cargo: "Yuk", profile: "Profil",
   category: "Kategoriya", subcategory: "Subkategoriya", price: "Narx", description: "Tavsif", title: "Sarlavha", images: "Rasmlar",
   publish: "E'lonni joylash", publishing: "Joylashtirilmoqda...",
   wrongCredentials: "Telefon raqam yoki parol noto'g'ri", fillAllFields: "Barcha maydonlarni to'ldiring",
@@ -96,7 +113,7 @@ const kz: Translations = {
   buyer: "Сатып алушы", seller: "Сатушы", driver: "Жүргізуші",
   buyerDesc: "Тауар сатып аламын", sellerDesc: "Хабарландыру береімін", driverDesc: "Жеткіземін",
   locationStep: "Орналасу", infoStep: "Мәлімет",
-  home: "Басты бет", search: "Іздеу", addListing: "Хабар", orders: "Тапсырыстар", profile: "Профиль",
+  home: "Басты бет", search: "Іздеу", addListing: "Хабар", orders: "Тапсырыстар", cargo: "Жүк", profile: "Профиль",
   category: "Санат", subcategory: "Кіші санат", price: "Баға", description: "Сипаттама", title: "Тақырып", images: "Суреттер",
   publish: "Жариялау", publishing: "Жарияланып жатыр...",
   wrongCredentials: "Телефон немесе құпиясөз қате", fillAllFields: "Барлық өрістерді толтырыңыз",
@@ -119,7 +136,7 @@ const kg: Translations = {
   buyer: "Сатып алуучу", seller: "Сатуучу", driver: "Айдоочу",
   buyerDesc: "Товар сатып алам", sellerDesc: "Жарнама жайлайм", driverDesc: "Жеткирем",
   locationStep: "Жайгашуу", infoStep: "Маалымат",
-  home: "Башкы бет", search: "Издөө", addListing: "Жарнама", orders: "Буйрутмалар", profile: "Профиль",
+  home: "Башкы бет", search: "Издөө", addListing: "Жарнама", orders: "Буйрутмалар", cargo: "Жүк", profile: "Профиль",
   category: "Категория", subcategory: "Субкатегория", price: "Баа", description: "Сүрөттөмө", title: "Аталыш", images: "Сүрөттөр",
   publish: "Жарнамалоо", publishing: "Жарыяланууда...",
   wrongCredentials: "Телефон же сырсөз туура эмес", fillAllFields: "Бардык талааларды толтуруңуз",
@@ -142,7 +159,7 @@ const tj: Translations = {
   buyer: "Харидор", seller: "Фурӯшанда", driver: "Ронанда",
   buyerDesc: "Маҳсулот мехарам", sellerDesc: "Эълон мегузорам", driverDesc: "Расонам",
   locationStep: "Ҷойгиршавӣ", infoStep: "Маълумот",
-  home: "Саҳифаи асосӣ", search: "Ҷустуҷӯ", addListing: "Эълон", orders: "Фармоишҳо", profile: "Профил",
+  home: "Саҳифаи асосӣ", search: "Ҷустуҷӯ", addListing: "Эълон", orders: "Фармоишҳо", cargo: "Бор", profile: "Профил",
   category: "Категория", subcategory: "Зеркатегория", price: "Нарх", description: "Тавсиф", title: "Сарлавҳа", images: "Аксҳо",
   publish: "Нашр кардан", publishing: "Нашр мешавад...",
   wrongCredentials: "Телефон ё рамз нодуруст", fillAllFields: "Ҳамаи майдонҳоро пур кунед",
@@ -165,7 +182,7 @@ const tm: Translations = {
   buyer: "Alyjy", seller: "Satyjy", driver: "Sürüji",
   buyerDesc: "Haryt satyn alýaryn", sellerDesc: "Yglan ýerleşdirýärin", driverDesc: "Eltip berýärin",
   locationStep: "Ýer", infoStep: "Maglumat",
-  home: "Baş sahypa", search: "Gözlemek", addListing: "Yglan", orders: "Buýurmalar", profile: "Profil",
+  home: "Baş sahypa", search: "Gözlemek", addListing: "Yglan", orders: "Buýurmalar", cargo: "Ýük", profile: "Profil",
   category: "Kategoriýa", subcategory: "Kiçi kategoriýa", price: "Baha", description: "Beýan", title: "Başlyk", images: "Suratlar",
   publish: "Çap etmek", publishing: "Çap edilýär...",
   wrongCredentials: "Telefon ýa-da açarsöz ýalňyş", fillAllFields: "Ähli meýdanlary dolduryň",
@@ -188,7 +205,7 @@ const af: Translations = {
   buyer: "خریدار", seller: "فروشنده", driver: "راننده",
   buyerDesc: "محصول می‌خرم", sellerDesc: "آگهی می‌گذارم", driverDesc: "تحویل می‌دهم",
   locationStep: "موقعیت", infoStep: "اطلاعات",
-  home: "صفحه اصلی", search: "جستجو", addListing: "آگهی", orders: "سفارشات", profile: "پروفایل",
+  home: "صفحه اصلی", search: "جستجو", addListing: "آگهی", orders: "سفارشات", cargo: "بار", profile: "پروفایل",
   category: "دسته", subcategory: "زیردسته", price: "قیمت", description: "توضیحات", title: "عنوان", images: "تصاویر",
   publish: "انتشار", publishing: "در حال انتشار...",
   wrongCredentials: "شماره یا رمز اشتباه است", fillAllFields: "همه فیلدها را پر کنید",
@@ -211,7 +228,7 @@ const ru: Translations = {
   buyer: "Покупатель", seller: "Продавец", driver: "Водитель",
   buyerDesc: "Покупаю товары", sellerDesc: "Размещаю объявления", driverDesc: "Доставляю",
   locationStep: "Местоположение", infoStep: "Данные",
-  home: "Главная", search: "Поиск", addListing: "Объявление", orders: "Заказы", profile: "Профиль",
+  home: "Главная", search: "Поиск", addListing: "Объявление", orders: "Заказы", cargo: "Грузы", profile: "Профиль",
   category: "Категория", subcategory: "Подкатегория", price: "Цена", description: "Описание", title: "Заголовок", images: "Фото",
   publish: "Разместить", publishing: "Размещается...",
   wrongCredentials: "Неверный телефон или пароль", fillAllFields: "Заполните все поля",
@@ -234,7 +251,7 @@ const cn: Translations = {
   buyer: "买家", seller: "卖家", driver: "司机",
   buyerDesc: "购买商品", sellerDesc: "发布广告", driverDesc: "配送",
   locationStep: "位置", infoStep: "信息",
-  home: "首页", search: "搜索", addListing: "发布", orders: "订单", profile: "个人",
+  home: "首页", search: "搜索", addListing: "发布", orders: "订单", cargo: "货运", profile: "个人",
   category: "分类", subcategory: "子分类", price: "价格", description: "描述", title: "标题", images: "图片",
   publish: "发布广告", publishing: "发布中...",
   wrongCredentials: "手机号或密码错误", fillAllFields: "请填写所有字段",
@@ -257,7 +274,7 @@ const ir: Translations = {
   buyer: "خریدار", seller: "فروشنده", driver: "راننده",
   buyerDesc: "محصول می‌خرم", sellerDesc: "آگهی می‌گذارم", driverDesc: "تحویل می‌دهم",
   locationStep: "موقعیت مکانی", infoStep: "اطلاعات",
-  home: "خانه", search: "جستجو", addListing: "آگهی", orders: "سفارش‌ها", profile: "پروفایل",
+  home: "خانه", search: "جستجو", addListing: "آگهی", orders: "سفارش‌ها", cargo: "بارها", profile: "پروفایل",
   category: "دسته‌بندی", subcategory: "زیردسته", price: "قیمت", description: "توضیحات", title: "عنوان", images: "تصاویر",
   publish: "انتشار آگهی", publishing: "در حال انتشار...",
   wrongCredentials: "شماره یا رمز اشتباه است", fillAllFields: "لطفاً همه فیلدها را پر کنید",
@@ -269,10 +286,56 @@ const ir: Translations = {
   welcomeBack: "خوش برگشتید!", createAccount: "حساب جدید بسازید",
 };
 
-export const TRANSLATIONS: Record<LangCode, Translations> = { uz, kz, kg, tj, tm, af, ru, cn, ir };
+const tr: Translations = {
+  appTagline: "Yerel pazar — bölgenizdeki en iyi fiyatlar",
+  login: "Giriş", register: "Kayıt ol", logout: "Çıkış",
+  phone: "Telefon numarası", password: "Şifre", name: "Ad",
+  selectCountry: "Ülke seçin", country: "Ülke", region: "Bölge/Şehir", district: "İlçe",
+  enterPhone: "Numarayı girin", enterPassword: "Şifreyi girin", enterName: "Adınızı girin",
+  loginBtn: "Giriş yap", registerBtn: "Kayıt ol", nextBtn: "İleri", saveBtn: "Kaydet", cancelBtn: "İptal", confirmBtn: "Onayla",
+  dontHaveAccount: "Hesabınız yok mu?", haveAccount: "Hesabınız var mı?",
+  buyer: "Alıcı", seller: "Satıcı", driver: "Sürücü",
+  buyerDesc: "Ürün satın alırım", sellerDesc: "İlan yayınlarım", driverDesc: "Teslimat yaparım",
+  locationStep: "Konum", infoStep: "Bilgiler",
+  home: "Ana sayfa", search: "Ara", addListing: "İlan", orders: "Siparişler", cargo: "Yük", profile: "Profil",
+  category: "Kategori", subcategory: "Alt kategori", price: "Fiyat", description: "Açıklama", title: "Başlık", images: "Fotoğraflar",
+  publish: "İlanı yayınla", publishing: "Yayınlanıyor...",
+  wrongCredentials: "Telefon veya şifre yanlış", fillAllFields: "Tüm alanları doldurun",
+  passwordTooShort: "Şifre en az 6 karakter olmalı", selectRegion: "Bölge ve ilçeyi seçin",
+  role: "Rol", detectLocation: "Konumumu belirle", detecting: "AI konumu belirliyor...",
+  locationPermissionDenied: "Konum izni verilmedi",
+  countryDetected: "Konumunuz belirlendi", correctLocation: "Evet, doğru", reDetect: "Yeniden belirle", skipUz: "Özbekistan — varsayılan devam",
+  demoHint: "Demo: +998901234567 / test123",
+  welcomeBack: "Tekrar hoş geldiniz!", createAccount: "Yeni hesap oluşturun",
+};
+
+const en: Translations = {
+  appTagline: "Local marketplace — the best prices in your region",
+  login: "Log in", register: "Sign up", logout: "Log out",
+  phone: "Phone number", password: "Password", name: "Name",
+  selectCountry: "Select country", country: "Country", region: "Region/City", district: "District",
+  enterPhone: "Enter your number", enterPassword: "Enter your password", enterName: "Enter your name",
+  loginBtn: "Log in", registerBtn: "Sign up", nextBtn: "Next", saveBtn: "Save", cancelBtn: "Cancel", confirmBtn: "Confirm",
+  dontHaveAccount: "Don't have an account?", haveAccount: "Already have an account?",
+  buyer: "Buyer", seller: "Seller", driver: "Driver",
+  buyerDesc: "I buy products", sellerDesc: "I publish listings", driverDesc: "I deliver goods",
+  locationStep: "Location", infoStep: "Information",
+  home: "Home", search: "Search", addListing: "Listing", orders: "Orders", cargo: "Cargo", profile: "Profile",
+  category: "Category", subcategory: "Subcategory", price: "Price", description: "Description", title: "Title", images: "Images",
+  publish: "Publish listing", publishing: "Publishing...",
+  wrongCredentials: "Incorrect phone number or password", fillAllFields: "Fill in all fields",
+  passwordTooShort: "Password must be at least 6 characters", selectRegion: "Select a region and district",
+  role: "Role", detectLocation: "Detect my location", detecting: "AI is detecting your location...",
+  locationPermissionDenied: "Location permission was denied",
+  countryDetected: "Your location was detected", correctLocation: "Yes, correct", reDetect: "Detect again", skipUz: "Uzbekistan — continue by default",
+  demoHint: "Demo: +998901234567 / test123",
+  welcomeBack: "Welcome back!", createAccount: "Create a new account",
+};
+
+export const TRANSLATIONS: Record<LangCode, Translations> = { uz, kz, kg, tj, tm, af, ru, cn, ir, tr, en };
 
 /** Map countryId → default language */
 export const COUNTRY_LANG: Record<string, LangCode> = {
   uz: 'uz', kz: 'kz', kg: 'kg', tj: 'tj',
-  tm: 'tm', af: 'af', ru: 'ru', cn: 'cn', ir: 'ir',
+  tm: 'tm', af: 'af', ru: 'ru', cn: 'cn', ir: 'ir', tr: 'tr',
 };

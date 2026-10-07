@@ -12,7 +12,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import { useColors } from '@/hooks/useColors';
-import { useGetRegions, useGetDistricts } from '@workspace/api-client-react';
+import { useGetRegions, useGetDistricts, getGetDistrictsQueryKey } from '@workspace/api-client-react';
 import { useLocation } from '@/context/LocationContext';
 
 interface LocationPickerProps {
@@ -35,7 +35,7 @@ export function LocationPicker({ visible, onClose }: LocationPickerProps) {
   );
   const { data: districtsData, isLoading: districtsLoading } = useGetDistricts(
     { regionId: selectedRegionId ?? undefined },
-    { query: { enabled: !!selectedRegionId && step === 'district' } },
+    { query: { enabled: !!selectedRegionId && step === 'district', queryKey: getGetDistrictsQueryKey({ regionId: selectedRegionId ?? undefined }) } },
   );
 
   function handleSelectRegion(id: string, name: string) {
@@ -111,7 +111,7 @@ export function LocationPicker({ visible, onClose }: LocationPickerProps) {
           </View>
         ) : (
           <FlatList
-            data={step === 'region' ? regions ?? [] : districtsData ?? []}
+            data={step === 'region' ? (regions as any[]) ?? [] : (districtsData as any[]) ?? []}
             keyExtractor={(item) => item.id}
             renderItem={({ item }) =>
               step === 'region' ? (

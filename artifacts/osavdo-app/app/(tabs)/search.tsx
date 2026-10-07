@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -8,49 +8,114 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   Platform,
+  ScrollView,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import { useColors } from '@/hooks/useColors';
-import { useGetListings, useGetCategories } from '@workspace/api-client-react';
+import { useGetListings, useGetCategories, useGetRegions, useGetDistricts, getGetDistrictsQueryKey, getGetListingsQueryKey } from '@workspace/api-client-react';
 import { ListingCard } from '@/components/ListingCard';
 import { EmptyState } from '@/components/EmptyState';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import { PhotoProductSearch } from '@/components/PhotoProductSearch';
+import { CreateListingForm } from '@/components/CreateListingForm';
 
 export default function SearchScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
+  const router = useRouter();
+  const params = useLocalSearchParams<{ categoryId?: string; subcategoryId?: string; mode?: string; ts?: string }>();
+  const [mode, setMode] = useState<'search' | 'post'>(params.mode === 'post' ? 'post' : 'search');
   const [query, setQuery] = useState('');
   const [search, setSearch] = useState('');
+
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [selectedSubcategory, setSelectedSubcategory] = useState<string | null>(null);
+
+  const [selectedRegion, setSelectedRegion] = useState<string | null>(null);
+  const [selectedDistrict, setSelectedDistrict] = useState<string | null>(null);
+
   const [minPrice, setMinPrice] = useState('');
   const [maxPrice, setMaxPrice] = useState('');
   const [showFilters, setShowFilters] = useState(false);
 
+  useEffect(() => {
+    if (params.mode === 'post') setMode('post');
+    else if (params.mode === 'search' || params.categoryId) setMode('search');
+    if (params.categoryId || params.subcategoryId) {
+      setSelectedCategory(params.categoryId ?? null);
+      setSelectedSubcategory(params.subcategoryId || null);
+      setQuery('');
+      setSearch('');
+    }
+  }, [params.categoryId, params.subcategoryId, params.mode, params.ts]);
+
   const { data: categories } = useGetCategories();
+  const { data: regions } = useGetRegions();
+  const { data: districts } = useGetDistricts(
+    { regionId: selectedRegion ?? undefined },
+    { query: { enabled: !!selectedRegion, queryKey: getGetDistrictsQueryKey({ regionId: selectedRegion ?? undefined }) } }
+  );
+
+  const activeCategory = categories?.find(c => c.id === selectedCategory);
 
   const { data: listingsData, isLoading } = useGetListings(
     {
       search: search || undefined,
       categoryId: selectedCategory ?? undefined,
+      subcategoryId: selectedSubcategory ?? undefined,
+      regionId: selectedRegion ?? undefined,
+      districtId: selectedDistrict ?? undefined,
       minPrice: minPrice ? Number(minPrice) : undefined,
       maxPrice: maxPrice ? Number(maxPrice) : undefined,
       limit: 40,
     },
-    { query: { enabled: search.length > 0 || selectedCategory !== null || !!minPrice || !!maxPrice } },
+    { query: { enabled: mode === 'search' && (search.length > 0 || selectedSubcategory !== null || selectedCategory !== null || selectedRegion !== null || !!minPrice || !!maxPrice), queryKey: getGetListingsQueryKey({
+      search: search || undefined,
+      categoryId: selectedCategory ?? undefined,
+      subcategoryId: selectedSubcategory ?? undefined,
+      regionId: selectedRegion ?? undefined,
+      districtId: selectedDistrict ?? undefined,
+      minPrice: minPrice ? Number(minPrice) : undefined,
+      maxPrice: maxPrice ? Number(maxPrice) : undefined,
+      limit: 40,
+    }) } },
   );
 
   const listings = listingsData?.items ?? [];
-  const hasSearched = search.length > 0 || selectedCategory !== null || !!minPrice || !!maxPrice;
+  const hasSearched = search.length > 0 || selectedCategory !== null || selectedSubcategory !== null || selectedRegion !== null || !!minPrice || !!maxPrice;
   const topPadding = Platform.OS === 'web' ? 67 : insets.top;
 
+  const modeHeader = null;
+  void modeHeader;
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       {/* Header */}
       <View style={[styles.header, { paddingTop: topPadding + 12, backgroundColor: colors.card, borderBottomColor: colors.border }]}>
-        <Text style={[styles.headerTitle, { color: colors.text }]}>Qidirish</Text>
+        <View style={[styles.seg, { backgroundColor: colors.muted }]}>
+          {(['search', 'post'] as const).map((m) => (
+            <TouchableOpacity
+              key={m}
+              testID={`mode-${m}`}
+              style={[styles.segBtn, mode === m && { backgroundColor: colors.primary }]}
+              onPress={() => setMode(m)}
+            >
+              <Feather name={m === 'search' ? 'search' : 'plus-circle'} size={15} color={mode === m ? colors.primaryForeground : colors.text} />
+              <Text style={{ fontSize: 14, fontFamily: 'Inter_600SemiBold', color: mode === m ? colors.primaryForeground : colors.text }}>
+                {m === 'search' ? 'Qidirish' : "E'lon joylash"}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+        {mode === 'search' && (
+          <TouchableOpacity onPress={() => router.push('/(tabs)/categories')} style={styles.catLink}>
+            <Feather name="grid" size={14} color={colors.primary} />
+            <Text style={{ color: colors.primary, fontSize: 13, fontFamily: 'Inter_500Medium' }}>Barcha kategoriyalar</Text>
+          </TouchableOpacity>
+        )}
 
         {/* Search bar */}
-        <View style={[styles.searchBar, { backgroundColor: colors.muted, borderColor: colors.border }]}>
+        {mode === 'search' && <View style={[styles.searchBar, { backgroundColor: colors.muted, borderColor: colors.border }]}>
           <Feather name="search" size={18} color={colors.mutedForeground} />
           <TextInput
             style={[styles.searchInput, { color: colors.text }]}
@@ -66,10 +131,12 @@ export default function SearchScreen() {
               <Feather name="x" size={16} color={colors.mutedForeground} />
             </TouchableOpacity>
           )}
-        </View>
+        </View>}
+
+        {mode === 'search' && <PhotoProductSearch />}
 
         {/* Filter toggle */}
-        <TouchableOpacity
+        {mode === 'search' && <TouchableOpacity
           style={[styles.filterToggle, { borderColor: colors.border, backgroundColor: showFilters ? colors.secondary : colors.card }]}
           onPress={() => setShowFilters(!showFilters)}
         >
@@ -78,12 +145,15 @@ export default function SearchScreen() {
           {(selectedCategory || minPrice || maxPrice) && (
             <View style={[styles.filterDot, { backgroundColor: colors.primary }]} />
           )}
-        </TouchableOpacity>
+        </TouchableOpacity>}
       </View>
 
+      {mode === 'post' ? (
+        <CreateListingForm hideHeader onDone={() => setMode('search')} />
+      ) : (<>
       {/* Filters panel */}
       {showFilters && (
-        <View style={[styles.filtersPanel, { backgroundColor: colors.card, borderBottomColor: colors.border }]}>
+        <ScrollView style={[styles.filtersPanel, { backgroundColor: colors.card, borderBottomColor: colors.border }]} nestedScrollEnabled showsVerticalScrollIndicator={false}>
           <Text style={[styles.filterLabel, { color: colors.mutedForeground }]}>Kategoriya</Text>
           <View style={styles.categoryChips}>
             {(categories ?? []).map((cat) => (
@@ -96,16 +166,101 @@ export default function SearchScreen() {
                     borderColor: selectedCategory === cat.id ? colors.primary : colors.border,
                   },
                 ]}
-                onPress={() => setSelectedCategory(selectedCategory === cat.id ? null : cat.id)}
+                onPress={() => {
+                  setSelectedCategory(selectedCategory === cat.id ? null : cat.id);
+                  setSelectedSubcategory(null);
+                }}
               >
                 <Text style={{ fontSize: 13, color: selectedCategory === cat.id ? colors.primaryForeground : colors.text }}>
-                  {cat.icon} {cat.name.split(' ')[0]}
+                  {cat.icon} {
+                    cat.id === 'cat15'
+                      ? 'Sanoat'
+                      : cat.id === 'cat16'
+                        ? 'B2B / Optom'
+                        : cat.id === 'cat17'
+                          ? 'Ishlatilgan'
+                          : cat.name.split(' ')[0]
+                  }
                 </Text>
               </TouchableOpacity>
             ))}
           </View>
 
-          <Text style={[styles.filterLabel, { color: colors.mutedForeground, marginTop: 12 }]}>Narx oralig'i (so'm)</Text>
+          {activeCategory && activeCategory.subcategories.length > 0 && (
+            <>
+              <Text style={[styles.filterLabel, { color: colors.mutedForeground, marginTop: 16 }]}>Ostki kategoriya</Text>
+              <View style={styles.categoryChips}>
+                {activeCategory.subcategories.map((sub) => (
+                  <TouchableOpacity
+                    key={sub.id}
+                    style={[
+                      styles.catChip,
+                      {
+                        backgroundColor: selectedSubcategory === sub.id ? colors.primary : colors.secondary,
+                        borderColor: selectedSubcategory === sub.id ? colors.primary : colors.border,
+                      },
+                    ]}
+                    onPress={() => setSelectedSubcategory(selectedSubcategory === sub.id ? null : sub.id)}
+                  >
+                    <Text style={{ fontSize: 12, color: selectedSubcategory === sub.id ? colors.primaryForeground : colors.text }}>
+                      {sub.name}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </>
+          )}
+
+          <Text style={[styles.filterLabel, { color: colors.mutedForeground, marginTop: 16 }]}>Hudud</Text>
+          <View style={styles.categoryChips}>
+            {(regions ?? []).map((reg) => (
+              <TouchableOpacity
+                key={reg.id}
+                style={[
+                  styles.catChip,
+                  {
+                    backgroundColor: selectedRegion === reg.id ? colors.primary : colors.secondary,
+                    borderColor: selectedRegion === reg.id ? colors.primary : colors.border,
+                  },
+                ]}
+                onPress={() => {
+                  setSelectedRegion(selectedRegion === reg.id ? null : reg.id);
+                  setSelectedDistrict(null);
+                }}
+              >
+                <Text style={{ fontSize: 13, color: selectedRegion === reg.id ? colors.primaryForeground : colors.text }}>
+                  {reg.name}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+
+          {selectedRegion && (districts ?? []).length > 0 && (
+            <>
+              <Text style={[styles.filterLabel, { color: colors.mutedForeground, marginTop: 16 }]}>Tuman</Text>
+              <View style={styles.categoryChips}>
+                {(districts ?? []).map((dist) => (
+                  <TouchableOpacity
+                    key={dist.id}
+                    style={[
+                      styles.catChip,
+                      {
+                        backgroundColor: selectedDistrict === dist.id ? colors.primary : colors.secondary,
+                        borderColor: selectedDistrict === dist.id ? colors.primary : colors.border,
+                      },
+                    ]}
+                    onPress={() => setSelectedDistrict(selectedDistrict === dist.id ? null : dist.id)}
+                  >
+                    <Text style={{ fontSize: 12, color: selectedDistrict === dist.id ? colors.primaryForeground : colors.text }}>
+                      {dist.name}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </>
+          )}
+
+          <Text style={[styles.filterLabel, { color: colors.mutedForeground, marginTop: 16 }]}>Narx oralig'i (so'm)</Text>
           <View style={styles.priceRow}>
             <TextInput
               style={[styles.priceInput, { borderColor: colors.border, color: colors.text, backgroundColor: colors.muted }]}
@@ -130,6 +285,9 @@ export default function SearchScreen() {
             style={[styles.clearBtn, { borderColor: colors.border }]}
             onPress={() => {
               setSelectedCategory(null);
+              setSelectedSubcategory(null);
+              setSelectedRegion(null);
+              setSelectedDistrict(null);
               setMinPrice('');
               setMaxPrice('');
               setSearch('');
@@ -140,7 +298,7 @@ export default function SearchScreen() {
               Filtrni tozalash
             </Text>
           </TouchableOpacity>
-        </View>
+        </ScrollView>
       )}
 
       {/* Results */}
@@ -179,11 +337,15 @@ export default function SearchScreen() {
           }
         />
       )}
+      </>)}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  seg: { flexDirection: 'row', borderRadius: 12, padding: 3 },
+  segBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: 9, borderRadius: 10 },
+  catLink: { flexDirection: 'row', alignItems: 'center', gap: 6, alignSelf: 'flex-start' },
   container: { flex: 1 },
   header: {
     paddingHorizontal: 16,
@@ -230,6 +392,7 @@ const styles = StyleSheet.create({
   },
   filtersPanel: {
     padding: 16,
+    maxHeight: 400,
     borderBottomWidth: StyleSheet.hairlineWidth,
   },
   filterLabel: {

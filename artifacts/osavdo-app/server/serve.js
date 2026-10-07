@@ -4,8 +4,6 @@
  * Serves the output of build.js (static-build/) with two special routes:
  * - GET / or /manifest with expo-platform header → platform manifest JSON
  * - GET / without expo-platform → landing page HTML
- * - GET /manifest.json, /sw.js and PWA assets from public/
- * - GET /icon-192.png and /icon-512.png → existing Turan Market app icon
  * Everything else falls through to static file serving from ./static-build/.
  *
  * Zero external dependencies — uses only Node.js built-ins (http, fs, path).
@@ -16,8 +14,7 @@ const fs = require('fs');
 const path = require('path');
 
 const STATIC_ROOT = path.resolve(__dirname, '..', 'static-build');
-const PUBLIC_ROOT = path.resolve(__dirname, '..', 'public');
-const APP_ICON_PATH = path.resolve(__dirname, '..', 'assets', 'images', 'icon.png');
+const WEB_ROOT = path.resolve(__dirname, '..', 'web-build');
 const TEMPLATE_PATH = path.resolve(__dirname, 'templates', 'landing-page.html');
 const basePath = (process.env.BASE_PATH || '/').replace(/\/+$/, '');
 
@@ -37,6 +34,7 @@ const MIME_TYPES = {
   '.ttf': 'font/ttf',
   '.otf': 'font/otf',
   '.map': 'application/json',
+  '.webmanifest': 'application/manifest+json',
 };
 
 function getAppName() {
@@ -69,19 +67,6 @@ function serveManifest(platform, res) {
   res.end(manifest);
 }
 
-function addPwaMarkup(html) {
-  const markup = `\n    <link rel="manifest" href="/manifest.json" />\n    <meta name="theme-color" content="#0f766e" />\n    <meta name="apple-mobile-web-app-capable" content="yes" />\n    <meta name="apple-mobile-web-app-status-bar-style" content="default" />\n`;
-  const withHead = html.includes('rel="manifest"')
-    ? html
-    : html.replace('</head>', `${markup}  </head>`);
-
-  if (withHead.includes('navigator.serviceWorker.register')) return withHead;
-  return withHead.replace(
-    '</body>',
-    `    <script>\n      if ("serviceWorker" in navigator) {\n        window.addEventListener("load", () => navigator.serviceWorker.register("/sw.js"));\n      }\n    </script>\n  </body>`,
-  );
-}
-
 function serveLandingPage(req, res, landingPageTemplate, appName) {
   const forwardedProto = req.headers['x-forwarded-proto'];
   const protocol = forwardedProto || 'https';
@@ -89,31 +74,26 @@ function serveLandingPage(req, res, landingPageTemplate, appName) {
   const baseUrl = `${protocol}://${host}`;
   const expsUrl = `${host}`;
 
-  const html = addPwaMarkup(
-    landingPageTemplate
-      .replace(/BASE_URL_PLACEHOLDER/g, baseUrl)
-      .replace(/EXPS_URL_PLACEHOLDER/g, expsUrl)
-      .replace(/APP_NAME_PLACEHOLDER/g, appName),
-  );
+  const html = landingPageTemplate
+    .replace(/BASE_URL_PLACEHOLDER/g, baseUrl)
+    .replace(/EXPS_URL_PLACEHOLDER/g, expsUrl)
+    .replace(/APP_NAME_PLACEHOLDER/g, appName);
 
   res.writeHead(200, { 'content-type': 'text/html; charset=utf-8' });
   res.end(html);
 }
 
-function safeFilePath(root, urlPath) {
-  const relativePath = path
-    .normalize(urlPath)
-    .replace(/^([.][.]([/\\]|$))+/, '');
-  const filePath = path.join(root, relativePath);
-  return filePath.startsWith(root) ? filePath : null;
-}
+function serveStaticFile(urlPath, res) {
+  const safePath = path.normalize(urlPath).replace(/^(\.\.(\/|\\|$))+/, '');
+  const filePath = path.join(STATIC_ROOT, safePath);
 
-function serveFile(filePath, res) {
-  if (
-    !filePath ||
-    !fs.existsSync(filePath) ||
-    fs.statSync(filePath).isDirectory()
-  ) {
+  if (!filePath.startsWith(STATIC_ROOT)) {
+    res.writeHead(403);
+    res.end('Forbidden');
+    return;
+  }
+
+  if (!fs.existsSync(filePath) || fs.statSync(filePath).isDirectory()) {
     res.writeHead(404);
     res.end('Not Found');
     return;
@@ -121,16 +101,50 @@ function serveFile(filePath, res) {
 
   const ext = path.extname(filePath).toLowerCase();
   const contentType = MIME_TYPES[ext] || 'application/octet-stream';
+  const content = fs.readFileSync(filePath);
   res.writeHead(200, { 'content-type': contentType });
-  res.end(fs.readFileSync(filePath));
+  res.end(content);
 }
 
-function servePublicFile(urlPath, res) {
-  serveFile(safeFilePath(PUBLIC_ROOT, urlPath), res);
-}
-
-function serveStaticFile(urlPath, res) {
-  serveFile(safeFilePath(STATIC_ROOT, urlPath), res);
+function serveWebFile(req, res, pathname) {
+  if (req.method !== 'GET' && req.method !== 'HEAD') {
+    res.writeHead(405, { Allow: 'GET, HEAD' });
+    res.end();
+    return;
+  }
+  let decoded;
+  try {
+    decoded = decodeURIComponent(pathname);
+  } catch {
+    res.writeHead(400);
+    res.end('Invalid path');
+    return;
+  }
+  let filePath = path.resolve(WEB_ROOT, `.${decoded}`);
+  if (!filePath.startsWith(`${WEB_ROOT}${path.sep}`) && filePath !== WEB_ROOT) {
+    res.writeHead(403);
+    res.end('Forbidden');
+    return;
+  }
+  const exists = fs.existsSync(filePath) && fs.statSync(filePath).isFile();
+  // Deep links enter the app, but missing assets and APIs remain errors.
+  if (!exists) {
+    if (!path.extname(decoded) && !/^\/api(?:\/|$)/.test(decoded) &&
+        (pathname === '/' || (req.headers.accept || '').includes('text/html'))) {
+      filePath = path.join(WEB_ROOT, 'index.html');
+    } else {
+      res.writeHead(404);
+      res.end('Not Found');
+      return;
+    }
+  }
+  res.writeHead(200, {
+    'content-type': MIME_TYPES[path.extname(filePath).toLowerCase()] || 'application/octet-stream',
+    'cache-control': filePath.endsWith('.html') || filePath.endsWith('.webmanifest')
+      ? 'no-cache' : 'public, max-age=3600',
+    'x-content-type-options': 'nosniff',
+  });
+  res.end(req.method === 'HEAD' ? undefined : fs.readFileSync(filePath));
 }
 
 const landingPageTemplate = fs.readFileSync(TEMPLATE_PATH, 'utf-8');
@@ -144,6 +158,10 @@ const server = http.createServer((req, res) => {
     pathname = pathname.slice(basePath.length) || '/';
   }
 
+  if (!req.headers['expo-platform'] && fs.existsSync(path.join(WEB_ROOT, 'index.html'))) {
+    return serveWebFile(req, res, pathname);
+  }
+
   if (pathname === '/' || pathname === '/manifest') {
     const platform = req.headers['expo-platform'];
     if (platform === 'ios' || platform === 'android') {
@@ -155,18 +173,10 @@ const server = http.createServer((req, res) => {
     }
   }
 
-  if (pathname === '/manifest.json' || pathname === '/sw.js') {
-    return servePublicFile(pathname, res);
-  }
-
-  if (pathname === '/icon-192.png' || pathname === '/icon-512.png') {
-    return serveFile(APP_ICON_PATH, res);
-  }
-
   serveStaticFile(pathname, res);
 });
 
 const port = parseInt(process.env.PORT || '3000', 10);
 server.listen(port, '0.0.0.0', () => {
-  console.log(`Serving static Expo build on port ${port}`);
+  console.log(`Serving ${fs.existsSync(path.join(WEB_ROOT, 'index.html')) ? 'production web app' : 'static Expo build'} on port ${port}`);
 });

@@ -11,7 +11,9 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import { useColors } from '@/hooks/useColors';
-import { useGetOrders } from '@workspace/api-client-react';
+import { useGetOrders, Order, useGetCargoTrips, getGetCargoTripsQueryKey } from '@workspace/api-client-react';
+import { CargoLoadCard } from '@/components/cargo/CargoLoadCard';
+import { CargoNotifications } from '@/components/cargo/CargoNotifications';
 import { EmptyState } from '@/components/EmptyState';
 import { useRouter } from 'expo-router';
 
@@ -35,16 +37,18 @@ function formatPrice(price: number): string {
   return price.toLocaleString() + " so'm";
 }
 
-type OrderItem = NonNullable<ReturnType<typeof useGetOrders>['data']>[number];
+type OrderItem = Order;
 
 function OrderCard({ order, colors, onPress }: { order: OrderItem; colors: ReturnType<typeof useColors>; onPress: () => void }) {
-  const statusColor = {
-    pending: colors.statusPending,
-    confirmed: colors.statusConfirmed,
-    delivering: colors.statusDelivering,
-    delivered: colors.statusDelivered,
-    cancelled: colors.statusCancelled,
-  }[order.status] ?? colors.mutedForeground;
+  const statusColor = (
+    {
+      pending: colors.statusPending,
+      confirmed: colors.statusConfirmed,
+      delivering: colors.statusDelivering,
+      delivered: colors.statusDelivered,
+      cancelled: colors.statusCancelled,
+    } as Record<string, string>
+  )[order.status] ?? colors.mutedForeground;
 
   const icon = STATUS_ICONS[order.status] ?? 'clock';
   const date = new Date(order.createdAt).toLocaleDateString('uz-Latn', {
@@ -114,6 +118,9 @@ export default function OrdersScreen() {
   const topPadding = Platform.OS === 'web' ? 67 : insets.top;
 
   const { data: orders, isLoading, refetch, isRefetching } = useGetOrders();
+  const trips = useGetCargoTrips({ query: {
+    queryKey: getGetCargoTripsQueryKey(), refetchInterval: 10_000,
+  } });
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
@@ -127,20 +134,32 @@ export default function OrdersScreen() {
         contentContainerStyle={[
           styles.list,
           { paddingBottom: Platform.OS === 'web' ? 84 + 34 : 100 },
-          (orders?.length ?? 0) === 0 && !isLoading ? { flex: 1 } : undefined,
+          (orders?.length ?? 0) === 0 && !isLoading ? { flexGrow: 1 } : undefined,
         ]}
         refreshControl={
           <RefreshControl
             refreshing={isRefetching || isLoading}
-            onRefresh={refetch}
+            onRefresh={() => { refetch(); trips.refetch(); }}
             tintColor={colors.primary}
           />
+        }
+        ListHeaderComponent={
+          <View>
+            <CargoNotifications />
+            <Text style={[styles.headerTitle, { color: colors.text, fontSize: 18, marginBottom: 12 }]}>Yuk tashuvlarim</Text>
+            {trips.isError && <Text style={{ color: colors.destructive }}>Yuk tashuvlari yuklanmadi. Yangilab ko‘ring.</Text>}
+            {trips.data?.length === 0 && <Text style={{ color: colors.mutedForeground, marginBottom: 16 }}>Hozircha yuk tashuvi yo‘q.</Text>}
+            {trips.data?.map(load => (
+              <CargoLoadCard key={load.id} load={load} onPress={() => router.push(`/cargo/${load.id}`)} />
+            ))}
+            <Text style={[styles.headerTitle, { color: colors.text, fontSize: 18, marginVertical: 12 }]}>Savdo buyurtmalari</Text>
+          </View>
         }
         renderItem={({ item }) => (
           <OrderCard
             order={item}
             colors={colors}
-            onPress={() => {}}
+            onPress={() => { if (item.listingId) router.push(`/listing/${item.listingId}`); }}
           />
         )}
         ListEmptyComponent={

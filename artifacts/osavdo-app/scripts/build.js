@@ -223,12 +223,8 @@ async function downloadFile(url, outputPath) {
 }
 
 async function downloadBundle(platform, timestamp) {
-  const entryPath = path.resolve(
-    projectRoot,
-    'node_modules',
-    'expo-router',
-    'entry',
-  );
+  // Use the same custom entry as native builds: it registers headless GPS first.
+  const entryPath = path.resolve(projectRoot, 'index.ts');
   const bundlePath = path.relative(workspaceRoot, entryPath);
   const url = new URL(`http://localhost:8081/${bundlePath}.bundle`);
   url.searchParams.set('platform', platform);
