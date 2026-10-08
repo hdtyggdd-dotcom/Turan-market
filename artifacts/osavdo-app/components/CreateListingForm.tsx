@@ -41,6 +41,7 @@ export function CreateListingForm({ hideHeader = false, onDone }: { hideHeader?:
   const [specialSubcategoryId, setSpecialSubcategoryId] = useState<string | null>(null);
   const [listingLocation, setListingLocation] = useState<ListingLocationValue>({ regionId: '', districtId: '' });
   const [formError, setFormError] = useState('');
+  const [isLocating, setIsLocating] = useState(false);
   const changeListingLocation = useCallback((value: ListingLocationValue) => {
     setListingLocation(value);
     setFormError('');
@@ -120,7 +121,7 @@ export function CreateListingForm({ hideHeader = false, onDone }: { hideHeader?:
         contentContainerStyle={[styles.content, { paddingBottom: Platform.OS === 'web' ? 84 + 34 : 100 }]}
         keyboardShouldPersistTaps="handled"
       >
-        <ListingLocationFields countryId={countryId ?? 'uz'} value={listingLocation} onChange={changeListingLocation} />
+        <ListingLocationFields countryId={countryId ?? 'uz'} value={listingLocation} onChange={changeListingLocation} onDetectingChange={setIsLocating} />
         {!!formError && <Text accessibilityRole="alert" style={{ color: colors.destructive, marginVertical: 8 }}>{formError}</Text>}
         {/* ─── Rasmlar ─── */}
         <View style={{ marginTop: 8 }}>
@@ -188,7 +189,7 @@ export function CreateListingForm({ hideHeader = false, onDone }: { hideHeader?:
             <View style={{ flex: 1 }}>
               <Text style={[styles.autoTitle, { color: colors.text }]}>Qolganini AI joylaydi</Text>
               <Text style={[styles.autoSubtitle, { color: colors.mutedForeground }]}>
-                 {specialSubcategoryId ? "Tanlangan subkategoriya va e’lon hududi saqlanadi" : "Kategoriya avtomatik aniqlanadi; viloyat va tumanni siz tanlaysiz"}
+                 {specialSubcategoryId ? "Tanlangan subkategoriya va e’lon hududi saqlanadi" : "Kategoriya avtomatik aniqlanadi; hududni GPS yoki qo‘lda tanlaysiz"}
               </Text>
             </View>
           </View>
@@ -207,9 +208,9 @@ export function CreateListingForm({ hideHeader = false, onDone }: { hideHeader?:
         <TouchableOpacity
           style={[styles.submitBtn, { backgroundColor: colors.primary, opacity: createMutation.isPending ? 0.7 : 1 }]}
           onPress={handleSubmit}
-          disabled={createMutation.isPending || isPreparing}
+          disabled={createMutation.isPending || isPreparing || isLocating}
         >
-          {createMutation.isPending || isPreparing ? (
+          {createMutation.isPending || isPreparing || isLocating ? (
             <ActivityIndicator color={colors.primaryForeground} />
           ) : (
             <>

@@ -1,10 +1,10 @@
 ---
 name: Listing location policy
-description: The product location is explicitly chosen for each new ad, independently of the seller's profile and GPS.
+description: Advertisers choose GPS detection or manual region and district selection, without changing account or browsing locality.
 ---
 
-Goods and service ads must ask the advertiser to choose a region and district. Do not silently publish using the advertiser's profile location or GPS.
+Goods and service ads must let the advertiser choose between an explicit GPS action and manual region/district selection. Do not silently publish using the advertiser's profile location or automatically request GPS.
 
-**Why:** The owner specifically requested location questions when posting an ad or product; the advertised goods need not be at the advertiser's current position.
+**Why:** The owner requested both GPS and manual selection as alternatives when posting. Advertised goods need not be at the advertiser's current position, and denying GPS must not block manual posting.
 
-**How to apply:** Keep the ad's selection separate from account location and browsing filters. Changing the region must require choosing a matching district again. Preserve existing ads and historical location identifiers rather than moving their data to a new place.
+**How to apply:** Keep ad selection separate from account location and browsing filters. Show the GPS result for review and manual correction; incomplete detection still requires choosing the district. Changing the region requires a matching district again. Late GPS responses must not override manual changes. Preserve existing ads and historical IDs.

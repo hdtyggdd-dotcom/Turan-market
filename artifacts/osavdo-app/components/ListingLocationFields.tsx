@@ -5,30 +5,36 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useGetRegions, useGetDistricts, getGetDistrictsQueryKey } from '@workspace/api-client-react';
 import { useColors } from '@/hooks/useColors';
 import { useI18n } from '@/context/I18nContext';
+import { useListingGps, type ListingLocationValue } from '@/hooks/useListingGps';
 
-export interface ListingLocationValue { regionId: string; districtId: string }
+export type { ListingLocationValue } from '@/hooks/useListingGps';
 
-export function ListingLocationFields({ countryId, value, onChange }: {
+export function ListingLocationFields({ countryId, value, onChange, onDetectingChange }: {
   countryId: string;
   value: ListingLocationValue;
   onChange: (value: ListingLocationValue) => void;
+  onDetectingChange?: (busy: boolean) => void;
 }) {
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const { t, lang } = useI18n();
   const [open, setOpen] = useState<'region' | 'district' | null>(null);
+  const gps = useListingGps(onChange);
+  useEffect(() => { onDetectingChange?.(gps.busy); }, [gps.busy, onDetectingChange]);
+  const selectionCountryId = value.countryId ?? countryId;
   const previousCountry = useRef(countryId);
-  const regions = useGetRegions({ countryId });
+  const regions = useGetRegions({ countryId: selectionCountryId });
   const districts = useGetDistricts({ regionId: value.regionId || undefined }, {
     query: { enabled: !!value.regionId, queryKey: getGetDistrictsQueryKey({ regionId: value.regionId || undefined }) },
   });
   useEffect(() => {
     if (previousCountry.current !== countryId) {
       previousCountry.current = countryId;
+      gps.cancel();
       onChange({ regionId: '', districtId: '' });
       setOpen(null);
     }
-  }, [countryId, onChange]);
+  }, [countryId, onChange, gps.cancel]);
 
   const name = (item?: { name: string; nameRu: string }) => item ? (lang === 'ru' ? item.nameRu : item.name) : '';
   const region = regions.data?.find(item => item.id === value.regionId);
@@ -36,12 +42,28 @@ export function ListingLocationFields({ countryId, value, onChange }: {
   const query = open === 'district' ? districts : regions;
   const options: { id: string; name: string; nameRu: string }[] = open === 'district'
     ? (districts.data ?? []).filter(item => item.regionId === value.regionId)
-    : (regions.data ?? []).filter(item => item.countryId === countryId);
+    : (regions.data ?? []).filter(item => item.countryId === selectionCountryId);
 
   return (
     <View style={{ gap: 8 }}>
       <Text style={{ color: colors.text, fontSize: 16, fontFamily: 'Inter_600SemiBold' }}>E’lon joylashuvi</Text>
       <Text style={{ color: colors.mutedForeground, fontSize: 13 }}>Tovar yoki xizmat qaysi hududda ekanini tanlang.</Text>
+      <View style={{ flexDirection: 'row', gap: 8 }}>
+        <TouchableOpacity accessibilityRole="button" accessibilityLabel="GPS orqali aniqlash"
+          accessibilityState={{ disabled: gps.busy }} disabled={gps.busy}
+          onPress={() => void gps.start()}
+          style={[styles.field, { flex: 1, gap: 8, borderColor: colors.primary, backgroundColor: colors.card }]}>
+          {gps.busy ? <ActivityIndicator color={colors.primary} /> : <Feather name="crosshair" size={18} color={colors.primary} />}
+          <Text style={{ color: colors.primary, flexShrink: 1 }}>{gps.busy ? 'Aniqlanmoqda…' : 'GPS orqali aniqlash'}</Text>
+        </TouchableOpacity>
+        <TouchableOpacity accessibilityRole="button" accessibilityLabel="Qo‘lda tanlash"
+          onPress={() => { gps.cancel(); setOpen('region'); }}
+          style={[styles.field, { flex: 1, gap: 8, borderColor: colors.border, backgroundColor: colors.card }]}>
+          <Feather name="edit-2" size={18} color={colors.text} />
+          <Text style={{ color: colors.text, flexShrink: 1 }}>Qo‘lda tanlash</Text>
+        </TouchableOpacity>
+      </View>
+      {!!gps.notice && <Text accessibilityRole="alert" style={{ color: colors.mutedForeground, fontSize: 13 }}>{gps.notice}</Text>}
       {(['region', 'district'] as const).map(kind => {
         const label = t(kind);
         const disabled = kind === 'district' && !region;
@@ -51,7 +73,7 @@ export function ListingLocationFields({ countryId, value, onChange }: {
             <TouchableOpacity
               accessibilityRole="button" accessibilityLabel={`${label} tanlash`}
               accessibilityState={{ disabled: !!disabled }}
-              disabled={!!disabled} onPress={() => setOpen(kind)}
+              disabled={!!disabled} onPress={() => { gps.cancel(); setOpen(kind); }}
               style={[styles.field, { borderColor: colors.border, backgroundColor: colors.card, opacity: disabled ? 0.5 : 1 }]}
             >
               <Text style={{ flex: 1, color: colors.text, fontSize: 15 }}>
@@ -83,7 +105,7 @@ export function ListingLocationFields({ countryId, value, onChange }: {
               ListEmptyComponent={<Text style={{ padding: 20, color: colors.mutedForeground }}>Bu hudud uchun ro‘yxat topilmadi.</Text>}
               renderItem={({ item }) => (
                 <TouchableOpacity accessibilityRole="button" onPress={() => {
-                  onChange(open === 'region' ? { regionId: item.id, districtId: '' } : { ...value, districtId: item.id });
+                  onChange(open === 'region' ? { ...value, regionId: item.id, districtId: '' } : { ...value, districtId: item.id });
                   setOpen(null);
                 }} style={[styles.option, { borderBottomColor: colors.border }]}>
                   <Text style={{ color: colors.text, fontSize: 16 }}>{name(item)}</Text>
