@@ -1,4 +1,4 @@
-// O'Savdo — Multi-language translations
+// Cosmos Market — Multi-language translations
 // Supported languages: Uzbek, Kazakh, Kyrgyz, Tajik, Turkmen, Dari,
 // Russian, Chinese, Persian, Turkish, and English.
 

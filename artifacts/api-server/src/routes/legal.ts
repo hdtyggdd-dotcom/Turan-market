@@ -8,7 +8,7 @@ router.get("/privacy-policy", (_req, res) => {
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Turan Market — Maxfiylik siyosati</title>
+    <title>Cosmos Market — Maxfiylik siyosati</title>
     <style>
       body { margin: 0; padding: 32px 18px; background: #f6f8f7; color: #17221d; font: 16px/1.65 Arial, sans-serif; }
       main { max-width: 760px; margin: 0 auto; padding: 28px; background: #fff; border-radius: 18px; box-shadow: 0 8px 30px rgba(20, 50, 35, .08); }
@@ -18,9 +18,9 @@ router.get("/privacy-policy", (_req, res) => {
   </head>
   <body>
     <main>
-      <h1>Turan Market maxfiylik siyosati</h1>
+      <h1>Cosmos Market maxfiylik siyosati</h1>
       <p class="muted">Yangilangan sana: 7-oktabr 2026</p>
-      <p>Turan Market foydalanuvchilarga mahsulot, xizmat va yuk tashish e’lonlarini joylash, ko‘rish va kelishuv qilish imkonini beradi.</p>
+      <p>Cosmos Market foydalanuvchilarga mahsulot, xizmat va yuk tashish e’lonlarini joylash, ko‘rish va kelishuv qilish imkonini beradi.</p>
 
       <h2>Qanday ma’lumotlar yig‘iladi</h2>
       <ul>
@@ -33,7 +33,7 @@ router.get("/privacy-policy", (_req, res) => {
       </ul>
 
       <h2>To‘lovlar</h2>
-      <p>Ilova ichida onlayn karta to‘lovlari hozircha mavjud emas. Turan Market karta raqami, amal qilish muddati yoki xavfsizlik kodini so‘ramaydi va saqlamaydi.</p>
+      <p>Ilova ichida onlayn karta to‘lovlari hozircha mavjud emas. Cosmos Market karta raqami, amal qilish muddati yoki xavfsizlik kodini so‘ramaydi va saqlamaydi.</p>
       <p>Ustalar obunasi bo‘limida faqat RevenueCat Test Store sinov xaridlari mavjud. Ekrandagi sinov narxi haqiqiy tarif emas va pul yechilmaydi. Haqiqiy obuna, bepul oy va bank orqali to‘lovlar hozircha yoqilmagan.</p>
 
       <h2>Ma’lumotlardan foydalanish</h2>
@@ -52,10 +52,10 @@ router.get("/privacy-policy", (_req, res) => {
       <p>Avval boshqa foydalanuvchilarga ochiq tarqatilgan e’lon rasmlari yoki ulardagi nusxalarni qaytarib olish kafolatlanmaydi. Parolni unutish yoki faol buyurtma bo‘yicha muammo bo‘lsa, yordam emailiga murojaat qiling; parol va hujjat suratlarini email orqali yubormang.</p>
 
       <h2>Bog‘lanish</h2>
-      <p>Turan Market bo‘yicha yordam va maxfiylik savollari uchun: <a href="mailto:fazliddin.16.09.2004@gmail.com">fazliddin.16.09.2004@gmail.com</a>.</p>
+      <p>Cosmos Market bo‘yicha yordam va maxfiylik savollari uchun: <a href="mailto:fazliddin.16.09.2004@gmail.com">fazliddin.16.09.2004@gmail.com</a>.</p>
 
       <h2>Bolalar xavfsizligi</h2>
-      <p>Turan Market 13 yoshdan kichik bolalar uchun mo‘ljallanmagan. Biz bunday foydalanuvchilardan ataylab ma’lumot yig‘maymiz.</p>
+      <p>Cosmos Market 13 yoshdan kichik bolalar uchun mo‘ljallanmagan. Biz bunday foydalanuvchilardan ataylab ma’lumot yig‘maymiz.</p>
 
       <h2>O‘zgarishlar</h2>
       <p>Ushbu siyosat yangilansa, ilovada va shu sahifada yangi sana ko‘rsatiladi.</p>

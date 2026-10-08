@@ -1,15 +1,15 @@
 {
   "expo": {
-    "name": "Turan Market",
+    "name": "Cosmos Market",
     "slug": "turanmarket",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/android-icon.png",
+    "icon": "./assets/images/cosmos-android-icon.png",
     "scheme": "turanmarket",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "splash": {
-      "image": "./assets/images/turan-logo.png",
+      "image": "./assets/images/cosmos-logo.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
@@ -21,7 +21,7 @@
       "package": "com.turanmarket.app",
       "versionCode": 1,
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/android-adaptive-foreground.png",
+        "foregroundImage": "./assets/images/cosmos-adaptive-foreground.png",
         "backgroundColor": "#000000"
       },
       "blockedPermissions": [
@@ -38,7 +38,7 @@
     },
     "web": {
       "output": "single",
-      "favicon": "./assets/images/icon.png"
+      "favicon": "./assets/images/cosmos-android-icon.png"
     },
     "plugins": [
       [

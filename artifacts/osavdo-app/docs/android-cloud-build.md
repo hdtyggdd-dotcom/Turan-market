@@ -30,11 +30,13 @@ eksportiga kiritilmasin. Existing remote-only kodni o‘zboshimchalik bilan o‘
 
 ## Telefonda olish
 
-GitHub → repository → Actions → **Turan Market - Android phone test**
+GitHub → repository → Actions → **Cosmos Market - Android phone test**
 → **Run workflow**. Branch sifatida `android-phone-test-...` ni tanlang;
 `main`da eski kod turibdi. Muvaffaqiyatli run ichidagi
-**turan-market-internal-phone-test** ZIP’ni yuklab olib oching.
-Ichidagi `turan-market-internal-test.apk` ni o‘rnating.
+**cosmos-market-internal-phone-test** ZIP’ni yuklab olib oching.
+Ichidagi `cosmos-market-internal-test.apk` ni o‘rnating.
+
+Bu nomlar yangilangan source snapshot GitHub’ga chiqarilib, yangi build bajarilgandan keyin ko‘rinadi. Oldingi run va APK nomlari tarixiy holicha qoladi. Source’ni yangi ochiq branch’ga chiqarishdan oldin egasining roziligi kerak.
 Android kerak bo‘lsa aynan shu brauzer/file manager uchun o‘rnatish ruxsatini
 so‘raydi. Begona noma’lum APK’larni o‘rnatmang.
 

@@ -1,7 +1,7 @@
 export const accountDeletionPage = String.raw`<!doctype html>
 <html lang="uz"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Turan Market — akkauntni o‘chirish</title>
-<meta name="description" content="Turan Market akkaunti va shaxsiy ma’lumotlarini o‘chirish uchun parol bilan tasdiqlanadigan rasmiy sahifa.">
+<title>Cosmos Market — akkauntni o‘chirish</title>
+<meta name="description" content="Cosmos Market akkaunti va shaxsiy ma’lumotlarini o‘chirish uchun parol bilan tasdiqlanadigan rasmiy sahifa.">
 <style>
 body{margin:0;padding:28px 16px;background:#f6f8f7;color:#17221d;font:16px/1.65 system-ui,sans-serif}
 main{max-width:650px;margin:auto;background:white;padding:28px;border-radius:18px}
@@ -12,7 +12,7 @@ button:disabled{opacity:.5;cursor:default}a{color:#087f5b;overflow-wrap:anywhere
 .notice{padding:16px;background:#fff1ed;border-radius:10px}.message{padding:14px;background:#edf5ef;border-radius:9px;white-space:pre-wrap}
 [hidden]{display:none!important}.check{font-weight:400;display:flex;gap:10px;align-items:flex-start}.check input{margin-top:8px}
 </style></head><body><main>
-<h1>Turan Market akkauntini o‘chirish</h1>
+<h1>Cosmos Market akkauntini o‘chirish</h1>
 <p>Ilovani qayta o‘rnatmasdan shu sahifa orqali o‘z akkauntingizni yopishingiz mumkin.</p>
 <div class="notice"><strong>Bu amal qaytarilmaydi.</strong>
 <ul><li>Ism, telefon, profil hududi, e’lon suratlari, savatcha va shaxsiy hujjatlar olib tashlanadi.</li>

@@ -1,4 +1,4 @@
-# Turan Market — Play Console checklist
+# Cosmos Market — Play Console checklist
 
 ## Before creating the release
 
@@ -11,7 +11,7 @@
 
 ## Android release
 
-- [ ] Keep application ID as `uz.turanmarket.app`.
+- [ ] Keep the existing application ID as `com.turanmarket.app`; changing the display name must not create a different app identity.
 - [ ] Build a signed Android App Bundle (`.aab`).
 - [ ] Upload the `.aab` to an internal or closed testing track.
 - [ ] Install the release build on physical Android devices.
