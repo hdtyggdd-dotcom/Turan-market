@@ -33,7 +33,8 @@ export interface CargoLoad {
   deliveryDistrictId: string;
   /** @nullable */
   deliveryAddress?: string | null;
-  distanceKm: number;
+  /** @nullable */
+  distanceKm: number | null;
   /** Strict YYYY-MM-DD calendar date */
   pickupDate: Date;
   /** @nullable */

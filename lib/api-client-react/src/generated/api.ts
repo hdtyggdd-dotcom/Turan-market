@@ -2555,7 +2555,7 @@ return customFetch<DeliveryEstimateResponse>(getEstimateDeliveryUrl(),
 
 export const getEstimateDeliveryMutationKey = () => ['estimateDelivery'] as const;
 
-export const getEstimateDeliveryMutationOptions = <TError = ErrorType<unknown>,
+export const getEstimateDeliveryMutationOptions = <TError = ErrorType<ErrorResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof estimateDelivery>>, TError,EstimateDeliveryMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof estimateDelivery>>, TError,EstimateDeliveryMutationVariables, TContext> => {
 
@@ -2584,13 +2584,13 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
     export type EstimateDeliveryMutationResult = NonNullable<Awaited<ReturnType<typeof estimateDelivery>>>
     export type EstimateDeliveryMutationBody = BodyType<DeliveryEstimateRequest>
-    export type EstimateDeliveryMutationError = ErrorType<unknown>
+    export type EstimateDeliveryMutationError = ErrorType<ErrorResponse>
     export type EstimateDeliveryMutationVariables = {data: BodyType<DeliveryEstimateRequest>}
 
     /**
  * @summary Estimate delivery cost and options
  */
-export const useEstimateDelivery = <TError = ErrorType<unknown>,
+export const useEstimateDelivery = <TError = ErrorType<ErrorResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof estimateDelivery>>, TError,EstimateDeliveryMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
  ): UseMutationResult<
         Awaited<ReturnType<typeof estimateDelivery>>,

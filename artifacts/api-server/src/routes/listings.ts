@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { canonicalDistrictId } from "../data/uzbekistan-districts.js";
 import Anthropic from "@anthropic-ai/sdk";
 import {
   listings,
@@ -96,7 +97,7 @@ router.get("/listings", (req, res) => {
   if (categoryId) result = result.filter((l) => l.categoryId === categoryId);
   if (subcategoryId) result = result.filter((l) => l.subcategoryId === subcategoryId);
   if (regionId) result = result.filter((l) => l.regionId === regionId);
-  if (districtId) result = result.filter((l) => l.districtId === districtId);
+  if (districtId) result = result.filter((l) => canonicalDistrictId(l.districtId) === canonicalDistrictId(districtId));
   if (neighborhoodId) result = result.filter((l) => l.neighborhoodId === neighborhoodId);
   if (search) {
     // Aqlli fuzzy qidiruv — xato yozilsa ham tushunadi

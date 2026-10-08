@@ -733,6 +733,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/DeliveryEstimateResponse"
+        "422":
+          description: Exact GPS coordinates are required when a district has no verified reference point
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 
   /orders:
     get:
@@ -2304,7 +2310,7 @@ components:
         deliveryRegionId: { type: string }
         deliveryDistrictId: { type: string }
         deliveryAddress: { type: ["string", "null"] }
-        distanceKm: { type: number }
+        distanceKm: { type: ["number", "null"] }
         pickupDate: { type: string, format: date, description: Strict YYYY-MM-DD calendar date }
         budgetUzs: { type: ["number", "null"] }
         sharedLoadAllowed: { type: boolean }

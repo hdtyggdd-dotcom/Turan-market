@@ -327,7 +327,10 @@ router.post("/cargo-loads", authenticateToken, async (req: AuthRequest, res) => 
     lengthCm: typeof body.lengthCm === "number" ? body.lengthCm : null, widthCm: typeof body.widthCm === "number" ? body.widthCm : null, heightCm: typeof body.heightCm === "number" ? body.heightCm : null,
     pickupRegionId: body.pickupRegionId, pickupDistrictId: body.pickupDistrictId, pickupAddress: typeof body.pickupAddress === "string" ? body.pickupAddress : null,
     deliveryRegionId: body.deliveryRegionId, deliveryDistrictId: body.deliveryDistrictId, deliveryAddress: typeof body.deliveryAddress === "string" ? body.deliveryAddress : null,
-    distanceKm: Math.round(Math.hypot(pickup.lat - delivery.lat, pickup.lng - delivery.lng) * 111), pickupDate: body.pickupDate,
+    distanceKm: pickup.lat !== null && pickup.lng !== null && delivery.lat !== null && delivery.lng !== null
+      ? Math.round(Math.hypot(pickup.lat - delivery.lat, pickup.lng - delivery.lng) * 111)
+      : null,
+    pickupDate: body.pickupDate,
     budgetUzs: typeof body.budgetUzs === "number" ? body.budgetUzs : null, sharedLoadAllowed: body.sharedLoadAllowed, status: "open", createdAt: new Date().toISOString(),
   };
   await persistItems([{ collection: "cargo_loads", item: load }]);

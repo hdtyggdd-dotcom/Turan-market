@@ -32,6 +32,26 @@ async function request(path: string, userId: string, method = "GET", body?: unkn
   return { status: response.status, data };
 }
 
+test("a new district without a reference point can create cargo without inventing its distance", async () => {
+  let createdId: string | undefined;
+  try {
+    const result = await request("/cargo-loads", shipperId, "POST", {
+      title: "District coverage regression", cargoType: "general", weightKg: 10, volumeM3: 1,
+      pickupRegionId: "r1", pickupDistrictId: "uz_1726292", pickupAddress: "Test pickup",
+      deliveryRegionId: "r5", deliveryDistrictId: "uz_davlatobod", deliveryAddress: "Test delivery",
+      pickupDate: new Date().toISOString().slice(0, 10), sharedLoadAllowed: false,
+    });
+    assert.equal(result.status, 201);
+    createdId = result.data.id;
+    assert.equal(result.data.pickupDistrictId, "uz_1726292");
+    assert.equal(result.data.deliveryDistrictId, "uz_davlatobod");
+    assert.equal(result.data.distanceKm, null);
+  } finally {
+    const index = cargoLoads.findIndex(load => load.id === createdId);
+    if (index >= 0) cargoLoads.splice(index, 1);
+  }
+});
+
 before(async () => {
   // Existing cargo regression scenarios use explicitly vetted fixtures.
   for (const profile of driverProfiles) {

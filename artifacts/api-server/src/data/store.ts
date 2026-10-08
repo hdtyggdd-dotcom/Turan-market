@@ -1,3 +1,4 @@
+import { completeUzbekistanLocations } from "./uzbekistan-districts.js";
 // Turan Market domain model and seed data.
 import { createHmac, randomBytes, scryptSync, timingSafeEqual } from "node:crypto";
 
@@ -24,8 +25,9 @@ export interface StoredDistrict {
   name: string;
   nameRu: string;
   regionId: string;
-  lat: number;
-  lng: number;
+  lat: number | null;
+  lng: number | null;
+  selectable?: boolean;
 }
 
 export interface StoredNeighborhood {
@@ -179,7 +181,7 @@ export interface StoredCargoLoad {
   deliveryRegionId: string;
   deliveryDistrictId: string;
   deliveryAddress: string | null;
-  distanceKm: number;
+  distanceKm: number | null;
   pickupDate: string;
   budgetUzs: number | null;
   sharedLoadAllowed: boolean;
@@ -745,6 +747,8 @@ export const districts: StoredDistrict[] = [
 ];
 
 // ─── NEIGHBORHOODS ────────────────────────────────────────────────────────────
+completeUzbekistanLocations(regions, districts);
+
 export const neighborhoods: StoredNeighborhood[] = [
   { id: 'n1', name: "Yunusobod-1", nameRu: "Юнусабад-1", districtId: 'd1' },
   { id: 'n2', name: "Yunusobod-2", nameRu: "Юнусабад-2", districtId: 'd1' },
