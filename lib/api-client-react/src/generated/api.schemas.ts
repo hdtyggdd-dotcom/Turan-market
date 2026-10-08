@@ -495,8 +495,8 @@ export interface CreateListingRequest {
   images?: string[];
   categoryId?: string;
   subcategoryId?: string;
-  regionId?: string;
-  districtId?: string;
+  regionId: string;
+  districtId: string;
   neighborhoodId?: string;
   lat?: number;
   lng?: number;
@@ -504,6 +504,54 @@ export interface CreateListingRequest {
   listingType?: CreateListingRequestListingType;
   elanTur?: CreateListingRequestElanTur;
   /** Ro'yhatda yo'q xizmat/tovar nomi — AI avtomatik kategoriya ochadi */
+  customSubcategoryName?: string;
+}
+
+export type ListingUpdateRequestSellerType = typeof ListingUpdateRequestSellerType[keyof typeof ListingUpdateRequestSellerType];
+
+
+export const ListingUpdateRequestSellerType = {
+  sotuvchi: 'sotuvchi',
+  ishlab_chiqaruvchi: 'ishlab_chiqaruvchi',
+} as const;
+
+export type ListingUpdateRequestListingType = typeof ListingUpdateRequestListingType[keyof typeof ListingUpdateRequestListingType];
+
+
+export const ListingUpdateRequestListingType = {
+  savdo: 'savdo',
+  xizmat: 'xizmat',
+} as const;
+
+export type ListingUpdateRequestElanTur = typeof ListingUpdateRequestElanTur[keyof typeof ListingUpdateRequestElanTur];
+
+
+export const ListingUpdateRequestElanTur = {
+  oddiy: 'oddiy',
+  vip: 'vip',
+} as const;
+
+/**
+ * Partial listing update; location changes must leave a valid region and district pair.
+ */
+export interface ListingUpdateRequest {
+  title?: string;
+  titleRu?: string;
+  description?: string;
+  price?: number;
+  priceUnit?: string;
+  images?: string[];
+  categoryId?: string;
+  subcategoryId?: string;
+  regionId?: string;
+  districtId?: string;
+  /** @nullable */
+  neighborhoodId?: string | null;
+  lat?: number;
+  lng?: number;
+  sellerType?: ListingUpdateRequestSellerType;
+  listingType?: ListingUpdateRequestListingType;
+  elanTur?: ListingUpdateRequestElanTur;
   customSubcategoryName?: string;
 }
 

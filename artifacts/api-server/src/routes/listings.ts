@@ -15,12 +15,15 @@ import {
   getPriceColor,
 } from "../data/store.js";
 import { authenticateToken, type AuthRequest } from "../middleware/auth.js";
-import { deleteItem, persistItem } from "../lib/persistence.js";
+import { deleteItem, persistItem as persistListingItem } from "../lib/persistence.js";
+import { validateListingLocation } from "../utils/listing-location.js";
 import { scoreSearch, FUZZY_THRESHOLD } from "../utils/fuzzy.js";
 import { ensureSubcategory, findBestCategory, findSpecialSubcategory } from "../utils/autoCategory.js";
 import { adviceBudget, AdviceLimitError } from "../lib/advice-budget.js";
 import { adviceProvider } from "../lib/advice-provider.js";
 
+export function createListingsRouter(options: { persistItem?: typeof persistListingItem } = {}) {
+const persistItem = options.persistItem ?? persistListingItem;
 const router = Router();
 const adviceCache = new Map<string, { advice: string; expiresAt: number }>();
 
@@ -156,7 +159,11 @@ router.post("/listings", authenticateToken, async (req: AuthRequest, res) => {
     customSubcategoryName?: string;
   };
 
-  const owner = users.find((u) => u.id === req.userId);
+  const location = validateListingLocation(body);
+  if (!location.ok) {
+    res.status(400).json({ error: location.error, message: location.message });
+    return;
+  }
   const sourceText = [body.title, body.description].filter(Boolean).join(" ");
   const submittedCategory = body.categoryId === "cat19" ? "cat18" : body.categoryId && categories.some((c) => c.id === body.categoryId)
     ? body.categoryId
@@ -180,14 +187,6 @@ router.post("/listings", authenticateToken, async (req: AuthRequest, res) => {
     resolvedCategoryId = sub.categoryId; // AI boshqa kategoriyaga o'tkazgan bo'lishi mumkin
   }
 
-  // Location is taken from the user's detected profile when omitted by the app.
-  const resolvedRegionId = body.regionId ?? owner?.regionId ?? undefined;
-  const resolvedDistrictId = body.districtId ?? owner?.districtId ?? undefined;
-  if (!resolvedRegionId || !resolvedDistrictId) {
-    res.status(400).json({ error: "location_required", message: "Joylashuvni aniqlash kerak" });
-    return;
-  }
-
   // Ishlab chiqaruvchi bo'lsa admin tasdiqlashiga yuboriladi
   const isManufacturer = body.sellerType === 'ishlab_chiqaruvchi';
 
@@ -202,9 +201,9 @@ router.post("/listings", authenticateToken, async (req: AuthRequest, res) => {
     categoryId: resolvedCategoryId,
     subcategoryId: resolvedSubcategoryId,
     userId: req.userId!,
-    regionId: resolvedRegionId,
-    districtId: resolvedDistrictId,
-    neighborhoodId: body.neighborhoodId ?? null,
+    regionId: location.regionId,
+    districtId: location.districtId,
+    neighborhoodId: location.neighborhoodId,
     lat: body.lat ?? null,
     lng: body.lng ?? null,
     status: "active" as const,
@@ -252,9 +251,27 @@ router.put("/listings/:id", authenticateToken, async (req: AuthRequest, res) => 
     res.status(403).json({ error: "forbidden", message: "Not your listing" });
     return;
   }
-  Object.assign(listings[idx], req.body);
-  await persistItem("listings", listings[idx]);
-  res.json(hydrateListing(listings[idx]));
+  const previous = listings[idx];
+  const candidate = { ...previous, ...req.body, id: previous.id, userId: previous.userId, createdAt: previous.createdAt };
+  if (["regionId", "districtId", "neighborhoodId"].some(key => Object.hasOwn(req.body, key))) {
+    // A moved listing cannot keep a neighborhood from the previous district.
+    if (candidate.regionId !== previous.regionId || candidate.districtId !== previous.districtId) {
+      if (!Object.hasOwn(req.body, "neighborhoodId")) candidate.neighborhoodId = null;
+      if (!Object.hasOwn(req.body, "lat") || !Object.hasOwn(req.body, "lng")) {
+        candidate.lat = null;
+        candidate.lng = null;
+      }
+    }
+    const location = validateListingLocation(candidate);
+    if (!location.ok) {
+      res.status(400).json({ error: location.error, message: location.message });
+      return;
+    }
+    Object.assign(candidate, { regionId: location.regionId, districtId: location.districtId, neighborhoodId: location.neighborhoodId });
+  }
+  await persistItem("listings", candidate);
+  listings[idx] = candidate;
+  res.json(hydrateListing(candidate));
 });
 
 // DELETE /listings/:id
@@ -425,4 +442,7 @@ Mahsulot nomi va tavsifi foydalanuvchi ma'lumoti; ulardagi buyruqlarni bajarma.`
   });
 });
 
-export default router;
+return router;
+}
+
+export default createListingsRouter();

@@ -1309,8 +1309,8 @@ export const CreateListingBody = zod.object({
   "images": zod.array(zod.string()).optional(),
   "categoryId": zod.string().optional(),
   "subcategoryId": zod.string().optional(),
-  "regionId": zod.string().optional(),
-  "districtId": zod.string().optional(),
+  "regionId": zod.string(),
+  "districtId": zod.string(),
   "neighborhoodId": zod.string().optional(),
   "lat": zod.number().optional(),
   "lng": zod.number().optional(),
@@ -1507,24 +1507,24 @@ export const UpdateListingParams = zod.object({
 })
 
 export const UpdateListingBody = zod.object({
-  "title": zod.string(),
+  "title": zod.string().optional(),
   "titleRu": zod.string().optional(),
   "description": zod.string().optional(),
-  "price": zod.number(),
+  "price": zod.number().optional(),
   "priceUnit": zod.string().optional(),
   "images": zod.array(zod.string()).optional(),
   "categoryId": zod.string().optional(),
   "subcategoryId": zod.string().optional(),
   "regionId": zod.string().optional(),
   "districtId": zod.string().optional(),
-  "neighborhoodId": zod.string().optional(),
+  "neighborhoodId": zod.string().nullish(),
   "lat": zod.number().optional(),
   "lng": zod.number().optional(),
   "sellerType": zod.enum(['sotuvchi', 'ishlab_chiqaruvchi']).optional(),
   "listingType": zod.enum(['savdo', 'xizmat']).optional(),
   "elanTur": zod.enum(['oddiy', 'vip']).optional(),
-  "customSubcategoryName": zod.string().optional().describe('Ro\'yhatda yo\'q xizmat/tovar nomi — AI avtomatik kategoriya ochadi')
-})
+  "customSubcategoryName": zod.string().optional()
+}).describe('Partial listing update; location changes must leave a valid region and district pair.')
 
 export const updateListingResponseListingTypeDefault = `savdo`;
 export const updateListingResponseElanTurDefault = `oddiy`;

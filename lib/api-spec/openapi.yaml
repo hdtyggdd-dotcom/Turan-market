@@ -507,6 +507,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Listing"
+        "400":
+          description: Missing location or district does not belong to the selected region
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 
   /listings/{id}:
     get:
@@ -549,7 +555,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/CreateListingRequest"
+              $ref: "#/components/schemas/ListingUpdateRequest"
       responses:
         "200":
           description: Listing updated
@@ -1884,6 +1890,32 @@ components:
       required:
         - title
         - price
+        - regionId
+        - districtId
+
+    ListingUpdateRequest:
+      type: object
+      description: Partial listing update; location changes must leave a valid region and district pair.
+      properties:
+        title: { type: string }
+        titleRu: { type: string }
+        description: { type: string }
+        price: { type: number }
+        priceUnit: { type: string }
+        images:
+          type: array
+          items: { type: string }
+        categoryId: { type: string }
+        subcategoryId: { type: string }
+        regionId: { type: string }
+        districtId: { type: string }
+        neighborhoodId: { type: ["string", "null"] }
+        lat: { type: number }
+        lng: { type: number }
+        sellerType: { type: string, enum: [sotuvchi, ishlab_chiqaruvchi] }
+        listingType: { type: string, enum: [savdo, xizmat] }
+        elanTur: { type: string, enum: [oddiy, vip] }
+        customSubcategoryName: { type: string }
 
     ListingsResponse:
       type: object

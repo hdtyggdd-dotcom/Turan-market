@@ -21,3 +21,4 @@
 - [Android cloud release](android-cloud-release.md) — approve source visibility before export; cloud test APK is not a signed Play AAB or a completed release.
 - [Administrative location integrity](administrative-location-integrity.md) — preserve historical IDs when fixing choices; unknown coordinates must not become invented distances or prices.
 - [Brand identity compatibility](brand-identity-compatibility.md) — Cosmos Market is a display rename; retain historical internal identifiers for upgrades, links and saved state.
+- [Listing location policy](listing-location-policy.md) — ask for the advertised goods’ region and district; do not silently use the seller’s profile or GPS.
