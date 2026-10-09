@@ -22,3 +22,4 @@
 - [Administrative location integrity](administrative-location-integrity.md) — preserve historical IDs when fixing choices; unknown coordinates must not become invented distances or prices.
 - [Brand identity compatibility](brand-identity-compatibility.md) — Cosmos Market is a display rename; retain historical internal identifiers for upgrades, links and saved state.
 - [Listing location policy](listing-location-policy.md) — offer explicit GPS or manual ad locality; do not change the account or browsing location.
+- [Native handoff verification](native-handoff-testing.md) — bound headless dialer checks; preserve synthetic account identity outside the browser until cleanup.

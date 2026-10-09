@@ -6,6 +6,7 @@ import { useFocusEffect, useRouter } from 'expo-router';
 import { useQueryClient } from '@tanstack/react-query';
 import { createOrder, getListing, getGetOrdersQueryKey } from '@workspace/api-client-react';
 import { useColors } from '@/hooks/useColors';
+import { ManualPaymentNotice } from '@/components/ManualPaymentNotice';
 import { useAuth } from '@/context/AuthContext';
 import { useCart } from '@/context/CartContext';
 import { EmptyState } from '@/components/EmptyState';
@@ -113,7 +114,7 @@ export default function CartScreen() {
           )}
           {report && (
             <View style={[styles.banner, { backgroundColor: (report.failed.length ? colors.destructive : colors.primary) + '18' }]}>
-              {report.ok > 0 && <Text style={{ color: colors.text, fontSize: 13 }}>{report.ok} ta buyurtma sotuvchiga yuborildi. To'lov ilovada amalga oshirilmaydi.</Text>}
+              {report.ok > 0 && <Text style={{ color: colors.text, fontSize: 13 }}>{report.ok} ta buyurtma sotuvchiga yuborildi. Pul yechilmadi. To‘lovni sotuvchi bilan o‘zaro kelishib amalga oshiring; bog‘lanish uchun Buyurtmalarim bo‘limini oching.</Text>}
               {report.failed.map((f, i) => (
                 <Text key={i} style={{ color: colors.destructive, fontSize: 13 }}>{f}</Text>
               ))}
@@ -129,6 +130,7 @@ export default function CartScreen() {
           ) : (
             <>
               <FlatList
+                ListHeaderComponent={<ManualPaymentNotice />}
                 data={items}
                 keyExtractor={(i) => i.requestId}
                 contentContainerStyle={{ padding: 16, gap: 10, paddingBottom: 24 }}

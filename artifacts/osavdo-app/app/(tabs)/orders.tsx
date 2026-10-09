@@ -16,6 +16,9 @@ import { CargoLoadCard } from '@/components/cargo/CargoLoadCard';
 import { CargoNotifications } from '@/components/cargo/CargoNotifications';
 import { EmptyState } from '@/components/EmptyState';
 import { useRouter } from 'expo-router';
+import { useAuth } from '@/context/AuthContext';
+import { ManualPaymentNotice } from '@/components/ManualPaymentNotice';
+import { manualPaymentContact } from '@/services/manual-payment';
 
 const STATUS_LABELS: Record<string, string> = {
   pending: "Kutilmoqda",
@@ -40,6 +43,7 @@ function formatPrice(price: number): string {
 type OrderItem = Order;
 
 function OrderCard({ order, colors, onPress }: { order: OrderItem; colors: ReturnType<typeof useColors>; onPress: () => void }) {
+  const { user } = useAuth();
   const statusColor = (
     {
       pending: colors.statusPending,
@@ -98,6 +102,9 @@ function OrderCard({ order, colors, onPress }: { order: OrderItem; colors: Retur
         )}
       </View>
 
+      {order.status !== 'cancelled' && (
+        <ManualPaymentNotice compact contact={manualPaymentContact(order, user?.id)} />
+      )}
       <View style={styles.orderFooter}>
         <View style={styles.sellerRow}>
           <Feather name="user" size={12} color={colors.mutedForeground} />
@@ -153,6 +160,7 @@ export default function OrdersScreen() {
               <CargoLoadCard key={load.id} load={load} onPress={() => router.push(`/cargo/${load.id}`)} />
             ))}
             <Text style={[styles.headerTitle, { color: colors.text, fontSize: 18, marginVertical: 12 }]}>Savdo buyurtmalari</Text>
+            <ManualPaymentNotice />
           </View>
         }
         renderItem={({ item }) => (

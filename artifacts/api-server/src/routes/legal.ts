@@ -19,7 +19,7 @@ router.get("/privacy-policy", (_req, res) => {
   <body>
     <main>
       <h1>Cosmos Market maxfiylik siyosati</h1>
-      <p class="muted">Yangilangan sana: 7-oktabr 2026</p>
+      <p class="muted">Yangilangan sana: 9-oktabr 2026</p>
       <p>Cosmos Market foydalanuvchilarga mahsulot, xizmat va yuk tashish e’lonlarini joylash, ko‘rish va kelishuv qilish imkonini beradi.</p>
 
       <h2>Qanday ma’lumotlar yig‘iladi</h2>
@@ -34,7 +34,8 @@ router.get("/privacy-policy", (_req, res) => {
 
       <h2>To‘lovlar</h2>
       <p>Ilova ichida onlayn karta to‘lovlari hozircha mavjud emas. Cosmos Market karta raqami, amal qilish muddati yoki xavfsizlik kodini so‘ramaydi va saqlamaydi.</p>
-      <p>Ustalar obunasi bo‘limida faqat RevenueCat Test Store sinov xaridlari mavjud. Ekrandagi sinov narxi haqiqiy tarif emas va pul yechilmaydi. Haqiqiy obuna, bepul oy va bank orqali to‘lovlar hozircha yoqilmagan.</p>
+      <p>Xaridor va sotuvchi o‘zaro kelishib, o‘z bank ilovalari orqali bevosita pul o‘tkazishi mumkin. Kelishuv uchun buyurtma ishtirokchilariga bir-birining mavjud bog‘lanish telefoni ko‘rsatiladi. Cosmos Market bu o‘tkazmani amalga oshirmaydi, bank tasdig‘ini olmaydi va “to‘landi” deb avtomatik belgilamaydi. Buyurtma yoki yetkazish holati to‘lov tasdig‘i emas. Pul yuborishdan oldin oluvchining ismi va summani bank ilovasida tekshiring; sotuvchi pul tushganini o‘z bank hisobidan tekshirsin. SMS kod, PIN va CVVni boshqa foydalanuvchilarga bermang.</p>
+      <p>Ustalar obunasi bo‘limida faqat RevenueCat Test Store sinov xaridlari mavjud. Ekrandagi sinov narxi haqiqiy tarif emas va pul yechilmaydi. Ilova ichidagi haqiqiy obuna, bepul oy tarifi va avtomatik bank to‘lovlari hozircha yoqilmagan.</p>
 
       <h2>Ma’lumotlardan foydalanish</h2>
       <p>Ma’lumotlar akkauntni boshqarish, e’lonlarni ko‘rsatish, buyurtmalarni bajarish, yuk tashishni tashkil qilish va xavfsizlikni ta’minlash uchun ishlatiladi. Ma’lumotlar reklama maqsadida sotilmaydi.</p>

@@ -12,6 +12,12 @@ When publication is blocked by the live Stripe requirement, removing code alone 
 
 ## Payment rollout geography
 
+The current interim phase permits only buyer–seller transfers outside the app, through their own bank apps. Merchant onboarding and live in-app product charging are deferred.
+
+**Why:** The owner explicitly chose mutual buyer–seller money transfers for now rather than proceeding with live acquiring setup.
+
+**How to apply:** Allow participants to coordinate payment using their own order contacts; never collect card credentials, initiate debits, treat an order/delivery status as payment proof, or automatically mark an external transfer paid. Do not resume live merchant onboarding unless requested again.
+
 The owner wants payments within Uzbekistan first, with international payment functions added later. The domestic phase includes both customer product-purchase payments and household-service provider subscriptions / seller commissions.
 
 Live domestic payments are explicitly requested; the disabled state is a setup safeguard, not a permanent decision to run a cash-only marketplace.
