@@ -1,16 +1,25 @@
 import { Router } from "express";
 import { authenticateToken, type AuthRequest } from "../middleware/auth.js";
 import { persistRecord } from "../lib/persistence.js";
-
-const router = Router();
-
-// Xotirada saqlanadigan rasmlar: id → base64 data URL
+import { db, appRecords } from "@workspace/db";
+import { and, eq } from "drizzle-orm";
+import { randomUUID } from "node:crypto";
 import { imageStore } from "../lib/image-store.js";
 export { imageStore } from "../lib/image-store.js";
-let imgCounter = 0;
+
+async function readPersistedImage(id: string): Promise<string | undefined> {
+  const [row] = await db.select({ payload: appRecords.payload }).from(appRecords)
+    .where(and(eq(appRecords.collection, "images"), eq(appRecords.id, id)));
+  return typeof row?.payload.dataUrl === "string" ? row.payload.dataUrl : undefined;
+}
+
+export function createUploadsRouter(readImage = readPersistedImage) {
+const router = Router();
+
+// Persisted legacy images are cached by ID in each running instance.
 
 function genImgId() {
-  return `img_${Date.now()}_${++imgCounter}`;
+  return `img_${randomUUID()}`;
 }
 
 // POST /api/upload — base64 rasm yuklash
@@ -45,12 +54,14 @@ router.post("/upload", authenticateToken, async (req: AuthRequest, res) => {
 });
 
 // GET /api/images/:id — rasmni qaytarish
-router.get("/images/:id", (req, res) => {
-  const dataUrl = imageStore.get(req.params.id);
+router.get("/images/:id", async (req, res) => {
+  // A freshly uploaded image may arrive at a different autoscale instance.
+  const dataUrl = imageStore.get(req.params.id) ?? await readImage(req.params.id);
   if (!dataUrl) {
     res.status(404).json({ error: "Rasm topilmadi" });
     return;
   }
+  imageStore.set(req.params.id, dataUrl);
 
   const matches = dataUrl.match(/^data:(.+);base64,(.+)$/);
   if (!matches) {
@@ -65,4 +76,7 @@ router.get("/images/:id", (req, res) => {
   res.send(buf);
 });
 
-export default router;
+return router;
+}
+
+export default createUploadsRouter();

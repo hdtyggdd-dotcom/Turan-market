@@ -29,6 +29,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { submitPurchase } from '@/services/purchase-attempt';
 import { PurchaseCargoSuggestion, type CargoPurchase } from '@/components/PurchaseCargoSuggestion';
 import { ManualPaymentNotice } from '@/components/ManualPaymentNotice';
+import { ListingImageGallery } from '@/components/ListingImageGallery';
 
 function formatPrice(price: number): string {
   return price.toLocaleString() + " so'm";
@@ -213,11 +214,7 @@ export default function ListingDetailScreen() {
         contentContainerStyle={{ paddingBottom: 120 }}
         showsVerticalScrollIndicator={false}
       >
-        {/* Image placeholder */}
-        <View style={[styles.imagePlaceholder, { backgroundColor: colors.secondary }]}>
-          <Feather name="image" size={48} color={colors.mutedForeground} />
-          <Text style={[styles.noImageText, { color: colors.mutedForeground }]}>Rasm yo'q</Text>
-        </View>
+        <ListingImageGallery key={listing.id} images={listing.images ?? []} />
 
         <View style={styles.content}>
           {/* Category */}

@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator, Platform, Image } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator, Platform } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import { useFocusEffect, useRouter } from 'expo-router';
@@ -7,6 +7,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { createOrder, getListing, getGetOrdersQueryKey } from '@workspace/api-client-react';
 import { useColors } from '@/hooks/useColors';
 import { ManualPaymentNotice } from '@/components/ManualPaymentNotice';
+import { ListingPhoto } from '@/components/ListingPhoto';
 import { useAuth } from '@/context/AuthContext';
 import { useCart } from '@/context/CartContext';
 import { EmptyState } from '@/components/EmptyState';
@@ -138,7 +139,7 @@ export default function CartScreen() {
                   <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
                     <TouchableOpacity onPress={() => router.push(`/listing/${item.listing.id}`)} style={[styles.img, { backgroundColor: colors.secondary }]}>
                       {item.listing.images?.[0] ? (
-                        <Image source={{ uri: item.listing.images[0] }} style={styles.img} />
+                        <ListingPhoto source={item.listing.images[0]} style={styles.img} />
                       ) : (
                         <Feather name="image" size={22} color={colors.mutedForeground} />
                       )}
