@@ -22,6 +22,7 @@ import { useLocation } from '@/context/LocationContext';
 import { useI18n } from '@/context/I18nContext';
 import { MarketAnalysisModal } from '@/components/MarketAnalysisModal';
 import { ListingLocationFields, type ListingLocationValue } from '@/components/ListingLocationFields';
+import { formatPriceInput, normalizePriceInput } from '@/services/price-input';
 
 export function CreateListingForm({ hideHeader = false, onDone }: { hideHeader?: boolean; onDone?: () => void }) {
   const colors = useColors();
@@ -75,7 +76,7 @@ export function CreateListingForm({ hideHeader = false, onDone }: { hideHeader?:
       Alert.alert("Xato", "Tovar haqida ma'lumot kiriting");
       return;
     }
-    if (!price || isNaN(Number(price))) {
+    if (!price || !Number.isFinite(Number(price))) {
       Alert.alert("Xato", "Narxni kiriting");
       return;
     }
@@ -152,8 +153,12 @@ export function CreateListingForm({ hideHeader = false, onDone }: { hideHeader?:
           style={[styles.input, { borderColor: colors.border, color: colors.text, backgroundColor: colors.card }]}
           placeholder="0"
           placeholderTextColor={colors.mutedForeground}
-          value={price}
-          onChangeText={setPrice}
+          value={formatPriceInput(price)}
+          onChangeText={(text) => {
+            const raw = normalizePriceInput(text);
+            if (raw !== null) setPrice(raw);
+          }}
+          accessibilityLabel={`${t('price')} (so'm)`}
           keyboardType="numeric"
         />
 

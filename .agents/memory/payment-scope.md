@@ -14,6 +14,12 @@ When publication is blocked by the live Stripe requirement, removing code alone 
 
 The owner wants payments within Uzbekistan first, with international payment functions added later. The domestic phase includes both customer product-purchase payments and household-service provider subscriptions / seller commissions.
 
+Live domestic payments are explicitly requested; the disabled state is a setup safeguard, not a permanent decision to run a cash-only marketplace.
+
+**Why:** The owner renewed the request for real payments. Test purchases must not be presented as satisfying that request.
+
+**How to apply:** Work toward legitimate live merchant/store configuration, but never enable charging merely by removing sandbox checks or treating an ordinary bank card as a connected merchant account.
+
 Include the requested card-acceptance scope for Uzum, AVO and other banks, including Visa where supported. Do not treat an issuer name as proof of the card network or guaranteed acceptance.
 
 **Why:** The owner explicitly set this order while preparing the app for Google Play, confirmed both payment purposes, and authorized support for these cards.
