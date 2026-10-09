@@ -8,7 +8,7 @@ router.get("/privacy-policy", (_req, res) => {
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Cosmos Market — Maxfiylik siyosati</title>
+    <title>Cosmis — Maxfiylik siyosati</title>
     <style>
       body { margin: 0; padding: 32px 18px; background: #f6f8f7; color: #17221d; font: 16px/1.65 Arial, sans-serif; }
       main { max-width: 760px; margin: 0 auto; padding: 28px; background: #fff; border-radius: 18px; box-shadow: 0 8px 30px rgba(20, 50, 35, .08); }
@@ -18,9 +18,9 @@ router.get("/privacy-policy", (_req, res) => {
   </head>
   <body>
     <main>
-      <h1>Cosmos Market maxfiylik siyosati</h1>
+      <h1>Cosmis maxfiylik siyosati</h1>
       <p class="muted">Yangilangan sana: 9-oktabr 2026</p>
-      <p>Cosmos Market foydalanuvchilarga mahsulot, xizmat va yuk tashish e’lonlarini joylash, ko‘rish va kelishuv qilish imkonini beradi.</p>
+      <p>Cosmis foydalanuvchilarga mahsulot, xizmat va yuk tashish e’lonlarini joylash, ko‘rish va kelishuv qilish imkonini beradi.</p>
 
       <h2>Qanday ma’lumotlar yig‘iladi</h2>
       <ul>
@@ -33,8 +33,8 @@ router.get("/privacy-policy", (_req, res) => {
       </ul>
 
       <h2>To‘lovlar</h2>
-      <p>Ilova ichida onlayn karta to‘lovlari hozircha mavjud emas. Cosmos Market karta raqami, amal qilish muddati yoki xavfsizlik kodini so‘ramaydi va saqlamaydi.</p>
-      <p>Xaridor va sotuvchi o‘zaro kelishib, o‘z bank ilovalari orqali bevosita pul o‘tkazishi mumkin. Kelishuv uchun buyurtma ishtirokchilariga bir-birining mavjud bog‘lanish telefoni ko‘rsatiladi. Cosmos Market bu o‘tkazmani amalga oshirmaydi, bank tasdig‘ini olmaydi va “to‘landi” deb avtomatik belgilamaydi. Buyurtma yoki yetkazish holati to‘lov tasdig‘i emas. Pul yuborishdan oldin oluvchining ismi va summani bank ilovasida tekshiring; sotuvchi pul tushganini o‘z bank hisobidan tekshirsin. SMS kod, PIN va CVVni boshqa foydalanuvchilarga bermang.</p>
+      <p>Ilova ichida onlayn karta to‘lovlari hozircha mavjud emas. Cosmis karta raqami, amal qilish muddati yoki xavfsizlik kodini so‘ramaydi va saqlamaydi.</p>
+      <p>Xaridor va sotuvchi o‘zaro kelishib, o‘z bank ilovalari orqali bevosita pul o‘tkazishi mumkin. Kelishuv uchun buyurtma ishtirokchilariga bir-birining mavjud bog‘lanish telefoni ko‘rsatiladi. Cosmis bu o‘tkazmani amalga oshirmaydi, bank tasdig‘ini olmaydi va “to‘landi” deb avtomatik belgilamaydi. Buyurtma yoki yetkazish holati to‘lov tasdig‘i emas. Pul yuborishdan oldin oluvchining ismi va summani bank ilovasida tekshiring; sotuvchi pul tushganini o‘z bank hisobidan tekshirsin. SMS kod, PIN va CVVni boshqa foydalanuvchilarga bermang.</p>
       <p>Ustalar obunasi bo‘limida faqat RevenueCat Test Store sinov xaridlari mavjud. Ekrandagi sinov narxi haqiqiy tarif emas va pul yechilmaydi. Ilova ichidagi haqiqiy obuna, bepul oy tarifi va avtomatik bank to‘lovlari hozircha yoqilmagan.</p>
 
       <h2>Ma’lumotlardan foydalanish</h2>
@@ -53,10 +53,10 @@ router.get("/privacy-policy", (_req, res) => {
       <p>Avval boshqa foydalanuvchilarga ochiq tarqatilgan e’lon rasmlari yoki ulardagi nusxalarni qaytarib olish kafolatlanmaydi. Parolni unutish yoki faol buyurtma bo‘yicha muammo bo‘lsa, yordam emailiga murojaat qiling; parol va hujjat suratlarini email orqali yubormang.</p>
 
       <h2>Bog‘lanish</h2>
-      <p>Cosmos Market bo‘yicha yordam va maxfiylik savollari uchun: <a href="mailto:fazliddin.16.09.2004@gmail.com">fazliddin.16.09.2004@gmail.com</a>.</p>
+      <p>Cosmis bo‘yicha yordam va maxfiylik savollari uchun: <a href="mailto:fazliddin.16.09.2004@gmail.com">fazliddin.16.09.2004@gmail.com</a>.</p>
 
       <h2>Bolalar xavfsizligi</h2>
-      <p>Cosmos Market 13 yoshdan kichik bolalar uchun mo‘ljallanmagan. Biz bunday foydalanuvchilardan ataylab ma’lumot yig‘maymiz.</p>
+      <p>Cosmis 13 yoshdan kichik bolalar uchun mo‘ljallanmagan. Biz bunday foydalanuvchilardan ataylab ma’lumot yig‘maymiz.</p>
 
       <h2>O‘zgarishlar</h2>
       <p>Ushbu siyosat yangilansa, ilovada va shu sahifada yangi sana ko‘rsatiladi.</p>

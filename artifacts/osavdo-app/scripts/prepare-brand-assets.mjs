@@ -11,7 +11,7 @@ const root = path.resolve(appDir, "../..");
 const config = JSON.parse(fs.readFileSync(path.join(appDir, "app.json"), "utf8")).expo;
 const source = path.resolve(appDir, config.splash.image);
 assert(fs.existsSync(source), "The approved brand logo must exist first");
-const release = path.join(root, "release-assets/cosmos-market");
+const release = path.join(root, "release-assets/cosmis");
 fs.mkdirSync(release, { recursive: true });
 const icon = path.resolve(appDir, config.icon);
 const foreground = path.resolve(appDir, config.android.adaptiveIcon.foregroundImage);

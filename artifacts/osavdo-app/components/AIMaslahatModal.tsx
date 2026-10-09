@@ -28,7 +28,7 @@ interface AIMaslahatModalProps {
 }
 
 const APP_GUIDE_QUESTION = "Ilova nimalar qila oladi?";
-const APP_GUIDE = `Cosmos Market ilovasiga xush kelibsiz!
+const APP_GUIDE = `Cosmis ilovasiga xush kelibsiz!
 
 • Mahsulot va xizmat e’lonlarini qidirish, kategoriya bo‘yicha ko‘rish mumkin.
 • “Izlash” → “Rasm orqali qidirish”da mahsulotni suratga oling yoki galereyadan tanlang. AI katalogdagi mos e’lonlarni izlaydi. Mos faol tovar topilmasa, shu kategoriyadagi sotuvchilarga mahsulotga talab haqida xabar beriladi; mijozning rasmi ularga yuborilmaydi.

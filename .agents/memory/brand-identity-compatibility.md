@@ -1,9 +1,9 @@
 ---
 name: Display-brand and application-identity compatibility
-description: Why old internal identifiers must survive the Cosmos Market display rebrand.
+description: Why old internal identifiers must survive display-brand changes, including Cosmis.
 ---
 
-The Cosmos Market change is a display-brand rename, not a new application or account migration. Historical Turan/osavdo identifiers intentionally remain behind the new visible name.
+The owner confirmed the exact visible name **Cosmis**, replacing Cosmos Market. This is a display-brand rename, not a new application or account migration. Historical Turan/osavdo identifiers intentionally remain behind the new visible name.
 
 **Why:** Existing native installations, deep links, remembered sessions, saved carts and provider connections depend on stable identity and storage namespaces. Cosmetic normalization of those old strings can break upgrades or make customer state appear missing.
 

@@ -15,7 +15,7 @@ export function ManualPaymentNotice({ contact, compact = false }: {
     <View style={[styles.box, { backgroundColor: colors.card, borderColor: colors.border }]} testID="manual-payment-notice">
       <Text style={[styles.title, { color: colors.text }]}>To‘lov — o‘zaro kelishuv asosida</Text>
       <Text style={[styles.text, { color: colors.mutedForeground }]}>
-        Xaridor pulni sotuvchiga o‘z bank ilovasi orqali o‘tkazadi. Cosmos Market pul yechmaydi va o‘tkazmani avtomatik tasdiqlamaydi.
+        Xaridor pulni sotuvchiga o‘z bank ilovasi orqali o‘tkazadi. Cosmis pul yechmaydi va o‘tkazmani avtomatik tasdiqlamaydi.
       </Text>
       {!compact && <Text style={[styles.text, { color: colors.mutedForeground }]}>
         Buyurtma tasdiqlanishi pul to‘langanini anglatmaydi. Pul yuborishdan oldin bank ilovasida oluvchining ismi va summani tekshiring. Sotuvchi pul tushganini o‘z bank hisobidan tekshirsin; faqat chek rasmiga ishonmang. SMS kod, PIN va CVVni hech kimga bermang.

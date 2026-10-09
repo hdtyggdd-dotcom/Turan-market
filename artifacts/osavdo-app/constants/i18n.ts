@@ -1,4 +1,4 @@
-// Cosmos Market — Multi-language translations
+// Cosmis — Multi-language translations
 // Supported languages: Uzbek, Kazakh, Kyrgyz, Tajik, Turkmen, Dari,
 // Russian, Chinese, Persian, Turkish, and English.
 

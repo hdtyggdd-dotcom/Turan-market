@@ -20,6 +20,6 @@
 - [RevenueCat sandbox](revenuecat-sandbox.md) — keep provider subscriptions test-only; generic projects may lack a Test Store, and the USD sample is not live pricing.
 - [Android cloud release](android-cloud-release.md) — approve source visibility before export; cloud test APK is not a signed Play AAB or a completed release.
 - [Administrative location integrity](administrative-location-integrity.md) — preserve historical IDs when fixing choices; unknown coordinates must not become invented distances or prices.
-- [Brand identity compatibility](brand-identity-compatibility.md) — Cosmos Market is a display rename; retain historical internal identifiers for upgrades, links and saved state.
+- [Brand identity compatibility](brand-identity-compatibility.md) — Cosmis is the confirmed display name; retain historical internal identifiers for upgrades, links and saved state.
 - [Listing location policy](listing-location-policy.md) — offer explicit GPS or manual ad locality; do not change the account or browsing location.
 - [Native handoff verification](native-handoff-testing.md) — bound headless dialer checks; preserve synthetic account identity outside the browser until cleanup.

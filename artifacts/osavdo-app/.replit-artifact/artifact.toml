@@ -1,6 +1,6 @@
 kind = "mobile"
 previewPath = "/"
-title = "Cosmos Market"
+title = "Cosmis"
 version = "1.0.0"
 id = "artifacts/osavdo-app"
 router = "expo-domain"

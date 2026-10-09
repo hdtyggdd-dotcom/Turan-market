@@ -65,7 +65,7 @@ router.post("/locations/detect", async (req, res) => {
     // Reverse geocode via Nominatim
     const nominatim = await fetch(
       `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`,
-      { headers: { 'User-Agent': 'CosmosMarket/1.0' } }
+      { headers: { 'User-Agent': 'Cosmis/1.0' } }
     );
     const geo = await nominatim.json() as { address?: { country_code?: string } };
     const isoCode = geo?.address?.country_code?.toLowerCase() ?? '';

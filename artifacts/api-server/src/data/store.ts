@@ -1,5 +1,5 @@
 import { completeUzbekistanLocations } from "./uzbekistan-districts.js";
-// Cosmos Market domain model and seed data.
+// Cosmis domain model and seed data.
 import { createHmac, randomBytes, scryptSync, timingSafeEqual } from "node:crypto";
 
 export interface StoredCountry {
@@ -2763,7 +2763,7 @@ export const orders: StoredOrder[] = [
   },
 ];
 
-// ─── COSMOS MARKET CARGO ─────────────────────────────────────────────────────
+// ─── COSMIS CARGO ─────────────────────────────────────────────────────
 export const vehicleTypes: StoredVehicleType[] = [
   { id: 'van', name: 'Yuk tashuvchi van', nameRu: 'Грузовой фургон', capacityKg: 1500, capacityM3: 12, supportedCargoTypes: ['general', 'fragile', 'perishable'] },
   { id: 'gazelle', name: 'Gazelle', nameRu: 'Газель', capacityKg: 3000, capacityM3: 18, supportedCargoTypes: ['general', 'fragile', 'construction'] },

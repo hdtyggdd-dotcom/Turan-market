@@ -27,8 +27,8 @@ function checkPng(file, width, height, allowAlpha = false) {
 }
 checkPng(path.join(appDir, config.icon), 1024, 1024);
 checkPng(path.join(appDir, config.android.adaptiveIcon.foregroundImage), 1024, 1024, true);
-checkPng(path.join(root, "release-assets/cosmos-market/play-icon.png"), 512, 512);
-checkPng(path.join(root, "release-assets/cosmos-market/feature-graphic.png"), 1024, 500);
+checkPng(path.join(root, "release-assets/cosmis/play-icon.png"), 512, 512);
+checkPng(path.join(root, "release-assets/cosmis/feature-graphic.png"), 1024, 500);
 const description = fs.readFileSync(path.join(appDir, "docs/store-listing-uz.txt"), "utf8");
 assert.equal(description.split("\n")[1], config.name, "Store listing and installed app names must agree");
 const short = description.split("QISQA TAVSIF (80 belgigacha)\n")[1]?.split("\n")[0];

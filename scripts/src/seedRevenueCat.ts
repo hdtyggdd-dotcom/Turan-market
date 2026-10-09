@@ -30,7 +30,7 @@ const apps = await list(`${base}/apps`);
 const test = apps.find((app) => app.type === "test_store");
 if (!test) throw new Error("The connected project has no Test Store.");
 const play = apps.find((app) => app.type === "play_store" && app.play_store?.package_name === "com.turanmarket.app")
-  ?? await request(`${base}/apps`, "POST", { name: "Cosmos Market Android", type: "play_store", play_store: { package_name: "com.turanmarket.app" } });
+  ?? await request(`${base}/apps`, "POST", { name: "Cosmis Android", type: "play_store", play_store: { package_name: "com.turanmarket.app" } });
 const products = await list(`${base}/products`);
 const testProduct = products.find((product) => product.app_id === test.id && product.store_identifier === "usta_monthly_test")
   ?? await request(`${base}/products`, "POST", { app_id: test.id, store_identifier: "usta_monthly_test", type: "subscription", title: "Ustalar obunasi — sinov", subscription: { duration: "P1M" } });

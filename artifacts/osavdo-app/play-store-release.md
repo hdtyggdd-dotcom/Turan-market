@@ -1,8 +1,8 @@
-# Cosmos Market — Google Play release pack
+# Cosmis — Google Play release pack
 
 ## App identity
 
-- App name: **Cosmos Market**
+- App name: **Cosmis**
 - Android application ID: `com.turanmarket.app` (unchanged identity)
 - Initial version name: `1.0.0`
 - Initial version code: `1`
@@ -16,7 +16,7 @@ Mahsulot, xizmat va yuk tashishni toping, e’lon bering va xavfsiz kelishing.
 
 ## Full description
 
-Cosmos Market — mahsulotlar, xizmatlar va yuk tashish xizmatlarini bir joyda topish uchun mahalliy marketplace.
+Cosmis — mahsulotlar, xizmatlar va yuk tashish xizmatlarini bir joyda topish uchun mahalliy marketplace.
 
 Ilovada:
 
@@ -27,7 +27,7 @@ Ilovada:
 - buyurtma holatini kuzating;
 - sotuvchi va haydovchilar haqida tasdiqlash ma’lumotlarini ko‘ring.
 
-Ilova ichida onlayn karta to‘lovlari hozircha mavjud emas. Cosmos Market bank karta ma’lumotlarini so‘ramaydi.
+Ilova ichida onlayn karta to‘lovlari hozircha mavjud emas. Cosmis bank karta ma’lumotlarini so‘ramaydi.
 
 ## Store assets still needed from the owner
 
@@ -40,7 +40,7 @@ Ilova ichida onlayn karta to‘lovlari hozircha mavjud emas. Cosmos Market bank 
 
 ## Release notes — version 1.0.0
 
-- Cosmos Market marketplace launch
+- Cosmis marketplace launch
 - Product and service listings
 - Cargo posting and driver offers
 - Order status tracking
