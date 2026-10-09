@@ -58,3 +58,11 @@ by the owner. The owner confirmed each month's sales are measured separately,
 not lifetime sales. Exact thresholds, commission base, and interaction with the
 free introductory month are not confirmed. Do not implement an unapproved tier
 table or enable deductions before these terms are settled.
+
+## Product-payment recipient
+
+Customer product payments must go directly to the seller, not first to the app owner's account.
+
+**Why:** The owner explicitly chose direct-to-seller settlement when asked where buyer payments should go.
+
+**How to apply:** Use seller-specific, provider-approved payment accounts and verify the provider supports this funds flow in Uzbekistan. Do not substitute a single owner-owned checkout, custodial wallet, or owner-then-seller payout flow. Treat seller commissions separately; direct settlement does not authorize automatic percentage deductions or settle the remaining commission terms.
