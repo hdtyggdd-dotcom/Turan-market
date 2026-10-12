@@ -26,3 +26,9 @@ Bound the entire GPS attempt, including permission acquisition and location dete
 **Why:** Expo's web permission request can itself invoke geolocation without a timeout. A timeout added only after permission resolves does not prevent the entry form from waiting indefinitely.
 
 **How to apply:** Use browser geolocation for web consent and coordinates, retain native permission APIs on mobile, and ensure timeout or denial releases the form for manual location selection. Ignore late results after the attempt has timed out.
+
+Show a representative country flag beside every language choice and the selected language.
+
+**Why:** The owner explicitly requested flags in the language selector, separately from the existing country selector.
+
+**How to apply:** Treat the flag as a language-selection visual, not as the user's actual country. Adding or changing these flags must not change saved country/location, phone numbering, credentials or session behavior.

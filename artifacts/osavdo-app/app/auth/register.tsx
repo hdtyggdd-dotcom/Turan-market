@@ -202,7 +202,7 @@ export default function RegisterScreen() {
             >
               <Feather name="globe" size={20} color={colors.primary} />
               <Text style={[styles.countrySelectorName, { flex: 1, color: colors.text }]}>
-                Til / Language: {LANGUAGE_OPTIONS.find(option => option.code === lang)?.label}
+                Til / Language: {LANGUAGE_OPTIONS.find(option => option.code === lang)?.flag} {LANGUAGE_OPTIONS.find(option => option.code === lang)?.label}
               </Text>
               <Feather name={showLanguagePicker ? 'chevron-up' : 'chevron-down'} size={16} color={colors.mutedForeground} />
             </TouchableOpacity>
@@ -215,7 +215,7 @@ export default function RegisterScreen() {
                     style={[styles.pickerRow, { borderBottomColor: colors.border }]}
                     onPress={() => { setLang(option.code); setShowLanguagePicker(false); }}
                   >
-                    <Text style={[styles.pickerName, { color: lang === option.code ? colors.primary : colors.text }]}>{option.label}</Text>
+                    <Text style={[styles.pickerName, { color: lang === option.code ? colors.primary : colors.text }]}>{option.flag} {option.label}</Text>
                     {lang === option.code && <Feather name="check" size={16} color={colors.primary} />}
                   </TouchableOpacity>
                 ))}

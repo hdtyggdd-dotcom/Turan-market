@@ -4,18 +4,18 @@
 
 export type LangCode = 'uz' | 'kz' | 'kg' | 'tj' | 'tm' | 'af' | 'ru' | 'cn' | 'ir' | 'tr' | 'en';
 
-export const LANGUAGE_OPTIONS: Array<{ code: LangCode; label: string }> = [
-  { code: 'uz', label: "O'zbekcha" },
-  { code: 'kz', label: "Қазақша" },
-  { code: 'kg', label: "Кыргызча" },
-  { code: 'cn', label: "中文" },
-  { code: 'tr', label: "Türkçe" },
-  { code: 'ru', label: "Русский" },
-  { code: 'ir', label: "فارسی" },
-  { code: 'tj', label: "Тоҷикӣ" },
-  { code: 'af', label: "دری" },
-  { code: 'tm', label: "Türkmençe" },
-  { code: 'en', label: "English" },
+export const LANGUAGE_OPTIONS: Array<{ code: LangCode; label: string; flag: string }> = [
+  { code: 'uz', label: "O'zbekcha", flag: '🇺🇿' },
+  { code: 'kz', label: "Қазақша", flag: '🇰🇿' },
+  { code: 'kg', label: "Кыргызча", flag: '🇰🇬' },
+  { code: 'cn', label: "中文", flag: '🇨🇳' },
+  { code: 'tr', label: "Türkçe", flag: '🇹🇷' },
+  { code: 'ru', label: "Русский", flag: '🇷🇺' },
+  { code: 'ir', label: "فارسی", flag: '🇮🇷' },
+  { code: 'tj', label: "Тоҷикӣ", flag: '🇹🇯' },
+  { code: 'af', label: "دری", flag: '🇦🇫' },
+  { code: 'tm', label: "Türkmençe", flag: '🇹🇲' },
+  { code: 'en', label: "English", flag: '🇬🇧' },
 ];
 
 export interface PhoneFormat {

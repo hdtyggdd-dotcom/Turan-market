@@ -170,7 +170,7 @@ export function CountrySetupModal({ visible, onDone }: Props) {
                       ]}
                     >
                       <Text style={{ color: lang === option.code ? colors.primaryForeground : colors.text, fontSize: 12 }}>
-                        {option.label}
+                        {option.flag} {option.label}
                       </Text>
                     </TouchableOpacity>
                   ))}
