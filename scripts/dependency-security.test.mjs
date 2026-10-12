@@ -95,12 +95,12 @@ test('both Expo and React Native Metro can measure image assets with image-size 
   const expoMetro = createRequire(expo.resolve('@expo/metro/package.json'));
   const native = createRequire(app.resolve('react-native/package.json'));
   const communityCli = createRequire(native.resolve('@react-native/community-cli-plugin/package.json'));
-  const icon = path.join(root, 'artifacts/osavdo-app/assets/images/turan-logo.png');
+  const icon = path.join(root, 'artifacts/osavdo-app/assets/images/cosmis-logo.png');
   const bytes = readFileSync(icon);
   for (const parent of [expoMetro, communityCli]) {
     const assetsPath = path.join(path.dirname(parent.resolve('metro/package.json')), 'src/Assets.js');
     const { getAssetData } = parent(assetsPath);
-    const data = await getAssetData(icon, 'turan-logo.png', [], 'android', '/assets');
+    const data = await getAssetData(icon, 'cosmis-logo.png', [], 'android', '/assets');
     assert.equal(data.width, bytes.readUInt32BE(16));
     assert.equal(data.height, bytes.readUInt32BE(20));
   }

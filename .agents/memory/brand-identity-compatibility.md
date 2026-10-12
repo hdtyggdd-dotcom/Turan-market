@@ -14,3 +14,9 @@ The owner selected **cosmicmarket.net** for the website address. This is an expl
 **Why:** The owner asked to replace the old website address separately from the application-name decision. A selected or registered domain is not necessarily connected to this deployment.
 
 **How to apply:** Verify domain ownership through the publishing/DNS connection process before treating the new URL as live. Keep the existing domain available until the new address works over HTTPS, and preserve compatibility for installed apps and old image links. Do not claim the migration is complete based only on source-code replacements or domain registration.
+
+Keep only the approved main logo for startup/application identity, without introducing extra decorative brand pictures into other app screens.
+
+**Why:** The owner explicitly clarified that the cleanup concerns logos, not product photos, and requested no unrelated changes.
+
+**How to apply:** Preserve customer-uploaded photos, language flags and functional icons. Platform-required versions of the approved logo are not additional designs; keep them usable. Archive unused legacy artwork rather than deleting customer data or changing authentication and marketplace behavior.

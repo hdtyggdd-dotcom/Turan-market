@@ -24,8 +24,8 @@ Tayyorlangan: 2026-10-06. Bu tayyorgarlik hujjati; imzolangan AAB yaratilmadi va
 ## Materiallar
 - `store-listing-uz.txt`: Play Console’ga ko‘chirish uchun o‘zbekcha tavsif.
 - `play-console-guide.html`: egasi uchun qisqa, yuklab olinadigan qo‘llanma.
-- `../assets/images/android-icon.png`: Expo ilova ikonkasi, 1024×1024.
-- `../assets/images/android-adaptive-foreground.png`: launcher foreground, 1024×1024.
+- `../assets/images/cosmis-android-icon.png`: Expo ilova ikonkasi, 1024×1024.
+- `../assets/images/cosmis-adaptive-foreground.png`: launcher foreground, 1024×1024.
 - `../../../release-assets/cosmis/play-icon.png`: Play Store ikonkasi, 512×512 RGB PNG.
 - `../../../release-assets/cosmis/feature-graphic.png`: 1024×500 PNG.
 - Kamida 2 ta haqiqiy Android release skrinshoti kerak. 1080×1920 portret rasmlar tavsiya qilinadi. Browserdagi mocked AI natijalarini haqiqiy AI aniqligining dalili sifatida store’ga qo‘ymang.
