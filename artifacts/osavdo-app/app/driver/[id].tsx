@@ -143,10 +143,10 @@ export default function DriverProfileScreen() {
             <Feather name="alert-circle" size={22} color={colors.statusPending} />
             <View style={styles.pendingCopy}>
               <Text style={[styles.pendingTitle, { color: colors.text }]}>
-                Transport hali tasdiqlanmagan
+                {driver.reviewStatus === 'expired' ? 'Hujjatlarni yangilash kerak' : 'Transport hali tasdiqlanmagan'}
               </Text>
               <Text style={[styles.pendingText, { color: colors.mutedForeground }]}>
-                Hujjatlar va davlat raqami tekshirilgach, haydovchi yuklarga taklif bera oladi.
+                Hujjatlar tasdiqlangan va amal qilish muddati tugamagan bo‘lsagina yangi yuk taklifi berish yoki qabul qilish mumkin.
               </Text>
             </View>
           </View>
@@ -163,6 +163,7 @@ export default function DriverProfileScreen() {
             <Text key={d.id} style={[styles.bio, { color: colors.text }]}>
               {{ identity: 'Shaxs hujjati', license: 'Haydovchilik guvohnomasi', registration: 'Transport guvohnomasi' }[d.kind]}
               {d.reviewedAt ? ` · ${new Date(d.reviewedAt).toLocaleDateString()}` : ''}
+              {` · Amal qilish: ${d.noExpiry ? 'Muddatsiz' : d.expiresAt ?? 'Sana yo‘q'}`}
             </Text>
           )) : <Text style={[styles.bio, { color: colors.mutedForeground }]}>Tasdiqlangan hujjat yo'q.</Text>}
         </View>

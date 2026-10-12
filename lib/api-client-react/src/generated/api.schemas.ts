@@ -495,8 +495,8 @@ export interface CreateListingRequest {
   images?: string[];
   categoryId?: string;
   subcategoryId?: string;
-  regionId?: string;
-  districtId?: string;
+  regionId: string;
+  districtId: string;
   neighborhoodId?: string;
   lat?: number;
   lng?: number;
@@ -504,6 +504,54 @@ export interface CreateListingRequest {
   listingType?: CreateListingRequestListingType;
   elanTur?: CreateListingRequestElanTur;
   /** Ro'yhatda yo'q xizmat/tovar nomi — AI avtomatik kategoriya ochadi */
+  customSubcategoryName?: string;
+}
+
+export type ListingUpdateRequestSellerType = typeof ListingUpdateRequestSellerType[keyof typeof ListingUpdateRequestSellerType];
+
+
+export const ListingUpdateRequestSellerType = {
+  sotuvchi: 'sotuvchi',
+  ishlab_chiqaruvchi: 'ishlab_chiqaruvchi',
+} as const;
+
+export type ListingUpdateRequestListingType = typeof ListingUpdateRequestListingType[keyof typeof ListingUpdateRequestListingType];
+
+
+export const ListingUpdateRequestListingType = {
+  savdo: 'savdo',
+  xizmat: 'xizmat',
+} as const;
+
+export type ListingUpdateRequestElanTur = typeof ListingUpdateRequestElanTur[keyof typeof ListingUpdateRequestElanTur];
+
+
+export const ListingUpdateRequestElanTur = {
+  oddiy: 'oddiy',
+  vip: 'vip',
+} as const;
+
+/**
+ * Partial listing update; location changes must leave a valid region and district pair.
+ */
+export interface ListingUpdateRequest {
+  title?: string;
+  titleRu?: string;
+  description?: string;
+  price?: number;
+  priceUnit?: string;
+  images?: string[];
+  categoryId?: string;
+  subcategoryId?: string;
+  regionId?: string;
+  districtId?: string;
+  /** @nullable */
+  neighborhoodId?: string | null;
+  lat?: number;
+  lng?: number;
+  sellerType?: ListingUpdateRequestSellerType;
+  listingType?: ListingUpdateRequestListingType;
+  elanTur?: ListingUpdateRequestElanTur;
   customSubcategoryName?: string;
 }
 
@@ -729,6 +777,7 @@ export const DriverProfileReviewStatus = {
   pending: 'pending',
   approved: 'approved',
   rejected: 'rejected',
+  expired: 'expired',
 } as const;
 
 export type DriverDocumentKind = typeof DriverDocumentKind[keyof typeof DriverDocumentKind];
@@ -750,6 +799,11 @@ export const DriverDocumentStatus = {
 } as const;
 
 export interface DriverDocument {
+  /** @nullable */
+  expiresAt: string | null;
+  noExpiry: boolean;
+  expiryVerified: boolean;
+  renewalRequired: boolean;
   id: string;
   kind: DriverDocumentKind;
   status: DriverDocumentStatus;
@@ -808,6 +862,14 @@ export const DriverDocumentInputMimeType = {
 } as const;
 
 export interface DriverDocumentInput {
+  /**
+     * Last valid UTC calendar day
+     * @nullable
+     * @pattern ^\d{4}-\d{2}-\d{2}$
+     */
+  expiresAt: string | null;
+  /** Only identity or registration may explicitly have no expiry */
+  noExpiry: boolean;
   kind: DriverDocumentInputKind;
   /** Base64 image */
   data: string;
@@ -833,6 +895,12 @@ export const DriverReviewInputDocumentsItemStatus = {
 } as const;
 
 export type DriverReviewInputDocumentsItem = {
+  /**
+     * @nullable
+     * @pattern ^\d{4}-\d{2}-\d{2}$
+     */
+  expiresAt: string | null;
+  noExpiry: boolean;
   id: string;
   status: DriverReviewInputDocumentsItemStatus;
 };
@@ -889,6 +957,7 @@ export const DriverVerificationStatus = {
   pending: 'pending',
   approved: 'approved',
   rejected: 'rejected',
+  expired: 'expired',
 } as const;
 
 export type DriverVerificationReviewHistoryItemStatus = typeof DriverVerificationReviewHistoryItemStatus[keyof typeof DriverVerificationReviewHistoryItemStatus];
@@ -976,7 +1045,8 @@ export interface CargoLoad {
   deliveryDistrictId: string;
   /** @nullable */
   deliveryAddress?: string | null;
-  distanceKm: number;
+  /** @nullable */
+  distanceKm: number | null;
   /** Strict YYYY-MM-DD calendar date */
   pickupDate: string;
   /** @nullable */
@@ -1139,6 +1209,16 @@ export interface PushRegistration {
   registered: boolean;
 }
 
+/**
+ * Open the signed-in driver's own verification application.
+ */
+export type CargoNotificationTarget = typeof CargoNotificationTarget[keyof typeof CargoNotificationTarget];
+
+
+export const CargoNotificationTarget = {
+  driver_verification: 'driver_verification',
+} as const;
+
 export type CargoNotificationType = typeof CargoNotificationType[keyof typeof CargoNotificationType];
 
 
@@ -1152,6 +1232,8 @@ export interface CargoNotification {
   id: string;
   /** @nullable */
   loadId: string | null;
+  /** Open the signed-in driver's own verification application. */
+  target?: CargoNotificationTarget;
   title: string;
   message: string;
   type: CargoNotificationType;

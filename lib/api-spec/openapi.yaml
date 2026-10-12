@@ -507,6 +507,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Listing"
+        "400":
+          description: Missing location or district does not belong to the selected region
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 
   /listings/{id}:
     get:
@@ -549,7 +555,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/CreateListingRequest"
+              $ref: "#/components/schemas/ListingUpdateRequest"
       responses:
         "200":
           description: Listing updated
@@ -733,6 +739,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/DeliveryEstimateResponse"
+        "422":
+          description: Exact GPS coordinates are required when a district has no verified reference point
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 
   /orders:
     get:
@@ -1878,6 +1890,32 @@ components:
       required:
         - title
         - price
+        - regionId
+        - districtId
+
+    ListingUpdateRequest:
+      type: object
+      description: Partial listing update; location changes must leave a valid region and district pair.
+      properties:
+        title: { type: string }
+        titleRu: { type: string }
+        description: { type: string }
+        price: { type: number }
+        priceUnit: { type: string }
+        images:
+          type: array
+          items: { type: string }
+        categoryId: { type: string }
+        subcategoryId: { type: string }
+        regionId: { type: string }
+        districtId: { type: string }
+        neighborhoodId: { type: ["string", "null"] }
+        lat: { type: number }
+        lng: { type: number }
+        sellerType: { type: string, enum: [sotuvchi, ishlab_chiqaruvchi] }
+        listingType: { type: string, enum: [savdo, xizmat] }
+        elanTur: { type: string, enum: [oddiy, vip] }
+        customSubcategoryName: { type: string }
 
     ListingsResponse:
       type: object
@@ -2169,7 +2207,7 @@ components:
       required: [id, userId, user, vehicleType, vehiclePlate, availableFrom, currentRegionId, rating, ratingCount, completedTrips, sharedLoadAvailableKg, sharedLoadAvailableM3]
       properties:
         operational: { type: boolean }
-        reviewStatus: { type: string, enum: [none, pending, approved, rejected] }
+        reviewStatus: { type: string, enum: [none, pending, approved, rejected, expired] }
         capacityKg: { type: number }
         capacityM3: { type: number }
         verifiedDocuments:
@@ -2194,8 +2232,10 @@ components:
 
     DriverDocumentInput:
       type: object
-      required: [kind, data, mimeType]
+      required: [kind, data, mimeType, expiresAt, noExpiry]
       properties:
+        expiresAt: { type: ["string", "null"], pattern: '^\d{4}-\d{2}-\d{2}$', description: Last valid UTC calendar day }
+        noExpiry: { type: boolean, description: Only identity or registration may explicitly have no expiry }
         kind: { type: string, enum: [identity, license, registration] }
         data: { type: string, description: Base64 image, maximum 5 MB decoded }
         mimeType: { type: string, enum: [image/jpeg, image/png] }
@@ -2210,8 +2250,10 @@ components:
           type: array
           items:
             type: object
-            required: [id, status]
+            required: [id, status, expiresAt, noExpiry]
             properties:
+              expiresAt: { type: ["string", "null"], pattern: '^\d{4}-\d{2}-\d{2}$' }
+              noExpiry: { type: boolean }
               id: { type: string }
               status: { type: string, enum: [pending, approved, rejected] }
     DriverRatingInput:
@@ -2222,8 +2264,12 @@ components:
         comment: { type: string, maxLength: 500 }
     DriverDocument:
       type: object
-      required: [id, kind, status, submittedAt]
+      required: [id, kind, status, submittedAt, expiresAt, noExpiry, expiryVerified, renewalRequired]
       properties:
+        expiresAt: { type: ["string", "null"] }
+        noExpiry: { type: boolean }
+        expiryVerified: { type: boolean }
+        renewalRequired: { type: boolean }
         id: { type: string }
         kind: { type: string, enum: [identity, license, registration] }
         status: { type: string, enum: [pending, approved, rejected] }
@@ -2268,7 +2314,7 @@ components:
         availableFrom: { type: string }
         currentRegionId: { type: string }
         bio: { type: ["string", "null"] }
-        status: { type: string, enum: [none, pending, approved, rejected] }
+        status: { type: string, enum: [none, pending, approved, rejected, expired] }
         reason: { type: ["string", "null"] }
         revision: { type: integer }
         documents:
@@ -2304,7 +2350,7 @@ components:
         deliveryRegionId: { type: string }
         deliveryDistrictId: { type: string }
         deliveryAddress: { type: ["string", "null"] }
-        distanceKm: { type: number }
+        distanceKm: { type: ["number", "null"] }
         pickupDate: { type: string, format: date, description: Strict YYYY-MM-DD calendar date }
         budgetUzs: { type: ["number", "null"] }
         sharedLoadAllowed: { type: boolean }
@@ -2417,6 +2463,7 @@ components:
       properties:
         id: { type: string }
         loadId: { type: ["string", "null"] }
+        target: { type: string, enum: [driver_verification], description: "Open the signed-in driver's own verification application." }
         title: { type: string }
         message: { type: string }
         type: { type: string, enum: [tracking, offer, system] }

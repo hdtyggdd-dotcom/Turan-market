@@ -17,6 +17,8 @@ export const appRecords = pgTable(
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
   },
   (table) => ({
+    // Also the durable idempotency key for orders: creation must INSERT ... DO
+    // NOTHING and read the winner, never replace its payload via an upsert.
     pk: primaryKey({ columns: [table.collection, table.id] }),
     collectionIndex: index("app_records_collection_idx").on(table.collection),
   }),

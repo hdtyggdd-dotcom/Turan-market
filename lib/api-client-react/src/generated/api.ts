@@ -68,6 +68,7 @@ import type {
   GetRegionsParams,
   HealthStatus,
   Listing,
+  ListingUpdateRequest,
   ListingsResponse,
   LoginRequest,
   MarketAnalysis,
@@ -1807,7 +1808,7 @@ return customFetch<Listing>(getCreateListingUrl(),
 
 export const getCreateListingMutationKey = () => ['createListing'] as const;
 
-export const getCreateListingMutationOptions = <TError = ErrorType<unknown>,
+export const getCreateListingMutationOptions = <TError = ErrorType<ErrorResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createListing>>, TError,CreateListingMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof createListing>>, TError,CreateListingMutationVariables, TContext> => {
 
@@ -1836,13 +1837,13 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
     export type CreateListingMutationResult = NonNullable<Awaited<ReturnType<typeof createListing>>>
     export type CreateListingMutationBody = BodyType<CreateListingRequest>
-    export type CreateListingMutationError = ErrorType<unknown>
+    export type CreateListingMutationError = ErrorType<ErrorResponse>
     export type CreateListingMutationVariables = {data: BodyType<CreateListingRequest>}
 
     /**
  * @summary Create a new listing
  */
-export const useCreateListing = <TError = ErrorType<unknown>,
+export const useCreateListing = <TError = ErrorType<ErrorResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createListing>>, TError,CreateListingMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
  ): UseMutationResult<
         Awaited<ReturnType<typeof createListing>>,
@@ -1942,7 +1943,7 @@ export const getUpdateListingUrl = (id: string,) => {
  * @summary Update listing
  */
 export const updateListing = async (id: string,
-    createListingRequest: CreateListingRequest, options?: Parameters<typeof customFetch>[1]): Promise<Listing> => {
+    listingUpdateRequest: ListingUpdateRequest, options?: Parameters<typeof customFetch>[1]): Promise<Listing> => {
 
     const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
     if (!h) return {};
@@ -1963,7 +1964,7 @@ return customFetch<Listing>(getUpdateListingUrl(id),
     ...options,
     method: 'PUT',
     headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
-    body: JSON.stringify(createListingRequest)
+    body: JSON.stringify(listingUpdateRequest)
   }
 );}
 
@@ -2001,9 +2002,9 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
   return  { mutationFn, ...mutationOptions }}
 
     export type UpdateListingMutationResult = NonNullable<Awaited<ReturnType<typeof updateListing>>>
-    export type UpdateListingMutationBody = BodyType<CreateListingRequest>
+    export type UpdateListingMutationBody = BodyType<ListingUpdateRequest>
     export type UpdateListingMutationError = ErrorType<unknown>
-    export type UpdateListingMutationVariables = {id: string;data: BodyType<CreateListingRequest>}
+    export type UpdateListingMutationVariables = {id: string;data: BodyType<ListingUpdateRequest>}
 
     /**
  * @summary Update listing
@@ -2555,7 +2556,7 @@ return customFetch<DeliveryEstimateResponse>(getEstimateDeliveryUrl(),
 
 export const getEstimateDeliveryMutationKey = () => ['estimateDelivery'] as const;
 
-export const getEstimateDeliveryMutationOptions = <TError = ErrorType<unknown>,
+export const getEstimateDeliveryMutationOptions = <TError = ErrorType<ErrorResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof estimateDelivery>>, TError,EstimateDeliveryMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof estimateDelivery>>, TError,EstimateDeliveryMutationVariables, TContext> => {
 
@@ -2584,13 +2585,13 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
     export type EstimateDeliveryMutationResult = NonNullable<Awaited<ReturnType<typeof estimateDelivery>>>
     export type EstimateDeliveryMutationBody = BodyType<DeliveryEstimateRequest>
-    export type EstimateDeliveryMutationError = ErrorType<unknown>
+    export type EstimateDeliveryMutationError = ErrorType<ErrorResponse>
     export type EstimateDeliveryMutationVariables = {data: BodyType<DeliveryEstimateRequest>}
 
     /**
  * @summary Estimate delivery cost and options
  */
-export const useEstimateDelivery = <TError = ErrorType<unknown>,
+export const useEstimateDelivery = <TError = ErrorType<ErrorResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof estimateDelivery>>, TError,EstimateDeliveryMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
  ): UseMutationResult<
         Awaited<ReturnType<typeof estimateDelivery>>,

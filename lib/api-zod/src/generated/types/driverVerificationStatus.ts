@@ -14,4 +14,5 @@ export const DriverVerificationStatus = {
   pending: 'pending',
   approved: 'approved',
   rejected: 'rejected',
+  expired: 'expired',
 } as const;

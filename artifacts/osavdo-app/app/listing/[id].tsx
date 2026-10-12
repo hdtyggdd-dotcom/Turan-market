@@ -28,6 +28,8 @@ import { MarketAnalysisModal } from '@/components/MarketAnalysisModal';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { submitPurchase } from '@/services/purchase-attempt';
 import { PurchaseCargoSuggestion, type CargoPurchase } from '@/components/PurchaseCargoSuggestion';
+import { ManualPaymentNotice } from '@/components/ManualPaymentNotice';
+import { ListingImageGallery } from '@/components/ListingImageGallery';
 
 function formatPrice(price: number): string {
   return price.toLocaleString() + " so'm";
@@ -195,7 +197,8 @@ export default function ListingDetailScreen() {
             <Text style={{ color: colors.text }}>{listing.title}{'\n'}{quantity} {listing.priceUnit} × {formatPrice(listing.price)}</Text>
             {selectedDelivery && <Text style={{ color: colors.mutedForeground }}>Yetkazish hisobi: {selectedDelivery.vehicleName} — {formatPrice(selectedDelivery.price)}</Text>}
             <Text style={{ color: colors.primary, fontFamily: 'Inter_700Bold' }}>Jami: {formatPrice(listing.price * quantity + (selectedDelivery?.price ?? 0))}</Text>
-            <Text style={{ color: colors.mutedForeground }}>To‘lov ilova ichida amalga oshirilmaydi. Xariddan keyin cargo taklif qilinadi.</Text>
+            <ManualPaymentNotice compact />
+            <Text style={{ color: colors.mutedForeground }}>Kelishuv uchun sotuvchining telefoni Buyurtmalar bo‘limida ko‘rsatiladi. Xariddan keyin cargo taklif qilinadi.</Text>
             <TouchableOpacity testID="confirm-purchase" disabled={buying} style={[styles.dialogButton, { backgroundColor: colors.primary }]} onPress={confirmOrder}>
               <Text style={{ color: colors.primaryForeground }}>{buying ? 'Yuborilmoqda…' : 'Tasdiqlash'}</Text>
             </TouchableOpacity>
@@ -211,11 +214,7 @@ export default function ListingDetailScreen() {
         contentContainerStyle={{ paddingBottom: 120 }}
         showsVerticalScrollIndicator={false}
       >
-        {/* Image placeholder */}
-        <View style={[styles.imagePlaceholder, { backgroundColor: colors.secondary }]}>
-          <Feather name="image" size={48} color={colors.mutedForeground} />
-          <Text style={[styles.noImageText, { color: colors.mutedForeground }]}>Rasm yo'q</Text>
-        </View>
+        <ListingImageGallery key={listing.id} images={listing.images ?? []} />
 
         <View style={styles.content}>
           {/* Category */}
@@ -294,6 +293,7 @@ export default function ListingDetailScreen() {
             </View>
           )}
 
+          <ManualPaymentNotice />
           {/* Description */}
           {listing.description && (
             <View style={[styles.descCard, { backgroundColor: colors.card, borderColor: colors.border }]}>

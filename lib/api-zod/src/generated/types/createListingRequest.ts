@@ -18,8 +18,8 @@ export interface CreateListingRequest {
   images?: string[];
   categoryId?: string;
   subcategoryId?: string;
-  regionId?: string;
-  districtId?: string;
+  regionId: string;
+  districtId: string;
   neighborhoodId?: string;
   lat?: number;
   lng?: number;

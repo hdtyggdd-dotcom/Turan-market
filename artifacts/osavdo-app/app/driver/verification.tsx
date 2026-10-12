@@ -51,6 +51,8 @@ export default function DriverVerificationScreen() {
   const [msg, setMsg] = useState<string | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const [upKind, setUpKind] = useState<string | null>(null);
+  const [expiry, setExpiry] = useState<Record<string, string>>({});
+  const [noExpiry, setNoExpiry] = useState<Record<string, boolean>>({});
   const server = q.data as DriverVerification | null | undefined;
   const hasApp = !!server && server.status !== 'none';
   const dirtyRef = useRef(dirty);
@@ -105,6 +107,13 @@ export default function DriverVerificationScreen() {
   async function pick(kind: (typeof KINDS)[number], camera: boolean) {
     setErr(null); setMsg(null);
     if (dirty || stale) return setErr('Hujjat yuklashdan oldin transport o‘zgarishlarini saqlang yoki arizani qayta yuklang.');
+    const old = server?.documents.find(d => d.kind === kind);
+    const withoutExpiry = noExpiry[kind] ?? old?.noExpiry ?? false;
+    const date = (expiry[kind] ?? old?.expiresAt ?? '').trim();
+    if (!withoutExpiry && (!/^\d{4}-\d{2}-\d{2}$/.test(date) || !Number.isFinite(Date.parse(date)) ||
+      new Date(date).toISOString().slice(0, 10) !== date || date < new Date().toISOString().slice(0, 10))) {
+      return setErr('Amal qilish sanasini YYYY-MM-DD formatida kiriting. Sana tugamagan bo‘lishi kerak.');
+    }
     try {
       if (camera && Platform.OS !== 'web') {
         const p = await ImagePicker.requestCameraPermissionsAsync();
@@ -119,7 +128,8 @@ export default function DriverVerificationScreen() {
       if (!a.base64) return setErr('Rasmni o\'qib bo\'lmadi');
       if (Math.floor((a.base64.length * 3) / 4) > MAX_BYTES) return setErr('Rasm 5 MB dan oshmasligi kerak');
       setUpKind(kind);
-      upload.mutate({ data: { kind, data: a.base64, mimeType: mime as DriverDocumentInputMimeType } }, {
+      upload.mutate({ data: { kind, data: a.base64, mimeType: mime as DriverDocumentInputMimeType,
+        expiresAt: withoutExpiry ? null : date, noExpiry: withoutExpiry } }, {
         onSuccess: (res) => {
           qc.setQueryData(getGetMyDriverVerificationQueryKey(), res);
           setBase((b) => (b ? { ...b, rev: res.revision } : b));
@@ -162,6 +172,7 @@ export default function DriverVerificationScreen() {
             </View>
             {server?.status === 'rejected' && !!server.reason && <Text style={{ color: c.destructive, fontFamily: 'Inter_500Medium' }}>Sabab: {server.reason}</Text>}
             {server?.status === 'approved' && <Text style={{ color: c.mutedForeground, fontFamily: 'Inter_400Regular' }}>Transportingiz tasdiqlangan. Ma'lumot o'zgartirilsa, ariza qayta tekshiriladi.</Text>}
+            {server?.status === 'expired' && <ErrorBox message="Hujjat muddati tugagan yoki muddati tasdiqlanmagan. Hujjatni yangilab, qayta tekshiruvga yuboring. Yangi yuk takliflari va ularni qabul qilish bloklangan." />}
             {(!server || server.status === 'none') && <Text style={{ color: c.mutedForeground, fontFamily: 'Inter_400Regular' }}>Real transport va hujjatlar tasdiqlangach, yuklarga taklif bera olasiz.</Text>}
             {!!server?.reviewHistory?.length && server.reviewHistory.slice(-3).reverse().map((h, i) => (
               <Text key={i} style={{ color: c.mutedForeground, fontSize: 12, fontFamily: 'Inter_400Regular' }}>
@@ -222,6 +233,22 @@ export default function DriverVerificationScreen() {
                   {d ? <StatusPill status={d.status} /> : <Text style={{ color: c.mutedForeground, fontSize: 12 }}>Yuklanmagan</Text>}
                 </View>
                 {d && <Text style={{ color: c.mutedForeground, fontSize: 12 }}>Yuborilgan: {new Date(d.submittedAt).toLocaleDateString()}</Text>}
+                {d && <Text style={{ color: d.renewalRequired ? c.destructive : c.mutedForeground, fontSize: 12 }}>
+                  Amal qilish: {d.noExpiry ? 'Muddatsiz' : d.expiresAt ?? 'Sana kiritilmagan'}
+                  {' · '}{d.expiryVerified ? 'Moderator tekshirgan' : 'Muddat tekshiruvi kutilmoqda'}
+                  {d.renewalRequired ? ' · Yangilash / tekshiruv talab qilinadi' : ''}
+                </Text>}
+                <Text style={[s.label, { color: c.mutedForeground }]}>Yuklanadigan hujjatning oxirgi amal qilish kuni (YYYY-MM-DD, UTC)</Text>
+                {!(noExpiry[k] ?? d?.noExpiry ?? false) && <TextInput
+                  value={expiry[k] ?? d?.expiresAt ?? ''} onChangeText={v => setExpiry(p => ({ ...p, [k]: v }))}
+                  placeholder="2030-12-31" maxLength={10} placeholderTextColor={c.mutedForeground}
+                  style={[s.input, { borderColor: c.input, color: c.text }]} />}
+                {k !== 'license' && <TouchableOpacity onPress={() => setNoExpiry(p => ({ ...p, [k]: !(p[k] ?? d?.noExpiry ?? false) }))}>
+                  <Text style={{ color: c.primary, fontFamily: 'Inter_600SemiBold' }}>
+                    {(noExpiry[k] ?? d?.noExpiry ?? false) ? '[✓]' : '[ ]'} Hujjatda amal qilish muddati yo‘q
+                  </Text>
+                </TouchableOpacity>}
+                <Text style={{ color: c.mutedForeground, fontSize: 12 }}>Sana yangi rasm bilan yuboriladi va moderator tomonidan tekshiriladi.</Text>
                 {busy ? <ActivityIndicator color={c.primary} /> : (
                   <View style={{ flexDirection: 'row', gap: 8, flexWrap: 'wrap' }}>
                     <Btn tone="ghost" icon="image" label={d ? 'Almashtirish' : 'Galereya'} onPress={() => pick(k, false)} disabled={!hasApp || upload.isPending || dirty || stale || submit.isPending} />

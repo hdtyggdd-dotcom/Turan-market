@@ -20,7 +20,7 @@ fs.writeFileSync(path.join(output, 'app-icon.png'), icon);
 fs.writeFileSync(path.join(output, 'manifest.webmanifest'), JSON.stringify({
   id: '/',
   name: config.name,
-  short_name: 'Turan Market',
+  short_name: config.name,
   description: 'Tovarlar va yuk tashish bozori',
   lang: 'uz',
   start_url: '/',
@@ -45,7 +45,7 @@ html = html.replace(/<title>[\s\S]*?<\/title>/i, `<title>${escape(config.name)}<
 html = html.replace(/<html\b([^>]*)>/i, (_, attrs) =>
   `<html lang="uz"${attrs.replace(/\s+lang=(?:"[^"]*"|'[^']*')/gi, '')}>`);
 html = html.replace('</head>', [
-  '<meta name="description" content="Turan Market — tovarlar va yuk tashish bozori">',
+  `<meta name="description" content="${escape(config.name)} — tovarlar va yuk tashish bozori">`,
   '<meta name="theme-color" content="#10b981">',
   '<link rel="manifest" href="/manifest.webmanifest">',
   '<link rel="apple-touch-icon" href="/app-icon.png">',

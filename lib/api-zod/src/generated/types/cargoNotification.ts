@@ -5,12 +5,15 @@
  * O'Savdo local marketplace API
  * OpenAPI spec version: 0.1.0
  */
+import type { CargoNotificationTarget } from './cargoNotificationTarget';
 import type { CargoNotificationType } from './cargoNotificationType';
 
 export interface CargoNotification {
   id: string;
   /** @nullable */
   loadId: string | null;
+  /** Open the signed-in driver's own verification application. */
+  target?: CargoNotificationTarget;
   title: string;
   message: string;
   type: CargoNotificationType;

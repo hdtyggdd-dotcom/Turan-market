@@ -1,4 +1,4 @@
-name: Turan Market - Android phone test
+name: Cosmis - Android phone test
 
 on:
   workflow_dispatch:
@@ -77,8 +77,8 @@ jobs:
           APK=artifacts/osavdo-app/android/app/build/outputs/apk/release/app-release.apk
           test -s "$APK"
           mkdir -p android-delivery
-          cp "$APK" android-delivery/turan-market-internal-test.apk
-          sha256sum android-delivery/turan-market-internal-test.apk > android-delivery/SHA256SUMS.txt
+          cp "$APK" android-delivery/cosmis-internal-test.apk
+          sha256sum android-delivery/cosmis-internal-test.apk > android-delivery/SHA256SUMS.txt
           printf '%s\n' \
             'Internal phone test only. Uses Expo-generated debug signing, not a Play upload key.' \
             'This APK is NOT an AAB and cannot be submitted as a production Play release.' \
@@ -86,7 +86,7 @@ jobs:
             > android-delivery/READ-ME.txt
       - uses: actions/upload-artifact@v4
         with:
-          name: turan-market-internal-phone-test
+          name: cosmis-internal-phone-test
           path: android-delivery/
           if-no-files-found: error
           retention-days: 7

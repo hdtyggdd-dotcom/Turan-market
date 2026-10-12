@@ -9,6 +9,11 @@ import type { DriverDocumentKind } from './driverDocumentKind';
 import type { DriverDocumentStatus } from './driverDocumentStatus';
 
 export interface DriverDocument {
+  /** @nullable */
+  expiresAt: string | null;
+  noExpiry: boolean;
+  expiryVerified: boolean;
+  renewalRequired: boolean;
   id: string;
   kind: DriverDocumentKind;
   status: DriverDocumentStatus;

@@ -1,4 +1,3 @@
-import React, { useEffect } from 'react';
 import { Platform } from 'react-native';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -27,6 +26,9 @@ if (Platform.OS !== 'web') {
   void SplashScreen.preventAutoHideAsync();
 }
 import { CargoPushListener } from '@/components/cargo/CargoNotifications';
+import React, { useEffect, useState } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { CountrySetupModal } from '@/components/CountrySetupModal';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -78,6 +80,7 @@ function RootLayoutNav() {
   );
 }
 
+const COUNTRY_SETUP_KEY = 'osavdo_country_setup_done';
 export default function RootLayout() {
   const [fontsLoaded, fontError] = useFonts({
     Inter_400Regular,
@@ -85,13 +88,22 @@ export default function RootLayout() {
     Inter_600SemiBold,
     Inter_700Bold,
   });
+  const [showCountrySetup, setShowCountrySetup] = useState(false);
   useEffect(() => {
     if (fontsLoaded || fontError) {
       void SplashScreen.hideAsync();
+      AsyncStorage.getItem(COUNTRY_SETUP_KEY).then((done) => {
+        if (!done) setShowCountrySetup(true);
+      });
     }
   }, [fontsLoaded, fontError]);
 
   if (!fontsLoaded && !fontError) return null;
+
+  function handleCountrySetupDone() {
+    AsyncStorage.setItem(COUNTRY_SETUP_KEY, '1').catch(() => {});
+    setShowCountrySetup(false);
+  }
 
   return (
     <SafeAreaProvider>
@@ -104,6 +116,7 @@ export default function RootLayout() {
                 <GestureHandlerRootView style={{ flex: 1 }}>
                   <KeyboardProvider>
                     <RootLayoutNav />
+                    <CountrySetupModal visible={showCountrySetup} onDone={handleCountrySetupDone} />
                   </KeyboardProvider>
                 </GestureHandlerRootView>
               </LocationProvider>

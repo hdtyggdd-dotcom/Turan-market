@@ -5,7 +5,7 @@ import { useColors } from '@/hooks/useColors';
 
 export function statusColor(c: ReturnType<typeof useColors>, s: string) {
   if (s === 'approved') return c.statusDelivered;
-  if (s === 'rejected') return c.destructive;
+  if (s === 'rejected' || s === 'expired') return c.destructive;
   return c.statusPending;
 }
 export const STATUS_LABEL: Record<string, string> = {
@@ -13,6 +13,7 @@ export const STATUS_LABEL: Record<string, string> = {
   pending: 'Kutilmoqda',
   approved: 'Tasdiqlangan',
   rejected: 'Rad etilgan',
+  expired: 'Yangilash kerak',
 };
 export const KIND_LABEL: Record<string, string> = {
   identity: 'Shaxsni tasdiqlovchi hujjat',

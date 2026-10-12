@@ -4,12 +4,12 @@ import {
   Text,
   TouchableOpacity,
   StyleSheet,
-  Image,
   Dimensions,
 } from 'react-native';
 import { useColors } from '@/hooks/useColors';
 import { Feather } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import { ListingPhoto } from './ListingPhoto';
 
 interface Listing {
   id: string;
@@ -97,7 +97,7 @@ export function ListingCard({ listing, onOpen }: ListingCardProps) {
       {/* Image */}
       <View style={[styles.imageContainer, { backgroundColor: colors.secondary }]}>
         {listing.images.length > 0 ? (
-          <Image source={{ uri: listing.images[0] }} style={styles.image} />
+          <ListingPhoto source={listing.images[0]} style={styles.image} />
         ) : (
           <View style={styles.imagePlaceholder}>
             <Feather name="image" size={28} color={colors.mutedForeground} />

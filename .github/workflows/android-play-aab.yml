@@ -1,0 +1,125 @@
+name: Cosmis - signed Google Play AAB
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cosmis-play-aab-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  bundle:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    env:
+      CI: "1"
+      EXPO_NO_TELEMETRY: "1"
+      EXPO_PUBLIC_DOMAIN: ${{ vars.TURAN_API_DOMAIN }}
+      EXPO_PUBLIC_REVENUECAT_MODE: test
+      EXPO_PUBLIC_REVENUECAT_TEST_API_KEY: ${{ vars.EXPO_PUBLIC_REVENUECAT_TEST_API_KEY }}
+      COSMIS_UPLOAD_KEYSTORE_BASE64: ${{ secrets.COSMIS_UPLOAD_KEYSTORE_BASE64 }}
+      COSMIS_UPLOAD_STORE_PASSWORD: ${{ secrets.COSMIS_UPLOAD_STORE_PASSWORD }}
+      COSMIS_UPLOAD_KEY_PASSWORD: ${{ secrets.COSMIS_UPLOAD_KEY_PASSWORD }}
+      COSMIS_UPLOAD_KEY_ALIAS: ${{ secrets.COSMIS_UPLOAD_KEY_ALIAS }}
+      COSMIS_UPLOAD_CERT_SHA256: ${{ vars.COSMIS_UPLOAD_CERT_SHA256 }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Require the approved snapshot and persistent signing key
+        shell: bash
+        run: |
+          set -euo pipefail
+          case "$GITHUB_REF_NAME" in
+            android-play-build-*) ;;
+            *) echo "Select the approved android-play-build-... snapshot." >&2; exit 1 ;;
+          esac
+          node -e '
+            for (const name of ["COSMIS_UPLOAD_KEYSTORE_BASE64", "COSMIS_UPLOAD_STORE_PASSWORD",
+              "COSMIS_UPLOAD_KEY_PASSWORD", "COSMIS_UPLOAD_KEY_ALIAS", "COSMIS_UPLOAD_CERT_SHA256"]) {
+              if (!process.env[name]) throw new Error("Missing signing setup: " + name);
+            }
+            const domain = process.env.EXPO_PUBLIC_DOMAIN;
+            if (!domain || !/^[a-zA-Z0-9.-]+$/.test(domain) || domain.endsWith(".replit.dev")) {
+              throw new Error("Production API hostname is not configured.");
+            }
+          '
+          curl --fail --silent --show-error --retry 2 "https://${EXPO_PUBLIC_DOMAIN}/api/healthz"
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.26.1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: pnpm
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - name: Install the locked workspace
+        run: pnpm install --frozen-lockfile
+      - name: Check store preparation
+        run: pnpm --filter @workspace/osavdo-app run check:android-preparation
+      - name: Generate disposable native Android sources
+        working-directory: artifacts/osavdo-app
+        run: pnpm exec expo prebuild --platform android --no-install
+      - uses: android-actions/setup-android@v3
+        with:
+          packages: ""
+          log-accepted-android-sdk-licenses: false
+      - name: Install the Android SDK
+        run: sdkmanager "platforms;android-36" "build-tools;36.0.0"
+      - name: Restore the upload key without printing its contents
+        shell: bash
+        run: |
+          set -euo pipefail
+          umask 077
+          export COSMIS_UPLOAD_KEYSTORE_PATH="$RUNNER_TEMP/cosmis-upload.p12"
+          printf '%s' "$COSMIS_UPLOAD_KEYSTORE_BASE64" | base64 --decode > "$COSMIS_UPLOAD_KEYSTORE_PATH"
+          echo "COSMIS_UPLOAD_KEYSTORE_PATH=$COSMIS_UPLOAD_KEYSTORE_PATH" >> "$GITHUB_ENV"
+          CERT=$(keytool -exportcert -keystore "$COSMIS_UPLOAD_KEYSTORE_PATH" \
+            -alias "$COSMIS_UPLOAD_KEY_ALIAS" -storepass:env COSMIS_UPLOAD_STORE_PASSWORD | sha256sum | cut -d' ' -f1)
+          test "$CERT" = "$COSMIS_UPLOAD_CERT_SHA256"
+      - name: Build with the persistent upload key, never debug signing
+        working-directory: artifacts/osavdo-app/android
+        run: |
+          chmod +x gradlew
+          ./gradlew :app:bundleRelease --no-daemon --max-workers=2 \
+            -I ../scripts/android-upload-signing.gradle \
+            -PreactNativeArchitectures=arm64-v8a,armeabi-v7a \
+            -Dorg.gradle.jvmargs="-Xmx4g -XX:MaxMetaspaceSize=1g"
+      - name: Verify signature, bundle metadata and native alignment
+        shell: bash
+        run: |
+          set -euo pipefail
+          AAB=artifacts/osavdo-app/android/app/build/outputs/bundle/release/app-release.aab
+          test -s "$AAB"
+          jarsigner -verify "$AAB"
+          CERT=$(keytool -printcert -jarfile "$AAB" -rfc | openssl x509 -outform DER | sha256sum | cut -d' ' -f1)
+          test "$CERT" = "$COSMIS_UPLOAD_CERT_SHA256"
+          curl --fail --location --silent --show-error \
+            https://github.com/google/bundletool/releases/download/1.18.2/bundletool-all-1.18.2.jar \
+            -o "$RUNNER_TEMP/bundletool.jar"
+          java -jar "$RUNNER_TEMP/bundletool.jar" validate --bundle="$AAB"
+          java -jar "$RUNNER_TEMP/bundletool.jar" dump manifest --bundle="$AAB" --module=base \
+            > "$RUNNER_TEMP/manifest.xml"
+          python3 scripts/check-play-bundle.py "$AAB" "$RUNNER_TEMP/manifest.xml"
+          mkdir -p android-play-delivery
+          cp "$AAB" android-play-delivery/cosmis-play.aab
+          sha256sum android-play-delivery/cosmis-play.aab > android-play-delivery/SHA256SUMS.txt
+          printf '%s\n' "Source commit: $GITHUB_SHA" \
+            "Signed upload bundle only. Not yet submitted to or approved by Google Play." \
+            "Real-device tests and Play Console declarations are still required." \
+            > android-play-delivery/READ-ME.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cosmis-signed-play-aab
+          path: android-play-delivery/
+          if-no-files-found: error
+          retention-days: 14
+      - name: Remove the temporary private key
+        if: always()
+        run: rm -f "$RUNNER_TEMP/cosmis-upload.p12"

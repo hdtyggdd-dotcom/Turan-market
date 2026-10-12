@@ -1,11 +1,13 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator, Platform, Image } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator, Platform } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useQueryClient } from '@tanstack/react-query';
 import { createOrder, getListing, getGetOrdersQueryKey } from '@workspace/api-client-react';
 import { useColors } from '@/hooks/useColors';
+import { ManualPaymentNotice } from '@/components/ManualPaymentNotice';
+import { ListingPhoto } from '@/components/ListingPhoto';
 import { useAuth } from '@/context/AuthContext';
 import { useCart } from '@/context/CartContext';
 import { EmptyState } from '@/components/EmptyState';
@@ -113,7 +115,7 @@ export default function CartScreen() {
           )}
           {report && (
             <View style={[styles.banner, { backgroundColor: (report.failed.length ? colors.destructive : colors.primary) + '18' }]}>
-              {report.ok > 0 && <Text style={{ color: colors.text, fontSize: 13 }}>{report.ok} ta buyurtma sotuvchiga yuborildi. To'lov ilovada amalga oshirilmaydi.</Text>}
+              {report.ok > 0 && <Text style={{ color: colors.text, fontSize: 13 }}>{report.ok} ta buyurtma sotuvchiga yuborildi. Pul yechilmadi. To‘lovni sotuvchi bilan o‘zaro kelishib amalga oshiring; bog‘lanish uchun Buyurtmalarim bo‘limini oching.</Text>}
               {report.failed.map((f, i) => (
                 <Text key={i} style={{ color: colors.destructive, fontSize: 13 }}>{f}</Text>
               ))}
@@ -129,6 +131,7 @@ export default function CartScreen() {
           ) : (
             <>
               <FlatList
+                ListHeaderComponent={<ManualPaymentNotice />}
                 data={items}
                 keyExtractor={(i) => i.requestId}
                 contentContainerStyle={{ padding: 16, gap: 10, paddingBottom: 24 }}
@@ -136,7 +139,7 @@ export default function CartScreen() {
                   <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
                     <TouchableOpacity onPress={() => router.push(`/listing/${item.listing.id}`)} style={[styles.img, { backgroundColor: colors.secondary }]}>
                       {item.listing.images?.[0] ? (
-                        <Image source={{ uri: item.listing.images[0] }} style={styles.img} />
+                        <ListingPhoto source={item.listing.images[0]} style={styles.img} />
                       ) : (
                         <Feather name="image" size={22} color={colors.mutedForeground} />
                       )}

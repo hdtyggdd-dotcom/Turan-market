@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   View,
   Text,
@@ -10,11 +10,10 @@ import {
   Platform,
   ActivityIndicator,
 } from 'react-native';
-import * as ExpoLocation from 'expo-location';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useColors } from '@/hooks/useColors';
 import { Feather } from '@expo/vector-icons';
-import { getGetUserListingsQueryKey, getGetListingsQueryKey, useCreateListing, useDetectLocation, useGetCategories } from '@workspace/api-client-react';
+import { getGetUserListingsQueryKey, getGetListingsQueryKey, useCreateListing, useGetCategories } from '@workspace/api-client-react';
 import { ImageUploader } from '@/components/ImageUploader';
 import { useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
@@ -22,21 +21,16 @@ import { useAuth } from '@/context/AuthContext';
 import { useLocation } from '@/context/LocationContext';
 import { useI18n } from '@/context/I18nContext';
 import { MarketAnalysisModal } from '@/components/MarketAnalysisModal';
+import { ListingLocationFields, type ListingLocationValue } from '@/components/ListingLocationFields';
+import { formatPriceInput, normalizePriceInput } from '@/services/price-input';
 
 export function CreateListingForm({ hideHeader = false, onDone }: { hideHeader?: boolean; onDone?: () => void }) {
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const { user } = useAuth();
-  const {
-    countryName,
-    regionId: detectedRegionId,
-    regionName: detectedRegionName,
-    districtId: detectedDistrictId,
-    districtName: detectedDistrictName,
-    setLocation,
-  } = useLocation();
-  const { t, lang, setLangByCountry } = useI18n();
+  const { countryId, countryName } = useLocation();
+  const { t, lang } = useI18n();
   const queryClient = useQueryClient();
   const topPadding = Platform.OS === 'web' ? 67 : insets.top;
 
@@ -46,10 +40,15 @@ export function CreateListingForm({ hideHeader = false, onDone }: { hideHeader?:
   const [analysisListingId, setAnalysisListingId] = useState<string | null>(null);
   const [isPreparing, setIsPreparing] = useState(false);
   const [specialSubcategoryId, setSpecialSubcategoryId] = useState<string | null>(null);
+  const [listingLocation, setListingLocation] = useState<ListingLocationValue>({ regionId: '', districtId: '' });
+  const [formError, setFormError] = useState('');
+  const [isLocating, setIsLocating] = useState(false);
+  const changeListingLocation = useCallback((value: ListingLocationValue) => {
+    setListingLocation(value);
+    setFormError('');
+  }, []);
   const { data: categories } = useGetCategories();
   const specialCategory = (categories ?? []).find((category) => category.id === 'cat18');
-
-  const detectLocationMutation = useDetectLocation();
 
   const createMutation = useCreateListing({
     mutation: {
@@ -61,55 +60,23 @@ export function CreateListingForm({ hideHeader = false, onDone }: { hideHeader?:
       },
       onError: () => {
         setIsPreparing(false);
+        setFormError("E’lon saqlanmadi. Viloyat, tuman va internet ulanishini tekshirib, qayta urining.");
         Alert.alert("Xato", "E'lon joylashtirishda xato yuz berdi");
       },
     },
   });
 
-  async function resolveAutomaticLocation() {
-    const knownRegionId = detectedRegionId ?? user?.regionId;
-    const knownDistrictId = detectedDistrictId ?? user?.districtId;
-    if (knownRegionId && knownDistrictId) {
-      return { regionId: knownRegionId, districtId: knownDistrictId };
-    }
-
-    if (Platform.OS === 'web' && typeof navigator === 'undefined') return null;
-
-    try {
-      const permission = await ExpoLocation.requestForegroundPermissionsAsync();
-      if (!permission.granted) return null;
-      const position = await ExpoLocation.getCurrentPositionAsync({
-        accuracy: ExpoLocation.Accuracy.Balanced,
-      });
-      const detected = await detectLocationMutation.mutateAsync({
-        data: { lat: position.coords.latitude, lng: position.coords.longitude },
-      });
-      const nextDistrictId = detected.districtId ?? detected.regionId;
-      setLocation({
-        countryId: detected.countryId,
-        countryName: detected.countryName,
-        countryFlag: detected.countryFlag,
-        currency: detected.currency,
-        regionId: detected.regionId,
-        regionName: detected.regionName,
-        districtId: nextDistrictId,
-        districtName: detected.districtName ?? detected.regionName,
-        lat: position.coords.latitude,
-        lng: position.coords.longitude,
-      });
-      setLangByCountry(detected.countryId);
-      return { regionId: detected.regionId, districtId: nextDistrictId };
-    } catch {
-      return null;
-    }
-  }
-
   async function handleSubmit() {
+    setFormError('');
+    if (!listingLocation.regionId || !listingLocation.districtId) {
+      setFormError('E’lon uchun viloyat va tumanni tanlang.');
+      return;
+    }
     if (!title.trim()) {
       Alert.alert("Xato", "Tovar haqida ma'lumot kiriting");
       return;
     }
-    if (!price || isNaN(Number(price))) {
+    if (!price || !Number.isFinite(Number(price))) {
       Alert.alert("Xato", "Narxni kiriting");
       return;
     }
@@ -119,12 +86,6 @@ export function CreateListingForm({ hideHeader = false, onDone }: { hideHeader?:
     }
 
     setIsPreparing(true);
-    const location = await resolveAutomaticLocation();
-    if (!location) {
-      setIsPreparing(false);
-      Alert.alert("Xato", "Joylashuvni aniqlab bo'lmadi. GPS ruxsatini yoqing.");
-      return;
-    }
 
     createMutation.mutate({
       data: {
@@ -132,8 +93,8 @@ export function CreateListingForm({ hideHeader = false, onDone }: { hideHeader?:
         price: Number(price),
         images,
         ...(specialSubcategoryId ? { categoryId: 'cat18', subcategoryId: specialSubcategoryId } : {}),
-        regionId: location.regionId,
-        districtId: location.districtId,
+        regionId: listingLocation.regionId,
+        districtId: listingLocation.districtId,
       },
     });
   }
@@ -151,6 +112,7 @@ export function CreateListingForm({ hideHeader = false, onDone }: { hideHeader?:
         onClose={() => {
           setAnalysisListingId(null);
           setTitle(''); setPrice(''); setImages([]); setIsPreparing(false); setSpecialSubcategoryId(null);
+           setListingLocation({ regionId: '', districtId: '' }); setFormError('');
           if (onDone) onDone(); else router.push('/(tabs)');
         }}
       />
@@ -160,6 +122,8 @@ export function CreateListingForm({ hideHeader = false, onDone }: { hideHeader?:
         contentContainerStyle={[styles.content, { paddingBottom: Platform.OS === 'web' ? 84 + 34 : 100 }]}
         keyboardShouldPersistTaps="handled"
       >
+        <ListingLocationFields countryId={countryId ?? 'uz'} value={listingLocation} onChange={changeListingLocation} onDetectingChange={setIsLocating} />
+        {!!formError && <Text accessibilityRole="alert" style={{ color: colors.destructive, marginVertical: 8 }}>{formError}</Text>}
         {/* ─── Rasmlar ─── */}
         <View style={{ marginTop: 8 }}>
           <ImageUploader
@@ -189,8 +153,12 @@ export function CreateListingForm({ hideHeader = false, onDone }: { hideHeader?:
           style={[styles.input, { borderColor: colors.border, color: colors.text, backgroundColor: colors.card }]}
           placeholder="0"
           placeholderTextColor={colors.mutedForeground}
-          value={price}
-          onChangeText={setPrice}
+          value={formatPriceInput(price)}
+          onChangeText={(text) => {
+            const raw = normalizePriceInput(text);
+            if (raw !== null) setPrice(raw);
+          }}
+          accessibilityLabel={`${t('price')} (so'm)`}
           keyboardType="numeric"
         />
 
@@ -226,14 +194,12 @@ export function CreateListingForm({ hideHeader = false, onDone }: { hideHeader?:
             <View style={{ flex: 1 }}>
               <Text style={[styles.autoTitle, { color: colors.text }]}>Qolganini AI joylaydi</Text>
               <Text style={[styles.autoSubtitle, { color: colors.mutedForeground }]}>
-                {specialSubcategoryId ? "Tanlangan subkategoriya saqlanadi; viloyat va tuman avtomatik aniqlanadi" : "Kategoriya, viloyat va tuman avtomatik aniqlanadi"}
+                 {specialSubcategoryId ? "Tanlangan subkategoriya va e’lon hududi saqlanadi" : "Kategoriya avtomatik aniqlanadi; hududni GPS yoki qo‘lda tanlaysiz"}
               </Text>
             </View>
           </View>
           <Text style={[styles.autoRow, { color: colors.mutedForeground }]}>
-            📍 {countryName ?? "Joylashuvingiz GPS orqali aniqlanadi"}
-            {detectedRegionName ? ` · ${detectedRegionName}` : ''}
-            {detectedDistrictName ? ` · ${detectedDistrictName}` : ''}
+            📍 {countryName ?? "E’lon hududini yuqorida tanlang"}
           </Text>
           <Text style={[styles.autoRow, { color: colors.mutedForeground }]}>
             🗂️ Mahsulot ma'lumotidan mos kategoriya topiladi
@@ -247,9 +213,9 @@ export function CreateListingForm({ hideHeader = false, onDone }: { hideHeader?:
         <TouchableOpacity
           style={[styles.submitBtn, { backgroundColor: colors.primary, opacity: createMutation.isPending ? 0.7 : 1 }]}
           onPress={handleSubmit}
-          disabled={createMutation.isPending || isPreparing}
+          disabled={createMutation.isPending || isPreparing || isLocating}
         >
-          {createMutation.isPending || isPreparing ? (
+          {createMutation.isPending || isPreparing || isLocating ? (
             <ActivityIndicator color={colors.primaryForeground} />
           ) : (
             <>
