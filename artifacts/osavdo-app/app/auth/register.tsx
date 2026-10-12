@@ -13,7 +13,7 @@ import { useAuth, type UserProfile } from '@/context/AuthContext';
 import { useRouter } from 'expo-router';
 import { useI18n } from '@/context/I18nContext';
 import { useLocation } from '@/context/LocationContext';
-import { LANGUAGE_OPTIONS, PHONE_FORMATS, buildFullPhone, type LangCode } from '@/constants/i18n';
+import { LANGUAGE_OPTIONS, PHONE_FORMATS, formatPhoneDigits, buildFullPhone, type LangCode } from '@/constants/i18n';
 
 type Role = 'buyer' | 'seller' | 'driver';
 
@@ -285,10 +285,10 @@ export default function RegisterScreen() {
                   style={[styles.input, { color: colors.text }]}
                   placeholder={formattedPlaceholder}
                   placeholderTextColor={colors.mutedForeground}
-                  value={phoneDigits}
+                  value={formatPhoneDigits(phoneDigits, fmt.mask)}
                   onChangeText={handlePhoneChange}
                   keyboardType="phone-pad"
-                  maxLength={fmt.maxDigits}
+                  maxLength={fmt.mask.length}
                 />
               </View>
             </View>
