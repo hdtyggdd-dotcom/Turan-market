@@ -20,3 +20,15 @@ Eligibility changes and new transport commitments must share a synchronization b
 **Why:** Independent moderation and cargo queues allow approval to be revoked while an already-validated acceptance is awaiting storage; it can then publish a new assignment after revocation completed.
 
 **How to apply:** Coordinate bidding, counter acceptance and shipper acceptance with document/profile changes and moderator decisions. For multiple server instances, move this guarantee into a database transaction with approval/revision preconditions instead of relying on process-local queues.
+
+Treat expiry as a current operating restriction, not as deletion of the moderator's historical decision. Missing legacy expiry metadata must require renewed evidence; do not invent dates or assume old documents are permanent.
+
+**Why:** A historical approval cannot prove a document is still valid, while erasing that approval would lose review history. Requiring fresh evidence keeps renewal tied to documents actually checked.
+
+**How to apply:** Keep historical review decisions, but derive current eligibility whenever creating or accepting a new transport commitment and when showing verification status. Existing committed trips are not automatically cancelled by expiry.
+
+Document dates use the full named UTC calendar day. Driving licenses require an expiry date; identity and vehicle registration can be explicitly declared permanent, subject to moderator confirmation.
+
+**Why:** Document types and issuing jurisdictions differ; an absent date is not proof that a document is permanent. A single disclosed date boundary prevents device timezone differences from changing eligibility.
+
+**How to apply:** Show the UTC convention in renewal forms and require moderators to confirm the submitted date or permanent-document declaration against the image before restoring eligibility.

@@ -2207,7 +2207,7 @@ components:
       required: [id, userId, user, vehicleType, vehiclePlate, availableFrom, currentRegionId, rating, ratingCount, completedTrips, sharedLoadAvailableKg, sharedLoadAvailableM3]
       properties:
         operational: { type: boolean }
-        reviewStatus: { type: string, enum: [none, pending, approved, rejected] }
+        reviewStatus: { type: string, enum: [none, pending, approved, rejected, expired] }
         capacityKg: { type: number }
         capacityM3: { type: number }
         verifiedDocuments:
@@ -2232,8 +2232,10 @@ components:
 
     DriverDocumentInput:
       type: object
-      required: [kind, data, mimeType]
+      required: [kind, data, mimeType, expiresAt, noExpiry]
       properties:
+        expiresAt: { type: ["string", "null"], pattern: '^\d{4}-\d{2}-\d{2}$', description: Last valid UTC calendar day }
+        noExpiry: { type: boolean, description: Only identity or registration may explicitly have no expiry }
         kind: { type: string, enum: [identity, license, registration] }
         data: { type: string, description: Base64 image, maximum 5 MB decoded }
         mimeType: { type: string, enum: [image/jpeg, image/png] }
@@ -2248,8 +2250,10 @@ components:
           type: array
           items:
             type: object
-            required: [id, status]
+            required: [id, status, expiresAt, noExpiry]
             properties:
+              expiresAt: { type: ["string", "null"], pattern: '^\d{4}-\d{2}-\d{2}$' }
+              noExpiry: { type: boolean }
               id: { type: string }
               status: { type: string, enum: [pending, approved, rejected] }
     DriverRatingInput:
@@ -2260,8 +2264,12 @@ components:
         comment: { type: string, maxLength: 500 }
     DriverDocument:
       type: object
-      required: [id, kind, status, submittedAt]
+      required: [id, kind, status, submittedAt, expiresAt, noExpiry, expiryVerified, renewalRequired]
       properties:
+        expiresAt: { type: ["string", "null"] }
+        noExpiry: { type: boolean }
+        expiryVerified: { type: boolean }
+        renewalRequired: { type: boolean }
         id: { type: string }
         kind: { type: string, enum: [identity, license, registration] }
         status: { type: string, enum: [pending, approved, rejected] }
@@ -2306,7 +2314,7 @@ components:
         availableFrom: { type: string }
         currentRegionId: { type: string }
         bio: { type: ["string", "null"] }
-        status: { type: string, enum: [none, pending, approved, rejected] }
+        status: { type: string, enum: [none, pending, approved, rejected, expired] }
         reason: { type: ["string", "null"] }
         revision: { type: integer }
         documents:

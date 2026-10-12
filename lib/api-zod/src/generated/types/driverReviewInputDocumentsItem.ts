@@ -8,6 +8,12 @@
 import type { DriverReviewInputDocumentsItemStatus } from './driverReviewInputDocumentsItemStatus';
 
 export type DriverReviewInputDocumentsItem = {
+  /**
+     * @nullable
+     * @pattern ^\d{4}-\d{2}-\d{2}$
+     */
+  expiresAt: string | null;
+  noExpiry: boolean;
   id: string;
   status: DriverReviewInputDocumentsItemStatus;
 };

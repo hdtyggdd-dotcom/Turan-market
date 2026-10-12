@@ -9,6 +9,14 @@ import type { DriverDocumentInputKind } from './driverDocumentInputKind';
 import type { DriverDocumentInputMimeType } from './driverDocumentInputMimeType';
 
 export interface DriverDocumentInput {
+  /**
+     * Last valid UTC calendar day
+     * @nullable
+     * @pattern ^\d{4}-\d{2}-\d{2}$
+     */
+  expiresAt: string | null;
+  /** Only identity or registration may explicitly have no expiry */
+  noExpiry: boolean;
   kind: DriverDocumentInputKind;
   /** Base64 image */
   data: string;

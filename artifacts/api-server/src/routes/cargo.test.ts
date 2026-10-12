@@ -35,12 +35,9 @@ async function request(path: string, userId: string, method = "GET", body?: unkn
 test("a new district without a reference point can create cargo without inventing its distance", async () => {
   let createdId: string | undefined;
   try {
-    const result = await request("/cargo-loads", shipperId, "POST", {
-      title: "District coverage regression", cargoType: "general", weightKg: 10, volumeM3: 1,
-      pickupRegionId: "r1", pickupDistrictId: "uz_1726292", pickupAddress: "Test pickup",
-      deliveryRegionId: "r5", deliveryDistrictId: "uz_davlatobod", deliveryAddress: "Test delivery",
-      pickupDate: new Date().toISOString().slice(0, 10), sharedLoadAllowed: false,
-    });
+  let result = await request(`/cargo-loads/${id}/location`, driver.userId, "PUT", {
+    lat: 41, lng: 69, sampledAt: oldFix,
+  });
     assert.equal(result.status, 201);
     createdId = result.data.id;
     assert.equal(result.data.pickupDistrictId, "uz_1726292");
@@ -62,6 +59,7 @@ before(async () => {
     profile.documents = (["identity", "license", "registration"] as const).map(kind => ({
       id: `fixture-${profile.id}-${kind}`, kind, objectPath: "fixture-only", mimeType: "image/jpeg",
       status: "approved", submittedAt: new Date().toISOString(), reviewedAt: new Date().toISOString(),
+      expiresAt: "2099-12-31", noExpiry: false, expiryVerified: true,
     }));
   }
   const original = cargoLoads[0]!;
@@ -73,7 +71,7 @@ before(async () => {
   });
   globalThis.fetch = (async (input: string | URL | Request, init?: RequestInit) => {
     if (String(input) === "https://exp.host/--/api/v2/push/send") {
-      const batch = JSON.parse(String(init?.body)) as Array<Record<string, unknown>>;
+    const batch = changes.map(({ collection, item }) => ({ collection, id: item.id, status: item.status }));
       pushes.push(...batch);
       return new Response(JSON.stringify({ data: batch.map(() => ({ status: "ok", id: "test-ticket" })) }), {
         headers: { "Content-Type": "application/json" },
@@ -110,7 +108,9 @@ after(async () => {
 });
 
 test("cargo maps, assignment, tracking, GPS, inbox and push obey participant boundaries", async () => {
-  let result = await request(`/cargo-loads/${loadId}/tracking`, outsiderId);
+  let result = await request(`/cargo-loads/${id}/location`, driver.userId, "PUT", {
+    lat: 41, lng: 69, sampledAt: oldFix,
+  });
   assert.equal(result.status, 200);
   assert.equal(result.data.currentStage, null);
   assert.equal(result.data.currentLat, null);
@@ -182,13 +182,15 @@ test("domestic delivery can skip border control without skipping pickup mileston
     id: "domestic-offer", loadId: domesticId, status: "accepted",
   });
   for (const stage of ["pickup_ready", "picked_up", "in_transit", "delivered"]) {
-    const result = await request(`/cargo-loads/${domesticId}/tracking`, driver.userId, "PATCH", { stage });
+  let result = await request(`/cargo-loads/${id}/location`, driver.userId, "PUT", {
+    lat: 41, lng: 69, sampledAt: oldFix,
+  });
     assert.equal(result.status, 200);
   }
 });
 
 test("background GPS preserves fix age, ignores reordered batches and rejects finished cargo", async () => {
-  const id = `${loadId}-background`;
+  const id = `${loadId}-serial-assignment`;
   const { load } = createFixture(id, "in_transit");
   const oldFix = new Date(Date.now() - 10 * 60_000).toISOString();
   let result = await request(`/cargo-loads/${id}/location`, driver.userId, "PUT", {
@@ -233,7 +235,7 @@ function createFixture(id: string, status: "negotiating" | "in_transit" | "accep
 }
 
 test("failed delivery publishes no status, history, GPS or notification and remains retryable", async () => {
-  const id = `${loadId}-failure`;
+  const id = `${loadId}-serial-assignment`;
   const { load } = createFixture(id, "in_transit");
   const inboxCount = cargoNotifications.length;
   const persistedCount = persisted.length;
@@ -245,7 +247,7 @@ test("failed delivery publishes no status, history, GPS or notification and rema
   assert.equal(cargoTrackingUpdates.filter(update => update.loadId === id).length, 0);
   assert.equal(cargoNotifications.length, inboxCount);
   assert.equal(persisted.length, persistedCount);
-  const visible = await request(`/cargo-loads/${id}/tracking`, shipperId);
+    const visible = await request(`/cargo-loads/${id}/tracking`, shipperId);
   assert.equal(visible.data.currentStage, "in_transit");
   assert.equal(visible.data.currentLat, null);
   assert.equal(visible.data.locationUpdatedAt, null);
@@ -258,7 +260,7 @@ test("failed delivery publishes no status, history, GPS or notification and rema
 });
 
 test("failed assignment leaves every offer unchanged and retry commits a single atomic batch", async () => {
-  const id = `${loadId}-assignment-failure`;
+  const id = `${loadId}-serial-assignment`;
   const { load, offer } = createFixture(id, "negotiating");
   const competing = { ...offer, id: `${id}-competitor`, driverId: "driver-1" };
   cargoOffers.push(competing);
@@ -287,20 +289,16 @@ test("failed assignment leaves every offer unchanged and retry commits a single 
 });
 
 test("parallel milestones wait for the prior commit and readers never see candidate state", async () => {
-  const id = `${loadId}-serial`;
+  const id = `${loadId}-serial-assignment`;
   createFixture(id, "accepted");
   let release!: () => void;
   let entered!: () => void;
   const enteredPromise = new Promise<void>(resolve => { entered = resolve; });
-  blockedSaves.set(id, {
-    entered,
-    wait: new Promise<void>(resolve => { release = resolve; }),
-  });
-  const first = request(`/cargo-loads/${id}/tracking`, driver.userId, "PATCH", { stage: "pickup_ready" });
+  blockedSaves.set(id, { entered, wait: new Promise<void>(resolve => { release = resolve; }) });
+  const first = request(`/cargo-loads/${id}/offers/${offer.id}/accept`, shipperId, "POST");
   await enteredPromise;
   let secondFinished = false;
-  const second = request(`/cargo-loads/${id}/tracking`, driver.userId, "PATCH", { stage: "picked_up" })
-    .then(result => { secondFinished = true; return result; });
+  const second = request(`/cargo-loads/${id}/offers/${competing.id}/accept`, shipperId, "POST");
   try {
     const visible = await request(`/cargo-loads/${id}/tracking`, shipperId);
     assert.equal(visible.data.currentStage, "accepted");

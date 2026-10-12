@@ -8,7 +8,8 @@ import { authenticateToken, type AuthRequest } from "../middleware/auth.js";
 import { driverProfiles, users, regions, vehicleTypes, cargoLoads, cargoOffers, generateId, type StoredDriverProfile } from "../data/store.js";
 import { persistItems } from "../lib/persistence.js";
 import { driverDocumentStorage } from "../lib/driver-documents.js";
-import { hasCompleteVehicle, requiredDocumentKinds, withDriverWrite } from "../lib/driver-trust.js";
+import { hasCompleteVehicle, requiredDocumentKinds, withDriverWrite, effectiveDriverReviewStatus } from "../lib/driver-trust.js";
+import { documentDateCurrent, documentValid, documentEvidence } from "../lib/document-validity.js";
 
 type Save = typeof persistItems;
 type DocumentStorage = typeof driverDocumentStorage;
@@ -21,8 +22,9 @@ export function privateDriverApplication(profile: StoredDriverProfile) {
     capacityKg: profile.capacityKg ?? 0, capacityM3: profile.capacityM3 ?? 0,
     sharedLoadAvailableKg: profile.sharedLoadAvailableKg, sharedLoadAvailableM3: profile.sharedLoadAvailableM3,
     availableFrom: profile.availableFrom, currentRegionId: profile.currentRegionId, bio: profile.bio,
-    status: profile.reviewStatus ?? "none", reason: profile.reviewReason ?? null, revision: profile.revision ?? 0,
-    documents: (profile.documents ?? []).map(({ objectPath, mimeType, ...doc }) => doc),
+    status: effectiveDriverReviewStatus(profile),
+    reason: profile.reviewReason ?? null, revision: profile.revision ?? 0,
+    documents: (profile.documents ?? []).map(documentEvidence),
     reviewHistory: (profile.reviewHistory ?? []).map(({ reviewerId, ...review }) => review),
   });
 }
@@ -87,7 +89,10 @@ export function createDriversRouter(save: Save = persistItems, files: DocumentSt
     if (!profile) { res.status(403).json({ error: "forbidden", message: "Haydovchi profili kerak." }); return; }
     const parsed = UploadDriverDocumentBody.safeParse(req.body);
     if (!parsed.success) { res.status(400).json({ error: "validation", message: "JPEG yoki PNG hujjat rasmini tanlang." }); return; }
-    const { kind, data, mimeType } = parsed.data;
+    const { kind, data, mimeType, expiresAt, noExpiry } = parsed.data;
+    if (!documentDateCurrent({ kind, expiresAt, noExpiry })) {
+      res.status(400).json({ error: "invalid_expiry", message: "Hujjatning haqiqiy amal qilish sanasini kiriting. Guvohnoma muddatsiz bo‘la olmaydi; o‘tgan sana qabul qilinmaydi." }); return;
+    }
     if (data.length > 7_000_000 || !/^[A-Za-z0-9+/]+={0,2}$/.test(data) || data.length % 4 !== 0) {
       res.status(400).json({ error: "validation", message: "Hujjat rasmi 5 MB dan oshmasin." }); return;
     }
@@ -104,7 +109,7 @@ export function createDriversRouter(save: Save = persistItems, files: DocumentSt
       ...profile, revision: (profile.revision ?? 0) + 1, reviewStatus: "pending", reviewReason: null,
       documents: [
         ...(profile.documents ?? []).filter(doc => doc.kind !== kind),
-        { id: generateId(), kind, objectPath, mimeType, status: "pending", submittedAt: new Date().toISOString(), reviewedAt: null },
+        { id: generateId(), kind, objectPath, mimeType, expiresAt, noExpiry, expiryVerified: false, status: "pending", submittedAt: new Date().toISOString(), reviewedAt: null },
       ],
     };
     try { await commitApplication(profile, next); }
@@ -147,17 +152,25 @@ export function createDriversRouter(save: Save = persistItems, files: DocumentSt
       res.status(400).json({ error: "validation", message: "Hujjatlar ro‘yxati noto‘g‘ri." }); return;
     }
     const now = new Date().toISOString();
+    if (input.documents.some(decision => {
+      const doc = existing.find(item => item.id === decision.id)!;
+      return decision.status === "approved" && (
+        decision.expiresAt !== (doc.expiresAt ?? null) || decision.noExpiry !== (doc.noExpiry ?? false) ||
+        !documentDateCurrent(doc));
+    })) {
+      res.status(400).json({ error: "invalid_expiry", message: "Tasdiqlashdan oldin hujjatdagi muddatni tekshiring. Sana yo‘q, noto‘g‘ri yoki tugagan bo‘lsa, haydovchi hujjatni yangilashi kerak." }); return;
+    }
     const next: StoredDriverProfile = {
       ...profile, reviewStatus: input.status, reviewReason: input.reason.trim() || null,
       revision: (profile.revision ?? 0) + 1,
       documents: existing.map(doc => {
         const decision = input.documents.find(item => item.id === doc.id);
-        return decision ? { ...doc, status: decision.status, reviewedAt: decision.status === "pending" ? null : now } : doc;
+        return decision ? { ...doc, status: decision.status, expiryVerified: decision.status === "approved", reviewedAt: decision.status === "pending" ? null : now } : doc;
       }),
       reviewHistory: [...(profile.reviewHistory ?? []), { status: input.status, reason: input.reason.trim(), createdAt: now, reviewerId: req.userId! }],
     };
     if (input.status === "approved" && (!hasCompleteVehicle(next) ||
-      !requiredDocumentKinds.every(kind => next.documents?.some(doc => doc.kind === kind && doc.status === "approved")))) {
+      !requiredDocumentKinds.every(kind => next.documents?.some(doc => doc.kind === kind && doc.status === "approved" && documentValid(doc))))) {
       res.status(400).json({ error: "incomplete_application", message: "Transport ma’lumotlari va uchta hujjat to‘liq tasdiqlanishi kerak." }); return;
     }
     await commitApplication(profile, next);

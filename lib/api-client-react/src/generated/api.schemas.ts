@@ -777,6 +777,7 @@ export const DriverProfileReviewStatus = {
   pending: 'pending',
   approved: 'approved',
   rejected: 'rejected',
+  expired: 'expired',
 } as const;
 
 export type DriverDocumentKind = typeof DriverDocumentKind[keyof typeof DriverDocumentKind];
@@ -798,6 +799,11 @@ export const DriverDocumentStatus = {
 } as const;
 
 export interface DriverDocument {
+  /** @nullable */
+  expiresAt: string | null;
+  noExpiry: boolean;
+  expiryVerified: boolean;
+  renewalRequired: boolean;
   id: string;
   kind: DriverDocumentKind;
   status: DriverDocumentStatus;
@@ -856,6 +862,14 @@ export const DriverDocumentInputMimeType = {
 } as const;
 
 export interface DriverDocumentInput {
+  /**
+     * Last valid UTC calendar day
+     * @nullable
+     * @pattern ^\d{4}-\d{2}-\d{2}$
+     */
+  expiresAt: string | null;
+  /** Only identity or registration may explicitly have no expiry */
+  noExpiry: boolean;
   kind: DriverDocumentInputKind;
   /** Base64 image */
   data: string;
@@ -881,6 +895,12 @@ export const DriverReviewInputDocumentsItemStatus = {
 } as const;
 
 export type DriverReviewInputDocumentsItem = {
+  /**
+     * @nullable
+     * @pattern ^\d{4}-\d{2}-\d{2}$
+     */
+  expiresAt: string | null;
+  noExpiry: boolean;
   id: string;
   status: DriverReviewInputDocumentsItemStatus;
 };
@@ -937,6 +957,7 @@ export const DriverVerificationStatus = {
   pending: 'pending',
   approved: 'approved',
   rejected: 'rejected',
+  expired: 'expired',
 } as const;
 
 export type DriverVerificationReviewHistoryItemStatus = typeof DriverVerificationReviewHistoryItemStatus[keyof typeof DriverVerificationReviewHistoryItemStatus];
@@ -1336,4 +1357,3 @@ regionId?: string;
 export type GetDriverDocumentUrl200 = {
   url: string;
 };
-

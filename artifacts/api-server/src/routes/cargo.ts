@@ -478,7 +478,7 @@ router.post("/cargo-loads/:id/offers", authenticateToken, withDriverCargoLock(as
   if (!isOperationalDriver(driver)) {
     res.status(403).json({
       error: "driver_not_verified",
-      message: "Driver identity and vehicle must be verified before submitting offers",
+      message: "Haydovchi va transport hujjatlari tasdiqlangan va amal qilish muddati tugamagan bo‘lishi kerak. Hujjatlarni Tekshiruv bo‘limida yangilang.",
     });
     return;
   }
@@ -555,7 +555,7 @@ router.post("/cargo-loads/:id/offers/:offerId/counter-decision", authenticateTok
   if (accepted && !isOperationalDriver(driver)) {
     res.status(403).json({
       error: "driver_not_verified",
-      message: "Driver identity and vehicle must remain verified to accept a counter offer",
+      message: "Taklifni qabul qilish uchun hujjatlar tasdiqlangan va muddati tugamagan bo‘lishi kerak. Hujjatlarni yangilang.",
     });
     return;
   }
@@ -602,7 +602,7 @@ router.post("/cargo-loads/:id/offers/:offerId/accept", authenticateToken, withDr
   if (!offerDriver || !isOperationalDriver(offerDriver)) {
     res.status(409).json({
       error: "driver_not_verified",
-      message: "This driver is no longer verified for cargo offers",
+      message: "Haydovchi hujjatlari tasdiqlanmagan yoki muddati tugagan. Hujjatlar yangilanmaguncha taklifni qabul qilib bo‘lmaydi.",
     });
     return;
   }

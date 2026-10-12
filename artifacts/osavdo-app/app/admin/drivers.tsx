@@ -25,7 +25,8 @@ function Review({ app, onDone }: { app: DriverVerification; onDone: () => void }
   const revision = useRef(app.revision);
   const init = () => Object.fromEntries(app.documents.map((d) => [d.id, d.status as St]));
   const [docs, setDocs] = useState<Record<string, St>>(init);
-  const [status, setStatus] = useState<St>((app.status === 'none' ? 'pending' : app.status) as St);
+  const [confirmed, setConfirmed] = useState<Record<string, boolean>>({});
+  const [status, setStatus] = useState<St>((app.status === 'none' || app.status === 'expired' ? 'pending' : app.status) as St);
   const [reason, setReason] = useState(app.reason ?? '');
   const [err, setErr] = useState<string | null>(null);
   const [conflict, setStale] = useState(false);
@@ -41,8 +42,11 @@ function Review({ app, onDone }: { app: DriverVerification; onDone: () => void }
     setErr(null);
     if (status === 'rejected' && !reason.trim()) return setErr('Rad etish sababini yozing');
     if (status === 'approved' && !(allThree && app.documents.every((d) => docs[d.id] === 'approved'))) return setErr('Tasdiqlash uchun uchala hujjat ham tasdiqlangan bo\'lishi kerak');
+    if (app.documents.some(d => docs[d.id] === 'approved' && !confirmed[d.id])) return setErr('Har bir tasdiqlanayotgan hujjatning muddatini rasmdan tekshirib, belgilang.');
     if (stale) return setStale(true);
-    review.mutate({ id: app.id, data: { status, revision: revision.current, reason: reason.trim(), documents: app.documents.map((d) => ({ id: d.id, status: docs[d.id] ?? d.status })) } }, {
+    review.mutate({ id: app.id, data: { status, revision: revision.current, reason: reason.trim(), documents: app.documents.map((d) => ({
+      id: d.id, status: docs[d.id] ?? d.status, expiresAt: d.expiresAt, noExpiry: d.noExpiry,
+    })) } }, {
       onSuccess: () => {
         qc.invalidateQueries({ queryKey: getListDriverVerificationsQueryKey() });
         qc.invalidateQueries({ queryKey: getGetDriversQueryKey() });
@@ -80,6 +84,13 @@ function Review({ app, onDone }: { app: DriverVerification; onDone: () => void }
             <Text style={{ color: c.text, fontFamily: 'Inter_600SemiBold', flex: 1 }}>{KIND_LABEL[d.kind]}</Text>
             <TouchableOpacity onPress={() => open(d.id)}><Text style={{ color: c.primary, fontFamily: 'Inter_700Bold', fontSize: 13 }}>Ochish</Text></TouchableOpacity>
           </View>
+          <Text style={{ color: d.renewalRequired ? c.destructive : c.mutedForeground, fontSize: 12 }}>
+            Amal qilish: {d.noExpiry ? 'Muddatsiz' : d.expiresAt ?? 'Sana yo‘q'} (UTC)
+            {d.renewalRequired ? ' · Yangilash / tekshiruv talab qilinadi' : ''}
+          </Text>
+          <TouchableOpacity onPress={() => setConfirmed(p => ({ ...p, [d.id]: !p[d.id] }))}>
+            <Text style={{ color: c.primary, fontSize: 13 }}>{confirmed[d.id] ? '[✓]' : '[ ]'} Rasmdagi muddat ushbu ma’lumotga mosligini tekshirdim</Text>
+          </TouchableOpacity>
           {seg(docs[d.id] ?? d.status, (v) => setDocs((p) => ({ ...p, [d.id]: v })))}
         </View>
       ))}
@@ -101,7 +112,7 @@ export default function AdminDrivers() {
   const isAdmin = user?.role === 'admin';
   const q = useListDriverVerifications({ query: { queryKey: getListDriverVerificationsQueryKey(), enabled: isAdmin, refetchInterval: 20000 } });
   const [open, setOpen] = useState<string | null>(null);
-  const [filter, setFilter] = useState<St | 'all'>('pending');
+  const [filter, setFilter] = useState<St | 'expired' | 'all'>('pending');
   useFocusEffect(React.useCallback(() => { if (isAdmin) q.refetch(); }, [isAdmin])); // eslint-disable-line react-hooks/exhaustive-deps
   const top = Platform.OS === 'web' ? 67 : 0;
   const list = (q.data ?? []).filter((a) => filter === 'all' || a.status === filter);
@@ -116,7 +127,7 @@ export default function AdminDrivers() {
       ) : (
         <ScrollView contentContainerStyle={{ padding: 16, gap: 12, paddingTop: 16 + top, paddingBottom: insets.bottom + 40 }}>
           <View style={{ flexDirection: 'row', gap: 6, flexWrap: 'wrap' }}>
-            {(['pending', 'approved', 'rejected', 'all'] as const).map((f) => (
+            {(['pending', 'approved', 'rejected', 'expired', 'all'] as const).map((f) => (
               <TouchableOpacity key={f} onPress={() => setFilter(f)} style={[s.seg, { borderColor: filter === f ? c.primary : c.input, backgroundColor: filter === f ? c.accent : 'transparent' }]}>
                 <Text style={{ fontSize: 12, fontFamily: 'Inter_600SemiBold', color: c.text }}>{f === 'all' ? 'Hammasi' : STATUS_LABEL[f]}</Text>
               </TouchableOpacity>

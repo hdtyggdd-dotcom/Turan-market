@@ -1,6 +1,13 @@
 import { users, vehicleTypes, type StoredDriverProfile, type StoredCargoLoad } from "../data/store.js";
+import { documentValid, documentEvidence } from "./document-validity.js";
 
 export const requiredDocumentKinds = ["identity", "license", "registration"] as const;
+
+export function effectiveDriverReviewStatus(profile: StoredDriverProfile) {
+  return profile.reviewStatus === "approved" && !requiredDocumentKinds.every(kind =>
+    profile.documents?.some(doc => doc.kind === kind && doc.status === "approved" && documentValid(doc)))
+    ? "expired" as const : profile.reviewStatus ?? "none";
+}
 
 export function hasCompleteVehicle(profile: StoredDriverProfile): boolean {
   const vehicle = vehicleTypes.find(item => item.id === profile.vehicleTypeId);
@@ -19,7 +26,7 @@ export function isOperationalDriver(profile: StoredDriverProfile): boolean {
   const user = users.find(item => item.id === profile.userId);
   return user?.role === "driver" && user.verificationStatus === "approved" &&
     profile.reviewStatus === "approved" && hasCompleteVehicle(profile) &&
-    requiredDocumentKinds.every(kind => profile.documents?.some(doc => doc.kind === kind && doc.status === "approved"));
+    requiredDocumentKinds.every(kind => profile.documents?.some(doc => doc.kind === kind && doc.status === "approved" && documentValid(doc)));
 }
 
 export function canCarryCargo(profile: StoredDriverProfile, load: StoredCargoLoad): boolean {
@@ -34,10 +41,10 @@ export function canCarryCargo(profile: StoredDriverProfile, load: StoredCargoLoa
 export function publicDriverEvidence(profile: StoredDriverProfile) {
   return {
     operational: isOperationalDriver(profile),
-    reviewStatus: profile.reviewStatus ?? "none",
+    reviewStatus: effectiveDriverReviewStatus(profile),
     capacityKg: profile.capacityKg ?? 0,
     capacityM3: profile.capacityM3 ?? 0,
-    verifiedDocuments: (profile.documents ?? []).filter(doc => doc.status === "approved").map(({ objectPath, mimeType, ...doc }) => doc),
+    verifiedDocuments: (profile.documents ?? []).filter(doc => doc.status === "approved" && documentValid(doc)).map(documentEvidence),
     ratingHistory: profile.ratingHistory ?? [],
   };
 }

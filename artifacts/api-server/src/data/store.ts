@@ -154,6 +154,9 @@ export interface StoredDriverDocument {
   status: 'pending' | 'approved' | 'rejected';
   submittedAt: string;
   reviewedAt: string | null;
+  expiresAt?: string | null;
+  noExpiry?: boolean;
+  expiryVerified?: boolean;
 }
 
 export interface StoredDriverRating {
