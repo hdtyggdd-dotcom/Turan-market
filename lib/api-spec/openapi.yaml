@@ -603,6 +603,39 @@ paths:
         "429": { description: Shared AI budget exhausted }
         "503": { description: Recognition unavailable or original request still processing }
 
+  /admin/ai-budget:
+    get:
+      operationId: getAdviceBudget
+      tags: [ai]
+      summary: Administrator-only global AI advice request allowance
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200":
+          description: Durable reserved request counts, not monetary costs
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdviceBudgetStatus" }
+        "401": { description: Authentication required }
+        "403": { description: Administrator permission required }
+        "503": { description: Budget data unavailable }
+  /admin/ai-budget/alerts/{id}/read:
+    post:
+      operationId: acknowledgeAdviceBudgetAlert
+      tags: [ai]
+      summary: Acknowledge a budget warning durably for the owner
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      responses:
+        "200":
+          description: Warning acknowledged
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdviceBudgetAlert" }
+        "401": { description: Authentication required }
+        "403": { description: Administrator permission required }
+        "404": { description: Warning not found }
+        "503": { description: Budget data unavailable }
   /ai/advice:
     post:
       operationId: requestAiAdvice
@@ -1336,6 +1369,36 @@ components:
       bearerFormat: JWT
 
   schemas:
+    AdviceBudgetCounter:
+      type: object
+      required: [used, limit, remaining]
+      properties:
+        used: { type: integer, minimum: 0 }
+        limit: { type: integer, minimum: 0 }
+        remaining: { type: integer, minimum: 0 }
+    AdviceBudgetAlert:
+      type: object
+      required: [id, scope, day, used, limit, createdAt, readAt]
+      properties:
+        id: { type: string }
+        scope: { type: string, enum: [daily, total] }
+        day: { type: string, nullable: true, description: UTC day for daily warnings }
+        used: { type: integer, minimum: 0 }
+        limit: { type: integer, minimum: 0 }
+        createdAt: { type: string, format: date-time }
+        readAt: { type: string, format: date-time, nullable: true }
+    AdviceBudgetStatus:
+      type: object
+      required: [day, resetsAt, warningThresholdPercent, daily, total, alerts]
+      properties:
+        day: { type: string, description: Current UTC day }
+        resetsAt: { type: string, format: date-time }
+        warningThresholdPercent: { type: integer, minimum: 1, maximum: 100 }
+        daily: { $ref: "#/components/schemas/AdviceBudgetCounter" }
+        total: { $ref: "#/components/schemas/AdviceBudgetCounter" }
+        alerts:
+          type: array
+          items: { $ref: "#/components/schemas/AdviceBudgetAlert" }
     AccountDeletionInput:
       type: object
       additionalProperties: false

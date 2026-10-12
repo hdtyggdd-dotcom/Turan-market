@@ -19,6 +19,7 @@ import { EmptyState } from '@/components/EmptyState';
 import { useRouter } from 'expo-router';
 import * as Linking from 'expo-linking';
 import { getBaseUrl } from '@workspace/api-client-react';
+import { AdviceBudgetWarning } from '@/components/AdviceBudgetWarning';
 import { CargoNotifications } from '@/components/cargo/CargoNotifications';
 
 function StatBox({ label, value, colors }: { label: string; value: string | number; colors: ReturnType<typeof useColors> }) {
@@ -154,6 +155,19 @@ export default function ProfileScreen() {
           >
             <Feather name="clipboard" size={18} color={colors.primary} />
             <Text style={{ flex: 1, color: colors.text, fontFamily: 'Inter_600SemiBold' }}>Haydovchi arizalari</Text>
+            <Feather name="chevron-right" size={18} color={colors.mutedForeground} />
+          </TouchableOpacity>
+        )}
+
+        {user.role === 'admin' && <AdviceBudgetWarning />}
+        {user.role === 'admin' && (
+          <TouchableOpacity
+            onPress={() => router.push('/admin/ai-budget' as never)}
+            style={[styles.section, { backgroundColor: colors.card, borderColor: colors.border, flexDirection: 'row', alignItems: 'center', gap: 12 }]}
+            testID="open-ai-budget"
+          >
+            <Feather name="cpu" size={18} color={colors.primary} />
+            <Text style={{ flex: 1, color: colors.text, fontFamily: 'Inter_600SemiBold' }}>AI maslahat budjeti</Text>
             <Feather name="chevron-right" size={18} color={colors.mutedForeground} />
           </TouchableOpacity>
         )}
