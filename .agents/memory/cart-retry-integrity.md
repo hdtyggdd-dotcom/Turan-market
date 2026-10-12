@@ -26,3 +26,9 @@ Checkout must share the buyer-cart database lock with cart changes and use inser
 **Why:** Simultaneous retries can otherwise replace the first accepted quantity, and cart edits can pass their "no order yet" check while checkout is committing.
 
 **How to apply:** Serialize checkout with cart edits, compare retry input against the durable purchase before checking current listing availability, and keep saved price/date/status instead of recomputing them.
+
+After an insert-only conflict, read the winning record with a separate statement under PostgreSQL READ COMMITTED, not an insert/select CTE.
+
+**Why:** The unique-key check can wait for a competing insert that the original statement snapshot cannot see. A CTE can then report no winner even though the purchase committed.
+
+**How to apply:** Keep creation and the subsequent read inside the same domain transaction; use the fresh statement snapshot to compare the durable request before returning a replay or conflict.

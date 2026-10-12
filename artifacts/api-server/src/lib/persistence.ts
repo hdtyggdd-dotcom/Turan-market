@@ -153,6 +153,34 @@ export async function getRecord(
   return row ? row.payload : null;
 }
 
+type RecordTransaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
+
+/**
+ * Insert-only creation for immutable request identities. Call inside the
+ * caller's transaction (and domain locks), never through the upsert helpers.
+ * The separate SELECT gets a fresh READ COMMITTED snapshot after a competing
+ * insert commits; a single INSERT/SELECT CTE can miss that winning row.
+ */
+export async function insertOrReadRecord(
+  transaction: RecordTransaction,
+  collection: string,
+  id: string,
+  payload: Record<string, unknown>,
+) {
+  const [inserted] = await transaction.insert(appRecords).values({
+    collection, id, payload,
+  }).onConflictDoNothing({
+    target: [appRecords.collection, appRecords.id],
+  }).returning();
+  if (inserted) return { record: inserted, created: true };
+
+  const [existing] = await transaction.select().from(appRecords).where(
+    and(eq(appRecords.collection, collection), eq(appRecords.id, id)),
+  ).for("update");
+  if (!existing) throw new Error("Record insertion outcome unavailable");
+  return { record: existing, created: false };
+}
+
 export async function persistItem(collection: string, item: PersistedItem): Promise<void> {
   const prepared = collection === "users" ? normalizeUser(item as StoredUser) : item;
   await persistRecord(

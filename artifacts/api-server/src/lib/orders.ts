@@ -2,6 +2,7 @@ import { createHash } from "node:crypto";
 import { and, eq, or, sql } from "drizzle-orm";
 import { appRecords, db } from "@workspace/db";
 import { generateId, orders, type StoredListing, type StoredOrder, type StoredUser } from "../data/store.js";
+import { insertOrReadRecord } from "./persistence.js";
 
 export class OrderError extends Error {
   constructor(public status: number, public code: string, message: string) { super(message); }
@@ -62,13 +63,10 @@ export async function createOrReplayOrder(buyerId: string, input: OrderInput) {
       notes: input.notes ?? null, status: "pending", createdAt: new Date().toISOString(),
     };
     // Never upsert a purchase: another process's accepted quantity is immutable.
-    const inserted = await tx.insert(appRecords).values({ collection: "orders", id, payload: order as unknown as Record<string, unknown> }).onConflictDoNothing().returning();
-    if (inserted.length) return { order, created: true };
-    const [winner] = await tx.select().from(appRecords).where(key).for("update");
-    if (!winner) throw new Error("Order insertion outcome unavailable");
-    const existing = winner.payload as unknown as StoredOrder;
+    const result = await insertOrReadRecord(tx, "orders", id, order as unknown as Record<string, unknown>);
+    const existing = result.record.payload as unknown as StoredOrder;
     if (!matches(existing, buyerId, input)) throw conflict();
-    return { order: existing, created: false };
+    return { order: existing, created: result.created };
   });
   return { ...result, order: remember(result.order) };
 }

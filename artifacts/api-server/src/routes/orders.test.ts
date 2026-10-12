@@ -7,6 +7,7 @@ import { appRecords, db, pool } from "@workspace/db";
 import { users, listings, generateToken } from "../data/store.js";
 import { orderRequestId } from "../lib/orders.js";
 import { changeCart, CartError, listingSnapshot } from "../lib/cart.js";
+import { insertOrReadRecord } from "../lib/persistence.js";
 
 test("independent HTTP workers preserve the first committed purchase", async t => {
   const prefix = `order-test-${randomUUID()}`;
@@ -19,7 +20,7 @@ test("independent HTTP workers preserve the first committed purchase", async t =
   listings.push(product);
   const children: ChildProcess[] = [];
   const start = () => new Promise<string>((resolve, reject) => {
-    const child = spawn("pnpm", ["--filter", "@workspace/scripts", "exec", "tsx", "../artifacts/api-server/src/routes/orders.test-worker.ts", prefix], { stdio: ["ignore", "pipe", "pipe"] });
+    const child = spawn("pnpm", ["--filter", "@workspace/scripts", "exec", "tsx", "../artifacts/api-server/src/routes/orders.test-worker.ts", prefix], { stdio: ["ignore", "pipe", "pipe"], detached: true });
     children.push(child);
     const timer = setTimeout(() => reject(new Error("HTTP worker startup timeout")), 20000);
     let output = "";
@@ -46,6 +47,18 @@ test("independent HTTP workers preserve the first committed purchase", async t =
     };
     const input = { listingId: product.id, quantity: 3, clientRequestId: randomUUID(), notes: "Test note", deliveryPrice: 0 };
     let original: any;
+    await t.test("insert-only persistence reads the winner of competing transactions", async () => {
+      const id = orderRequestId(buyer.id, randomUUID());
+      const replies = await Promise.all(Array.from({ length: 12 }, (_, quantity) =>
+        db.transaction(tx => insertOrReadRecord(tx, "orders", id, {
+          id, buyerId: buyer.id, listingId: product.id, quantity: quantity + 1,
+        })),
+      ));
+      const winner = replies.find(reply => reply.created)!;
+      assert.equal(replies.filter(reply => reply.created).length, 1);
+      assert(replies.every(reply => reply.record.payload.quantity === winner.record.payload.quantity));
+      await db.delete(appRecords).where(and(eq(appRecords.collection, "orders"), eq(appRecords.id, id)));
+    });
     await t.test("simultaneous identical retries create one row and share its original price/date", async () => {
       const responses = await Promise.all(Array.from({ length: 12 }, (_, i) => request(i % 2, "/orders", "POST", input)));
       assert.equal(responses.filter(r => r.status === 201).length, 1);
@@ -67,6 +80,45 @@ test("independent HTTP workers preserve the first committed purchase", async t =
       assert.deepEqual(replies.map(r => r.status).sort(), [201, 409]);
       const winner = replies.find(r => r.status === 201)!.data;
       assert.equal((await request(1, `/orders/${winner.id}`)).data.quantity, winner.quantity);
+    });
+    await t.test("simultaneous delivery changes cannot replace the winning request", async () => {
+      const nonce = randomUUID();
+      const inputs = [
+        { ...input, clientRequestId: nonce, deliveryOption: "pickup", deliveryPrice: 0, notes: "first" },
+        { ...input, clientRequestId: nonce, deliveryOption: "courier", deliveryPrice: 200, notes: "second" },
+      ];
+      const replies = await Promise.all(inputs.map((body, i) => request(i, "/orders", "POST", body)));
+      assert.deepEqual(replies.map(r => r.status).sort(), [201, 409]);
+      const index = replies.findIndex(r => r.status === 201);
+      const winner = replies[index]!.data;
+      const stored = (await request(1, `/orders/${winner.id}`)).data;
+      assert.equal(stored.deliveryOption, inputs[index]!.deliveryOption);
+      assert.equal(stored.deliveryPrice, inputs[index]!.deliveryPrice);
+      assert.equal(stored.notes, inputs[index]!.notes);
+      assert.equal((await request(0, "/orders", "POST", inputs[index])).status, 200);
+      assert.equal((await request(1, "/orders", "POST", inputs[1 - index])).status, 409);
+    });
+    await t.test("a committed purchase survives a truly dropped HTTP reply and a fresh worker", async () => {
+      const body = { ...input, clientRequestId: randomUUID() };
+      await assert.rejects(fetch(`${bases[0]}/orders`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json", Authorization: `Bearer ${generateToken(buyer.id)}`,
+          "x-test-drop-response": "1",
+        },
+        body: JSON.stringify(body),
+        signal: AbortSignal.timeout(10000),
+      }));
+      const id = orderRequestId(buyer.id, body.clientRequestId);
+      const [saved] = await db.select().from(appRecords).where(and(eq(appRecords.collection, "orders"), eq(appRecords.id, id)));
+      assert(saved, "the response must drop after the purchase commits");
+      bases[1] = await start();
+      const replay = await request(1, "/orders", "POST", body);
+      assert.equal(replay.status, 200);
+      for (const field of ["id", "buyerId", "listingId", "quantity", "totalPrice", "deliveryOption", "deliveryPrice", "notes", "createdAt", "status"]) {
+        assert.deepEqual(replay.data[field], saved.payload[field]);
+      }
+      assert.equal((await request(1, "/orders", "POST", { ...body, quantity: 8 })).status, 409);
     });
     await t.test("fresh reads and status writes do not replace original purchase fields", async () => {
       assert.equal((await request(1, `/orders/${original.id}/status`, "PUT", { status: "confirmed" }, seller)).status, 200);
@@ -124,7 +176,19 @@ test("independent HTTP workers preserve the first committed purchase", async t =
       assert.equal(replay.data.status, "confirmed");
     });
   } finally {
-    for (const child of children) child.kill("SIGTERM");
+    // pnpm/tsx start descendants: stop the whole worker group, not just pnpm.
+    for (const child of children) {
+      if (child.pid && child.exitCode === null) {
+        process.kill(-child.pid, "SIGTERM");
+        await new Promise<void>(resolve => {
+          const timer = setTimeout(() => {
+            try { process.kill(-child.pid!, "SIGKILL"); } catch { /* already exited */ }
+            resolve();
+          }, 5000);
+          child.once("exit", () => { clearTimeout(timer); resolve(); });
+        });
+      }
+    }
     await db.delete(appRecords).where(and(eq(appRecords.collection, "orders"), sql`${appRecords.payload}->>'buyerId' IN (${buyer.id}, ${other.id})`));
     await db.delete(appRecords).where(and(inArray(appRecords.collection, ["users", "listings", "carts"]), inArray(appRecords.id, [...actors.map(a => a.id), product.id])));
     await db.delete(appRecords).where(and(eq(appRecords.collection, "cart_operations"), sql`${appRecords.id} LIKE ${buyer.id + ":%"}`));
