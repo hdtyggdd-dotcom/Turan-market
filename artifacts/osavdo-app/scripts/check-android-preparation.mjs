@@ -31,6 +31,7 @@ checkPng(path.join(root, "release-assets/cosmis/play-icon.png"), 512, 512);
 checkPng(path.join(root, "release-assets/cosmis/feature-graphic.png"), 1024, 500);
 const description = fs.readFileSync(path.join(appDir, "docs/store-listing-uz.txt"), "utf8");
 assert.equal(description.split("\n")[1], config.name, "Store listing and installed app names must agree");
+assert(description.includes(`Android package: ${config.android.package}`), "Store metadata and Android identity must agree");
 const short = description.split("QISQA TAVSIF (80 belgigacha)\n")[1]?.split("\n")[0];
 assert(short && [...short].length <= 80);
 assert(fs.existsSync(path.join(appDir, "docs/play-console-guide.html")));

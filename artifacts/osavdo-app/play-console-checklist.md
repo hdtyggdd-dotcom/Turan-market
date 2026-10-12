@@ -11,7 +11,7 @@
 
 ## Android release
 
-- [ ] Keep the existing application ID as `com.turanmarket.app`; changing the display name must not create a different app identity.
+- [ ] Preserve the current app.json application ID `com.cosmic.app`; do not change the package during signing or publishing.
 - [ ] Build a signed Android App Bundle (`.aab`).
 - [ ] Upload the `.aab` to an internal or closed testing track.
 - [ ] Install the release build on physical Android devices.

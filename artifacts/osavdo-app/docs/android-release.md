@@ -3,7 +3,7 @@
 Tayyorlangan: 2026-10-06. Bu tayyorgarlik hujjati; imzolangan AAB yaratilmadi va Google Play’ga yuklanmadi.
 
 ## Mavjud identifikatorni saqlang
-- Android package: `com.turanmarket.app`.
+- Android package: `com.cosmic.app` (joriy `app.json` identifikatori).
 - Egasi tasdiqlagan ommaviy yordam emaili: `fazliddin.16.09.2004@gmail.com`. Play Console’da ham shu kontakt kiritilsin.
 - Version: `1.0.0`, versionCode: `1`. Shu package oldin Play Console’ga yuklangan bo‘lsa, keyingi AAB versionCode avvalgisidan yuqori bo‘lsin. Package yoki signing identity’ni o‘zboshimchalik bilan o‘zgartirmang.
 - SDK: Expo 54 / React Native 0.81.5. Dependency alignment tekshiruvi o‘tdi; bu imzolangan native build tekshiruvi emas.
@@ -34,7 +34,7 @@ Tayyorlangan: 2026-10-06. Bu tayyorgarlik hujjati; imzolangan AAB yaratilmadi va
 1. **Akkaunt o‘chirish:** profil ichidagi “Hisobni o‘chirish” va `/api/account-deletion` web sahifasi qo‘shilgan. Faol buyurtma yoki qabul qilingan tashish avval yakunlanadi/bekor qilinadi; oxirgi admin boshqaruvni topshirishi kerak. Kontakt, GPS, surat va hujjat ma’lumotlari olib tashlanadi; boshqa tomonning tugallangan tarixi kontaktsiz, minimal kirib bo‘lmaydigan texnik identifikator bilan qoladi. Hujjat fayllari uchun qayta urinadigan server navbati bor. Production backend yangilanmaguncha web manzil Google Play uchun tayyor deb belgilanmasin.
 2. **Maxfiylik:** ommaviy yordam emaili va saqlash/o‘chirish shartlari qo‘shilgan; siyosat AI provayderiga yuboriladigan surat va matnlar, haydovchi hujjatlari, fon GPS va push xizmatini ham tushuntiradi. Workspace’dagi siyosat o‘zgarishi production’ga avtomatik chiqarilgan deb hisoblanmasin. Play Console Data safety javoblari haqiqiy yig‘ish, uzatish va saqlash tartibiga mos tekshirilsin.
 3. **Backend:** production API’da yangi photo-search va bildirishnoma funksiyalarini tekshiring; shunchaki development preview bilan chiqarib bo‘lmaydi.
-4. **Native AAB:** Android build va signing Replit ichida bu tayyorgarlik bilan bajarilmadi. Replit Expo Launch hozir Google Play submission’ni qo‘llamaydi; yakuniy native build va Google Play submission mustaqil Android chiqarish jarayonida qilinadi.
+4. **Native AAB:** `.github/workflows/android-play-aab.yml` GitHub Actions’da doimiy upload kaliti bilan AAB yig‘adi. Kalit bulutda yaratiladi va faqat GitHub Secrets uchun shifrlangan holatda uzatiladi; ochiq repozitoriyga private kalit yozilmaydi. Tayyor AAB borligi faqat muvaffaqiyatli run va yuklab olinadigan artifact bilan tasdiqlanadi. Replit Expo Launch Google Play submission’ni qo‘llamaydi; Play Console’ga yuklash va deklaratsiyalar egasi tomonidan bajariladi.
 5. **Native sinov:** kamera, gallery, hujjat yuklash, ruxsat rad etilishi, account/session, buyurtma, ekran o‘chiq va uzoq safardagi GPS, push, internet uzilishi tekshirilsin.
 6. **Rasmli qidiruvdan e’longa o‘tish:** oynaning ko‘rinishi faol route bilan cheklangan. Tuzatishdan keyingi signed-in browser tekshiruvi test worker’i sessiyani yo‘qotgani sabab yakunlanmadi. E’lon ochilganda modal yopilishi va qaytishda o‘z-o‘zidan ochilmasligi native sinovda tasdiqlansin.
 
