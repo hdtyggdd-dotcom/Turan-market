@@ -4,7 +4,7 @@ import express from "express";
 import type { Server } from "node:http";
 import { createDriversRouter } from "./drivers.js";
 import { createCargoRouter } from "./cargo.js";
-import { users, driverProfiles, cargoLoads, cargoOffers, generateToken, type StoredDriverProfile } from "../data/store.js";
+import { users, driverProfiles, cargoLoads, cargoOffers, cargoNotifications, generateToken, type StoredDriverProfile, type StoredCargoNotification } from "../data/store.js";
 import { isOperationalDriver } from "../lib/driver-trust.js";
 import { documentDateCurrent, documentValid } from "../lib/document-validity.js";
 
@@ -14,6 +14,8 @@ const adminId = "verification-regression-admin";
 let server: Server;
 let base: string;
 let failSave = false;
+let failPush = false;
+const delivered: StoredCargoNotification[] = [];
 type WriteBlock = { entered: Promise<void>; signal: () => void; wait: Promise<void>; release: () => void };
 let cargoWriteBlock: WriteBlock | null = null;
 let driverWriteBlock: WriteBlock | null = null;
@@ -59,10 +61,18 @@ before(async () => {
     async save(bytes) { const path = `private-test-${++fileCounter}`; files.set(path, bytes); return path; },
     async remove(path) { files.delete(path); },
     async readUrl(path) { assert(files.has(path)); return "https://example.test/private-read"; },
+  }, notification => {
+    // Delivery must see only committed records, never a candidate decision.
+    assert(cargoNotifications.some(item => item.id === notification.id));
+    assert(writes.some(batch => (batch as Array<{ item: { id: string } }>).some(change => change.item.id === notification.id)));
+    if (failPush) { failPush = false; throw new Error("Injected push failure"); }
+    delivered.push(structuredClone(notification));
   }));
   app.use("/api", createCargoRouter(async () => {
     if (cargoWriteBlock) { cargoWriteBlock.signal(); await cargoWriteBlock.wait; }
     commitOrder.push("cargo");
+  }, async notification => {
+    writes.push([{ collection: "cargo_notifications", item: structuredClone(notification) }]);
   }));
   app.use((_error: unknown, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
     res.status(500).json({ error: "save_failed" });
@@ -77,6 +87,9 @@ after(async () => {
   users.splice(users.findIndex(user => user.id === adminId), 1);
   users.splice(users.findIndex(user => user.id === ownerId), 1);
   driverProfiles.splice(driverProfiles.findIndex(profile => profile.id === driverId), 1);
+  for (let i = cargoNotifications.length - 1; i >= 0; i--) {
+    if (cargoNotifications[i]!.userId === ownerId) cargoNotifications.splice(i, 1);
+  }
   for (const id of ["verification-trip", "verification-open", "verification-expiry", "verification-race-accept", "verification-race-reject", "verification-race-document"]) {
     const index = cargoLoads.findIndex(load => load.id === id); if (index >= 0) cargoLoads.splice(index, 1);
   }
@@ -124,9 +137,29 @@ test("driver verification is private, revision-safe, persistent and authoritativ
     status: "approved", revision: profile.revision, reason: "", documents: [],
   })).status, 403);
   const approval = { status: "approved", revision: profile.revision, reason: "Checked originals", documents: reviewDocuments(profile) };
+  const initialMessages = cargoNotifications.length;
+  failSave = true;
+  assert.equal((await request(`/admin/drivers/${driverId}/verification`, adminId, "PATCH", approval)).status, 500);
+  assert.equal(cargoNotifications.length, initialMessages, "failed commit must not publish a message");
+  assert.equal(delivered.length, 0, "failed decision must not push");
   assert.equal((await request(`/admin/drivers/${driverId}/verification`, adminId, "PATCH", approval)).status, 200);
+  const approvedMessage = cargoNotifications.find(item => item.userId === ownerId)!;
+  assert.equal(approvedMessage.target, "driver_verification");
+  assert.equal(approvedMessage.loadId, null);
+  assert.match(approvedMessage.title, /tasdiqlandi/);
+  assert.equal(delivered.length, 1);
+  const approvalWrite = writes.at(-1) as Array<{ collection: string; item: { id: string } }>;
+  assert.deepEqual(approvalWrite.map(item => item.collection), ["driver_profiles", "users", "cargo_notifications"]);
+  const ownMessages = await request("/notifications", ownerId);
+  assert.equal(ownMessages.status, 200);
+  assert(ownMessages.data.some((item: { id: string; target: string }) => item.id === approvedMessage.id && item.target === "driver_verification"));
+  assert(!(await request("/notifications", "u1")).data.some((item: { id: string }) => item.id === approvedMessage.id));
+  assert.equal((await request(`/notifications/${approvedMessage.id}/read`, "u1", "POST")).status, 404);
+  assert.equal((await request(`/notifications/${approvedMessage.id}/read`, ownerId, "POST")).status, 200);
+  assert.equal(approvedMessage.read, true);
   assert(isOperationalDriver(profile));
   assert.equal((await request(`/admin/drivers/${driverId}/verification`, adminId, "PATCH", approval)).status, 409);
+  assert.equal(cargoNotifications.length, initialMessages + 1, "stale retry must not duplicate messages");
   const publicProfile = (await request(`/drivers/${driverId}`, "u1")).data;
   assert.equal(publicProfile.operational, true);
   assert.equal(publicProfile.capacityKg, 1000);
@@ -155,11 +188,21 @@ test("driver verification is private, revision-safe, persistent and authoritativ
   assert.equal((await request(`/admin/drivers/${driverId}/verification`, adminId, "PATCH", {
     status: "rejected", revision: profile.revision, reason: "", documents: [],
   })).status, 400);
+  failPush = true;
   assert.equal((await request(`/admin/drivers/${driverId}/verification`, adminId, "PATCH", {
     status: "rejected", revision: profile.revision, reason: "Unreadable identity", documents: [{ ...expiry, id: profile.documents!.find(doc => doc.kind === "identity")!.id, status: "rejected" }],
   })).status, 200);
   assert.equal(profile.reviewReason, "Unreadable identity");
   assert.equal(profile.reviewHistory!.length, 2);
+  const rejectedMessage = cargoNotifications.find(item => item.userId === ownerId)!;
+  assert.match(rejectedMessage.title, /rad etildi/);
+  assert.equal(rejectedMessage.target, "driver_verification");
+  assert.equal(rejectedMessage.read, false);
+  const visibleText = JSON.stringify({ title: rejectedMessage.title, message: rejectedMessage.message });
+  for (const secret of ["Unreadable identity", "private-test", profile.vehiclePlate, users.find(user => user.id === ownerId)!.phone]) {
+    assert(!visibleText.includes(secret), "notification must not disclose moderator text, images or personal details");
+  }
+  assert.equal(cargoNotifications.length, initialMessages + 2, "push failure preserves the in-app message");
   assert(writes.length > 0);
 });
 

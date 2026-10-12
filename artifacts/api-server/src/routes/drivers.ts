@@ -5,7 +5,9 @@ import {
   RateCargoDriverResponse, ListDriverVerificationsResponse,
 } from "@workspace/api-zod";
 import { authenticateToken, type AuthRequest } from "../middleware/auth.js";
-import { driverProfiles, users, regions, vehicleTypes, cargoLoads, cargoOffers, generateId, type StoredDriverProfile } from "../data/store.js";
+import { driverProfiles, users, regions, vehicleTypes, cargoLoads, cargoOffers, cargoNotifications, generateId, type StoredDriverProfile, type StoredCargoNotification } from "../data/store.js";
+import { deliverStoredNotification } from "../lib/cargo-notifications.js";
+import { logger } from "../lib/logger.js";
 import { persistItems } from "../lib/persistence.js";
 import { driverDocumentStorage } from "../lib/driver-documents.js";
 import { hasCompleteVehicle, requiredDocumentKinds, withDriverWrite, effectiveDriverReviewStatus } from "../lib/driver-trust.js";
@@ -29,7 +31,7 @@ export function privateDriverApplication(profile: StoredDriverProfile) {
   });
 }
 
-export function createDriversRouter(save: Save = persistItems, files: DocumentStorage = driverDocumentStorage) {
+export function createDriversRouter(save: Save = persistItems, files: DocumentStorage = driverDocumentStorage, deliver: typeof deliverStoredNotification = deliverStoredNotification) {
   const router = Router();
   const moderator: RequestHandler = (req: AuthRequest, res, next) => {
     if (users.find(user => user.id === req.userId)?.role !== "admin") {
@@ -41,12 +43,16 @@ export function createDriversRouter(save: Save = persistItems, files: DocumentSt
     if (users.find(user => user.id === req.userId)?.role !== "driver") return undefined;
     return driverProfiles.find(profile => profile.userId === req.userId);
   };
-  const commitApplication = async (current: StoredDriverProfile, next: StoredDriverProfile) => {
+  const commitApplication = async (current: StoredDriverProfile, next: StoredDriverProfile, notification?: StoredCargoNotification) => {
     const user = users.find(item => item.id === current.userId)!;
     const nextUser = { ...user, verificationStatus: next.reviewStatus ?? "none" };
-    await save([{ collection: "driver_profiles", item: next }, { collection: "users", item: nextUser }]);
+    await save([
+      { collection: "driver_profiles", item: next }, { collection: "users", item: nextUser },
+      ...(notification ? [{ collection: "cargo_notifications", item: notification }] : []),
+    ]);
     Object.assign(current, next);
     Object.assign(user, nextUser);
+    if (notification) cargoNotifications.unshift(notification);
   };
   const locked = (handler: RequestHandler): RequestHandler => (req, res, next) => {
     void withDriverWrite(async () => { await handler(req, res, next); }).catch(next);
@@ -173,7 +179,20 @@ export function createDriversRouter(save: Save = persistItems, files: DocumentSt
       !requiredDocumentKinds.every(kind => next.documents?.some(doc => doc.kind === kind && doc.status === "approved" && documentValid(doc))))) {
       res.status(400).json({ error: "incomplete_application", message: "Transport ma’lumotlari va uchta hujjat to‘liq tasdiqlanishi kerak." }); return;
     }
-    await commitApplication(profile, next);
+    // Do not copy the moderator's free-text reason or document details into a
+    // notification: it can appear on a locked device. The reason stays in the application.
+    const notification: StoredCargoNotification = {
+      id: generateId(), userId: profile.userId, loadId: null, target: "driver_verification",
+      title: input.status === "approved" ? "Haydovchi arizangiz tasdiqlandi"
+        : input.status === "rejected" ? "Haydovchi arizangiz rad etildi" : "Haydovchi arizangiz tekshiruvda",
+      message: input.status === "rejected"
+        ? "Rad etish sababini ko‘rish va hujjatlarni yangilash uchun arizangizni oching."
+        : "Tekshiruv natijasini ko‘rish uchun arizangizni oching.",
+      type: "system", read: false, createdAt: now,
+    };
+    await commitApplication(profile, next, notification);
+    try { await deliver(notification); }
+    catch { logger.warn({ notificationId: notification.id }, "Driver review push failed; decision and in-app notification remain saved"); }
     res.json(privateDriverApplication(profile));
   }));
 

@@ -7,6 +7,7 @@ import {
   driverProfiles,
   cargoLoads,
   cargoOffers,
+  cargoNotifications,
   hashPassword,
   type StoredUser,
   type StoredListing,
@@ -14,6 +15,7 @@ import {
   type StoredDriverProfile,
   type StoredCargoLoad,
   type StoredCargoOffer,
+  type StoredCargoNotification,
 } from "../data/store.js";
 
 type PersistedItem =
@@ -22,7 +24,8 @@ type PersistedItem =
   | StoredOrder
   | StoredDriverProfile
   | StoredCargoLoad
-  | StoredCargoOffer;
+  | StoredCargoOffer
+  | StoredCargoNotification;
 
 type Collection = {
   name: string;
@@ -36,6 +39,7 @@ const collections: Collection[] = [
   { name: "driver_profiles", items: driverProfiles },
   { name: "cargo_loads", items: cargoLoads },
   { name: "cargo_offers", items: cargoOffers },
+  { name: "cargo_notifications", items: cargoNotifications },
 ];
 
 function normalizeUser(user: StoredUser): StoredUser {

@@ -14,6 +14,7 @@ import {
   type CargoType,
   type StoredCargoLoad,
   type StoredCargoOffer,
+  type StoredCargoNotification,
   users,
   vehicleTypes,
 } from "../data/store.js";
@@ -28,6 +29,9 @@ type SaveCargo = (changes: readonly CargoChange[]) => Promise<void>;
 export function createCargoRouter(persistItems: SaveCargo = async (changes) => {
   const storage = await import("../lib/persistence.js");
   await storage.persistItems(changes);
+}, saveNotification: (notification: StoredCargoNotification) => Promise<void> = async notification => {
+  const storage = await import("../lib/persistence.js");
+  await storage.persistItem("cargo_notifications", notification);
 }) {
 const router = Router();
 const mutationQueue = new Map<string, Promise<void>>();
@@ -678,6 +682,9 @@ router.post("/notifications/:id/read", authenticateToken, async (req: AuthReques
   if (!notification) {
     res.status(404).json({ error: "not_found", message: "Notification not found" });
     return;
+  }
+  if (notification.target === "driver_verification") {
+    await saveNotification({ ...notification, read: true });
   }
   notification.read = true;
   const { userId: _userId, ...response } = notification;

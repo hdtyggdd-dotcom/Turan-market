@@ -22,6 +22,7 @@ export * from './cargoLoadInputCargoType';
 export * from './cargoLoadStatus';
 export * from './cargoLocationInput';
 export * from './cargoNotification';
+export * from './cargoNotificationTarget';
 export * from './cargoNotificationType';
 export * from './cargoOffer';
 export * from './cargoOfferInput';

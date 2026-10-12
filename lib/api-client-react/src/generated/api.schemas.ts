@@ -1209,6 +1209,16 @@ export interface PushRegistration {
   registered: boolean;
 }
 
+/**
+ * Open the signed-in driver's own verification application.
+ */
+export type CargoNotificationTarget = typeof CargoNotificationTarget[keyof typeof CargoNotificationTarget];
+
+
+export const CargoNotificationTarget = {
+  driver_verification: 'driver_verification',
+} as const;
+
 export type CargoNotificationType = typeof CargoNotificationType[keyof typeof CargoNotificationType];
 
 
@@ -1222,6 +1232,8 @@ export interface CargoNotification {
   id: string;
   /** @nullable */
   loadId: string | null;
+  /** Open the signed-in driver's own verification application. */
+  target?: CargoNotificationTarget;
   title: string;
   message: string;
   type: CargoNotificationType;
@@ -1357,3 +1369,4 @@ regionId?: string;
 export type GetDriverDocumentUrl200 = {
   url: string;
 };
+

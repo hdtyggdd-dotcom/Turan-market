@@ -2463,6 +2463,7 @@ components:
       properties:
         id: { type: string }
         loadId: { type: ["string", "null"] }
+        target: { type: string, enum: [driver_verification], description: "Open the signed-in driver's own verification application." }
         title: { type: string }
         message: { type: string }
         type: { type: string, enum: [tracking, offer, system] }

@@ -96,6 +96,7 @@ export async function eraseAccount(input: Input, expectedUserId?: string) {
       and(inArray(appRecords.collection, ["cart_operations", "photo_search_requests"]), sql`starts_with(${appRecords.id}, ${ownerPrefix})`),
       and(eq(appRecords.collection, "ai_advice_usage"), sql`starts_with(${appRecords.id}, ${budgetPrefix})`),
       and(eq(appRecords.collection, "product_demand_notifications"), sql`${appRecords.payload}->>'userId' = ${owner.id}`),
+      and(eq(appRecords.collection, "cargo_notifications"), sql`${appRecords.payload}->>'userId' = ${owner.id}`),
     ));
     const event: DeletionEvent = {
       userId: owner.id, deleted: plan.deleted, updated: plan.updated.map(({ collection, id }) => ({ collection, id })),

@@ -46,7 +46,7 @@ export function deliverStoredNotification(notification: StoredCargoNotification)
         headers: { "Content-Type": "application/json", Accept: "application/json" },
         body: JSON.stringify(recipients.map(([to]) => ({
           to, title, body: message, sound: "default", channelId: "cargo",
-          data: { loadId, notificationId: notification.id },
+          data: { loadId, notificationId: notification.id, ...(notification.target ? { target: notification.target } : {}) },
         }))),
         signal: AbortSignal.timeout(10_000),
       });

@@ -8,6 +8,8 @@ import { useQueryClient } from '@tanstack/react-query';
 import { Feather } from '@expo/vector-icons';
 import {
   getGetNotificationsQueryKey,
+  getGetMyDriverVerificationQueryKey,
+  getGetDriversQueryKey,
   registerPushToken,
   unregisterPushToken,
   useGetNotifications,
@@ -15,6 +17,7 @@ import {
 } from '@workspace/api-client-react';
 import { useAuth } from '@/context/AuthContext';
 import { useColors } from '@/hooks/useColors';
+import { notificationRoute } from './notification-route';
 
 export const PUSH_TOKEN_KEY = 'osavdo_cargo_push_token';
 
@@ -33,15 +36,20 @@ export function CargoPushListener() {
           shouldShowBanner: true, shouldShowList: true, shouldPlaySound: true, shouldSetBadge: false,
         }),
       });
-      const received = Notifications.addNotificationReceivedListener(() => {
+      const refresh = () => {
         client.invalidateQueries({ queryKey: getGetNotificationsQueryKey() });
         client.invalidateQueries({ queryKey: ['/api/cargo-trips'] });
-      });
+        client.invalidateQueries({ queryKey: getGetMyDriverVerificationQueryKey() });
+        client.invalidateQueries({ queryKey: getGetDriversQueryKey() });
+      };
+      const received = Notifications.addNotificationReceivedListener(refresh);
       const open = (response: NotificationResponse) => {
-        const loadId = response.notification.request.content.data.loadId;
-        if (typeof loadId === 'string') router.push(`/cargo/${encodeURIComponent(loadId)}`);
-        else if (typeof response.notification.request.content.data.notificationId === 'string') router.push('/(tabs)/profile');
-        client.invalidateQueries({ queryKey: getGetNotificationsQueryKey() });
+        if (!active) return;
+        const data = response.notification.request.content.data;
+        const route = notificationRoute(data);
+        refresh();
+        if (route) router.push(route);
+        else if (typeof data.notificationId === 'string') router.push('/(tabs)/profile');
       };
       const responseListener = Notifications.addNotificationResponseReceivedListener(open);
       cleanup = () => { received.remove(); responseListener.remove(); };
@@ -146,7 +154,7 @@ export function CargoNotifications({ scope = 'cargo' }: { scope?: 'cargo' | 'all
         <Text style={{ color: colors.primary }}>Sozlamalarni ochish</Text>
       </TouchableOpacity>}
       {isError && <Text style={{ color: colors.destructive }}>Xabarlar yuklanmadi. Sahifani yangilang.</Text>}
-      {notifications?.length === 0 && <Text style={[styles.message, { color: colors.mutedForeground }]}>{scope === 'all' ? 'Mahsulotlarga talab va yuklar haqidagi xabarlar shu yerda ko‘rinadi.' : 'Yuk holati o‘zgarsa, xabar shu yerda ko‘rinadi.'}</Text>}
+      {notifications?.length === 0 && <Text style={[styles.message, { color: colors.mutedForeground }]}>{scope === 'all' ? 'Ariza natijalari, mahsulotlarga talab va yuklar haqidagi xabarlar shu yerda ko‘rinadi.' : 'Yuk holati o‘zgarsa, xabar shu yerda ko‘rinadi.'}</Text>}
       {notifications?.map(notification => (
         <TouchableOpacity
           testID={`cargo-notification-${notification.id}`}
@@ -157,7 +165,9 @@ export function CargoNotifications({ scope = 'cargo' }: { scope?: 'cargo' | 'all
               onSuccess: () => client.invalidateQueries({ queryKey: getGetNotificationsQueryKey() }),
               onError: () => setFeedback('Xabar o‘qilgan deb belgilanmadi. Qayta urinib ko‘ring.'),
             });
-            if (notification.loadId) router.push(`/cargo/${notification.loadId}`);
+            const route = notificationRoute(notification);
+            if (notification.target === 'driver_verification') client.invalidateQueries({ queryKey: getGetMyDriverVerificationQueryKey() });
+            if (route) router.push(route);
           }}
         >
           <View style={[styles.dot, { backgroundColor: notification.read ? colors.border : colors.primary }]} />

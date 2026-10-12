@@ -3029,6 +3029,7 @@ export interface StoredCargoNotification {
   id: string;
   userId: string;
   loadId: string | null;
+  target?: 'driver_verification';
   title: string;
   message: string;
   type: 'tracking' | 'offer' | 'system';

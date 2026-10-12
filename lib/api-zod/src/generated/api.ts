@@ -56,6 +56,8 @@ export const rateCargoDriverBodyScoreMax = 5;
 export const rateCargoDriverBodyCommentMax = 500;
 
 
+
+
 export const getCartResponseItemsItemListingListingTypeDefault = `savdo`;
 export const getCartResponseItemsItemListingElanTurDefault = `oddiy`;
 
@@ -153,6 +155,8 @@ export const GetCartResponse = zod.object({
 })
 
 
+
+
 export const clearCartBodyOperationIdRegExp = new RegExp('^[A-Za-z0-9_-]{8,160}$');
 
 
@@ -160,6 +164,7 @@ export const ClearCartBody = zod.object({
   "revision": zod.number().int().min(clearCartBodyRevisionMin),
   "operationId": zod.string().regex(clearCartBodyOperationIdRegExp)
 })
+
 
 
 export const clearCartResponseItemsItemListingListingTypeDefault = `savdo`;
@@ -259,6 +264,9 @@ export const ClearCartResponse = zod.object({
 })
 
 
+
+
+
 export const addCartItemBodyRequestIdRegExp = new RegExp('^[A-Za-z0-9_-]{8,160}$');
 export const addCartItemBodyOperationIdRegExp = new RegExp('^[A-Za-z0-9_-]{8,160}$');
 
@@ -269,6 +277,7 @@ export const AddCartItemBody = zod.object({
   "requestId": zod.string().regex(addCartItemBodyRequestIdRegExp),
   "operationId": zod.string().regex(addCartItemBodyOperationIdRegExp)
 })
+
 
 
 export const addCartItemResponseItemsItemListingListingTypeDefault = `savdo`;
@@ -368,13 +377,19 @@ export const AddCartItemResponse = zod.object({
 })
 
 
+
+
+
 export const UpdateCartItemParams = zod.object({
   "listingId": zod.coerce.string().min(1)
 })
 
 
+
 export const updateCartItemBodyRequestIdRegExp = new RegExp('^[A-Za-z0-9_-]{8,160}$');
 export const updateCartItemBodyOperationIdRegExp = new RegExp('^[A-Za-z0-9_-]{8,160}$');
+
+
 
 
 export const UpdateCartItemBody = zod.object({
@@ -384,6 +399,7 @@ export const UpdateCartItemBody = zod.object({
   "revision": zod.number().int().min(updateCartItemBodyRevisionMin),
   "refreshListing": zod.boolean().optional()
 })
+
 
 
 export const updateCartItemResponseItemsItemListingListingTypeDefault = `savdo`;
@@ -483,6 +499,9 @@ export const UpdateCartItemResponse = zod.object({
 })
 
 
+
+
+
 export const RemoveCartItemParams = zod.object({
   "listingId": zod.coerce.string().min(1)
 })
@@ -491,11 +510,14 @@ export const removeCartItemBodyRequestIdRegExp = new RegExp('^[A-Za-z0-9_-]{8,16
 export const removeCartItemBodyOperationIdRegExp = new RegExp('^[A-Za-z0-9_-]{8,160}$');
 
 
+
+
 export const RemoveCartItemBody = zod.object({
   "requestId": zod.string().regex(removeCartItemBodyRequestIdRegExp),
   "operationId": zod.string().regex(removeCartItemBodyOperationIdRegExp),
   "quantity": zod.number().int().min(1).max(removeCartItemBodyQuantityMax)
 })
+
 
 
 export const removeCartItemResponseItemsItemListingListingTypeDefault = `savdo`;
@@ -694,6 +716,7 @@ export const MergeCartBody = zod.object({
   "requestId": zod.string().regex(mergeCartBodyItemsItemRequestIdRegExp)
 }))
 })
+
 
 
 export const mergeCartResponseItemsItemListingListingTypeDefault = `savdo`;
@@ -904,6 +927,11 @@ export const LoginResponse = zod.object({
 /**
  * @summary Permanently close an account after password confirmation
  */
+
+
+
+
+
 
 
 export const DeleteAccountBody = zod.object({
@@ -1159,6 +1187,7 @@ export const GetCategoriesResponse = zod.array(GetCategoriesResponseItem)
 /**
  * @summary Get listings with filters
  */
+
 
 
 export const GetListingsQueryParams = zod.object({
@@ -1598,6 +1627,7 @@ export const DeleteListingResponse = zod.void()
  */
 
 
+
 export const searchProductByPhotoBodyRequestIdRegExp = new RegExp('^[A-Za-z0-9_-]{8,100}$');
 
 
@@ -1622,6 +1652,12 @@ export const SearchProductByPhotoResponse = zod.object({
 /**
  * @summary Request authenticated advice within the shared usage budget
  */
+
+
+
+
+
+
 
 
 export const RequestAiAdviceBody = zod.object({
@@ -1981,6 +2017,9 @@ export const GetOrdersResponse = zod.array(GetOrdersResponseItem)
 /**
  * @summary Create a new order
  */
+
+
+
 
 
 export const CreateOrderBody = zod.object({
@@ -2967,6 +3006,13 @@ export const UpdateCargoLocationParams = zod.object({
 })
 
 
+
+
+
+
+
+
+
 export const UpdateCargoLocationBody = zod.object({
   "lat": zod.number().min(updateCargoLocationBodyLatMin).max(updateCargoLocationBodyLatMax),
   "lng": zod.number().min(updateCargoLocationBodyLngMin).max(updateCargoLocationBodyLngMax),
@@ -3584,6 +3630,7 @@ export const GetVehicleTypesResponse = zod.array(GetVehicleTypesResponseItem)
 export const GetNotificationsResponseItem = zod.object({
   "id": zod.string(),
   "loadId": zod.string().nullable(),
+  "target": zod.enum(['driver_verification']).optional().describe('Open the signed-in driver\'s own verification application.'),
   "title": zod.string(),
   "message": zod.string(),
   "type": zod.enum(['tracking', 'offer', 'system']),
@@ -3603,12 +3650,17 @@ export const MarkNotificationReadParams = zod.object({
 export const MarkNotificationReadResponse = zod.object({
   "id": zod.string(),
   "loadId": zod.string().nullable(),
+  "target": zod.enum(['driver_verification']).optional().describe('Open the signed-in driver\'s own verification application.'),
   "title": zod.string(),
   "message": zod.string(),
   "type": zod.enum(['tracking', 'offer', 'system']),
   "read": zod.boolean(),
   "createdAt": zod.coerce.date()
 })
+
+
+
+
 
 
 export const RegisterPushTokenBody = zod.object({
@@ -3618,6 +3670,10 @@ export const RegisterPushTokenBody = zod.object({
 export const RegisterPushTokenResponse = zod.object({
   "registered": zod.boolean()
 })
+
+
+
+
 
 
 export const UnregisterPushTokenBody = zod.object({
@@ -3662,6 +3718,23 @@ export const GetMyDriverVerificationResponse = zod.object({
   "createdAt": zod.string()
 }))
 })
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 export const SubmitDriverVerificationBody = zod.object({
@@ -3711,7 +3784,10 @@ export const SubmitDriverVerificationResponse = zod.object({
 }))
 })
 
+
 export const uploadDriverDocumentBodyExpiresAtRegExp = new RegExp('^\\d{4}-\\d{2}-\\d{2}$');
+
+
 export const UploadDriverDocumentBody = zod.object({
   "expiresAt": zod.string().regex(uploadDriverDocumentBodyExpiresAtRegExp).nullable().describe('Last valid UTC calendar day'),
   "noExpiry": zod.boolean().describe('Only identity or registration may explicitly have no expiry'),
@@ -3805,7 +3881,11 @@ export const ReviewDriverVerificationParams = zod.object({
   "id": zod.coerce.string()
 })
 
+
+
 export const reviewDriverVerificationBodyDocumentsItemExpiresAtRegExp = new RegExp('^\\d{4}-\\d{2}-\\d{2}$');
+
+
 export const ReviewDriverVerificationBody = zod.object({
   "status": zod.enum(['pending', 'approved', 'rejected']),
   "revision": zod.number().int(),
@@ -3856,6 +3936,11 @@ export const ReviewDriverVerificationResponse = zod.object({
 export const RateCargoDriverParams = zod.object({
   "id": zod.coerce.string()
 })
+
+
+
+
+
 
 
 export const RateCargoDriverBody = zod.object({
@@ -3956,4 +4041,5 @@ export const GetDriverResponse = zod.object({
   "sharedLoadAvailableM3": zod.number(),
   "bio": zod.string().nullish()
 })
+
 
