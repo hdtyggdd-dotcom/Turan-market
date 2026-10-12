@@ -15,6 +15,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import { useColors } from '@/hooks/useColors';
 import { requestAiAdvice, ApiError } from '@workspace/api-client-react';
+import { APP_GUIDE, APP_GUIDE_QUICK_QUESTIONS, getAppGuideReply } from '@/constants/app-guide';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -27,23 +28,8 @@ interface AIMaslahatModalProps {
   onClose: () => void;
 }
 
-const APP_GUIDE_QUESTION = "Ilova nimalar qila oladi?";
-const APP_GUIDE = `Cosmis ilovasiga xush kelibsiz!
-
-• Mahsulot va xizmat e’lonlarini qidirish, kategoriya bo‘yicha ko‘rish mumkin.
-• “Izlash” → “Rasm orqali qidirish”da mahsulotni suratga oling yoki galereyadan tanlang. AI katalogdagi mos e’lonlarni izlaydi. Mos faol tovar topilmasa, shu kategoriyadagi sotuvchilarga mahsulotga talab haqida xabar beriladi; mijozning rasmi ularga yuborilmaydi.
-• Sotuvchi mahsulot e’lonini rasm, narx va tavsif bilan joylaydi, keyin o‘z e’lonlarini boshqaradi.
-• Xaridor mahsulotni savatchaga qo‘shib, buyurtma beradi va buyurtmalarini kuzatadi.
-• Yuk egasi yuk tashish buyurtmasini joylaydi va haydovchilarning takliflarini ko‘radi.
-• Tasdiqlangan haydovchi yuk tashishga taklif beradi. Safar holati va ruxsat berilgan GPS joylashuvi kuzatiladi.
-• AI narx, e’lon matni, sotish usullari va ilovadan foydalanish haqida maslahat beradi.
-
-Boshlash uchun kerakli kategoriya yoki mahsulotni tanlang. Sotish uchun “E’lon joylash” tugmasidan, buyurtma berish uchun savatdan foydalaning.
-
-Muhim: onlayn karta to‘lovi va avtomatik komissiya undirish hozir yoqilmagan. AI hisobingiz nomidan e’lon yoki buyurtma yaratmaydi; amallarni o‘zingiz tasdiqlaysiz.`;
-
 const QUICK_QUESTIONS = [
-  APP_GUIDE_QUESTION,
+  ...APP_GUIDE_QUICK_QUESTIONS,
   "Sigir narxim to'g'rimi?",
   "E'lonimni yaxshilang",
   "Tez sotish uchun nima qilish kerak?",
@@ -71,9 +57,10 @@ export function AIMaslahatModal({ visible, onClose }: AIMaslahatModalProps) {
 
     setInput('');
     // Public product information is a labelled guide, not a paid AI fallback.
-    if (trimmed === APP_GUIDE_QUESTION) {
+    const guideReply = getAppGuideReply(trimmed);
+    if (guideReply !== null) {
       setMessages(prev => [...prev, { role: 'user', text: trimmed },
-        { role: 'assistant', kind: 'guide', text: APP_GUIDE }]);
+        { role: 'assistant', kind: 'guide', text: guideReply }]);
       return;
     }
     setMessages((prev) => [...prev, { role: 'user', text: trimmed }]);
@@ -131,6 +118,19 @@ export function AIMaslahatModal({ visible, onClose }: AIMaslahatModalProps) {
               <Feather name="x" size={22} color={colors.mutedForeground} />
             </TouchableOpacity>
           </View>
+
+          <TouchableOpacity
+            style={[styles.guideShortcut, { backgroundColor: colors.card, borderBottomColor: colors.border }]}
+            onPress={() => scrollRef.current?.scrollTo({ y: 0, animated: true })}
+            accessibilityRole="button"
+            accessibilityLabel="Ilovaning barcha imkoniyatlari qo‘llanmasini ochish"
+            testID="open-app-guide"
+          >
+            <Feather name="book-open" size={16} color={colors.primary} />
+            <Text style={[styles.guideShortcutText, { color: colors.primary }]}>
+              Ilova qo‘llanmasi: barcha imkoniyatlar
+            </Text>
+          </TouchableOpacity>
 
           {/* Messages */}
           <ScrollView
@@ -242,6 +242,15 @@ export function AIMaslahatModal({ visible, onClose }: AIMaslahatModalProps) {
 }
 
 const styles = StyleSheet.create({
+  guideShortcut: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+  },
+  guideShortcutText: { fontSize: 12, fontFamily: 'Inter_500Medium' },
   container: { flex: 1 },
   header: {
     flexDirection: 'row',
