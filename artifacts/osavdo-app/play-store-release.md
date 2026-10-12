@@ -3,7 +3,7 @@
 ## App identity
 
 - App name: **Cosmis**
-- Android application ID: `com.turanmarket.app` (unchanged identity)
+- Android application ID: `com.cosmic.app` (current app.json identity; do not change during release)
 - Initial version name: `1.0.0`
 - Initial version code: `1`
 - App type: marketplace for products, services and cargo transport

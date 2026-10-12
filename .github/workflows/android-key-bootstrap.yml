@@ -1,0 +1,37 @@
+name: Cosmis - encrypted upload key setup
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cosmis-upload-key-bootstrap
+  cancel-in-progress: false
+
+jobs:
+  seal:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install the standard GitHub sealed-box implementation
+        run: python -m pip install --disable-pip-version-check PyNaCl==1.5.0
+      - name: Generate and seal a new upload key
+        run: python scripts/android-key-bootstrap.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cosmis-sealed-upload-key
+          path: android-key-delivery/sealed-upload-key.json
+          if-no-files-found: error
+          retention-days: 2

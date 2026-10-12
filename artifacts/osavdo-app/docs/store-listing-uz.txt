@@ -30,7 +30,7 @@ Yuklab olish bepul. Hozir ilova ichida onlayn karta to‘lovlari yoqilmagan. Ilk
 E’lonlar va mahsulotlar foydalanuvchilar tomonidan joylanadi. Mavjudlik, narx va yetkazib berish shartlarini sotuvchi bilan aniqlashtiring.
 
 TEXNIK MA’LUMOT
-Android package: com.turanmarket.app
+Android package: com.cosmic.app
 Ilova versiyasi: 1.0.0
 Android versionCode: 1 (agar oldin yuklangan bo‘lsa, undan katta qiymat kerak)
 Website: https://turanmarket.net

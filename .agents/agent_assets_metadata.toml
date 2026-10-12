@@ -56,3 +56,17 @@ mtime_ms = 1791357622777
 storage_uri = "gcs://replit-rams-assets-pike/rams/assets/repl:d034b3be-e147-4dab-ab59-99935cafc7da/4cbd2d96-edcb-4b99-8699-14d3c2afdb39/dc14a139-669e-46ab-8792-0321cc358751"
 storage_version_token = "1791357675215318"
 content_type = "text/html"
+
+[[outputs]]
+id = "SWwsaoUzh0eTaaXM7PgyD"
+uri = "file://generated-artifacts/cosmis-play-release/cosmis-play.aab"
+type = "unspecified"
+title = "Cosmis — Google Play uchun imzolangan AAB"
+description = "Google Play Console uchun Android App Bundle. Imzo, paket/versiya, target API va 16 KB native kutubxonalar tekshirildi. Bu APK emas; telefonga bevosita o‘rnatilmaydi."
+logical_id = "a5e8b8ca-61d1-4cc4-9fbf-9fe22fff0dfd"
+content_hash = "sha256:50a67811239f35b2532419e4646fd9691eaaa359aca9e271fa018537dbe57256"
+size = 44372083
+mtime_ms = 1791824993737
+storage_uri = "gcs://replit-rams-assets-pike/rams/assets/repl:d034b3be-e147-4dab-ab59-99935cafc7da/a5e8b8ca-61d1-4cc4-9fbf-9fe22fff0dfd/052e727e-6dd9-48cf-9ef2-71e6923ab9e0"
+storage_version_token = "1791825017510661"
+content_type = "application/octet-stream"
