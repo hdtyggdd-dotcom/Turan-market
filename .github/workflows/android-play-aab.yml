@@ -2,6 +2,9 @@ name: Cosmis - signed Google Play AAB
 
 on:
   workflow_dispatch:
+  push:
+    branches: ["android-play-build-20261012-164832"]
+    paths: [".github/workflows/android-play-aab.yml"]
 
 permissions:
   contents: read
@@ -20,10 +23,7 @@ jobs:
       EXPO_PUBLIC_DOMAIN: ${{ vars.TURAN_API_DOMAIN }}
       EXPO_PUBLIC_REVENUECAT_MODE: test
       EXPO_PUBLIC_REVENUECAT_TEST_API_KEY: ${{ vars.EXPO_PUBLIC_REVENUECAT_TEST_API_KEY }}
-      COSMIS_UPLOAD_KEYSTORE_BASE64: ${{ secrets.COSMIS_UPLOAD_KEYSTORE_BASE64 }}
-      COSMIS_UPLOAD_STORE_PASSWORD: ${{ secrets.COSMIS_UPLOAD_STORE_PASSWORD }}
-      COSMIS_UPLOAD_KEY_PASSWORD: ${{ secrets.COSMIS_UPLOAD_KEY_PASSWORD }}
-      COSMIS_UPLOAD_KEY_ALIAS: ${{ secrets.COSMIS_UPLOAD_KEY_ALIAS }}
+      SIGNING_KEY_CONFIGURED: ${{ secrets.COSMIS_UPLOAD_KEYSTORE_BASE64 != '' && secrets.COSMIS_UPLOAD_STORE_PASSWORD != '' && secrets.COSMIS_UPLOAD_KEY_PASSWORD != '' && secrets.COSMIS_UPLOAD_KEY_ALIAS != '' }}
       COSMIS_UPLOAD_CERT_SHA256: ${{ vars.COSMIS_UPLOAD_CERT_SHA256 }}
     steps:
       - uses: actions/checkout@v4
@@ -38,9 +38,8 @@ jobs:
             *) echo "Select the approved android-play-build-... snapshot." >&2; exit 1 ;;
           esac
           node -e '
-            for (const name of ["COSMIS_UPLOAD_KEYSTORE_BASE64", "COSMIS_UPLOAD_STORE_PASSWORD",
-              "COSMIS_UPLOAD_KEY_PASSWORD", "COSMIS_UPLOAD_KEY_ALIAS", "COSMIS_UPLOAD_CERT_SHA256"]) {
-              if (!process.env[name]) throw new Error("Missing signing setup: " + name);
+            if (process.env.SIGNING_KEY_CONFIGURED !== "true" || !process.env.COSMIS_UPLOAD_CERT_SHA256) {
+              throw new Error("Persistent upload signing setup is incomplete.");
             }
             const domain = process.env.EXPO_PUBLIC_DOMAIN;
             if (!domain || !/^[a-zA-Z0-9.-]+$/.test(domain) || domain.endsWith(".replit.dev")) {
@@ -74,6 +73,10 @@ jobs:
         run: sdkmanager "platforms;android-36" "build-tools;36.0.0"
       - name: Restore the upload key without printing its contents
         shell: bash
+        env:
+          COSMIS_UPLOAD_KEYSTORE_BASE64: ${{ secrets.COSMIS_UPLOAD_KEYSTORE_BASE64 }}
+          COSMIS_UPLOAD_STORE_PASSWORD: ${{ secrets.COSMIS_UPLOAD_STORE_PASSWORD }}
+          COSMIS_UPLOAD_KEY_ALIAS: ${{ secrets.COSMIS_UPLOAD_KEY_ALIAS }}
         run: |
           set -euo pipefail
           umask 077
@@ -85,12 +88,19 @@ jobs:
           test "$CERT" = "$COSMIS_UPLOAD_CERT_SHA256"
       - name: Build with the persistent upload key, never debug signing
         working-directory: artifacts/osavdo-app/android
+        env:
+          COSMIS_UPLOAD_STORE_PASSWORD: ${{ secrets.COSMIS_UPLOAD_STORE_PASSWORD }}
+          COSMIS_UPLOAD_KEY_PASSWORD: ${{ secrets.COSMIS_UPLOAD_KEY_PASSWORD }}
+          COSMIS_UPLOAD_KEY_ALIAS: ${{ secrets.COSMIS_UPLOAD_KEY_ALIAS }}
         run: |
           chmod +x gradlew
           ./gradlew :app:bundleRelease --no-daemon --max-workers=2 \
             -I ../scripts/android-upload-signing.gradle \
             -PreactNativeArchitectures=arm64-v8a,armeabi-v7a \
             -Dorg.gradle.jvmargs="-Xmx4g -XX:MaxMetaspaceSize=1g"
+      - name: Remove the upload key immediately after Gradle
+        if: always()
+        run: rm -f "$RUNNER_TEMP/cosmis-upload.p12"
       - name: Verify signature, bundle metadata and native alignment
         shell: bash
         run: |

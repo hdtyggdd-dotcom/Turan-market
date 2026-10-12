@@ -1,8 +1,7 @@
 name: Cosmis - encrypted upload key setup
 
 on:
-  push:
-    branches: ["android-play-build-20261012-164832"]
+  workflow_dispatch:
 
 permissions:
   contents: read
