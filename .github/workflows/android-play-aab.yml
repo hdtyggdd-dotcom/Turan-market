@@ -2,9 +2,6 @@ name: Cosmis - signed Google Play AAB
 
 on:
   workflow_dispatch:
-  push:
-    branches: ["android-play-build-20261012-164832"]
-    paths: [".github/workflows/android-play-aab.yml"]
 
 permissions:
   contents: read
