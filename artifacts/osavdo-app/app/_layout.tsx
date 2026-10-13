@@ -29,7 +29,7 @@ import { CargoPushListener } from '@/components/cargo/CargoNotifications';
 import React, { useEffect, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { CountrySetupModal } from '@/components/CountrySetupModal';
-import { LANGUAGE_OPTIONS } from '@/constants/i18n';
+import { ENTRY_SETUP_VERSION, needsEntrySetup } from '@/services/entry-setup';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -96,18 +96,15 @@ export default function RootLayout() {
       void SplashScreen.hideAsync();
       AsyncStorage.multiGet([COUNTRY_SETUP_KEY, 'osavdo_location', 'osavdo_lang']).then((values) => {
         const [[, done], [, savedLocation], [, savedLanguage]] = values;
-        let country: unknown;
-        try { country = savedLocation ? JSON.parse(savedLocation).countryId : null; } catch { country = null; }
-        const selectedLanguage = LANGUAGE_OPTIONS.some(option => option.code === savedLanguage);
-        setShowCountrySetup(!done || typeof country !== 'string' || !country || !selectedLanguage);
+        setShowCountrySetup(needsEntrySetup(done, savedLocation, savedLanguage));
       }).catch(() => setShowCountrySetup(true));
     }
   }, [fontsLoaded, fontError]);
 
   if ((!fontsLoaded && !fontError) || showCountrySetup === null) return null;
 
-  function handleCountrySetupDone() {
-    AsyncStorage.setItem(COUNTRY_SETUP_KEY, '1').catch(() => {});
+  async function handleCountrySetupDone() {
+    await AsyncStorage.setItem(COUNTRY_SETUP_KEY, ENTRY_SETUP_VERSION);
     setShowCountrySetup(false);
   }
 

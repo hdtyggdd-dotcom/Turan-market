@@ -3,9 +3,9 @@ name: Single authentication form
 description: Country/language-only startup, transaction-time identity/locality, remembered self-chosen code and bounded optional GPS.
 ---
 
-Initial entry requires only explicit country and language choices. Allow anonymous product browsing without asking for name, phone, GPS, province or district. Collect identity and locality when entering purchase, selling/ad posting or cargo actions.
+Initial entry requires explicit country and language choices, with optional user-initiated GPS as an alternative to manual country selection. Allow anonymous product browsing without mandatory name, phone, GPS, province or district. Collect identity and locality when entering purchase, selling/ad posting or cargo actions.
 
-**Why:** The owner revised the earlier full-entry requirement after reporting locality-selection friction: country and language are mandatory at entry; phone, name and locality are asked before buying, selling, posting ads or cargo transport.
+**Why:** The owner revised the earlier full-entry requirement after reporting locality-selection friction: country and language are mandatory at entry; phone, name and locality are asked before buying, selling, posting ads or cargo transport. They subsequently reported that the chooser was missing and explicitly requested the manual-country/GPS option back.
 
 **How to apply:** Keep one real credential form for transaction-time authentication, not fake guest accounts. Preserve returning-account identity, role, locality, orders and remembered code. Gate protected actions without blocking catalogue browsing; allow manual locality if GPS fails. Country and language remain separate explicit choices; browsing locality must not overwrite account or ad locality.
 
