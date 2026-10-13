@@ -4,7 +4,7 @@ import { randomUUID } from "node:crypto";
 import express from "express";
 import type { Server } from "node:http";
 import { and, eq, like } from "drizzle-orm";
-import { appRecords, db, pool } from "@workspace/db";
+import { appRecords, db, pool, adviceCoordinationPool } from "@workspace/db";
 import { AdviceLimitError, adviceBudget, adviceLimits, reserveAdvice, readAdviceBudget, acknowledgeAdviceBudgetAlert } from "../lib/advice-budget.js";
 import { adviceProvider } from "../lib/advice-provider.js";
 import aiRouter from "./ai.js";
@@ -22,6 +22,7 @@ let limits = { accountDaily: 2, globalDaily: 10, globalTotal: 20 };
 let providerCalls = 0;
 let failProvider = false;
 let failBudget = false;
+let providerDelay = 10;
 let lastSystemPrompt: string | undefined;
 let server: Server;
 let base: string;
@@ -45,7 +46,7 @@ before(async () => {
   mock.method(adviceProvider, "generate", async (_prompt: string, system?: string) => {
     lastSystemPrompt = system;
     providerCalls++;
-    await new Promise(resolve => setTimeout(resolve, 10));
+    await new Promise(resolve => setTimeout(resolve, providerDelay));
     if (failProvider) throw new Error("Uncertain provider timeout");
     return "Aniq AI maslahat";
   });
@@ -71,6 +72,7 @@ after(async () => {
   users.splice(users.indexOf(other), 1);
   users.splice(users.indexOf(admin), 1);
   listings.splice(listings.indexOf(listing), 1);
+  await adviceCoordinationPool.end();
   await pool.end();
 });
 
@@ -220,6 +222,36 @@ test("atomic durable budgets and both advice entry points", async t => {
     assert.equal(results.filter(r => r.status === 200).length, 3);
     assert.equal(results.filter(r => r.status === 429).length, 9);
     assert.equal(providerCalls - before, 3);
+  });
+  await t.test("parallel listing analysis shares one charged call; ownership precedes warm cache", async () => {
+    collection = `${prefix}-parallel-listing`;
+    limits = { accountDaily: 10, globalDaily: 10, globalTotal: 10 };
+    listing.price += 1;
+    providerDelay = 150;
+    const before = providerCalls;
+    const results = await Promise.all(Array.from({ length: 12 }, () => request(`/listings/${listing.id}/analyse`)));
+    assert(results.every(r => r.status === 200 && r.data.advice === "Aniq AI maslahat"));
+    assert.equal(providerCalls - before, 1);
+    assert.equal((await readAdviceBudget(limits, collection)).total.used, 1);
+    assert.equal((await request(`/listings/${listing.id}/analyse`, other.id)).status, 403);
+    assert.equal((await request(`/listings/${listing.id}/analyse`, null)).status, 401);
+    assert.equal((await request(`/listings/${listing.id}/analyse`)).data.advice, "Aniq AI maslahat");
+    assert.equal(providerCalls - before, 1);
+  });
+  await t.test("parallel failed analysis is not cached; retry reserves a new attempt", async () => {
+    collection = `${prefix}-parallel-failure`;
+    listing.price += 1;
+    failProvider = true;
+    const before = providerCalls;
+    const failed = await Promise.all(Array.from({ length: 12 }, () => request(`/listings/${listing.id}/analyse`)));
+    assert(failed.every(r => r.data.advice === null && r.data.adviceStatus === "unavailable"));
+    assert.equal(providerCalls - before, 1);
+    failProvider = false;
+    const retry = await request(`/listings/${listing.id}/analyse`);
+    assert.equal(retry.data.advice, "Aniq AI maslahat");
+    assert.equal(providerCalls - before, 2);
+    assert.equal((await readAdviceBudget(limits, collection)).total.used, 2);
+    providerDelay = 10;
   });
   await t.test("app help reaches AI with accurate capabilities and safety boundaries", async () => {
     collection = `${prefix}-app-help`;

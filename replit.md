@@ -21,6 +21,7 @@ _Replace the heading above with the project's name, and this line with one sente
 - These are request/usage caps, not dollar accounting. Each call has bounded input (16,000 characters) and output (at most 1024 tokens); provider pricing still determines monetary cost.
 - Every outbound attempt, including provider failures/timeouts, consumes allowance. Cached listing advice (five minutes) does not. Listing statistics remain available after a limit is reached.
 - PostgreSQL reservations are atomic across server processes and durable across restarts. Both advice entry points share the same counters. Configure these values in the environment where the server runs.
+- Identical listing analysis shares a promise within a worker and a PostgreSQL session lock across workers. Only successful advice is cached for five minutes in the shared database. Waiting requests never start a second call after a failure; a fresh request can retry. Each actual attempt still reserves the existing allowance.
 
 ## Stack
 

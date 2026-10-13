@@ -18,6 +18,12 @@ export const accountCoordinationPool = new Pool({
   max: 4,
   connectionTimeoutMillis: 10_000,
 });
+// AI generation holds session locks while reserving budget via the data pool.
+export const adviceCoordinationPool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  max: 4,
+  connectionTimeoutMillis: 10_000,
+});
 export const db = drizzle(pool, { schema });
 
 export * from "./schema";
