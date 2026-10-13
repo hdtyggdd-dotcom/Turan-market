@@ -5,6 +5,7 @@
 - [Payment scope](payment-scope.md) — payments stay disabled; preserve confirmed free access, household-service pricing, and increasing seller commission terms.
 - [Cart retry integrity](cart-retry-integrity.md) — uncertain checkout responses must keep the original request identity; removing and re-adding can duplicate an order.
 - [Special goods taxonomy](special-goods-taxonomy.md) — damaged and promotional goods are sibling subcategories under one parent, not separate categories.
+- [Retail category scope](retail-category-scope.md) — food and clothing are separate categories; men's, women's, children's and workwear stay under clothing.
 - [AI advice billing](ai-advice-billing.md) — use owner-provided Anthropic access; do not switch advice to Replit credit billing without an explicit request.
 - [AI product guidance](ai-product-guidance.md) — AI maslahat must explain app capabilities and usage to customers, not only market advice.
 - [Photo product search](photo-product-search.md) — customers photograph products for AI lookup; unavailable products should trigger a relevant entrepreneur alert.
@@ -25,4 +26,5 @@
 - [Native handoff verification](native-handoff-testing.md) — bound headless dialer checks; preserve synthetic account identity outside the browser until cleanup.
 - [Android signing custody](android-signing-custody.md) — public builds export only sealed key material; retain signing identity and verify the real bundle before calling it ready.
 - [Expo browser preview](expo-browser-preview.md) — testers may lack the Expo hostname; use the exact workflow URL and wait for bundling.
+- [Expo workflow processes](expo-workflow-processes.md) — an old Expo child can retain the preview port while its replacement waits for input.
 - [Moderation notification privacy](moderation-notification-privacy.md) — show review outcomes in alerts; keep free-text reasons and document details inside the private application.

@@ -188,6 +188,12 @@ router.post("/listings", authenticateToken, async (req: AuthRequest, res) => {
   }
 
   // Ishlab chiqaruvchi bo'lsa admin tasdiqlashiga yuboriladi
+  if (resolvedSubcategoryId && !categories.find(category => category.id === resolvedCategoryId)
+    ?.subcategories.some(sub => sub.id === resolvedSubcategoryId)) {
+    res.status(400).json({ error: "invalid_subcategory", message: "Subkategoriya tanlangan kategoriyaga tegishli emas." });
+    return;
+  }
+
   const isManufacturer = body.sellerType === 'ishlab_chiqaruvchi';
 
   const newListing = {

@@ -1130,6 +1130,43 @@ categories.push(
   },
 );
 
+// cat19 remains reserved for the historical promotional-goods alias.
+categories.push(
+  {
+    id: 'cat20', name: "Oziq-ovqat", nameRu: "Продукты питания", icon: "🛒",
+    subcategories: [
+      { id: 'sub20_01', name: "Meva va sabzavotlar", nameRu: "Фрукты и овощи", categoryId: 'cat20' },
+      { id: 'sub20_02', name: "Go'sht va parranda mahsulotlari", nameRu: "Мясо и птица", categoryId: 'cat20' },
+      { id: 'sub20_03', name: "Baliq va dengiz mahsulotlari", nameRu: "Рыба и морепродукты", categoryId: 'cat20' },
+      { id: 'sub20_04', name: "Sut mahsulotlari va tuxum", nameRu: "Молочные продукты и яйца", categoryId: 'cat20' },
+      { id: 'sub20_05', name: "Non va pishiriqlar", nameRu: "Хлеб и выпечка", categoryId: 'cat20' },
+      { id: 'sub20_06', name: "Un, guruch, makaron va yormalar", nameRu: "Мука, рис, макароны и крупы", categoryId: 'cat20' },
+      { id: 'sub20_07', name: "Yog', shakar, tuz va ziravorlar", nameRu: "Масло, сахар, соль и специи", categoryId: 'cat20' },
+      { id: 'sub20_08', name: "Shirinliklar, asal va quruq mevalar", nameRu: "Сладости, мёд и сухофрукты", categoryId: 'cat20' },
+      { id: 'sub20_09', name: "Ichimliklar, choy va qahva", nameRu: "Напитки, чай и кофе", categoryId: 'cat20' },
+      { id: 'sub20_10', name: "Konservalar va muzlatilgan mahsulotlar", nameRu: "Консервы и замороженные продукты", categoryId: 'cat20' },
+      { id: 'sub20_11', name: "Tayyor taomlar va yarim tayyor mahsulotlar", nameRu: "Готовые блюда и полуфабрикаты", categoryId: 'cat20' },
+      { id: 'sub20_12', name: "Boshqa oziq-ovqat mahsulotlari", nameRu: "Другие продукты питания", categoryId: 'cat20' },
+    ],
+  },
+  {
+    id: 'cat21', name: "Kiyim-kechak", nameRu: "Одежда", icon: "👕",
+    subcategories: [
+      { id: 'sub21_01', name: "Erkaklar kiyimlari", nameRu: "Мужская одежда", categoryId: 'cat21' },
+      { id: 'sub21_02', name: "Ayollar kiyimlari", nameRu: "Женская одежда", categoryId: 'cat21' },
+      { id: 'sub21_03', name: "Bolalar kiyimlari", nameRu: "Детская одежда", categoryId: 'cat21' },
+      { id: 'sub21_04', name: "Chaqaloqlar kiyimlari", nameRu: "Одежда для новорождённых", categoryId: 'cat21' },
+      { id: 'sub21_05', name: "Maxsus va ish kiyimlari", nameRu: "Спецодежда и рабочая одежда", categoryId: 'cat21' },
+      { id: 'sub21_06', name: "Sport kiyimlari", nameRu: "Спортивная одежда", categoryId: 'cat21' },
+      { id: 'sub21_07', name: "Maktab formasi", nameRu: "Школьная форма", categoryId: 'cat21' },
+      { id: 'sub21_08', name: "Milliy va bayram kiyimlari", nameRu: "Национальная и праздничная одежда", categoryId: 'cat21' },
+      { id: 'sub21_09', name: "Poyabzallar", nameRu: "Обувь", categoryId: 'cat21' },
+      { id: 'sub21_10', name: "Bosh kiyimlar va aksessuarlar", nameRu: "Головные уборы и аксессуары", categoryId: 'cat21' },
+      { id: 'sub21_11', name: "Boshqa kiyim-kechaklar", nameRu: "Другая одежда", categoryId: 'cat21' },
+    ],
+  },
+);
+
 export const users: StoredUser[] = [
   {
     id: 'u1',

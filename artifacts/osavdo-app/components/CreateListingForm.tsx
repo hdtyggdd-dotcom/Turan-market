@@ -45,6 +45,8 @@ function CreateListingContent({ hideHeader = false, onDone }: { hideHeader?: boo
   const [analysisListingId, setAnalysisListingId] = useState<string | null>(null);
   const [isPreparing, setIsPreparing] = useState(false);
   const [specialSubcategoryId, setSpecialSubcategoryId] = useState<string | null>(null);
+  const [categoryId, setCategoryId] = useState<string | null>(null);
+  const [subcategoryId, setSubcategoryId] = useState<string | null>(null);
   const [listingLocation, setListingLocation] = useState<ListingLocationValue>({ regionId: '', districtId: '' });
   const [formError, setFormError] = useState('');
   const [isLocating, setIsLocating] = useState(false);
@@ -54,6 +56,7 @@ function CreateListingContent({ hideHeader = false, onDone }: { hideHeader?: boo
   }, []);
   const { data: categories } = useGetCategories();
   const specialCategory = (categories ?? []).find((category) => category.id === 'cat18');
+  const selectedCategory = categories?.find(category => category.id === categoryId);
 
   const createMutation = useCreateListing({
     mutation: {
@@ -73,6 +76,10 @@ function CreateListingContent({ hideHeader = false, onDone }: { hideHeader?: boo
 
   async function handleSubmit() {
     setFormError('');
+    if (categoryId && !selectedCategory?.subcategories.some(sub => sub.id === subcategoryId)) {
+      setFormError('Tanlangan kategoriyaga tegishli subkategoriyani tanlang.');
+      return;
+    }
     if (!listingLocation.regionId || !listingLocation.districtId) {
       setFormError('E’lon uchun viloyat va tumanni tanlang.');
       return;
@@ -97,6 +104,7 @@ function CreateListingContent({ hideHeader = false, onDone }: { hideHeader?: boo
         title: title.trim(),
         price: Number(price),
         images,
+        ...(categoryId ? { categoryId, subcategoryId: subcategoryId ?? undefined } : {}),
         ...(specialSubcategoryId ? { categoryId: 'cat18', subcategoryId: specialSubcategoryId } : {}),
         regionId: listingLocation.regionId,
         districtId: listingLocation.districtId,
@@ -117,6 +125,7 @@ function CreateListingContent({ hideHeader = false, onDone }: { hideHeader?: boo
         onClose={() => {
           setAnalysisListingId(null);
           setTitle(''); setPrice(''); setImages([]); setIsPreparing(false); setSpecialSubcategoryId(null);
+          setCategoryId(null); setSubcategoryId(null);
            setListingLocation({ regionId: '', districtId: '' }); setFormError('');
           if (onDone) onDone(); else router.push('/(tabs)');
         }}
@@ -167,6 +176,33 @@ function CreateListingContent({ hideHeader = false, onDone }: { hideHeader?: boo
           keyboardType="numeric"
         />
 
+        <FieldLabel label="Kategoriya" colors={colors} />
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 12 }}>
+          {[{ id: null, name: 'Avtomatik' }, ...(categories ?? [])].map(category => (
+            <TouchableOpacity key={category.id ?? 'auto'} testID={`listing-category-${category.id ?? 'auto'}`}
+              accessibilityRole="button" accessibilityState={{ selected: categoryId === category.id }}
+              onPress={() => { setCategoryId(category.id); setSubcategoryId(null); setSpecialSubcategoryId(null); }}
+              style={{ padding: 12, marginRight: 8, borderRadius: 12, borderWidth: 1,
+                borderColor: categoryId === category.id ? colors.primary : colors.border }}>
+              <Text style={{ color: colors.text }}>{category.name}</Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+        {selectedCategory && <>
+          <FieldLabel label="Subkategoriya" colors={colors} />
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 12 }}>
+            {selectedCategory.subcategories.map(sub => (
+              <TouchableOpacity key={sub.id} testID={`listing-subcategory-${sub.id}`}
+                accessibilityRole="button" accessibilityState={{ selected: subcategoryId === sub.id }}
+                onPress={() => { setSubcategoryId(sub.id); setSpecialSubcategoryId(null); }}
+                style={{ padding: 10, borderRadius: 12, borderWidth: 1,
+                  borderColor: subcategoryId === sub.id ? colors.primary : colors.border }}>
+                <Text style={{ color: colors.text }}>{sub.name}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </>}
+        {!categoryId && <>
         <FieldLabel label="Tovar bo'limi" colors={colors} />
         {specialCategory && <Text style={{ color: colors.mutedForeground, fontSize: 13 }}>{specialCategory.name}</Text>}
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
@@ -191,6 +227,8 @@ function CreateListingContent({ hideHeader = false, onDone }: { hideHeader?: boo
             );
           })}
         </View>
+
+        </>}
 
         {/* AI-filled fields */}
         <View style={[styles.autoCard, { backgroundColor: colors.secondary, borderColor: colors.border }]}>
