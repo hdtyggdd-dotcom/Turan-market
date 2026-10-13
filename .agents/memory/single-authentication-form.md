@@ -15,6 +15,12 @@ The owner clarified that the account holder chooses their own code; it is not an
 
 **How to apply:** Retain the existing hashed password credential behind the user-facing “kirish kodi” wording, including verification for returning users. Persist the authenticated session until explicit sign-out, server expiry, or revocation; do not prompt on every app launch. Preserve existing account identities and profile data. Do not add SMS or a fixed test code.
 
+Province/district selection at entry is a user-reported usability problem, not a requirement to expand onboarding.
+
+**Why:** The owner reported that choosing province and district in the entry section causes inconvenience and asked for advice on removing that friction.
+
+**How to apply:** Discuss whether locality should be optional at entry or easier to search before changing the flow. This feedback alone does not authorize removing validation. Preserve saved account and listing localities rather than replacing them with guessed defaults.
+
 Preserve the published authentication entry appearance when changing cart, categories, or cargo.
 
 **Why:** The owner clarified that only the entry screen should return to the published version, while category navigation, cart, and cargo changes must remain.
