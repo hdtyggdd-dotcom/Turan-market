@@ -9,8 +9,8 @@ Browser checks cannot establish that a phone dialer or another native app actual
 
 **How to apply:** Use bounded browser checks for correct participant contacts, safe destinations and absence of unintended navigation/payment requests. Report native handoff as unverified until checked on a real supported device. Do not repeatedly retry OS-dependent behavior in headless browsers.
 
-Keep the exact disposable test-account identifier available outside the browser notebook until cleanup succeeds.
+Keep the exact disposable test-account identity and its synthetic deletion credentials outside ephemeral browser, shell or notebook variables before creating it, until cleanup succeeds.
 
-**Why:** A browser worker reset can erase its local variables and credentials before account deletion.
+**Why:** Browser worker resets and short-lived scripts can erase local variables and synthetic credentials before account deletion.
 
-**How to apply:** Record only the synthetic account identifier in temporary test coordination, not real-user credentials or project memory. Delete only the positively identified synthetic account using the existing account-closure lifecycle; never broadly remove similarly named users.
+**How to apply:** Use a private temporary file for synthetic test identity, never project memory or real-user credentials. Confirm the deletion contract and retain a stable request ID for retries. Delete only the positively identified synthetic account using the existing account-closure lifecycle; never broadly remove similarly named users.

@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useActionAccess } from '@/hooks/useActionAccess';
 import {
   View,
   Text,
@@ -59,6 +60,7 @@ export default function ListingDetailScreen() {
   const session = useRef({ owner: user?.id, token });
   session.current = { owner: user?.id, token };
   const { districtId, lat, lng } = useLocation();
+  const ensureAccess = useActionAccess();
   const queryClient = useQueryClient();
   const { addItem, items: cartItems } = useCart();
   const [adding, setAdding] = useState(false);
@@ -81,16 +83,14 @@ export default function ListingDetailScreen() {
   const deliveryMutation = useEstimateDelivery();
 
   function handleOrder() {
-    if (!user) {
-      router.push('/auth/login');
-      return;
-    }
+    if (!ensureAccess(`/listing/${id}`)) return;
     if (!listing) return;
 
     setConfirmPurchase(true);
   }
 
   async function confirmOrder() {
+    if (!ensureAccess(`/listing/${id}`)) return;
     if (!listing || !user || !token || purchaseLock.current) return;
     const owner = user.id;
     const capturedToken = token;
@@ -119,7 +119,7 @@ export default function ListingDetailScreen() {
   }
 
   async function handleAddToCart() {
-    if (!user || !token) { router.push('/auth/login'); return; }
+    if (!ensureAccess(`/listing/${id}`, 'buyer', false) || !user || !token) return;
     if (!listing || adding) return;
     const owner = user.id, capturedToken = token;
     const current = () => session.current.owner === owner && session.current.token === capturedToken;

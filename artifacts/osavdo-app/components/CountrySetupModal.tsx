@@ -1,244 +1,74 @@
-/**
- * CountrySetupModal
- * Birinchi ishga tushganda GPS orqali mamlakatni avtomatik aniqlab beradi.
- * Mamlakatni tanlagandan so'ng til avtomatik o'zgaradi.
- */
 import React, { useState } from 'react';
-import {
-  Modal, View, Text, TouchableOpacity,
-  ActivityIndicator, StyleSheet, Platform,
-} from 'react-native';
-import * as ExpoLocation from 'expo-location';
-import { useDetectLocation, useGetCountries } from '@workspace/api-client-react';
+import { Modal, View, Text, TouchableOpacity, ScrollView, StyleSheet, ActivityIndicator } from 'react-native';
+import { useGetCountries } from '@workspace/api-client-react';
 import { useLocation } from '@/context/LocationContext';
 import { useI18n } from '@/context/I18nContext';
 import { LANGUAGE_OPTIONS, type LangCode } from '@/constants/i18n';
 import { useColors } from '@/hooks/useColors';
 
-interface Props {
-  visible: boolean;
-  onDone: () => void;
-}
-
-type Step = 'idle' | 'requesting' | 'detecting' | 'confirm' | 'pick' | 'error';
-
-interface Detected {
-  countryId: string; countryName: string; countryFlag: string;
-  currency: string; dialCode: string;
-  regionId: string; regionName: string;
-  districtId?: string; districtName?: string; distanceKm: number;
-}
-
-export function CountrySetupModal({ visible, onDone }: Props) {
+export function CountrySetupModal({ visible, onDone }: { visible: boolean; onDone: () => void }) {
   const colors = useColors();
   const { setLocation } = useLocation();
-  const { t, lang, setLang, setLangByCountry } = useI18n();
-  const [step, setStep] = useState<Step>('idle');
-  const [errorMsg, setErrorMsg] = useState('');
-  const [detected, setDetected] = useState<Detected | null>(null);
-  const [languageOverride, setLanguageOverride] = useState(false);
+  const { setLang } = useI18n();
+  const { data: countries, isLoading, isError, refetch } = useGetCountries();
+  const [country, setCountry] = useState<string | null>(null);
+  const [language, setLanguage] = useState<LangCode | null>(null);
+  const selected = countries?.find(c => c.id === country);
 
-  const { data: allCountries } = useGetCountries();
-
-  const detectMutation = useDetectLocation({
-    mutation: {
-      onSuccess: (data) => {
-        setDetected(data as Detected);
-        setStep('confirm');
-      },
-      onError: () => {
-        setStep('error');
-        setErrorMsg('Joylashuv aniqlanmadi. Davlatni qo\'lda tanlang.');
-      },
-    },
-  });
-
-  async function handleDetect() {
-    setStep('requesting');
-    setErrorMsg('');
-    try {
-      const { status } = await ExpoLocation.requestForegroundPermissionsAsync();
-      if (status !== 'granted') {
-        setStep('error');
-        setErrorMsg(t('locationPermissionDenied'));
-        return;
-      }
-      setStep('detecting');
-      const pos = await ExpoLocation.getCurrentPositionAsync({
-        accuracy: ExpoLocation.Accuracy.Balanced,
-      });
-      detectMutation.mutate({
-        data: { lat: pos.coords.latitude, lng: pos.coords.longitude },
-      });
-    } catch {
-      setStep('error');
-      setErrorMsg('GPS xatosi yuz berdi.');
-    }
-  }
-
-  function applyCountry(
-    c: { id: string; name: string; flag: string; currency: string; dialCode: string },
-    regionId?: string,
-    regionName?: string,
-    districtId?: string,
-    districtName?: string,
-  ) {
+  function continueBrowsing() {
+    if (!selected || !language) return;
     setLocation({
-      countryId: c.id,
-      countryName: c.name,
-      countryFlag: c.flag,
-      currency: c.currency,
-      regionId: regionId ?? null,
-      regionName: regionName ?? null,
-      districtId: districtId ?? null,
-      districtName: districtName ?? null,
+      countryId: selected.id, countryName: selected.name, countryFlag: selected.flag,
+      currency: selected.currency, regionId: null, regionName: null,
+      districtId: null, districtName: null, lat: null, lng: null,
     });
-    if (!languageOverride) setLangByCountry(c.id);
+    setLang(language);
     onDone();
   }
 
-  function handleConfirm() {
-    if (!detected) return;
-    applyCountry(
-      { id: detected.countryId, name: detected.countryName, flag: detected.countryFlag, currency: detected.currency, dialCode: detected.dialCode },
-      detected.regionId, detected.regionName,
-      detected.districtId, detected.districtName,
-    );
-  }
-
-  function handlePickCountry(c: { id: string; name: string; flag: string; currency: string; dialCode: string }) {
-    applyCountry(c);
-  }
-
   return (
-    <Modal visible={visible} transparent animationType="fade">
+    <Modal visible={visible} transparent animationType="fade" onRequestClose={() => {}}>
       <View style={styles.overlay}>
         <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
-
-          <Text style={styles.emoji}>🌍</Text>
-          <Text style={[styles.title, { color: colors.text }]}>{t('selectCountry')}</Text>
-          <Text style={[styles.subtitle, { color: colors.mutedForeground }]}>
-            AI GPS orqali siz turgan davlat va shaharni avtomatik topadi
+          <Text style={[styles.title, { color: colors.text }]}>Davlat va tilni tanlang</Text>
+          <Text style={[styles.help, { color: colors.mutedForeground }]}>
+            Mahsulotlarni ko‘rish uchun shu ikki tanlov kifoya. Ism, telefon va joylashuv xarid, e’lon yoki yuk tashish vaqtida so‘raladi.
           </Text>
-
-          {/* IDLE / ERROR */}
-          {(step === 'idle' || step === 'error') && (
-            <>
-              <TouchableOpacity
-                style={[styles.primaryBtn, { backgroundColor: colors.primary }]}
-                onPress={handleDetect}
-              >
-                <Text style={[styles.primaryBtnText, { color: colors.primaryForeground }]}>
-                  📍 {t('detectLocation')}
-                </Text>
-              </TouchableOpacity>
-
-              {step === 'error' && (
-                <View style={[styles.errorBox, { backgroundColor: '#ef444415', borderColor: '#ef4444' }]}>
-                  <Text style={{ color: '#ef4444', fontSize: 13, textAlign: 'center' }}>{errorMsg}</Text>
-                </View>
-              )}
-
-              <TouchableOpacity onPress={() => setStep('pick')} style={{ marginTop: 14 }}>
-                <Text style={[styles.skipText, { color: colors.primary }]}>
-                  🌐 Davlatni qo'lda tanlash
-                </Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity onPress={() => applyCountry({ id: 'uz', name: "O'zbekiston", flag: '🇺🇿', currency: 'UZS', dialCode: '+998' })}>
-                <Text style={[styles.skipText, { color: colors.mutedForeground }]}>
-                  {t('skipUz')}
-                </Text>
-              </TouchableOpacity>
-
-              <View style={styles.languageSection}>
-                <Text style={[styles.languageTitle, { color: colors.mutedForeground }]}>🌐 Til / Language</Text>
-                <View style={styles.languageGrid}>
-                  {LANGUAGE_OPTIONS.map((option) => (
-                    <TouchableOpacity
-                      key={option.code}
-                      onPress={() => {
-                        setLanguageOverride(true);
-                        setLang(option.code as LangCode);
-                      }}
-                      style={[
-                        styles.languageChip,
-                        {
-                          backgroundColor: lang === option.code ? colors.primary : colors.background,
-                          borderColor: lang === option.code ? colors.primary : colors.border,
-                        },
-                      ]}
-                    >
-                      <Text style={{ color: lang === option.code ? colors.primaryForeground : colors.text, fontSize: 12 }}>
-                        {option.flag} {option.label}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-              </View>
-            </>
-          )}
-
-          {/* LOADING */}
-          {(step === 'requesting' || step === 'detecting') && (
-            <View style={styles.loadingBox}>
-              <ActivityIndicator size="large" color={colors.primary} />
-              <Text style={[styles.loadingText, { color: colors.mutedForeground }]}>
-                {step === 'requesting' ? 'GPS ruxsati so\'ralyapti…' : t('detecting')}
-              </Text>
-            </View>
-          )}
-
-          {/* CONFIRM detected */}
-          {step === 'confirm' && detected && (
-            <View style={styles.confirmBox}>
-              <Text style={styles.detectedFlag}>{detected.countryFlag}</Text>
-              <Text style={[styles.detectedCountry, { color: colors.text }]}>{detected.countryName}</Text>
-              <Text style={[styles.detectedRegion, { color: colors.mutedForeground }]}>
-                📍 {detected.regionName}  (~{detected.distanceKm} km)
-              </Text>
-              <Text style={[styles.detectedMeta, { color: colors.mutedForeground }]}>
-                💱 {detected.currency}  ·  📞 {detected.dialCode}
-              </Text>
-
-              <TouchableOpacity
-                style={[styles.primaryBtn, { backgroundColor: colors.primary, marginTop: 20, width: '100%' }]}
-                onPress={handleConfirm}
-              >
-                <Text style={[styles.primaryBtnText, { color: colors.primaryForeground }]}>
-                  ✅ {t('correctLocation')}
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity onPress={() => setStep('idle')} style={{ marginTop: 12 }}>
-                <Text style={[styles.skipText, { color: colors.mutedForeground }]}>{t('reDetect')}</Text>
-              </TouchableOpacity>
-            </View>
-          )}
-
-          {/* MANUAL PICK */}
-          {step === 'pick' && (
-            <View style={{ width: '100%', marginTop: 8 }}>
-              {(allCountries ?? []).map((c) => (
-                <TouchableOpacity
-                  key={c.id}
-                  style={[styles.countryRow, { borderBottomColor: colors.border }]}
-                  onPress={() => handlePickCountry(c as { id: string; name: string; flag: string; currency: string; dialCode: string })}
-                >
-                  <Text style={styles.countryFlag}>{c.flag}</Text>
-                  <View style={{ flex: 1 }}>
-                    <Text style={[styles.countryName, { color: colors.text }]}>{c.name}</Text>
-                    <Text style={[styles.countryMeta, { color: colors.mutedForeground }]}>
-                      {c.dialCode} · {c.currency}
-                    </Text>
-                  </View>
+          <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
+            <Text style={[styles.label, { color: colors.text }]}>Davlat *</Text>
+            {isLoading && <ActivityIndicator color={colors.primary} />}
+            {isError && <TouchableOpacity onPress={() => { void refetch(); }}>
+              <Text style={{ color: colors.destructive }}>Davlatlar yuklanmadi. Qayta urinish</Text>
+            </TouchableOpacity>}
+            <View style={styles.grid}>
+              {(countries ?? []).map(c => (
+                <TouchableOpacity key={c.id} testID={`entry-country-${c.id}`}
+                  accessibilityRole="button" accessibilityState={{ selected: country === c.id }}
+                  onPress={() => setCountry(c.id)}
+                  style={[styles.choice, { borderColor: country === c.id ? colors.primary : colors.border,
+                    backgroundColor: country === c.id ? colors.secondary : colors.background }]}>
+                  <Text style={{ color: colors.text }}>{c.flag} {c.name}</Text>
                 </TouchableOpacity>
               ))}
-              <TouchableOpacity onPress={() => setStep('idle')} style={{ marginTop: 12, alignItems: 'center' }}>
-                <Text style={[styles.skipText, { color: colors.mutedForeground }]}>← Orqaga</Text>
-              </TouchableOpacity>
             </View>
-          )}
-
+            <Text style={[styles.label, { color: colors.text }]}>Til / Language *</Text>
+            <View style={styles.grid}>
+              {LANGUAGE_OPTIONS.map(option => (
+                <TouchableOpacity key={option.code} testID={`entry-language-${option.code}`}
+                  accessibilityRole="button" accessibilityState={{ selected: language === option.code }}
+                  onPress={() => setLanguage(option.code as LangCode)}
+                  style={[styles.choice, { borderColor: language === option.code ? colors.primary : colors.border,
+                    backgroundColor: language === option.code ? colors.secondary : colors.background }]}>
+                  <Text style={{ color: colors.text }}>{option.flag} {option.label}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </ScrollView>
+          <TouchableOpacity testID="entry-continue" accessibilityRole="button"
+            disabled={!selected || !language} onPress={continueBrowsing}
+            style={[styles.button, { backgroundColor: colors.primary, opacity: selected && language ? 1 : 0.4 }]}>
+            <Text style={{ color: colors.primaryForeground, fontFamily: 'Inter_600SemiBold' }}>Mahsulotlarni ko‘rish</Text>
+          </TouchableOpacity>
         </View>
       </View>
     </Modal>
@@ -246,41 +76,13 @@ export function CountrySetupModal({ visible, onDone }: Props) {
 }
 
 const styles = StyleSheet.create({
-  overlay: {
-    flex: 1, backgroundColor: 'rgba(0,0,0,0.55)',
-    justifyContent: 'center', alignItems: 'center', padding: 20,
-  },
-  card: {
-    width: '100%', maxWidth: 390, borderRadius: 20, borderWidth: 1,
-    padding: 24, alignItems: 'center',
-    ...Platform.select({
-      ios: { shadowColor: '#000', shadowOpacity: 0.18, shadowRadius: 16, shadowOffset: { width: 0, height: 6 } },
-      android: { elevation: 8 },
-    }),
-  },
-  emoji: { fontSize: 44, marginBottom: 6 },
-  title: { fontSize: 19, fontFamily: 'Inter_700Bold', marginBottom: 6, textAlign: 'center' },
-  subtitle: { fontSize: 13, fontFamily: 'Inter_400Regular', textAlign: 'center', lineHeight: 19, marginBottom: 20 },
-  primaryBtn: { width: '100%', paddingVertical: 14, borderRadius: 12, alignItems: 'center' },
-  primaryBtnText: { fontSize: 15, fontFamily: 'Inter_700Bold' },
-  skipText: { fontSize: 13, fontFamily: 'Inter_400Regular', marginTop: 10, textDecorationLine: 'underline', textAlign: 'center' },
-  loadingBox: { alignItems: 'center', paddingVertical: 20, gap: 14 },
-  loadingText: { fontSize: 14, fontFamily: 'Inter_400Regular', textAlign: 'center' },
-  confirmBox: { alignItems: 'center', width: '100%' },
-  detectedFlag: { fontSize: 52, marginBottom: 6 },
-  detectedCountry: { fontSize: 21, fontFamily: 'Inter_700Bold', marginBottom: 4 },
-  detectedRegion: { fontSize: 14, fontFamily: 'Inter_500Medium', marginBottom: 4 },
-  detectedMeta: { fontSize: 13, fontFamily: 'Inter_400Regular' },
-  errorBox: { width: '100%', borderWidth: 1, borderRadius: 10, padding: 12, marginTop: 12 },
-  languageSection: { width: '100%', marginTop: 18, paddingTop: 14, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: '#d1d5db' },
-  languageTitle: { fontSize: 12, fontFamily: 'Inter_600SemiBold', textAlign: 'center', marginBottom: 9 },
-  languageGrid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: 7 },
-  languageChip: { borderWidth: 1, borderRadius: 9, paddingHorizontal: 9, paddingVertical: 7 },
-  countryRow: {
-    flexDirection: 'row', alignItems: 'center', gap: 12,
-    paddingVertical: 11, borderBottomWidth: StyleSheet.hairlineWidth, width: '100%',
-  },
-  countryFlag: { fontSize: 28 },
-  countryName: { fontSize: 15, fontFamily: 'Inter_600SemiBold' },
-  countryMeta: { fontSize: 12, fontFamily: 'Inter_400Regular' },
+  overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.45)', justifyContent: 'center', padding: 20 },
+  card: { maxHeight: '88%', borderWidth: 1, borderRadius: 24, padding: 20, gap: 14 },
+  title: { fontSize: 22, fontFamily: 'Inter_700Bold' },
+  help: { fontSize: 13, lineHeight: 20 },
+  scroll: { flexShrink: 1 }, content: { gap: 12 },
+  label: { fontFamily: 'Inter_600SemiBold', fontSize: 15 },
+  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  choice: { paddingHorizontal: 12, paddingVertical: 10, borderRadius: 12, borderWidth: 1 },
+  button: { padding: 16, borderRadius: 14, alignItems: 'center' },
 });

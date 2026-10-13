@@ -1,13 +1,13 @@
 ---
 name: Single authentication form
-description: Owner's single-entry requirement and bounded GPS permission handling.
+description: Country/language-only startup, transaction-time identity/locality, remembered self-chosen code and bounded optional GPS.
 ---
 
-Keep one full entry form containing language selection, manual country selection or optional GPS permission/location selection, name, phone, and the authentication credential. Do not reintroduce a separate phone-only sign-in screen or put required entry controls only in an initial popup or second step.
+Initial entry requires only explicit country and language choices. Allow anonymous product browsing without asking for name, phone, GPS, province or district. Collect identity and locality when entering purchase, selling/ad posting or cargo actions.
 
-**Why:** The owner explicitly asked to keep the fuller registration experience and repeated that language, country or GPS, name, phone, and code must all be in the entry section itself.
+**Why:** The owner revised the earlier full-entry requirement after reporting locality-selection friction: country and language are mandatory at entry; phone, name and locality are asked before buying, selling, posting ads or cargo transport.
 
-**How to apply:** Preserve returning-account access through the same form without overwriting the stored name, role, location, or orders. GPS denial must allow manual location selection rather than block account access. Any retained password path must still verify the existing password.
+**How to apply:** Keep one real credential form for transaction-time authentication, not fake guest accounts. Preserve returning-account identity, role, locality, orders and remembered code. Gate protected actions without blocking catalogue browsing; allow manual locality if GPS fails. Country and language remain separate explicit choices; browsing locality must not overwrite account or ad locality.
 
 The owner clarified that the account holder chooses their own code; it is not an SMS-delivered code. A valid login should remain saved rather than requesting the code at every app launch.
 
@@ -19,13 +19,13 @@ Province/district selection at entry is a user-reported usability problem, not a
 
 **Why:** The owner reported that choosing province and district in the entry section causes inconvenience and asked for advice on removing that friction.
 
-**How to apply:** Discuss whether locality should be optional at entry or easier to search before changing the flow. This feedback alone does not authorize removing validation. Preserve saved account and listing localities rather than replacing them with guessed defaults.
+**How to apply:** The owner chose deferred locality collection at transaction time. Keep transaction validation intact; preserve saved account and listing localities rather than replacing them with guessed defaults.
 
-Preserve the published authentication entry appearance when changing cart, categories, or cargo.
+Do not change authentication when working on unrelated cart, category or cargo requests.
 
 **Why:** The owner clarified that only the entry screen should return to the published version, while category navigation, cart, and cargo changes must remain.
 
-**How to apply:** Keep language/manual-country selection available inside the full entry form. Do not force an additional first-install chooser to reopen on authentication routes. Keep session-expiry security and unrelated cart/cargo functionality intact.
+**How to apply:** Follow the current country/language-only initial entry scope above; do not reintroduce mandatory account/locality collection on app launch. Do not reopen a completed chooser every launch. Keep session-expiry security and unrelated cart/cargo functionality intact.
 
 Bound the entire GPS attempt, including permission acquisition and location detection, not only the final coordinate request.
 

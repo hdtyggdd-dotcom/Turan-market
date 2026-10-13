@@ -29,6 +29,7 @@ import { CargoPushListener } from '@/components/cargo/CargoNotifications';
 import React, { useEffect, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { CountrySetupModal } from '@/components/CountrySetupModal';
+import { LANGUAGE_OPTIONS } from '@/constants/i18n';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -89,17 +90,21 @@ export default function RootLayout() {
     Inter_600SemiBold,
     Inter_700Bold,
   });
-  const [showCountrySetup, setShowCountrySetup] = useState(false);
+  const [showCountrySetup, setShowCountrySetup] = useState<boolean | null>(null);
   useEffect(() => {
     if (fontsLoaded || fontError) {
       void SplashScreen.hideAsync();
-      AsyncStorage.getItem(COUNTRY_SETUP_KEY).then((done) => {
-        if (!done) setShowCountrySetup(true);
-      });
+      AsyncStorage.multiGet([COUNTRY_SETUP_KEY, 'osavdo_location', 'osavdo_lang']).then((values) => {
+        const [[, done], [, savedLocation], [, savedLanguage]] = values;
+        let country: unknown;
+        try { country = savedLocation ? JSON.parse(savedLocation).countryId : null; } catch { country = null; }
+        const selectedLanguage = LANGUAGE_OPTIONS.some(option => option.code === savedLanguage);
+        setShowCountrySetup(!done || typeof country !== 'string' || !country || !selectedLanguage);
+      }).catch(() => setShowCountrySetup(true));
     }
   }, [fontsLoaded, fontError]);
 
-  if (!fontsLoaded && !fontError) return null;
+  if ((!fontsLoaded && !fontError) || showCountrySetup === null) return null;
 
   function handleCountrySetupDone() {
     AsyncStorage.setItem(COUNTRY_SETUP_KEY, '1').catch(() => {});

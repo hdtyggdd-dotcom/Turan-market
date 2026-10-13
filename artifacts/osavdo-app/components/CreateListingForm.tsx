@@ -23,8 +23,13 @@ import { useI18n } from '@/context/I18nContext';
 import { MarketAnalysisModal } from '@/components/MarketAnalysisModal';
 import { ListingLocationFields, type ListingLocationValue } from '@/components/ListingLocationFields';
 import { formatPriceInput, normalizePriceInput } from '@/services/price-input';
+import { ActionAccessGate } from '@/components/ActionAccessGate';
 
 export function CreateListingForm({ hideHeader = false, onDone }: { hideHeader?: boolean; onDone?: () => void }) {
+  return <ActionAccessGate target="/(tabs)/create" role="seller"><CreateListingContent hideHeader={hideHeader} onDone={onDone} /></ActionAccessGate>;
+}
+
+function CreateListingContent({ hideHeader = false, onDone }: { hideHeader?: boolean; onDone?: () => void }) {
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const router = useRouter();

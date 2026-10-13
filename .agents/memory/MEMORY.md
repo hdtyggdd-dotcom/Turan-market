@@ -11,7 +11,7 @@
 - [AI advice budget policy](ai-advice-budget-policy.md) — uncertain provider failures consume allowance; cumulative global ceilings protect against new-account abuse.
 - [Mobile push runtime](mobile-push-runtime.md) — verify push support against the installed Expo SDK and native build, not general Expo Go guidance.
 - [Generated schema initialization](generated-schema-initialization.md) — generation must check runtime imports, not only types; eager schemas require initialized bounds.
-- [Single authentication form](single-authentication-form.md) — keep the full name/country/GPS/phone/password entry; do not restore a separate phone-only form.
+- [Entry and action authentication](single-authentication-form.md) — country/language-only startup; real identity and locality before transactions; preserve codes and sessions.
 - [Browser distribution](browser-distribution.md) — always-available phone access uses the published browser app; Expo Go remains a development preview.
 - [Background location runtime](background-location-runtime.md) — background GPS needs separate consent and a native build; force-quit and browser continuity cannot be promised.
 - [Local security patches](local-security-patches.md) — version-based audits still flag local fixes; verify patched behavior and never claim a clean scan.

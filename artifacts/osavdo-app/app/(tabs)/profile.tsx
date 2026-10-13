@@ -21,6 +21,7 @@ import * as Linking from 'expo-linking';
 import { getBaseUrl } from '@workspace/api-client-react';
 import { AdviceBudgetWarning } from '@/components/AdviceBudgetWarning';
 import { CargoNotifications } from '@/components/cargo/CargoNotifications';
+import { ActionAccessGate } from '@/components/ActionAccessGate';
 
 function StatBox({ label, value, colors }: { label: string; value: string | number; colors: ReturnType<typeof useColors> }) {
   return (
@@ -62,6 +63,10 @@ function BadgeDisplay({ badge, verificationStatus, colors }: {
 }
 
 export default function ProfileScreen() {
+  return <ActionAccessGate target="/(tabs)/profile" requireLocation={false}><ProfileContent /></ActionAccessGate>;
+}
+
+function ProfileContent() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const { user, signOut } = useAuth();

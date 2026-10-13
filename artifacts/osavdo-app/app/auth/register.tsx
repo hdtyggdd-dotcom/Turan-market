@@ -10,7 +10,8 @@ import { useRegister, useGetRegions, useGetDistricts, useGetCountries, getGetDis
 import * as ExpoLocation from 'expo-location';
 import * as Linking from 'expo-linking';
 import { useAuth, type UserProfile } from '@/context/AuthContext';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
+import { safeActionReturn } from '@/services/action-access';
 import { useI18n } from '@/context/I18nContext';
 import { useLocation } from '@/context/LocationContext';
 import { LANGUAGE_OPTIONS, PHONE_FORMATS, formatPhoneDigits, buildFullPhone, type LangCode } from '@/constants/i18n';
@@ -22,6 +23,7 @@ export default function RegisterScreen() {
   const insets = useSafeAreaInsets();
   const { signIn } = useAuth();
   const router = useRouter();
+  const params = useLocalSearchParams<{ returnTo?: string; role?: string }>();
   const { t, lang, setLang } = useI18n();
   const { setLocation, countryId, regionId: savedRegionId, districtId: savedDistrictId } = useLocation();
   const topPad = Platform.OS === 'web' ? 67 : insets.top;
@@ -34,7 +36,7 @@ export default function RegisterScreen() {
   const [phoneDigits, setPhoneDigits] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [role, setRole] = useState<Role>('buyer');
+  const [role, setRole] = useState<Role>(params.role === 'seller' || params.role === 'driver' ? params.role : 'buyer');
   const [regionId, setRegionId] = useState(savedRegionId ?? '');
   const [districtId, setDistrictId] = useState(savedDistrictId ?? '');
   const [showLanguagePicker, setShowLanguagePicker] = useState(false);
@@ -72,7 +74,7 @@ export default function RegisterScreen() {
     mutation: {
       onSuccess: async (data) => {
         await signIn(data.token, data.user as UserProfile);
-        router.replace(data.user.role === 'driver' ? '/driver/verification' : '/(tabs)');
+        router.replace((data.user.role === 'driver' && !params.returnTo ? '/driver/verification' : safeActionReturn(params.returnTo)) as '/(tabs)');
       },
       onError: (err: unknown) => {
         const details = (err as { data?: { error?: string; message?: string } })?.data;
@@ -340,7 +342,7 @@ export default function RegisterScreen() {
 
             <Text style={[styles.stepTitle, { color: colors.text }]}>{t('locationStep')}</Text>
             <Text style={[styles.stepSubtitle, { color: colors.mutedForeground }]}>
-              Yangi hisob uchun viloyat va tumanni tanlang. Oldingi hisobga kirishda saqlangan joylashuvingiz o‘zgarmaydi.
+              Xarid, sotish, e’lon yoki yuk tashishdan oldin ma’lumotlaringiz kerak. Oldingi hisobga kirishda saqlangan ma’lumotlar o‘zgarmaydi.
             </Text>
 
             {/* Region */}

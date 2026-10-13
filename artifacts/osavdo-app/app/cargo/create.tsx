@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { ActionAccessGate } from '@/components/ActionAccessGate';
 import {
   View,
   Text,
@@ -38,6 +39,12 @@ const cargoTypeLabels: Record<string, string> = {
 };
 
 export default function CreateCargoLoadScreen() {
+  const { orderId } = useLocalSearchParams<{ orderId?: string }>();
+  const target = orderId ? `/cargo/create?orderId=${encodeURIComponent(orderId)}` : '/cargo/create';
+  return <ActionAccessGate target={target}><CreateCargoContent /></ActionAccessGate>;
+}
+
+function CreateCargoContent() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const router = useRouter();
