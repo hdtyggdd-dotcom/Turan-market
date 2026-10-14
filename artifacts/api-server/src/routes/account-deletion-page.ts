@@ -48,4 +48,4 @@ form.addEventListener('submit',async event=>{
  }catch(error){result.textContent=(error instanceof Error?error.message:'Tarmoq xatosi.')+' Agar javob olinmagan bo‘lsa, shu so‘rovni qayta yuboring.';}
  finally{busy=false;button.disabled=false;phone.disabled=false;password.disabled=false;}
 });
-</script></main></body></html>`;
+</script></main></body></html>`.replaceAll('Cosmis', 'Cosmis Market');

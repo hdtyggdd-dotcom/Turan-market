@@ -70,3 +70,17 @@ mtime_ms = 1791824993737
 storage_uri = "gcs://replit-rams-assets-pike/rams/assets/repl:d034b3be-e147-4dab-ab59-99935cafc7da/a5e8b8ca-61d1-4cc4-9fbf-9fe22fff0dfd/052e727e-6dd9-48cf-9ef2-71e6923ab9e0"
 storage_version_token = "1791825017510661"
 content_type = "application/octet-stream"
+
+[[outputs]]
+id = "VpmB7igsQgHHPYsAefDzi"
+uri = "file://generated-artifacts/cosmis-market-play-v2/cosmis-market-play.aab"
+type = "unspecified"
+title = "Cosmis Market — Google Play uchun AAB"
+description = "Android versionCode 2. Oxirgi kirish/GPS va kategoriya o‘zgarishlari bilan yig‘ilgan, mavjud upload kaliti bilan imzolangan. Fayl tekshiruvlari muvaffaqiyatli o‘tdi; Google Play’ga hali yuklanmagan."
+logical_id = "2e31a9b6-ffae-424e-b67f-c4f090349ff0"
+content_hash = "sha256:ce653ba691799ccb6e739f00f2bc11e6a79e57e8ccc4b63e88dfdb868f41a944"
+size = 44384909
+mtime_ms = 1791946309349
+storage_uri = "gcs://replit-rams-assets-pike/rams/assets/repl:d034b3be-e147-4dab-ab59-99935cafc7da/2e31a9b6-ffae-424e-b67f-c4f090349ff0/18c8e895-0e89-4b31-9528-f2ba4876c3c1"
+storage_version_token = "1791946333413241"
+content_type = "application/octet-stream"

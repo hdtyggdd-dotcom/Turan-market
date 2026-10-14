@@ -4,8 +4,8 @@ export const APP_GUIDE_QUESTION = 'Ilova nimalar qila oladi?';
 export const APP_GUIDE_SECTIONS = [
   {
     id: 'overview',
-    title: '1. Cosmis nima?',
-    text: 'Cosmis — mahsulotlar, xizmatlar va yuk tashishni bir joyda topish uchun marketplace. Xaridor tovar izlaydi, sotuvchi e’lon beradi, yuk egasi transport izlaydi, tasdiqlangan haydovchi tashish taklifini yuboradi. AI ilovadan foydalanish va savdo bo‘yicha maslahat beradi.',
+    title: '1. Cosmis Market nima?',
+    text: 'Cosmis Market — mahsulotlar, xizmatlar va yuk tashishni bir joyda topish uchun marketplace. Xaridor tovar izlaydi, sotuvchi e’lon beradi, yuk egasi transport izlaydi, tasdiqlangan haydovchi tashish taklifini yuboradi. AI ilovadan foydalanish va savdo bo‘yicha maslahat beradi.',
   },
   {
     id: 'login',
@@ -50,7 +50,7 @@ export const APP_GUIDE_SECTIONS = [
   {
     id: 'payment',
     title: '10. To‘lov qanday ishlaydi?',
-    text: 'Hozir xaridor va sotuvchi kelishib, o‘z bank ilovalari orqali bir-biriga pul o‘tkazadi. Cosmis karta raqami, PIN, CVV yoki SMS kodini so‘ramaydi, pulni yechmaydi va bank o‘tkazmasini avtomatik tasdiqlamaydi. Buyurtma yoki “yetkazildi” holati “pul to‘landi” degani emas. Oluvchi va summani bank ilovasida tekshiring; sotuvchi pul tushganini o‘z hisobidan tekshirsin. Onlayn karta to‘lovi va avtomatik komissiya undirish yoqilmagan.',
+    text: 'Hozir xaridor va sotuvchi kelishib, o‘z bank ilovalari orqali bir-biriga pul o‘tkazadi. Cosmis Market karta raqami, PIN, CVV yoki SMS kodini so‘ramaydi, pulni yechmaydi va bank o‘tkazmasini avtomatik tasdiqlamaydi. Buyurtma yoki “yetkazildi” holati “pul to‘landi” degani emas. Oluvchi va summani bank ilovasida tekshiring; sotuvchi pul tushganini o‘z hisobidan tekshirsin. Onlayn karta to‘lovi va avtomatik komissiya undirish yoqilmagan.',
   },
   {
     id: 'cargo',
@@ -105,7 +105,7 @@ export const APP_GUIDE_SECTIONS = [
 ] as const;
 
 export const APP_GUIDE = [
-  'Cosmis — ilova imkoniyatlari va foydalanish qo‘llanmasi',
+  'Cosmis Market — ilova imkoniyatlari va foydalanish qo‘llanmasi',
   'Quyida mavjud imkoniyatlar va hali tayyor bo‘lmagan funksiyalar alohida tushuntirilgan.',
   ...APP_GUIDE_SECTIONS.map(section => `${section.title}\n${section.text}`),
 ].join('\n\n');

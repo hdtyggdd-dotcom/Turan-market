@@ -62,7 +62,7 @@ router.get("/privacy-policy", (_req, res) => {
       <p>Ushbu siyosat yangilansa, ilovada va shu sahifada yangi sana ko‘rsatiladi.</p>
     </main>
   </body>
-</html>`);
+</html>`.replaceAll('Cosmis', 'Cosmis Market'));
 });
 
 export default router;

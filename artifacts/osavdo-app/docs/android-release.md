@@ -39,7 +39,7 @@ Tayyorlangan: 2026-10-06. Bu tayyorgarlik hujjati; imzolangan AAB yaratilmadi va
 6. **Rasmli qidiruvdan e’longa o‘tish:** oynaning ko‘rinishi faol route bilan cheklangan. Tuzatishdan keyingi signed-in browser tekshiruvi test worker’i sessiyani yo‘qotgani sabab yakunlanmadi. E’lon ochilganda modal yopilishi va qaytishda o‘z-o‘zidan ochilmasligi native sinovda tasdiqlansin.
 
 ## Play Console bosqichlari
-1. Create app: Cosmis; App; Free. Ommaviy kontakt, mamlakat, maqsadli auditoriya va kategoriya egasi tomonidan tasdiqlansin. Joriy `app.json`dagi `com.cosmic.app` identifikatori saqlanadi.
+1. Create app: Cosmis Market; App; Free. Ommaviy kontakt, mamlakat, maqsadli auditoriya va kategoriya egasi tomonidan tasdiqlansin. Joriy `app.json`dagi `com.cosmic.app` identifikatori saqlanadi.
 2. Main store listing: matn, 512×512 ikonka, 1024×500 feature graphic va haqiqiy telefon skrinshotlarini yuklang.
 3. App content: privacy policy, Data safety, app access (reviewer uchun alohida test akkaunti), kontent reytingi, auditoriya, reklama va permission deklaratsiyalarini to‘ldiring. “Reklama yo‘q” faqat yakuniy build’dagi barcha SDKlar tekshirilgach belgilanadi.
 4. Internal testing’da imzolangan AAB’ni tekshiring. Target SDK, signing, native kutubxonalar va 16 KB page-size mosligini aynan yakuniy AAB’da tasdiqlang.
