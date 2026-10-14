@@ -22,6 +22,7 @@ import { getBaseUrl } from '@workspace/api-client-react';
 import { AdviceBudgetWarning } from '@/components/AdviceBudgetWarning';
 import { CargoNotifications } from '@/components/cargo/CargoNotifications';
 import { ActionAccessGate } from '@/components/ActionAccessGate';
+import { LanguagePicker } from '@/components/LanguagePicker';
 
 function StatBox({ label, value, colors }: { label: string; value: string | number; colors: ReturnType<typeof useColors> }) {
   return (
@@ -116,6 +117,7 @@ function ProfileContent() {
         contentContainerStyle={[styles.content, { paddingBottom: Platform.OS === 'web' ? 84 + 34 : 100 }]}
         showsVerticalScrollIndicator={false}
       >
+        <LanguagePicker />
         {/* Avatar + Info */}
         <View style={[styles.profileCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
           <View style={[styles.avatar, { backgroundColor: colors.primary }]}>

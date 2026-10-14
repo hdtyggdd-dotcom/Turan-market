@@ -9,6 +9,7 @@
     "build:web": "node scripts/build-web.js",
     "serve": "node server/serve.js",
     "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test:localization": "node --test scripts/ui-localization.test.cjs",
     "test:cart-resilience": "node --test context/CartContext.test.mjs",
     "check:android-preparation": "node scripts/check-android-preparation.mjs"
   },

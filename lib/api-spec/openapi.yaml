@@ -514,6 +514,26 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
 
+  /listings/translate:
+    post:
+      operationId: translateListings
+      tags: [listings]
+      summary: Translate public listing text into the selected interface language
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ListingTranslationInput"
+      responses:
+        "200":
+          description: Per-listing results; unavailable text must be labelled as original
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ListingTranslationResponse"
+        "400":
+          description: Invalid language or listing IDs
   /listings/{id}:
     get:
       operationId: getListing
@@ -1458,6 +1478,10 @@ components:
       required: [message]
       properties:
         message: { type: string, minLength: 1, maxLength: 4000 }
+        language:
+          type: string
+          enum: [uz, kz, kg, tj, tm, af, ru, cn, ir, tr, en]
+          description: Selected interface language for the AI reply; defaults to Uzbek for older clients.
         context:
           type: object
           additionalProperties: false
@@ -1803,6 +1827,38 @@ components:
         - nameRu
         - categoryId
 
+    ListingTranslationInput:
+      type: object
+      required: [listingIds, language]
+      properties:
+        listingIds:
+          type: array
+          minItems: 1
+          maxItems: 20
+          items: { type: string, minLength: 1, maxLength: 160 }
+        language:
+          type: string
+          enum: [uz, kz, kg, tj, tm, af, ru, cn, ir, tr, en]
+    ListingTranslationResponse:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/ListingTranslation"
+    ListingTranslation:
+      type: object
+      required: [id, language, status, sourceTitle, sourceDescription, title, description, translated]
+      properties:
+        id: { type: string }
+        language: { type: string }
+        status: { type: string, enum: [ready, unavailable] }
+        sourceTitle: { type: string }
+        sourceDescription: { type: string }
+        title: { type: string }
+        description: { type: string }
+        translated: { type: boolean }
     Listing:
       type: object
       properties:

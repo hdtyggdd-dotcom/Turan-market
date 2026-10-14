@@ -19,9 +19,11 @@ import { LocationPicker } from '@/components/LocationPicker';
 import { AIMaslahatModal } from '@/components/AIMaslahatModal';
 import { useLocation } from '@/context/LocationContext';
 import { useAuth } from '@/context/AuthContext';
+import { useI18n } from '@/context/I18nContext';
 
 export default function HomeScreen() {
   const colors = useColors();
+  const { ui } = useI18n();
   const insets = useSafeAreaInsets();
   const { districtName, regionName, districtId, regionId } = useLocation();
   const { user } = useAuth();
@@ -50,7 +52,7 @@ export default function HomeScreen() {
           <View>
             <Text style={[styles.appName, { color: colors.primary }]}>Cosmis Market</Text>
             <Text style={[styles.greeting, { color: colors.mutedForeground }]}>
-              Assalomu alaykum, {user?.name?.split(' ')[0] ?? 'Mehmon'}!
+              Assalomu alaykum, {user?.name?.split(' ')[0] ?? ui('Mehmon')}!
             </Text>
           </View>
           <TouchableOpacity

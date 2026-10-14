@@ -16,6 +16,8 @@ import { Feather } from '@expo/vector-icons';
 import { useColors } from '@/hooks/useColors';
 import { requestAiAdvice, ApiError } from '@workspace/api-client-react';
 import { APP_GUIDE, APP_GUIDE_QUICK_QUESTIONS, getAppGuideReply } from '@/constants/app-guide';
+import { useI18n } from '@/context/I18nContext';
+import { LocalizedText } from '@/components/LocalizedPrimitives';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -38,6 +40,7 @@ const QUICK_QUESTIONS = [
 
 export function AIMaslahatModal({ visible, onClose }: AIMaslahatModalProps) {
   const colors = useColors();
+  const { lang, ui } = useI18n();
   const insets = useSafeAreaInsets();
   const scrollRef = useRef<ScrollView>(null);
 
@@ -51,25 +54,26 @@ export function AIMaslahatModal({ visible, onClose }: AIMaslahatModalProps) {
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const sendMessage = useCallback(async (text: string) => {
+  const sendMessage = useCallback(async (text: string, quick = false) => {
     const trimmed = text.trim();
     if (!trimmed || loading) return;
+    const visibleText = quick ? ui(trimmed) : trimmed;
 
     setInput('');
     // Public product information is a labelled guide, not a paid AI fallback.
     const guideReply = getAppGuideReply(trimmed);
     if (guideReply !== null) {
-      setMessages(prev => [...prev, { role: 'user', text: trimmed },
+      setMessages(prev => [...prev, { role: 'user', text: visibleText },
         { role: 'assistant', kind: 'guide', text: guideReply }]);
       return;
     }
-    setMessages((prev) => [...prev, { role: 'user', text: trimmed }]);
+    setMessages((prev) => [...prev, { role: 'user', text: visibleText }]);
     setLoading(true);
 
     setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 100);
 
     try {
-      const data = await requestAiAdvice({ message: trimmed });
+      const data = await requestAiAdvice({ message: trimmed, language: lang });
       const reply = data.reply;
       setMessages((prev) => [...prev, { role: 'assistant', text: reply }]);
     } catch (error) {
@@ -84,7 +88,7 @@ export function AIMaslahatModal({ visible, onClose }: AIMaslahatModalProps) {
       setLoading(false);
       setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 150);
     }
-  }, [loading]);
+  }, [loading, lang, ui]);
 
   return (
     <Modal
@@ -155,12 +159,12 @@ export function AIMaslahatModal({ visible, onClose }: AIMaslahatModalProps) {
                 {msg.role === 'assistant' && (
                   <Text style={styles.aiLabel}>{msg.kind === 'guide' ? 'Ilova qo‘llanmasi' : '🤖 AI'}</Text>
                 )}
-                <Text style={[
+                <LocalizedText localize={msg.role !== 'user'} style={[
                   styles.bubbleText,
                   { color: msg.role === 'user' ? colors.primaryForeground : colors.text },
                 ]}>
                   {msg.text}
-                </Text>
+                </LocalizedText>
               </View>
             ))}
 
@@ -192,7 +196,7 @@ export function AIMaslahatModal({ visible, onClose }: AIMaslahatModalProps) {
                 <TouchableOpacity
                   key={q}
                   style={[styles.quickChip, { backgroundColor: colors.secondary, borderColor: colors.border }]}
-                  onPress={() => sendMessage(q)}
+                  onPress={() => sendMessage(q, true)}
                 >
                   <Text style={[styles.quickText, { color: colors.text }]}>{q}</Text>
                 </TouchableOpacity>

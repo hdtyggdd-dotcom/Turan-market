@@ -31,6 +31,7 @@ import { submitPurchase } from '@/services/purchase-attempt';
 import { PurchaseCargoSuggestion, type CargoPurchase } from '@/components/PurchaseCargoSuggestion';
 import { ManualPaymentNotice } from '@/components/ManualPaymentNotice';
 import { ListingImageGallery } from '@/components/ListingImageGallery';
+import { useListingTranslation } from '@/hooks/useListingTranslation';
 
 function formatPrice(price: number): string {
   return price.toLocaleString() + " so'm";
@@ -79,6 +80,9 @@ export default function ListingDetailScreen() {
   } | null>(null);
 
   const { data: listing, isLoading } = useGetListing(id);
+  const { translation, loading: translating } = useListingTranslation(listing);
+  const [showOriginal, setShowOriginal] = useState(false);
+  useEffect(() => { setShowOriginal(false); }, [id, translation?.language]);
 
   const deliveryMutation = useEstimateDelivery();
 
@@ -223,10 +227,14 @@ export default function ListingDetailScreen() {
           </Text>
 
           {/* Title */}
-          <Text style={[styles.title, { color: colors.text }]}>{listing.title}</Text>
-          {listing.titleRu && (
-            <Text style={[styles.titleRu, { color: colors.mutedForeground }]}>{listing.titleRu}</Text>
-          )}
+          <Text style={[styles.title, { color: colors.text }]}>{!showOriginal && translation ? translation.title : listing.title}</Text>
+          <Text style={{ color: colors.mutedForeground }}>
+            {translating ? 'Tarjima tayyorlanmoqda…' : translation?.translated ?
+              (showOriginal ? 'Asl matn' : 'AI tarjima') : translation ? '' : 'Tarjima mavjud emas — asl matn'}
+          </Text>
+          {translation?.translated && <TouchableOpacity onPress={() => setShowOriginal(value => !value)}>
+            <Text style={{ color: colors.primary }}>{showOriginal ? 'Tarjimani ko‘rish' : 'Asl matnni ko‘rish'}</Text>
+          </TouchableOpacity>}
 
           {/* Price */}
           <View style={styles.priceRow}>
@@ -299,7 +307,7 @@ export default function ListingDetailScreen() {
             <View style={[styles.descCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
               <Text style={[styles.descTitle, { color: colors.text }]}>Tavsif</Text>
               <Text style={[styles.descText, { color: colors.mutedForeground }]}>
-                {listing.description}
+                {!showOriginal && translation ? translation.description : listing.description}
               </Text>
             </View>
           )}

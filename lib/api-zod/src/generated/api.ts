@@ -30,6 +30,8 @@ export const deleteAccountBodyPhoneMax = 32;
 export const deleteAccountBodyPasswordMax = 256;
 export const getListingsQueryPageDefault = 1;
 export const getListingsQueryLimitDefault = 20;
+export const translateListingsBodyListingIdsItemMax = 160;
+export const translateListingsBodyListingIdsMax = 20;
 export const searchProductByPhotoBodyDataMin = 8;
 export const searchProductByPhotoBodyDataMax = 2800000;
 export const getAdviceBudgetResponseWarningThresholdPercentMax = 100;
@@ -1418,6 +1420,34 @@ export const CreateListingResponse = zod.object({
 
 
 /**
+ * @summary Translate public listing text into the selected interface language
+ */
+
+
+
+
+
+
+export const TranslateListingsBody = zod.object({
+  "listingIds": zod.array(zod.string().min(1).max(translateListingsBodyListingIdsItemMax)).min(1).max(translateListingsBodyListingIdsMax),
+  "language": zod.enum(['uz', 'kz', 'kg', 'tj', 'tm', 'af', 'ru', 'cn', 'ir', 'tr', 'en'])
+})
+
+export const TranslateListingsResponse = zod.object({
+  "items": zod.array(zod.object({
+  "id": zod.string(),
+  "language": zod.string(),
+  "status": zod.enum(['ready', 'unavailable']),
+  "sourceTitle": zod.string(),
+  "sourceDescription": zod.string(),
+  "title": zod.string(),
+  "description": zod.string(),
+  "translated": zod.boolean()
+}))
+})
+
+
+/**
  * @summary Get listing by ID
  */
 export const GetListingParams = zod.object({
@@ -1746,6 +1776,7 @@ export const AcknowledgeAdviceBudgetAlertResponse = zod.object({
 
 export const RequestAiAdviceBody = zod.object({
   "message": zod.string().min(1).max(requestAiAdviceBodyMessageMax),
+  "language": zod.enum(['uz', 'kz', 'kg', 'tj', 'tm', 'af', 'ru', 'cn', 'ir', 'tr', 'en']).optional().describe('Selected interface language for the AI reply; defaults to Uzbek for older clients.'),
   "context": zod.object({
   "category": zod.string().max(requestAiAdviceBodyContextCategoryMax).optional(),
   "region": zod.string().max(requestAiAdviceBodyContextRegionMax).optional(),

@@ -15,7 +15,8 @@ import {
   getPriceColor,
 } from "../data/store.js";
 import { authenticateToken, type AuthRequest } from "../middleware/auth.js";
-import { deleteItem, persistItem as persistListingItem } from "../lib/persistence.js";
+import { persistItem as persistListingItem } from "../lib/persistence.js";
+import { deleteListingWithTranslations } from "../lib/listing-translation.js";
 import { validateListingLocation } from "../utils/listing-location.js";
 import { scoreSearch, FUZZY_THRESHOLD } from "../utils/fuzzy.js";
 import { ensureSubcategory, findBestCategory, findSpecialSubcategory } from "../utils/autoCategory.js";
@@ -292,7 +293,7 @@ router.delete("/listings/:id", authenticateToken, async (req: AuthRequest, res) 
     return;
   }
   const listingId = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
-  await deleteItem("listings", listingId);
+  await deleteListingWithTranslations(listingId);
   listings.splice(idx, 1);
   res.status(204).send();
 });

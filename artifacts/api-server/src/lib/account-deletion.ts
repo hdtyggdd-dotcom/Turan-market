@@ -69,6 +69,10 @@ export async function eraseAccount(input: Input, expectedUserId?: string) {
     if (receipt) throw new DeletionConflict("Bu so‘rov eski akkauntga tegishli. Sahifani qayta ochib yangi so‘rov yuboring.");
     const plan = buildDeletionPlan(owner, core);
     const ownListingIds = new Set(core.filter(r => r.collection === "listings" && r.payload.userId === owner.id).map(r => r.id));
+    if (ownListingIds.size) await tx.delete(appRecords).where(and(
+      eq(appRecords.collection, 'listing_translations'),
+      inArray(sql<string>`${appRecords.payload}->>'listingId'`, [...ownListingIds]),
+    ));
     const relatedImages = await tx.select({ id: appRecords.id }).from(appRecords).where(and(eq(appRecords.collection, "images"), or(
       sql`${appRecords.payload}->>'userId' = ${owner.id}`,
       plan.imageIds.length ? inArray(appRecords.id, plan.imageIds) : sql`false`,

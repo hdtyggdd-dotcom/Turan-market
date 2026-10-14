@@ -13,7 +13,7 @@ import { ActivityIndicator } from 'react-native';
 import { useCart } from '@/context/CartContext';
 
 function NativeTabLayout() {
-  const { t } = useI18n();
+  const { t, ui } = useI18n();
 
   return (
     <NativeTabs>
@@ -23,15 +23,15 @@ function NativeTabLayout() {
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name="categories">
         <Icon sf={{ default: 'square.grid.2x2', selected: 'square.grid.2x2.fill' }} />
-        <Label>Kategoriyalar</Label>
+        <Label>{ui('Kategoriyalar')}</Label>
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name="search">
         <Icon sf={{ default: 'plus.magnifyingglass', selected: 'plus.magnifyingglass' }} />
-        <Label>Izlash / E’lon</Label>
+        <Label>{ui('Izlash / E’lon')}</Label>
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name="cart">
         <Icon sf={{ default: 'cart', selected: 'cart.fill' }} />
-        <Label>Savat</Label>
+        <Label>{ui('Savat')}</Label>
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name="profile">
         <Icon sf={{ default: 'person', selected: 'person.fill' }} />
@@ -47,7 +47,7 @@ function NativeTabLayout() {
 
 function ClassicTabLayout() {
   const colors = useColors();
-  const { t } = useI18n();
+  const { t, ui } = useI18n();
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
   const isIOS = Platform.OS === 'ios';
@@ -120,21 +120,21 @@ function ClassicTabLayout() {
       <Tabs.Screen
         name="categories"
         options={{
-          title: 'Kategoriyalar',
+          title: ui('Kategoriyalar'),
           tabBarIcon: ({ color }) => <Feather name="grid" size={22} color={color} />,
         }}
       />
       <Tabs.Screen
         name="search"
         options={{
-          title: 'Izlash / E’lon',
+          title: ui('Izlash / E’lon'),
           tabBarIcon: ({ color }) => <Feather name="plus-square" size={22} color={color} />,
         }}
       />
       <Tabs.Screen
         name="cart"
         options={{
-          title: 'Savat',
+          title: ui('Savat'),
           tabBarBadge: count > 0 ? count : undefined,
           tabBarIcon: ({ color }) => <Feather name="shopping-cart" size={22} color={color} />,
         }}

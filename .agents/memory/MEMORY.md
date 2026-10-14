@@ -28,3 +28,4 @@
 - [Expo browser preview](expo-browser-preview.md) — testers may lack the Expo hostname; use the exact workflow URL and wait for bundling.
 - [Expo workflow processes](expo-workflow-processes.md) — an old Expo child can retain the preview port while its replacement waits for input.
 - [Moderation notification privacy](moderation-notification-privacy.md) — show review outcomes in alerts; keep free-text reasons and document details inside the private application.
+- [Interface language policy](interface-language-policy.md) — selected language covers the whole UI; preserve customer text and verify actual served JavaScript after custom transforms.

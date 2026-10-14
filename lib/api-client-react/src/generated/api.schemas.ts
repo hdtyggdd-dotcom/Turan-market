@@ -337,6 +337,26 @@ export interface PhotoSearchResult {
   notifiedSellerCount: number;
 }
 
+/**
+ * Selected interface language for the AI reply; defaults to Uzbek for older clients.
+ */
+export type AiAdviceInputLanguage = typeof AiAdviceInputLanguage[keyof typeof AiAdviceInputLanguage];
+
+
+export const AiAdviceInputLanguage = {
+  uz: 'uz',
+  kz: 'kz',
+  kg: 'kg',
+  tj: 'tj',
+  tm: 'tm',
+  af: 'af',
+  ru: 'ru',
+  cn: 'cn',
+  ir: 'ir',
+  tr: 'tr',
+  en: 'en',
+} as const;
+
 export type AiAdviceInputContext = {
   /** @maxLength 200 */
   category?: string;
@@ -351,6 +371,8 @@ export interface AiAdviceInput {
      * @maxLength 4000
      */
   message: string;
+  /** Selected interface language for the AI reply; defaults to Uzbek for older clients. */
+  language?: AiAdviceInputLanguage;
   context?: AiAdviceInputContext;
 }
 
@@ -508,6 +530,57 @@ export interface Category {
   nameRu: string;
   icon: string;
   subcategories: Subcategory[];
+}
+
+export type ListingTranslationInputLanguage = typeof ListingTranslationInputLanguage[keyof typeof ListingTranslationInputLanguage];
+
+
+export const ListingTranslationInputLanguage = {
+  uz: 'uz',
+  kz: 'kz',
+  kg: 'kg',
+  tj: 'tj',
+  tm: 'tm',
+  af: 'af',
+  ru: 'ru',
+  cn: 'cn',
+  ir: 'ir',
+  tr: 'tr',
+  en: 'en',
+} as const;
+
+export interface ListingTranslationInput {
+  /**
+     * @minItems 1
+     * @maxItems 20
+     * @items.minLength 1
+     * @items.maxLength 160
+     */
+  listingIds: string[];
+  language: ListingTranslationInputLanguage;
+}
+
+export type ListingTranslationStatus = typeof ListingTranslationStatus[keyof typeof ListingTranslationStatus];
+
+
+export const ListingTranslationStatus = {
+  ready: 'ready',
+  unavailable: 'unavailable',
+} as const;
+
+export interface ListingTranslation {
+  id: string;
+  language: string;
+  status: ListingTranslationStatus;
+  sourceTitle: string;
+  sourceDescription: string;
+  title: string;
+  description: string;
+  translated: boolean;
+}
+
+export interface ListingTranslationResponse {
+  items: ListingTranslation[];
 }
 
 export type CreateListingRequestSellerType = typeof CreateListingRequestSellerType[keyof typeof CreateListingRequestSellerType];

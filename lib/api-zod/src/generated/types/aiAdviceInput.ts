@@ -6,6 +6,7 @@
  * OpenAPI spec version: 0.1.0
  */
 import type { AiAdviceInputContext } from './aiAdviceInputContext';
+import type { AiAdviceInputLanguage } from './aiAdviceInputLanguage';
 
 export interface AiAdviceInput {
   /**
@@ -13,5 +14,7 @@ export interface AiAdviceInput {
      * @maxLength 4000
      */
   message: string;
+  /** Selected interface language for the AI reply; defaults to Uzbek for older clients. */
+  language?: AiAdviceInputLanguage;
   context?: AiAdviceInputContext;
 }

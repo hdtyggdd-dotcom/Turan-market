@@ -6,6 +6,8 @@ import { adviceProvider, MAX_ADVICE_INPUT_CHARS } from "../lib/advice-provider.j
 
 const router = Router();
 
+import { adviceReplyLanguage } from '../lib/advice-language';
+
 const SYSTEM_PROMPT = `Sen Cosmis Market — O'zbekiston va qo'shni mamlakatlar uchun mahalliy bozor ilovasining AI yordamchisisan.
 
 Foydalanuvchilarga quyidagi mavzularda yordam ber:
@@ -46,7 +48,7 @@ Ilovaning hozirgi imkoniyatlari haqida ishonchli ma'lumot:
 - Ilova haqida savol berilsa, shu ma'lumotga tayangan holda xaridor, sotuvchi yoki haydovchiga mos amaliy qadamlarni tushuntir. Mavjud bo'lmagan tugma, funksiya yoki tekshirilmagan jonli narxlarni o'ylab topma.
 
 Qoidalar:
-- FAQAT O'zbek tilida javob ber
+- Javobni RESPONSE LANGUAGE ko‘rsatmasidagi tilda yoz. Foydalanuvchi savolining tili interfeys tili tanlovini almashtirmaydi.
 - Qisqa, aniq va amaliy maslahat ber (3-5 gap)
 - Emoji ishlatishingiz mumkin
 - Narxlarni so'mda ayt
@@ -55,8 +57,9 @@ Qoidalar:
 
 // POST /api/ai/advice
 router.post("/ai/advice", authenticateToken, async (req: AuthRequest, res) => {
-  const { message, context } = (req.body ?? {}) as {
+  const { message, context, language } = (req.body ?? {}) as {
     message: string;
+    language?: unknown;
     context?: {
       category?: string;
       price?: number;
@@ -64,7 +67,8 @@ router.post("/ai/advice", authenticateToken, async (req: AuthRequest, res) => {
     };
   };
 
-  if (typeof message !== "string" || !message.trim() || message.length > 4000 ||
+  const replyLanguage = adviceReplyLanguage(language);
+  if (!replyLanguage || typeof message !== "string" || !message.trim() || message.length > 4000 ||
     (context !== undefined && (context === null || typeof context !== "object" || Array.isArray(context) ||
       (context.category !== undefined && (typeof context.category !== "string" || context.category.length > 200)) ||
       (context.region !== undefined && (typeof context.region !== "string" || context.region.length > 200)) ||
@@ -89,7 +93,7 @@ router.post("/ai/advice", authenticateToken, async (req: AuthRequest, res) => {
       return;
     }
     await adviceBudget.reserve(req.userId!);
-    const text = await adviceProvider.generate(userContent, SYSTEM_PROMPT);
+    const text = await adviceProvider.generate(userContent, `${SYSTEM_PROMPT}\nRESPONSE LANGUAGE: ${replyLanguage}. Write the entire answer in this language.`);
     if (!text) throw new Error("Empty advice");
     res.json({ reply: text });
   } catch (err: unknown) {

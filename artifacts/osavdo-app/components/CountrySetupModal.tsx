@@ -139,7 +139,7 @@ export function CountrySetupModal({ visible, onDone }: { visible: boolean; onDon
               {LANGUAGE_OPTIONS.map(option => (
                 <TouchableOpacity key={option.code} testID={`entry-language-${option.code}`}
                   accessibilityRole="button" accessibilityState={{ selected: language === option.code }}
-                  disabled={saving} onPress={() => setLanguage(option.code as LangCode)}
+                  disabled={saving} onPress={() => { setLanguage(option.code as LangCode); setLang(option.code); }}
                   style={[styles.choice, { borderColor: language === option.code ? colors.primary : colors.border,
                     backgroundColor: language === option.code ? colors.secondary : colors.background }]}>
                   <Text style={{ color: colors.text }}>{option.flag} {option.label}</Text>

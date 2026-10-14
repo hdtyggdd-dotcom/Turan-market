@@ -10,10 +10,12 @@ import { useColors } from '@/hooks/useColors';
 import { Feather } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { ListingPhoto } from './ListingPhoto';
+import { useListingTranslation } from '../hooks/useListingTranslation';
 
 interface Listing {
   id: string;
   title: string;
+  description?: string | null;
   price: number;
   priceUnit?: string | null;
   images: string[];
@@ -85,6 +87,7 @@ function SellerBadge({ badge }: { badge?: 'manufacturer' | 'reseller' | null }) 
 }
 
 export function ListingCard({ listing, onOpen }: ListingCardProps) {
+  const { translation, loading } = useListingTranslation(listing);
   const colors = useColors();
   const router = useRouter();
 
@@ -128,7 +131,11 @@ export function ListingCard({ listing, onOpen }: ListingCardProps) {
           style={[styles.title, { color: colors.text }]}
           numberOfLines={2}
         >
-          {listing.title}
+          {translation?.title ?? listing.title}
+        </Text>
+        <Text style={{ color: colors.mutedForeground, fontSize: 10 }}>
+          {loading ? 'Tarjima tayyorlanmoqda…' : translation?.translated ? 'AI tarjima' :
+            translation ? '' : 'Tarjima mavjud emas — asl matn'}
         </Text>
 
         <View style={styles.priceRow}>

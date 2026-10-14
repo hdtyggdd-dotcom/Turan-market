@@ -70,6 +70,8 @@ import type {
   GetRegionsParams,
   HealthStatus,
   Listing,
+  ListingTranslationInput,
+  ListingTranslationResponse,
   ListingUpdateRequest,
   ListingsResponse,
   LoginRequest,
@@ -1854,6 +1856,94 @@ export const useCreateListing = <TError = ErrorType<ErrorResponse>,
         TContext
       > => {
       return useMutation(getCreateListingMutationOptions(options));
+    }
+
+export const getTranslateListingsUrl = () => {
+
+
+
+
+  return `/api/listings/translate`
+}
+
+/**
+ * @summary Translate public listing text into the selected interface language
+ */
+export const translateListings = async (listingTranslationInput: ListingTranslationInput, options?: Parameters<typeof customFetch>[1]): Promise<ListingTranslationResponse> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<ListingTranslationResponse>(getTranslateListingsUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(listingTranslationInput)
+  }
+);}
+
+
+
+
+
+export const getTranslateListingsMutationKey = () => ['translateListings'] as const;
+
+export const getTranslateListingsMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof translateListings>>, TError,TranslateListingsMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof translateListings>>, TError,TranslateListingsMutationVariables, TContext> => {
+
+const mutationKey = getTranslateListingsMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof translateListings>>, TranslateListingsMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  translateListings(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type TranslateListingsMutationResult = NonNullable<Awaited<ReturnType<typeof translateListings>>>
+    export type TranslateListingsMutationBody = BodyType<ListingTranslationInput>
+    export type TranslateListingsMutationError = ErrorType<void>
+    export type TranslateListingsMutationVariables = {data: BodyType<ListingTranslationInput>}
+
+    /**
+ * @summary Translate public listing text into the selected interface language
+ */
+export const useTranslateListings = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof translateListings>>, TError,TranslateListingsMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof translateListings>>,
+        TError,
+        TranslateListingsMutationVariables,
+        TContext
+      > => {
+      return useMutation(getTranslateListingsMutationOptions(options));
     }
 
 export const getGetListingUrl = (id: string,) => {

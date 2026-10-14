@@ -10,7 +10,7 @@ export const APP_GUIDE_SECTIONS = [
   {
     id: 'login',
     title: '2. Kirish, til va joylashuv',
-    text: 'Kirishda til, davlat, ism, telefon va o‘zingiz tanlagan kirish kodi/parol ishlatiladi. Joylashuvni GPS ruxsati bilan aniqlash yoki qo‘lda tanlash mumkin. Sessiya saqlanadi; chiqish, akkaunt o‘chirilishi yoki sessiya tugashi qayta kirishni talab qilishi mumkin. Bu kirish kodi SMS orqali keladigan tasdiqlash kodi emas.',
+    text: 'Kirishda faqat til va davlat tanlanadi. Davlatni GPS ruxsati bilan aniqlash yoki qo‘lda tanlash mumkin. Ism, telefon, o‘zingiz tanlagan kirish kodi va viloyat/tuman xarid, e’lon yoki yuk tashishdan oldin so‘raladi. Sessiya saqlanadi; chiqish, akkaunt o‘chirilishi yoki sessiya tugashi qayta kirishni talab qilishi mumkin. Bu kirish kodi SMS orqali keladigan tasdiqlash kodi emas.',
   },
   {
     id: 'home',

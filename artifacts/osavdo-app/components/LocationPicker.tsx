@@ -14,6 +14,7 @@ import { Feather } from '@expo/vector-icons';
 import { useColors } from '@/hooks/useColors';
 import { useGetRegions, useGetDistricts, getGetDistrictsQueryKey } from '@workspace/api-client-react';
 import { useLocation } from '@/context/LocationContext';
+import { useI18n } from '@/context/I18nContext';
 
 interface LocationPickerProps {
   visible: boolean;
@@ -22,6 +23,7 @@ interface LocationPickerProps {
 
 export function LocationPicker({ visible, onClose }: LocationPickerProps) {
   const colors = useColors();
+  const { lang } = useI18n();
   const insets = useSafeAreaInsets();
   const { setLocation, countryId } = useLocation();
   const [step, setStep] = useState<'region' | 'district'>('region');
@@ -120,10 +122,7 @@ export function LocationPicker({ visible, onClose }: LocationPickerProps) {
                   onPress={() => handleSelectRegion(item.id, item.name)}
                 >
                   <View>
-                    <Text style={[styles.itemName, { color: colors.text }]}>{item.name}</Text>
-                    <Text style={[styles.itemNameRu, { color: colors.mutedForeground }]}>
-                      {item.nameRu}
-                    </Text>
+                    <Text style={[styles.itemName, { color: colors.text }]}>{lang === 'ru' ? item.nameRu : item.name}</Text>
                   </View>
                   <Feather name="chevron-right" size={18} color={colors.mutedForeground} />
                 </TouchableOpacity>
@@ -140,10 +139,7 @@ export function LocationPicker({ visible, onClose }: LocationPickerProps) {
                   }
                 >
                   <View>
-                    <Text style={[styles.itemName, { color: colors.text }]}>{item.name}</Text>
-                    <Text style={[styles.itemNameRu, { color: colors.mutedForeground }]}>
-                      {item.nameRu}
-                    </Text>
+                    <Text style={[styles.itemName, { color: colors.text }]}>{lang === 'ru' ? item.nameRu : item.name}</Text>
                   </View>
                   <Feather name="check" size={18} color={colors.primary} />
                 </TouchableOpacity>
