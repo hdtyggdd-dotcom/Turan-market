@@ -1,4 +1,4 @@
-# Cosmis — Play Console checklist
+# Cosmis Market — Play Console checklist
 
 ## Before creating the release
 

@@ -1,8 +1,8 @@
-# Cosmis — Google Play release pack
+# Cosmis Market — Google Play release pack
 
 ## App identity
 
-- App name: **Cosmis**
+- App name: **Cosmis Market**
 - Android application ID: `com.cosmic.app` (current app.json identity; do not change during release)
 - Initial version name: `1.0.0`
 - Initial version code: `1`
@@ -16,7 +16,7 @@ Mahsulot, xizmat va yuk tashishni toping, e’lon bering va xavfsiz kelishing.
 
 ## Full description
 
-Cosmis — mahsulotlar, xizmatlar va yuk tashish xizmatlarini bir joyda topish uchun mahalliy marketplace.
+Cosmis Market — mahsulotlar, xizmatlar va yuk tashish xizmatlarini bir joyda topish uchun mahalliy marketplace.
 
 Ilovada:
 
@@ -27,7 +27,7 @@ Ilovada:
 - buyurtma holatini kuzating;
 - sotuvchi va haydovchilar haqida tasdiqlash ma’lumotlarini ko‘ring.
 
-Ilova ichida onlayn karta to‘lovlari hozircha mavjud emas. Cosmis bank karta ma’lumotlarini so‘ramaydi.
+Ilova ichida onlayn karta to‘lovlari hozircha mavjud emas. Cosmis Market bank karta ma’lumotlarini so‘ramaydi.
 
 ## Store assets still needed from the owner
 
@@ -40,7 +40,7 @@ Ilova ichida onlayn karta to‘lovlari hozircha mavjud emas. Cosmis bank karta m
 
 ## Release notes — version 1.0.0
 
-- Cosmis marketplace launch
+- Cosmis Market marketplace launch
 - Product and service listings
 - Cargo posting and driver offers
 - Order status tracking
