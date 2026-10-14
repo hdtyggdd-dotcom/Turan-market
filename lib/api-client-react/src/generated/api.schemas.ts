@@ -5,6 +5,54 @@
  * O'Savdo local marketplace API
  * OpenAPI spec version: 0.1.0
  */
+export interface AdviceBudgetCounter {
+  /** @minimum 0 */
+  used: number;
+  /** @minimum 0 */
+  limit: number;
+  /** @minimum 0 */
+  remaining: number;
+}
+
+export type AdviceBudgetAlertScope = typeof AdviceBudgetAlertScope[keyof typeof AdviceBudgetAlertScope];
+
+
+export const AdviceBudgetAlertScope = {
+  daily: 'daily',
+  total: 'total',
+} as const;
+
+export interface AdviceBudgetAlert {
+  id: string;
+  scope: AdviceBudgetAlertScope;
+  /**
+     * UTC day for daily warnings
+     * @nullable
+     */
+  day: string | null;
+  /** @minimum 0 */
+  used: number;
+  /** @minimum 0 */
+  limit: number;
+  createdAt: string;
+  /** @nullable */
+  readAt: string | null;
+}
+
+export interface AdviceBudgetStatus {
+  /** Current UTC day */
+  day: string;
+  resetsAt: string;
+  /**
+     * @minimum 1
+     * @maximum 100
+     */
+  warningThresholdPercent: number;
+  daily: AdviceBudgetCounter;
+  total: AdviceBudgetCounter;
+  alerts: AdviceBudgetAlert[];
+}
+
 export interface AccountDeletionInput {
   /**
      * @minLength 3

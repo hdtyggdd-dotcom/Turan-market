@@ -29,6 +29,7 @@ import { CargoPushListener } from '@/components/cargo/CargoNotifications';
 import React, { useEffect, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { CountrySetupModal } from '@/components/CountrySetupModal';
+import { ENTRY_SETUP_VERSION, needsEntrySetup } from '@/services/entry-setup';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -58,6 +59,7 @@ function RootLayoutNav() {
     <Stack>
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       <Stack.Screen name="subscription" options={{ headerShown: false }} />
+      <Stack.Screen name="admin/ai-budget" options={{ headerShown: true, title: 'AI maslahat budjeti' }} />
       <Stack.Screen
         name="auth/login"
         options={{ headerShown: false, animation: 'fade' }}
@@ -88,20 +90,21 @@ export default function RootLayout() {
     Inter_600SemiBold,
     Inter_700Bold,
   });
-  const [showCountrySetup, setShowCountrySetup] = useState(false);
+  const [showCountrySetup, setShowCountrySetup] = useState<boolean | null>(null);
   useEffect(() => {
     if (fontsLoaded || fontError) {
       void SplashScreen.hideAsync();
-      AsyncStorage.getItem(COUNTRY_SETUP_KEY).then((done) => {
-        if (!done) setShowCountrySetup(true);
-      });
+      AsyncStorage.multiGet([COUNTRY_SETUP_KEY, 'osavdo_location', 'osavdo_lang']).then((values) => {
+        const [[, done], [, savedLocation], [, savedLanguage]] = values;
+        setShowCountrySetup(needsEntrySetup(done, savedLocation, savedLanguage));
+      }).catch(() => setShowCountrySetup(true));
     }
   }, [fontsLoaded, fontError]);
 
-  if (!fontsLoaded && !fontError) return null;
+  if ((!fontsLoaded && !fontError) || showCountrySetup === null) return null;
 
-  function handleCountrySetupDone() {
-    AsyncStorage.setItem(COUNTRY_SETUP_KEY, '1').catch(() => {});
+  async function handleCountrySetupDone() {
+    await AsyncStorage.setItem(COUNTRY_SETUP_KEY, ENTRY_SETUP_VERSION);
     setShowCountrySetup(false);
   }
 

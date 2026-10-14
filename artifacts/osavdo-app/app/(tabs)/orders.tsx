@@ -1,4 +1,5 @@
 import React from 'react';
+import { ActionAccessGate } from '@/components/ActionAccessGate';
 import {
   View,
   Text,
@@ -119,6 +120,10 @@ function OrderCard({ order, colors, onPress }: { order: OrderItem; colors: Retur
 }
 
 export default function OrdersScreen() {
+  return <ActionAccessGate target="/(tabs)/orders" requireLocation={false}><OrdersContent /></ActionAccessGate>;
+}
+
+function OrdersContent() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const router = useRouter();

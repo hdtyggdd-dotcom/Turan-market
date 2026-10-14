@@ -22,6 +22,8 @@ import type {
 import type {
   AccountDeletionInput,
   AccountDeletionResult,
+  AdviceBudgetAlert,
+  AdviceBudgetStatus,
   AiAdviceInput,
   AuthResponse,
   CargoCounterDecisionInput,
@@ -2180,6 +2182,157 @@ export const useSearchProductByPhoto = <TError = ErrorType<void>,
         TContext
       > => {
       return useMutation(getSearchProductByPhotoMutationOptions(options));
+    }
+
+export const getGetAdviceBudgetUrl = () => {
+
+
+
+
+  return `/api/admin/ai-budget`
+}
+
+/**
+ * @summary Administrator-only global AI advice request allowance
+ */
+export const getAdviceBudget = async ( options?: Parameters<typeof customFetch>[1]): Promise<AdviceBudgetStatus> => {
+
+  return customFetch<AdviceBudgetStatus>(getGetAdviceBudgetUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetAdviceBudgetQueryKey = () => {
+    return [
+    `/api/admin/ai-budget`
+    ] as const;
+    }
+
+
+export const getGetAdviceBudgetQueryOptions = <TData = Awaited<ReturnType<typeof getAdviceBudget>>, TError = ErrorType<void>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getAdviceBudget>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetAdviceBudgetQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getAdviceBudget>>> = ({ signal }) => getAdviceBudget({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getAdviceBudget>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetAdviceBudgetQueryResult = NonNullable<Awaited<ReturnType<typeof getAdviceBudget>>>
+export type GetAdviceBudgetQueryError = ErrorType<void>
+
+
+/**
+ * @summary Administrator-only global AI advice request allowance
+ */
+
+export function useGetAdviceBudget<TData = Awaited<ReturnType<typeof getAdviceBudget>>, TError = ErrorType<void>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getAdviceBudget>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetAdviceBudgetQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getAcknowledgeAdviceBudgetAlertUrl = (id: string,) => {
+
+
+
+
+  return `/api/admin/ai-budget/alerts/${id}/read`
+}
+
+/**
+ * @summary Acknowledge a budget warning durably for the owner
+ */
+export const acknowledgeAdviceBudgetAlert = async (id: string, options?: Parameters<typeof customFetch>[1]): Promise<AdviceBudgetAlert> => {
+
+  return customFetch<AdviceBudgetAlert>(getAcknowledgeAdviceBudgetAlertUrl(id),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getAcknowledgeAdviceBudgetAlertMutationKey = () => ['acknowledgeAdviceBudgetAlert'] as const;
+
+export const getAcknowledgeAdviceBudgetAlertMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof acknowledgeAdviceBudgetAlert>>, TError,AcknowledgeAdviceBudgetAlertMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof acknowledgeAdviceBudgetAlert>>, TError,AcknowledgeAdviceBudgetAlertMutationVariables, TContext> => {
+
+const mutationKey = getAcknowledgeAdviceBudgetAlertMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof acknowledgeAdviceBudgetAlert>>, AcknowledgeAdviceBudgetAlertMutationVariables> = (props) => {
+          const {id} = props ?? {};
+
+          return  acknowledgeAdviceBudgetAlert(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AcknowledgeAdviceBudgetAlertMutationResult = NonNullable<Awaited<ReturnType<typeof acknowledgeAdviceBudgetAlert>>>
+
+    export type AcknowledgeAdviceBudgetAlertMutationError = ErrorType<void>
+    export type AcknowledgeAdviceBudgetAlertMutationVariables = {id: string}
+
+    /**
+ * @summary Acknowledge a budget warning durably for the owner
+ */
+export const useAcknowledgeAdviceBudgetAlert = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof acknowledgeAdviceBudgetAlert>>, TError,AcknowledgeAdviceBudgetAlertMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof acknowledgeAdviceBudgetAlert>>,
+        TError,
+        AcknowledgeAdviceBudgetAlertMutationVariables,
+        TContext
+      > => {
+      return useMutation(getAcknowledgeAdviceBudgetAlertMutationOptions(options));
     }
 
 export const getRequestAiAdviceUrl = () => {

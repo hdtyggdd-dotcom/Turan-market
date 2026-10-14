@@ -12,15 +12,22 @@ import { useAuth } from '@/context/AuthContext';
 import { useCart } from '@/context/CartContext';
 import { EmptyState } from '@/components/EmptyState';
 import { PurchaseCargoSuggestion, type CargoPurchase } from '@/components/PurchaseCargoSuggestion';
+import { ActionAccessGate } from '@/components/ActionAccessGate';
+import { useActionAccess } from '@/hooks/useActionAccess';
 
 const fmt = (n: number) => n.toLocaleString() + " so'm";
 
 export default function CartScreen() {
+  return <ActionAccessGate target="/(tabs)/cart" requireLocation={false}><CartContent /></ActionAccessGate>;
+}
+
+function CartContent() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const qc = useQueryClient();
   const { user, token } = useAuth();
+  const ensureAccess = useActionAccess();
   const { items, ready, syncing, error, refresh, setQuantity, removeItem, refreshItem } = useCart();
   const account = useRef(user?.id);
   account.current = user?.id;
@@ -35,6 +42,7 @@ export default function CartScreen() {
   const disabled = busy || syncing || !ready;
 
   async function checkout() {
+    if (!ensureAccess('/(tabs)/cart')) return;
     if (lock.current || disabled || !token || items.length === 0) return;
     const owner = user?.id;
     const options = { headers: { Authorization: `Bearer ${token}` } };

@@ -158,9 +158,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [queryClient]);
 
   const updateUser = useCallback(async (u: UserProfile) => {
-    await AsyncStorage.setItem(USER_KEY, JSON.stringify(u));
-    setUser(u);
-  }, []);
+    const version = sessionVersion.current;
+    const current = () => identityRef.current === u.id && sessionVersion.current === version;
+    if (!current()) return;
+    await storeSession(async () => {
+      if (current()) await AsyncStorage.setItem(USER_KEY, JSON.stringify(u));
+    });
+    if (current()) setUser(u);
+  }, [storeSession]);
 
   const finishAccountDeletion = useCallback(async () => {
     const owner = user?.id;

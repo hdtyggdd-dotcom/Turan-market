@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useActionAccess } from '@/hooks/useActionAccess';
 import {
   View,
   Text,
@@ -59,6 +60,7 @@ export default function CargoDetailScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const { user } = useAuth();
+  const ensureAccess = useActionAccess();
   const queryClient = useQueryClient();
   const { data: driverApplication } = useGetMyDriverVerification({ query: {
     queryKey: getGetMyDriverVerificationQueryKey(), enabled: user?.role === 'driver', refetchInterval: 15_000,
@@ -151,6 +153,7 @@ export default function CargoDetailScreen() {
     load.deliveryDistrictId;
   
   const handleCreateOffer = () => {
+    if (!ensureAccess(`/cargo/${id}`, 'driver')) return;
     if (!offerAmount) {
       Alert.alert("Xato", "Narxni kiriting");
       return;

@@ -32,6 +32,17 @@ export const getListingsQueryPageDefault = 1;
 export const getListingsQueryLimitDefault = 20;
 export const searchProductByPhotoBodyDataMin = 8;
 export const searchProductByPhotoBodyDataMax = 2800000;
+export const getAdviceBudgetResponseWarningThresholdPercentMax = 100;
+export const getAdviceBudgetResponseDailyUsedMin = 0;
+export const getAdviceBudgetResponseDailyLimitMin = 0;
+export const getAdviceBudgetResponseDailyRemainingMin = 0;
+export const getAdviceBudgetResponseTotalUsedMin = 0;
+export const getAdviceBudgetResponseTotalLimitMin = 0;
+export const getAdviceBudgetResponseTotalRemainingMin = 0;
+export const getAdviceBudgetResponseAlertsItemUsedMin = 0;
+export const getAdviceBudgetResponseAlertsItemLimitMin = 0;
+export const acknowledgeAdviceBudgetAlertResponseUsedMin = 0;
+export const acknowledgeAdviceBudgetAlertResponseLimitMin = 0;
 export const requestAiAdviceBodyMessageMax = 4000;
 export const requestAiAdviceBodyContextCategoryMax = 200;
 export const requestAiAdviceBodyContextRegionMax = 200;
@@ -1646,6 +1657,79 @@ export const SearchProductByPhotoResponse = zod.object({
   "unavailableCount": zod.number().int(),
   "notificationStatus": zod.enum(['not_needed', 'unrecognized', 'sent', 'already_sent', 'no_sellers']),
   "notifiedSellerCount": zod.number().int()
+})
+
+
+/**
+ * @summary Administrator-only global AI advice request allowance
+ */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+export const GetAdviceBudgetResponse = zod.object({
+  "day": zod.string().describe('Current UTC day'),
+  "resetsAt": zod.coerce.date(),
+  "warningThresholdPercent": zod.number().int().min(1).max(getAdviceBudgetResponseWarningThresholdPercentMax),
+  "daily": zod.object({
+  "used": zod.number().int().min(getAdviceBudgetResponseDailyUsedMin),
+  "limit": zod.number().int().min(getAdviceBudgetResponseDailyLimitMin),
+  "remaining": zod.number().int().min(getAdviceBudgetResponseDailyRemainingMin)
+}),
+  "total": zod.object({
+  "used": zod.number().int().min(getAdviceBudgetResponseTotalUsedMin),
+  "limit": zod.number().int().min(getAdviceBudgetResponseTotalLimitMin),
+  "remaining": zod.number().int().min(getAdviceBudgetResponseTotalRemainingMin)
+}),
+  "alerts": zod.array(zod.object({
+  "id": zod.string(),
+  "scope": zod.enum(['daily', 'total']),
+  "day": zod.string().nullable().describe('UTC day for daily warnings'),
+  "used": zod.number().int().min(getAdviceBudgetResponseAlertsItemUsedMin),
+  "limit": zod.number().int().min(getAdviceBudgetResponseAlertsItemLimitMin),
+  "createdAt": zod.coerce.date(),
+  "readAt": zod.coerce.date().nullable()
+}))
+})
+
+
+/**
+ * @summary Acknowledge a budget warning durably for the owner
+ */
+export const AcknowledgeAdviceBudgetAlertParams = zod.object({
+  "id": zod.coerce.string()
+})
+
+
+
+
+
+
+
+export const AcknowledgeAdviceBudgetAlertResponse = zod.object({
+  "id": zod.string(),
+  "scope": zod.enum(['daily', 'total']),
+  "day": zod.string().nullable().describe('UTC day for daily warnings'),
+  "used": zod.number().int().min(acknowledgeAdviceBudgetAlertResponseUsedMin),
+  "limit": zod.number().int().min(acknowledgeAdviceBudgetAlertResponseLimitMin),
+  "createdAt": zod.coerce.date(),
+  "readAt": zod.coerce.date().nullable()
 })
 
 

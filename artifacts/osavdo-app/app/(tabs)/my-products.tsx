@@ -9,7 +9,13 @@ import { useAuth } from '@/context/AuthContext';
 import { ListingCard } from '@/components/ListingCard';
 import { EmptyState } from '@/components/EmptyState';
 
+import { ActionAccessGate } from '@/components/ActionAccessGate';
+
 export default function MyProductsScreen() {
+  return <ActionAccessGate target="/(tabs)/my-products" requireLocation={false}><MyProductsContent /></ActionAccessGate>;
+}
+
+function MyProductsContent() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const router = useRouter();
