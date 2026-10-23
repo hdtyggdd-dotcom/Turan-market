@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Heart, Filter, Search, MapPin, DollarSign } from 'lucide-react';
+import { Heart, Filter, Search, MapPin } from 'lucide-react';
 
 interface SavedListing {
   id: string;
