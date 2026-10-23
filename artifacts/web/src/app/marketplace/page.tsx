@@ -63,7 +63,8 @@ const MOCK_LISTINGS: Listing[] = [
 ];
 
 export default function Marketplace() {
-  const [listings, setListings] = useState<Listing[]>(MOCK_LISTINGS);
+  const [listings, setListings] = useState<Listing[]>(MOCK_LISTINGS);const [listings, setListings] = useState<Listing[]>(MOCK_LISTINGS);
+void setListings;
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
 
   const filteredListings =
