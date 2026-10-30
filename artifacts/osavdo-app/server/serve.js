@@ -4,6 +4,8 @@
  * Serves the output of build.js (static-build/) with two special routes:
  * - GET / or /manifest with expo-platform header → platform manifest JSON
  * - GET / without expo-platform → landing page HTML
+ * - GET /manifest.json, /sw.js and PWA assets from public/
+ * - GET /icon-192.png and /icon-512.png → existing Turan Market app icon
  * Everything else falls through to static file serving from ./static-build/.
  *
  * Zero external dependencies — uses only Node.js built-ins (http, fs, path).
@@ -15,6 +17,8 @@ const path = require('path');
 
 const STATIC_ROOT = path.resolve(__dirname, '..', 'static-build');
 const WEB_ROOT = path.resolve(__dirname, '..', 'web-build');
+const PUBLIC_ROOT = path.resolve(__dirname, '..', 'public');
+const APP_ICON_PATH = path.resolve(__dirname, '..', 'assets', 'images', 'icon.png');
 const TEMPLATE_PATH = path.resolve(__dirname, 'templates', 'landing-page.html');
 const basePath = (process.env.BASE_PATH || '/').replace(/\/+$/, '');
 
@@ -67,6 +71,19 @@ function serveManifest(platform, res) {
   res.end(manifest);
 }
 
+function addPwaMarkup(html) {
+  const markup = `\n    <link rel="manifest" href="/manifest.json" />\n    <meta name="theme-color" content="#0f766e" />\n    <meta name="apple-mobile-web-app-capable" content="yes" />\n    <meta name="apple-mobile-web-app-status-bar-style" content="default" />\n`;
+  const withHead = html.includes('rel="manifest"')
+    ? html
+    : html.replace('</head>', `${markup}  </head>`);
+
+  if (withHead.includes('navigator.serviceWorker.register')) return withHead;
+  return withHead.replace(
+    '</body>',
+    `    <script>\n      if ("serviceWorker" in navigator) {\n        window.addEventListener("load", () => navigator.serviceWorker.register("/sw.js"));\n      }\n    </script>\n  </body>`,
+  );
+}
+
 function serveLandingPage(req, res, landingPageTemplate, appName) {
   const forwardedProto = req.headers['x-forwarded-proto'];
   const protocol = forwardedProto || 'https';
@@ -74,26 +91,31 @@ function serveLandingPage(req, res, landingPageTemplate, appName) {
   const baseUrl = `${protocol}://${host}`;
   const expsUrl = `${host}`;
 
-  const html = landingPageTemplate
-    .replace(/BASE_URL_PLACEHOLDER/g, baseUrl)
-    .replace(/EXPS_URL_PLACEHOLDER/g, expsUrl)
-    .replace(/APP_NAME_PLACEHOLDER/g, appName);
+  const html = addPwaMarkup(
+    landingPageTemplate
+      .replace(/BASE_URL_PLACEHOLDER/g, baseUrl)
+      .replace(/EXPS_URL_PLACEHOLDER/g, expsUrl)
+      .replace(/APP_NAME_PLACEHOLDER/g, appName),
+  );
 
   res.writeHead(200, { 'content-type': 'text/html; charset=utf-8' });
   res.end(html);
 }
 
-function serveStaticFile(urlPath, res) {
-  const safePath = path.normalize(urlPath).replace(/^(\.\.(\/|\\|$))+/, '');
-  const filePath = path.join(STATIC_ROOT, safePath);
+function safeFilePath(root, urlPath) {
+  const relativePath = path
+    .normalize(urlPath)
+    .replace(/^([.][.]([/\\]|$))+/, '');
+  const filePath = path.join(root, relativePath);
+  return filePath.startsWith(root) ? filePath : null;
+}
 
-  if (!filePath.startsWith(STATIC_ROOT)) {
-    res.writeHead(403);
-    res.end('Forbidden');
-    return;
-  }
-
-  if (!fs.existsSync(filePath) || fs.statSync(filePath).isDirectory()) {
+function serveFile(filePath, res) {
+  if (
+    !filePath ||
+    !fs.existsSync(filePath) ||
+    fs.statSync(filePath).isDirectory()
+  ) {
     res.writeHead(404);
     res.end('Not Found');
     return;
@@ -101,9 +123,16 @@ function serveStaticFile(urlPath, res) {
 
   const ext = path.extname(filePath).toLowerCase();
   const contentType = MIME_TYPES[ext] || 'application/octet-stream';
-  const content = fs.readFileSync(filePath);
   res.writeHead(200, { 'content-type': contentType });
-  res.end(content);
+  res.end(fs.readFileSync(filePath));
+}
+
+function servePublicFile(urlPath, res) {
+  serveFile(safeFilePath(PUBLIC_ROOT, urlPath), res);
+}
+
+function serveStaticFile(urlPath, res) {
+  serveFile(safeFilePath(STATIC_ROOT, urlPath), res);
 }
 
 function serveWebFile(req, res, pathname) {
@@ -171,6 +200,14 @@ const server = http.createServer((req, res) => {
     if (pathname === '/') {
       return serveLandingPage(req, res, landingPageTemplate, appName);
     }
+  }
+
+  if (pathname === '/manifest.json' || pathname === '/sw.js') {
+    return servePublicFile(pathname, res);
+  }
+
+  if (pathname === '/icon-192.png' || pathname === '/icon-512.png') {
+    return serveFile(APP_ICON_PATH, res);
   }
 
   serveStaticFile(pathname, res);

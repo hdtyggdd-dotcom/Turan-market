@@ -1,4 +1,4 @@
-name: Cosmis - Android phone test
+name: Turan Market - Android phone test
 
 on:
   workflow_dispatch:
