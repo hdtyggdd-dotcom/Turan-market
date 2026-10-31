@@ -14,10 +14,15 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import { useColors } from '@/hooks/useColors';
+import { requestAiAdvice, ApiError } from '@workspace/api-client-react';
+import { APP_GUIDE, APP_GUIDE_QUICK_QUESTIONS, getAppGuideReply } from '@/constants/app-guide';
+import { useI18n } from '@/context/I18nContext';
+import { LocalizedText } from '@/components/LocalizedPrimitives';
 
 interface Message {
   role: 'user' | 'assistant';
   text: string;
+  kind?: 'guide';
 }
 
 interface AIMaslahatModalProps {
@@ -26,6 +31,7 @@ interface AIMaslahatModalProps {
 }
 
 const QUICK_QUESTIONS = [
+  ...APP_GUIDE_QUICK_QUESTIONS,
   "Sigir narxim to'g'rimi?",
   "E'lonimni yaxshilang",
   "Tez sotish uchun nima qilish kerak?",
@@ -34,48 +40,55 @@ const QUICK_QUESTIONS = [
 
 export function AIMaslahatModal({ visible, onClose }: AIMaslahatModalProps) {
   const colors = useColors();
+  const { lang, ui } = useI18n();
   const insets = useSafeAreaInsets();
   const scrollRef = useRef<ScrollView>(null);
 
   const [messages, setMessages] = useState<Message[]>([
     {
       role: 'assistant',
-      text: "Salom! Men O'Savdo AI yordamchisiman 🤖\n\nSizga narx, e'lon tavsifi, sotish strategiyasi yoki boshqa savollarda yordam bera olaman. Nima so'rashni istaysiz?",
+      kind: 'guide',
+      text: APP_GUIDE,
     },
   ]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const sendMessage = useCallback(async (text: string) => {
+  const sendMessage = useCallback(async (text: string, quick = false) => {
     const trimmed = text.trim();
     if (!trimmed || loading) return;
+    const visibleText = quick ? ui(trimmed) : trimmed;
 
     setInput('');
-    setMessages((prev) => [...prev, { role: 'user', text: trimmed }]);
+    // Public product information is a labelled guide, not a paid AI fallback.
+    const guideReply = getAppGuideReply(trimmed);
+    if (guideReply !== null) {
+      setMessages(prev => [...prev, { role: 'user', text: visibleText },
+        { role: 'assistant', kind: 'guide', text: guideReply }]);
+      return;
+    }
+    setMessages((prev) => [...prev, { role: 'user', text: visibleText }]);
     setLoading(true);
 
     setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 100);
 
     try {
-      const baseUrl = `https://${process.env.EXPO_PUBLIC_DOMAIN}`;
-      const res = await fetch(`${baseUrl}/api/ai/advice`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: trimmed }),
-      });
-      const data = await res.json();
-      const reply: string = data.reply ?? data.error ?? 'Xatolik yuz berdi';
+      const data = await requestAiAdvice({ message: trimmed, language: lang });
+      const reply = data.reply;
       setMessages((prev) => [...prev, { role: 'assistant', text: reply }]);
-    } catch {
+    } catch (error) {
+      const detail = error instanceof ApiError ? error.data as { message?: string } | null : null;
       setMessages((prev) => [
         ...prev,
-        { role: 'assistant', text: "❌ Tarmoq xatoligi. Internet aloqasini tekshiring." },
+        { role: 'assistant', text: (error instanceof ApiError && error.status === 401
+          ? "AI maslahat olish uchun akkauntingizga kiring."
+          : detail?.message ?? "Tarmoq yoki AI xatoligi. Birozdan keyin qayta urinib ko‘ring.") },
       ]);
     } finally {
       setLoading(false);
       setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 150);
     }
-  }, [loading]);
+  }, [loading, lang, ui]);
 
   return (
     <Modal
@@ -110,13 +123,28 @@ export function AIMaslahatModal({ visible, onClose }: AIMaslahatModalProps) {
             </TouchableOpacity>
           </View>
 
+          <TouchableOpacity
+            style={[styles.guideShortcut, { backgroundColor: colors.card, borderBottomColor: colors.border }]}
+            onPress={() => scrollRef.current?.scrollTo({ y: 0, animated: true })}
+            accessibilityRole="button"
+            accessibilityLabel="Ilovaning barcha imkoniyatlari qo‘llanmasini ochish"
+            testID="open-app-guide"
+          >
+            <Feather name="book-open" size={16} color={colors.primary} />
+            <Text style={[styles.guideShortcutText, { color: colors.primary }]}>
+              Ilova qo‘llanmasi: barcha imkoniyatlar
+            </Text>
+          </TouchableOpacity>
+
           {/* Messages */}
           <ScrollView
             ref={scrollRef}
             style={{ flex: 1 }}
             contentContainerStyle={[styles.msgList, { paddingBottom: 12 }]}
             keyboardShouldPersistTaps="handled"
-            onContentSizeChange={() => scrollRef.current?.scrollToEnd({ animated: false })}
+            onContentSizeChange={() => {
+              if (messages.length > 1) scrollRef.current?.scrollToEnd({ animated: false });
+            }}
           >
             {messages.map((msg, i) => (
               <View
@@ -129,14 +157,14 @@ export function AIMaslahatModal({ visible, onClose }: AIMaslahatModalProps) {
                 ]}
               >
                 {msg.role === 'assistant' && (
-                  <Text style={styles.aiLabel}>🤖 AI</Text>
+                  <Text style={styles.aiLabel}>{msg.kind === 'guide' ? 'Ilova qo‘llanmasi' : '🤖 AI'}</Text>
                 )}
-                <Text style={[
+                <LocalizedText localize={msg.role !== 'user'} style={[
                   styles.bubbleText,
                   { color: msg.role === 'user' ? colors.primaryForeground : colors.text },
                 ]}>
                   {msg.text}
-                </Text>
+                </LocalizedText>
               </View>
             ))}
 
@@ -168,7 +196,7 @@ export function AIMaslahatModal({ visible, onClose }: AIMaslahatModalProps) {
                 <TouchableOpacity
                   key={q}
                   style={[styles.quickChip, { backgroundColor: colors.secondary, borderColor: colors.border }]}
-                  onPress={() => sendMessage(q)}
+                  onPress={() => sendMessage(q, true)}
                 >
                   <Text style={[styles.quickText, { color: colors.text }]}>{q}</Text>
                 </TouchableOpacity>
@@ -190,10 +218,10 @@ export function AIMaslahatModal({ visible, onClose }: AIMaslahatModalProps) {
               }]}
               placeholder="Savolingizni yozing..."
               placeholderTextColor={colors.mutedForeground}
-              value={input}
+                value={input}
+                maxLength={4000}
               onChangeText={setInput}
               multiline
-              maxLength={500}
               returnKeyType="send"
               onSubmitEditing={() => sendMessage(input)}
             />
@@ -218,6 +246,15 @@ export function AIMaslahatModal({ visible, onClose }: AIMaslahatModalProps) {
 }
 
 const styles = StyleSheet.create({
+  guideShortcut: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+  },
+  guideShortcutText: { fontSize: 12, fontFamily: 'Inter_500Medium' },
   container: { flex: 1 },
   header: {
     flexDirection: 'row',

@@ -1,0 +1,31 @@
+- [Cargo privacy boundary](cargo-privacy-boundary.md) — reveal exact addresses and personal profile locality only after a transport offer is accepted.
+- [Account closure policy](account-closure-policy.md) — erase contacts and revoke sessions while preserving anonymous third-party receipts; active commitments block closure.
+- [Operational driver trust](operational-driver-trust.md) — cargo bidding requires approved identity and verified real vehicle data, not a self-selected driver role.
+- [Cargo negotiation integrity](cargo-negotiation-integrity.md) — a shipper counter becomes the payable amount only after the offering driver accepts it.
+- [Payment scope](payment-scope.md) — payments stay disabled; preserve confirmed free access, household-service pricing, and increasing seller commission terms.
+- [Cart retry integrity](cart-retry-integrity.md) — uncertain checkout responses must keep the original request identity; removing and re-adding can duplicate an order.
+- [Special goods taxonomy](special-goods-taxonomy.md) — damaged and promotional goods are sibling subcategories under one parent, not separate categories.
+- [Retail category scope](retail-category-scope.md) — food and clothing are separate categories; men's, women's, children's and workwear stay under clothing.
+- [AI advice billing](ai-advice-billing.md) — use owner-provided Anthropic access; do not switch advice to Replit credit billing without an explicit request.
+- [AI product guidance](ai-product-guidance.md) — AI maslahat must explain app capabilities and usage to customers, not only market advice.
+- [Photo product search](photo-product-search.md) — customers photograph products for AI lookup; unavailable products should trigger a relevant entrepreneur alert.
+- [AI advice budget policy](ai-advice-budget-policy.md) — uncertain provider failures consume allowance; cumulative global ceilings protect against new-account abuse.
+- [Mobile push runtime](mobile-push-runtime.md) — verify push support against the installed Expo SDK and native build, not general Expo Go guidance.
+- [Generated schema initialization](generated-schema-initialization.md) — generation must check runtime imports, not only types; eager schemas require initialized bounds.
+- [Entry and action authentication](single-authentication-form.md) — country/language-only startup; real identity and locality before transactions; preserve codes and sessions.
+- [Browser distribution](browser-distribution.md) — always-available phone access uses the published browser app; Expo Go remains a development preview.
+- [Background location runtime](background-location-runtime.md) — background GPS needs separate consent and a native build; force-quit and browser continuity cannot be promised.
+- [Local security patches](local-security-patches.md) — version-based audits still flag local fixes; verify patched behavior and never claim a clean scan.
+- [Home and category navigation](home-catalog-navigation.md) — category browsing belongs under Kategoriyalar; home displays products and ads without a category grid.
+- [Post-purchase cargo](post-purchase-cargo.md) — automatically suggest cargo after buying; do not book transport or invent shipment measurements.
+- [RevenueCat sandbox](revenuecat-sandbox.md) — keep provider subscriptions test-only; generic projects may lack a Test Store, and the USD sample is not live pricing.
+- [Android cloud release](android-cloud-release.md) — approve source visibility before export; cloud test APK is not a signed Play AAB or a completed release.
+- [Administrative location integrity](administrative-location-integrity.md) — preserve historical IDs when fixing choices; unknown coordinates must not become invented distances or prices.
+- [Brand identity compatibility](brand-identity-compatibility.md) — Cosmis Market is the confirmed display name; retain historical internal identifiers for upgrades, links and saved state.
+- [Listing location policy](listing-location-policy.md) — offer explicit GPS or manual ad locality; do not change the account or browsing location.
+- [Native handoff verification](native-handoff-testing.md) — bound headless dialer checks; preserve synthetic account identity outside the browser until cleanup.
+- [Android signing custody](android-signing-custody.md) — public builds export only sealed key material; retain signing identity and verify the real bundle before calling it ready.
+- [Expo browser preview](expo-browser-preview.md) — testers may lack the Expo hostname; use the exact workflow URL and wait for bundling.
+- [Expo workflow processes](expo-workflow-processes.md) — an old Expo child can retain the preview port while its replacement waits for input.
+- [Moderation notification privacy](moderation-notification-privacy.md) — show review outcomes in alerts; keep free-text reasons and document details inside the private application.
+- [Interface language policy](interface-language-policy.md) — selected language covers the whole UI; preserve customer text and verify actual served JavaScript after custom transforms.

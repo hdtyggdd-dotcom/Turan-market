@@ -13,10 +13,16 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import { useColors } from '@/hooks/useColors';
 import { useAuth } from '@/context/AuthContext';
-import { useGetUserListings } from '@workspace/api-client-react';
+import { useGetUserListings, getGetUserListingsQueryKey } from '@workspace/api-client-react';
 import { ListingCard } from '@/components/ListingCard';
 import { EmptyState } from '@/components/EmptyState';
 import { useRouter } from 'expo-router';
+import * as Linking from 'expo-linking';
+import { getBaseUrl } from '@workspace/api-client-react';
+import { AdviceBudgetWarning } from '@/components/AdviceBudgetWarning';
+import { CargoNotifications } from '@/components/cargo/CargoNotifications';
+import { ActionAccessGate } from '@/components/ActionAccessGate';
+import { LanguagePicker } from '@/components/LanguagePicker';
 
 function StatBox({ label, value, colors }: { label: string; value: string | number; colors: ReturnType<typeof useColors> }) {
   return (
@@ -58,6 +64,10 @@ function BadgeDisplay({ badge, verificationStatus, colors }: {
 }
 
 export default function ProfileScreen() {
+  return <ActionAccessGate target="/(tabs)/profile" requireLocation={false}><ProfileContent /></ActionAccessGate>;
+}
+
+function ProfileContent() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const { user, signOut } = useAuth();
@@ -65,19 +75,27 @@ export default function ProfileScreen() {
   const topPadding = Platform.OS === 'web' ? 67 : insets.top;
 
   const { data: myListings } = useGetUserListings(user?.id ?? '', {
-    query: { enabled: !!user?.id },
+    query: { enabled: !!user?.id, queryKey: getGetUserListingsQueryKey(user?.id ?? '') },
   });
 
+  async function confirmSignOut() {
+    const signedOut = await signOut();
+    if (signedOut) router.replace('/auth/login');
+  }
+
   function handleSignOut() {
+    if (Platform.OS === 'web') {
+      if (typeof window !== 'undefined' && window.confirm('Rostdan ham hisobdan chiqmoqchimisiz?')) {
+        void confirmSignOut();
+      }
+      return;
+    }
     Alert.alert("Chiqish", "Rostdan ham chiqmoqchimisiz?", [
       { text: "Bekor qilish", style: "cancel" },
       {
         text: "Chiqish",
         style: "destructive",
-        onPress: async () => {
-          await signOut();
-          router.replace('/auth/login');
-        },
+        onPress: () => { void confirmSignOut(); },
       },
     ]);
   }
@@ -99,6 +117,7 @@ export default function ProfileScreen() {
         contentContainerStyle={[styles.content, { paddingBottom: Platform.OS === 'web' ? 84 + 34 : 100 }]}
         showsVerticalScrollIndicator={false}
       >
+        <LanguagePicker />
         {/* Avatar + Info */}
         <View style={[styles.profileCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
           <View style={[styles.avatar, { backgroundColor: colors.primary }]}>
@@ -124,6 +143,42 @@ export default function ProfileScreen() {
           </View>
         )}
 
+        {user.role === 'driver' && (
+          <>
+            <TouchableOpacity
+              onPress={() => router.push('/driver/verification')}
+              style={[styles.section, { backgroundColor: colors.card, borderColor: colors.border, flexDirection: 'row', alignItems: 'center', gap: 12 }]}
+            >
+              <Feather name="shield" size={18} color={colors.primary} />
+              <Text style={{ flex: 1, color: colors.text, fontFamily: 'Inter_600SemiBold' }}>Transport va hujjatlar tekshiruvi</Text>
+              <Feather name="chevron-right" size={18} color={colors.mutedForeground} />
+            </TouchableOpacity>
+          </>
+        )}
+        {user.role === 'admin' && (
+          <TouchableOpacity
+            onPress={() => router.push('/admin/drivers')}
+            style={[styles.section, { backgroundColor: colors.card, borderColor: colors.border, flexDirection: 'row', alignItems: 'center', gap: 12 }]}
+          >
+            <Feather name="clipboard" size={18} color={colors.primary} />
+            <Text style={{ flex: 1, color: colors.text, fontFamily: 'Inter_600SemiBold' }}>Haydovchi arizalari</Text>
+            <Feather name="chevron-right" size={18} color={colors.mutedForeground} />
+          </TouchableOpacity>
+        )}
+
+        {user.role === 'admin' && <AdviceBudgetWarning />}
+        {user.role === 'admin' && (
+          <TouchableOpacity
+            onPress={() => router.push('/admin/ai-budget' as never)}
+            style={[styles.section, { backgroundColor: colors.card, borderColor: colors.border, flexDirection: 'row', alignItems: 'center', gap: 12 }]}
+            testID="open-ai-budget"
+          >
+            <Feather name="cpu" size={18} color={colors.primary} />
+            <Text style={{ flex: 1, color: colors.text, fontFamily: 'Inter_600SemiBold' }}>AI maslahat budjeti</Text>
+            <Feather name="chevron-right" size={18} color={colors.mutedForeground} />
+          </TouchableOpacity>
+        )}
+
         {/* Location */}
         {(user.region || user.district) && (
           <View style={[styles.section, { backgroundColor: colors.card, borderColor: colors.border }]}>
@@ -135,6 +190,95 @@ export default function ProfileScreen() {
             </View>
           </View>
         )}
+
+        <TouchableOpacity
+          style={[styles.ordersBtn, { backgroundColor: colors.card, borderColor: colors.border }]}
+          onPress={() => router.push('/(tabs)/my-products')}
+          testID="open-my-products"
+        >
+          <View style={styles.ordersBtnLeft}>
+            <View style={[styles.ordersBtnIcon, { backgroundColor: colors.primary + '15' }]}>
+              <Feather name="package" size={20} color={colors.primary} />
+            </View>
+            <Text style={[styles.ordersBtnText, { color: colors.text }]}>Mahsulotlarim</Text>
+          </View>
+          <Feather name="chevron-right" size={20} color={colors.mutedForeground} />
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[styles.ordersBtn, { backgroundColor: colors.card, borderColor: colors.border }]}
+          onPress={() => router.push('/(tabs)/cargo')}
+          testID="open-cargo"
+        >
+          <View style={styles.ordersBtnLeft}>
+            <View style={[styles.ordersBtnIcon, { backgroundColor: colors.primary + '15' }]}>
+              <Feather name="truck" size={20} color={colors.primary} />
+            </View>
+            <Text style={[styles.ordersBtnText, { color: colors.text }]}>Cargo</Text>
+          </View>
+          <Feather name="chevron-right" size={20} color={colors.mutedForeground} />
+        </TouchableOpacity>
+
+        {user.role === 'seller' && (
+          <TouchableOpacity
+            style={[styles.ordersBtn, { backgroundColor: colors.card, borderColor: colors.border }]}
+            onPress={() => router.push('/subscription' as never)}
+            testID="open-subscription"
+            accessibilityRole="button"
+            accessibilityLabel="Ustalar obunasi (sinov)"
+          >
+            <View style={styles.ordersBtnLeft}>
+              <View style={[styles.ordersBtnIcon, { backgroundColor: colors.primary + '15' }]}>
+                <Feather name="award" size={20} color={colors.primary} />
+              </View>
+              <Text style={[styles.ordersBtnText, { color: colors.text }]}>Ustalar obunasi (sinov)</Text>
+            </View>
+            <Feather name="chevron-right" size={20} color={colors.mutedForeground} />
+          </TouchableOpacity>
+        )}
+
+        {/* Orders Link */}
+        <TouchableOpacity
+          style={[styles.ordersBtn, { backgroundColor: colors.card, borderColor: colors.border }]}
+          onPress={() => router.push('/(tabs)/orders')}
+        >
+          <View style={styles.ordersBtnLeft}>
+            <View style={[styles.ordersBtnIcon, { backgroundColor: colors.primary + '15' }]}>
+              <Feather name="shopping-bag" size={20} color={colors.primary} />
+            </View>
+            <Text style={[styles.ordersBtnText, { color: colors.text }]}>Mening buyurtmalarim</Text>
+          </View>
+          <Feather name="chevron-right" size={20} color={colors.mutedForeground} />
+        </TouchableOpacity>
+
+        <CargoNotifications scope="all" />
+
+        <TouchableOpacity
+          style={[styles.ordersBtn, { backgroundColor: colors.card, borderColor: colors.border }]}
+          onPress={() => { void Linking.openURL(`${getBaseUrl()}/api/privacy-policy`); }}
+        >
+          <View style={styles.ordersBtnLeft}>
+            <View style={[styles.ordersBtnIcon, { backgroundColor: colors.primary + '15' }]}>
+              <Feather name="shield" size={20} color={colors.primary} />
+            </View>
+            <Text style={[styles.ordersBtnText, { color: colors.text }]}>Maxfiylik siyosati</Text>
+          </View>
+          <Feather name="external-link" size={20} color={colors.mutedForeground} />
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[styles.ordersBtn, { backgroundColor: colors.card, borderColor: colors.destructive + '60' }]}
+          onPress={() => router.push('/delete-account' as never)}
+          testID="open-delete-account"
+        >
+          <View style={styles.ordersBtnLeft}>
+            <View style={[styles.ordersBtnIcon, { backgroundColor: colors.destructive + '15' }]}>
+              <Feather name="trash-2" size={20} color={colors.destructive} />
+            </View>
+            <Text style={[styles.ordersBtnText, { color: colors.destructive }]}>Hisobni o'chirish</Text>
+          </View>
+          <Feather name="chevron-right" size={20} color={colors.mutedForeground} />
+        </TouchableOpacity>
 
         {/* Stats */}
         {user.role === 'seller' && (
@@ -155,7 +299,7 @@ export default function ProfileScreen() {
                 title="E'lonlar yo'q"
                 subtitle="Birinchi e'loningizni joylang!"
                 actionLabel="E'lon joylash"
-                onAction={() => router.push('/(tabs)/create')}
+                onAction={() => router.push({ pathname: '/(tabs)/search', params: { mode: 'post' } })}
               />
             ) : (
               <View style={styles.listingsGrid}>
@@ -285,6 +429,30 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     borderWidth: 1,
     gap: 4,
+  },
+  ordersBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: 12,
+    borderRadius: 14,
+    borderWidth: 1,
+  },
+  ordersBtnLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  ordersBtnIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  ordersBtnText: {
+    fontSize: 16,
+    fontFamily: 'Inter_600SemiBold',
   },
   statValue: {
     fontSize: 20,

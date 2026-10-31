@@ -1,17 +1,20 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity,
-  StyleSheet, ActivityIndicator, Alert, Platform, ScrollView,
+  StyleSheet, ActivityIndicator, Platform, ScrollView,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import { useColors } from '@/hooks/useColors';
-import { useRegister, useGetRegions, useGetDistricts, useGetCountries } from '@workspace/api-client-react';
+import { useRegister, useGetRegions, useGetDistricts, useGetCountries, getGetDistrictsQueryKey, useDetectLocation, getBaseUrl } from '@workspace/api-client-react';
+import * as ExpoLocation from 'expo-location';
+import * as Linking from 'expo-linking';
 import { useAuth, type UserProfile } from '@/context/AuthContext';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
+import { safeActionReturn } from '@/services/action-access';
 import { useI18n } from '@/context/I18nContext';
 import { useLocation } from '@/context/LocationContext';
-import { PHONE_FORMATS, buildFullPhone, type LangCode } from '@/constants/i18n';
+import { LANGUAGE_OPTIONS, PHONE_FORMATS, formatPhoneDigits, buildFullPhone, type LangCode } from '@/constants/i18n';
 
 type Role = 'buyer' | 'seller' | 'driver';
 
@@ -20,8 +23,9 @@ export default function RegisterScreen() {
   const insets = useSafeAreaInsets();
   const { signIn } = useAuth();
   const router = useRouter();
-  const { t, setLangByCountry } = useI18n();
-  const { setLocation, countryId } = useLocation();
+  const params = useLocalSearchParams<{ returnTo?: string; role?: string }>();
+  const { t, lang, setLang } = useI18n();
+  const { setLocation, countryId, regionId: savedRegionId, districtId: savedDistrictId } = useLocation();
   const topPad = Platform.OS === 'web' ? 67 : insets.top;
   const botPad = Platform.OS === 'web' ? 34 : insets.bottom;
 
@@ -32,17 +36,30 @@ export default function RegisterScreen() {
   const [phoneDigits, setPhoneDigits] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [role, setRole] = useState<Role>('buyer');
-  const [regionId, setRegionId] = useState('');
-  const [districtId, setDistrictId] = useState('');
-  const [step, setStep] = useState<1 | 2>(1);
+  const [role, setRole] = useState<Role>(params.role === 'seller' || params.role === 'driver' ? params.role : 'buyer');
+  const [regionId, setRegionId] = useState(savedRegionId ?? '');
+  const [districtId, setDistrictId] = useState(savedDistrictId ?? '');
+  const [showLanguagePicker, setShowLanguagePicker] = useState(false);
   const [showCountryPicker, setShowCountryPicker] = useState(false);
+  const [isDetecting, setIsDetecting] = useState(false);
+  const [gpsNotice, setGpsNotice] = useState('');
+  const [formError, setFormError] = useState('');
+  const detectLocation = useDetectLocation();
+
+  useEffect(() => {
+    if (savedRegionId) setRegionId(savedRegionId);
+    if (savedDistrictId) setDistrictId(savedDistrictId);
+  }, [savedRegionId, savedDistrictId]);
+
+  useEffect(() => {
+    if (regionId && selectedCountryId !== 'uz' && !districtId) setDistrictId(regionId);
+  }, [regionId, selectedCountryId, districtId]);
 
   const { data: countries } = useGetCountries();
   const { data: regions } = useGetRegions({ countryId: selectedCountryId });
   const { data: districts } = useGetDistricts(
     { regionId: regionId || undefined },
-    { query: { enabled: !!regionId } },
+    { query: { enabled: !!regionId, queryKey: getGetDistrictsQueryKey({ regionId: regionId || undefined }) } },
   );
 
   const selectedCountry = countries?.find(c => c.id === selectedCountryId);
@@ -57,11 +74,15 @@ export default function RegisterScreen() {
     mutation: {
       onSuccess: async (data) => {
         await signIn(data.token, data.user as UserProfile);
-        router.replace('/(tabs)');
+        router.replace((data.user.role === 'driver' && !params.returnTo ? '/driver/verification' : safeActionReturn(params.returnTo)) as '/(tabs)');
       },
       onError: (err: unknown) => {
-        const message = (err as { data?: { message?: string } })?.data?.message ?? 'Xato yuz berdi';
-        Alert.alert('Xato', message);
+        const details = (err as { data?: { error?: string; message?: string } })?.data;
+        if (details?.error === 'location_required') {
+          setFormError(details.message ?? t('selectRegion'));
+          return;
+        }
+        setFormError(details?.message ?? 'Kirish amalga oshmadi. Internetni tekshirib, qayta urinib ko‘ring.');
       },
     },
   });
@@ -72,30 +93,83 @@ export default function RegisterScreen() {
   }
 
   function handleNext() {
-    if (!name.trim())          { Alert.alert('Xato', t('enterName'));        return; }
-    if (!phoneDigits.trim())   { Alert.alert('Xato', t('enterPhone'));       return; }
-    if (password.length < 6)   { Alert.alert('Xato', t('passwordTooShort')); return; }
-    setStep(2);
+    setFormError('');
+    if (!name.trim())          { setFormError(t('enterName')); return; }
+    if (phoneDigits.length !== fmt.maxDigits) { setFormError(t('enterPhone')); return; }
+    if (password.length < 6)   { setFormError(t('passwordTooShort')); return; }
+    handleRegister();
   }
 
   function handleRegister() {
-    if (!regionId || !districtId) {
-      Alert.alert('Xato', t('selectRegion'));
-      return;
-    }
     const fullPhone = buildFullPhone(fmt.dialCode, phoneDigits);
     registerMutation.mutate({
-      data: { name: name.trim(), phone: fullPhone, password, role, regionId, districtId },
+      data: { name: name.trim(), phone: fullPhone, password, role, signInExisting: true, regionId: regionId || undefined, districtId: districtId || undefined },
     });
   }
 
   function handleSelectCountry(c: { id: string; name: string; flag: string; currency: string; dialCode: string }) {
-    setLocation({ countryId: c.id, countryName: c.name, countryFlag: c.flag, currency: c.currency });
-    setLangByCountry(c.id);
+    setLocation({ countryId: c.id, countryName: c.name, countryFlag: c.flag, currency: c.currency, regionId: null, regionName: null, districtId: null, districtName: null, lat: null, lng: null });
     setPhoneDigits('');
     setRegionId('');
     setDistrictId('');
+    setGpsNotice('');
     setShowCountryPicker(false);
+  }
+
+  async function handleGps() {
+    setIsDetecting(true);
+    setGpsNotice('');
+    let gpsTimeout: ReturnType<typeof setTimeout> | undefined;
+    try {
+      const detect = async () => {
+        let coords: { latitude: number; longitude: number };
+        if (Platform.OS === 'web') {
+          // Browser permission requests also acquire a fix; Expo's separate
+          // web permission probe can wait forever before a position timeout.
+          coords = await new Promise<{ latitude: number; longitude: number }>((resolve, reject) => {
+            if (typeof navigator === 'undefined' || !navigator.geolocation) {
+              reject(new Error('GPS_UNAVAILABLE'));
+              return;
+            }
+            navigator.geolocation.getCurrentPosition(
+              (position) => resolve(position.coords),
+              (error) => reject(new Error(error.code === 1 ? 'GPS_PERMISSION_DENIED' : 'GPS_UNAVAILABLE')),
+              { enableHighAccuracy: false, timeout: 15_000, maximumAge: 60_000 },
+            );
+          });
+        } else {
+          const permission = await ExpoLocation.requestForegroundPermissionsAsync();
+          if (!permission.granted) throw new Error('GPS_PERMISSION_DENIED');
+          coords = (await ExpoLocation.getCurrentPositionAsync({ accuracy: ExpoLocation.Accuracy.Balanced })).coords;
+        }
+        const detected = await detectLocation.mutateAsync({ data: { lat: coords.latitude, lng: coords.longitude } });
+        return { coords, detected };
+      };
+      const { coords, detected } = await Promise.race([
+        detect(),
+        new Promise<Awaited<ReturnType<typeof detect>>>((_, reject) => {
+          gpsTimeout = setTimeout(() => reject(new Error('GPS timeout')), 20_000);
+        }),
+      ]);
+      const detectedDistrict = detected.districtId ?? (detected.countryId !== 'uz' ? detected.regionId : '');
+      if (detected.countryId !== selectedCountryId) setPhoneDigits('');
+      setLocation({
+        countryId: detected.countryId, countryName: detected.countryName, countryFlag: detected.countryFlag,
+        currency: detected.currency, regionId: detected.regionId, regionName: detected.regionName,
+        districtId: detectedDistrict || null, districtName: detected.districtName ?? null,
+        lat: coords.latitude, lng: coords.longitude,
+      });
+      setRegionId(detected.regionId);
+      setDistrictId(detectedDistrict);
+      setGpsNotice(`${detected.countryName} · ${detected.regionName}${detected.districtName ? ` · ${detected.districtName}` : ''}`);
+    } catch (error) {
+      setGpsNotice(error instanceof Error && error.message === 'GPS_PERMISSION_DENIED'
+        ? 'GPS ruxsati berilmadi. Davlat, viloyat va tumanni qo‘lda tanlashingiz mumkin.'
+        : 'Joylashuv aniqlanmadi. GPS’ni qayta yoqing yoki joylashuvni qo‘lda tanlang.');
+    } finally {
+      if (gpsTimeout) clearTimeout(gpsTimeout);
+      setIsDetecting(false);
+    }
   }
 
   const formattedPlaceholder = fmt.placeholder;
@@ -104,20 +178,13 @@ export default function RegisterScreen() {
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       {/* Header */}
       <View style={[styles.header, { paddingTop: topPad + 16, backgroundColor: colors.card, borderBottomColor: colors.border }]}>
-        <TouchableOpacity onPress={step === 2 ? () => setStep(1) : () => router.back()} style={styles.backBtn}>
+        <TouchableOpacity onPress={() => router.replace('/(tabs)')} style={styles.backBtn} accessibilityLabel="Bosh sahifaga qaytish">
           <Feather name="arrow-left" size={22} color={colors.text} />
         </TouchableOpacity>
         <Text style={[styles.headerTitle, { color: colors.text }]}>
-          {step === 1 ? t('register') : t('locationStep')}
+          {t('login')} / {t('register')}
         </Text>
         <View style={{ width: 40 }} />
-      </View>
-
-      {/* Step indicator */}
-      <View style={[styles.stepBar, { backgroundColor: colors.card }]}>
-        <View style={[styles.stepDot, { backgroundColor: colors.primary }]} />
-        <View style={[styles.stepLine, { backgroundColor: step === 2 ? colors.primary : colors.border }]} />
-        <View style={[styles.stepDot, { backgroundColor: step === 2 ? colors.primary : colors.border }]} />
       </View>
 
       <ScrollView
@@ -125,12 +192,48 @@ export default function RegisterScreen() {
         contentContainerStyle={[styles.content, { paddingBottom: botPad + 30 }]}
         keyboardShouldPersistTaps="handled"
       >
-        {step === 1 ? (
-          <>
+        {!!formError && <Text accessibilityRole="alert" style={{ color: colors.destructive }}>{formError}</Text>}
+        <>
+            <Text style={{ color: colors.mutedForeground, fontSize: 13 }}>
+              Kirish kodini o‘zingiz tanlaysiz. Oldin ro‘yxatdan o‘tgan bo‘lsangiz, eski telefon raqamingiz va parolingiz bilan kiring. Keyingi safar sessiya saqlanadi.
+            </Text>
+            <TouchableOpacity
+              testID="auth-language-selector"
+              onPress={() => setShowLanguagePicker(!showLanguagePicker)}
+              style={[styles.countrySelector, { backgroundColor: colors.card, borderColor: colors.border }]}
+            >
+              <Feather name="globe" size={20} color={colors.primary} />
+              <Text style={[styles.countrySelectorName, { flex: 1, color: colors.text }]}>
+                Til / Language: {LANGUAGE_OPTIONS.find(option => option.code === lang)?.flag} {LANGUAGE_OPTIONS.find(option => option.code === lang)?.label}
+              </Text>
+              <Feather name={showLanguagePicker ? 'chevron-up' : 'chevron-down'} size={16} color={colors.mutedForeground} />
+            </TouchableOpacity>
+            {showLanguagePicker && (
+              <View style={[styles.pickerDropdown, { backgroundColor: colors.card, borderColor: colors.border }]}>
+                {LANGUAGE_OPTIONS.map(option => (
+                  <TouchableOpacity
+                    key={option.code}
+                    testID={`auth-language-${option.code}`}
+                    style={[styles.pickerRow, { borderBottomColor: colors.border }]}
+                    onPress={() => { setLang(option.code); setShowLanguagePicker(false); }}
+                  >
+                    <Text style={[styles.pickerName, { color: lang === option.code ? colors.primary : colors.text }]}>{option.flag} {option.label}</Text>
+                    {lang === option.code && <Feather name="check" size={16} color={colors.primary} />}
+                  </TouchableOpacity>
+                ))}
+              </View>
+            )}
+            <TouchableOpacity testID="registration-gps" onPress={() => { void handleGps(); }} disabled={isDetecting || registerMutation.isPending}
+              style={[styles.countrySelector, { borderColor: colors.primary, backgroundColor: colors.secondary }]}>
+              {isDetecting ? <ActivityIndicator color={colors.primary} /> : <Feather name="map-pin" size={20} color={colors.primary} />}
+              <Text style={{ color: colors.primary, flex: 1 }}>GPS orqali davlat va joylashuvni aniqlash</Text>
+            </TouchableOpacity>
+            {!!gpsNotice && <Text style={{ color: colors.mutedForeground, fontSize: 13 }}>{gpsNotice}</Text>}
             {/* Country selector */}
             <TouchableOpacity
               style={[styles.countrySelector, { backgroundColor: colors.card, borderColor: colors.border }]}
               onPress={() => setShowCountryPicker(!showCountryPicker)}
+              disabled={isDetecting || registerMutation.isPending}
             >
               <Text style={{ fontSize: 22 }}>{selectedCountry?.flag ?? '🌍'}</Text>
               <View style={{ flex: 1 }}>
@@ -148,6 +251,7 @@ export default function RegisterScreen() {
                     key={c.id}
                     style={[styles.pickerRow, { borderBottomColor: colors.border }]}
                     onPress={() => handleSelectCountry(c as { id: string; name: string; flag: string; currency: string; dialCode: string })}
+                    disabled={isDetecting || registerMutation.isPending}
                   >
                     <Text style={{ fontSize: 22 }}>{c.flag}</Text>
                     <Text style={[styles.pickerName, { color: colors.text }]}>{c.name}</Text>
@@ -183,26 +287,28 @@ export default function RegisterScreen() {
                   style={[styles.input, { color: colors.text }]}
                   placeholder={formattedPlaceholder}
                   placeholderTextColor={colors.mutedForeground}
-                  value={phoneDigits}
+                  value={formatPhoneDigits(phoneDigits, fmt.mask)}
                   onChangeText={handlePhoneChange}
                   keyboardType="phone-pad"
-                  maxLength={fmt.maxDigits}
+                  maxLength={fmt.mask.length}
                 />
               </View>
             </View>
 
-            {/* Password */}
+            {/* Owner-selected secret; the server still verifies the account's existing password. */}
             <View style={styles.fieldGroup}>
-              <Text style={[styles.label, { color: colors.mutedForeground }]}>{t('password')}</Text>
+              <Text style={[styles.label, { color: colors.mutedForeground }]}>{lang === 'uz' ? 'Kirish kodi' : t('password')}</Text>
               <View style={[styles.inputRow, { borderColor: colors.border, backgroundColor: colors.muted }]}>
                 <Feather name="lock" size={16} color={colors.mutedForeground} />
                 <TextInput
+                  testID="auth-code"
                   style={[styles.input, { color: colors.text }]}
-                  placeholder="••••••"
+                  placeholder={lang === 'uz' ? 'Kamida 6 ta belgi' : t('enterPassword')}
                   placeholderTextColor={colors.mutedForeground}
                   value={password}
                   onChangeText={setPassword}
                   secureTextEntry={!showPassword}
+                  autoCapitalize="none"
                 />
                 <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
                   <Feather name={showPassword ? 'eye-off' : 'eye'} size={16} color={colors.mutedForeground} />
@@ -234,19 +340,9 @@ export default function RegisterScreen() {
               </View>
             </View>
 
-            <TouchableOpacity
-              style={[styles.nextBtn, { backgroundColor: colors.primary }]}
-              onPress={handleNext}
-            >
-              <Text style={styles.nextBtnText}>{t('nextBtn')}</Text>
-              <Feather name="arrow-right" size={18} color="#fff" />
-            </TouchableOpacity>
-          </>
-        ) : (
-          <>
             <Text style={[styles.stepTitle, { color: colors.text }]}>{t('locationStep')}</Text>
             <Text style={[styles.stepSubtitle, { color: colors.mutedForeground }]}>
-              Bu sizga eng yaqin e'lonlarni ko'rsatish uchun kerak
+              Xarid, sotish, e’lon yoki yuk tashishdan oldin ma’lumotlaringiz kerak. Oldingi hisobga kirishda saqlangan ma’lumotlar o‘zgarmaydi.
             </Text>
 
             {/* Region */}
@@ -299,37 +395,26 @@ export default function RegisterScreen() {
               </View>
             )}
 
-            {/* For non-Uzbekistan: auto-set districtId = regionId as fallback */}
-            {regionId && selectedCountryId !== 'uz' && !districtId && (
-              <View style={{ display: 'none' }}>
-                {/* auto-set */}
-                {(() => { if (!districtId) setDistrictId(regionId); return null; })()}
-              </View>
-            )}
-
             <TouchableOpacity
-              style={[styles.nextBtn, { backgroundColor: colors.primary, opacity: registerMutation.isPending ? 0.7 : 1 }]}
-              onPress={handleRegister}
-              disabled={registerMutation.isPending}
+              testID="auth-submit"
+              style={[styles.nextBtn, { backgroundColor: colors.primary, opacity: registerMutation.isPending || isDetecting ? 0.7 : 1 }]}
+              onPress={handleNext}
+              disabled={registerMutation.isPending || isDetecting}
             >
               {registerMutation.isPending ? (
                 <ActivityIndicator color="#fff" />
               ) : (
                 <>
-                  <Text style={styles.nextBtnText}>{t('registerBtn')}</Text>
+                  <Text style={styles.nextBtnText}>{t('login')} / {t('register')}</Text>
                   <Feather name="check" size={18} color="#fff" />
                 </>
               )}
             </TouchableOpacity>
-          </>
-        )}
+        </>
 
-        <View style={styles.loginRow}>
-          <Text style={[styles.loginText, { color: colors.mutedForeground }]}>{t('haveAccount')}</Text>
-          <TouchableOpacity onPress={() => router.push('/auth/login')}>
-            <Text style={[styles.loginLink, { color: colors.primary }]}>{t('login')}</Text>
-          </TouchableOpacity>
-        </View>
+        <TouchableOpacity onPress={() => { void Linking.openURL(`${getBaseUrl()}/api/privacy-policy`); }}>
+          <Text style={{ color: colors.primary, textAlign: 'center', fontSize: 13 }}>Maxfiylik siyosati</Text>
+        </TouchableOpacity>
       </ScrollView>
     </View>
   );
@@ -343,12 +428,6 @@ const styles = StyleSheet.create({
   },
   headerTitle: { fontSize: 17, fontFamily: 'Inter_600SemiBold' },
   backBtn: { width: 40 },
-  stepBar: {
-    flexDirection: 'row', alignItems: 'center',
-    paddingHorizontal: 24, paddingVertical: 12,
-  },
-  stepDot: { width: 12, height: 12, borderRadius: 6 },
-  stepLine: { flex: 1, height: 2 },
   content: { padding: 20, gap: 16 },
   stepTitle: { fontSize: 20, fontFamily: 'Inter_700Bold' },
   stepSubtitle: { fontSize: 14, fontFamily: 'Inter_400Regular', marginTop: -8 },

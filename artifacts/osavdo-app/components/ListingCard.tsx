@@ -4,16 +4,18 @@ import {
   Text,
   TouchableOpacity,
   StyleSheet,
-  Image,
   Dimensions,
 } from 'react-native';
 import { useColors } from '@/hooks/useColors';
 import { Feather } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import { ListingPhoto } from './ListingPhoto';
+import { useListingTranslation } from '../hooks/useListingTranslation';
 
 interface Listing {
   id: string;
   title: string;
+  description?: string | null;
   price: number;
   priceUnit?: string | null;
   images: string[];
@@ -35,6 +37,7 @@ interface Listing {
 
 interface ListingCardProps {
   listing: Listing;
+  onOpen?: () => void;
 }
 
 const CARD_WIDTH = (Dimensions.get('window').width - 48) / 2;
@@ -83,20 +86,21 @@ function SellerBadge({ badge }: { badge?: 'manufacturer' | 'reseller' | null }) 
   );
 }
 
-export function ListingCard({ listing }: ListingCardProps) {
+export function ListingCard({ listing, onOpen }: ListingCardProps) {
+  const { translation, loading } = useListingTranslation(listing);
   const colors = useColors();
   const router = useRouter();
 
   return (
     <TouchableOpacity
       style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}
-      onPress={() => router.push(`/listing/${listing.id}`)}
+      onPress={() => { onOpen?.(); router.push(`/listing/${listing.id}`); }}
       activeOpacity={0.9}
     >
       {/* Image */}
       <View style={[styles.imageContainer, { backgroundColor: colors.secondary }]}>
         {listing.images.length > 0 ? (
-          <Image source={{ uri: listing.images[0] }} style={styles.image} />
+          <ListingPhoto source={listing.images[0]} style={styles.image} />
         ) : (
           <View style={styles.imagePlaceholder}>
             <Feather name="image" size={28} color={colors.mutedForeground} />
@@ -127,7 +131,11 @@ export function ListingCard({ listing }: ListingCardProps) {
           style={[styles.title, { color: colors.text }]}
           numberOfLines={2}
         >
-          {listing.title}
+          {translation?.title ?? listing.title}
+        </Text>
+        <Text style={{ color: colors.mutedForeground, fontSize: 10 }}>
+          {loading ? 'Tarjima tayyorlanmoqda…' : translation?.translated ? 'AI tarjima' :
+            translation ? '' : 'Tarjima mavjud emas — asl matn'}
         </Text>
 
         <View style={styles.priceRow}>

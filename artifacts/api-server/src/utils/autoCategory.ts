@@ -9,6 +9,18 @@ import { normalizeUz } from "./fuzzy.js";
 
 // Har bir kategoriya uchun kalit so'zlar
 const CATEGORY_KEYWORDS: Record<string, string[]> = {
+  cat20: [
+    "oziq-ovqat", "qatiq", "sut", "pishloq", "tvorog", "qaymoq", "tuxum",
+    "gosht", "kolbasa", "non", "pishiriq", "makaron", "yorma", "shakar",
+    "ziravor", "shokolad", "konfet", "pechenye", "sharbat", "choy", "qahva",
+    "konserva", "taom", "полуфабрикаты", "продукты", "молоко", "сыр",
+  ],
+  cat21: [
+    "kiyim", "koylak", "shim", "kostyum", "kurtka", "palto", "futbolka",
+    "poyabzal", "krossovka", "etik", "paypoq", "forma", "kombinezon",
+    "maxsus kiyim", "erkaklar kiyimlari", "ayollar kiyimlari", "bolalar kiyimlari",
+    "одежда", "платье", "брюки", "куртка", "обувь", "спецодежда",
+  ],
   cat1: [
     "sigir", "qoy", "echki", "tuya", "ot", "eshak", "tovuq", "o'rdak", "g'oz",
     "hayvon", "chorva", "qoramol", "paranda", "it", "mushuk", "kabutar", "baliq",
@@ -56,13 +68,40 @@ const CATEGORY_KEYWORDS: Record<string, string[]> = {
     "sotiladi", "garaj", "ombor", "ofis", "do'kon", "magazin", "bozor",
     "ko'chmas mulk", "apartment",
   ],
+  cat15: [
+    "sanoat", "ishlab chiqarish", "zavod", "fabrika", "sex", "stanok", "uskuna",
+    "metall", "plastmassa", "polimer", "tekstil", "tikuvchilik", "qadoqlash",
+    "kimyo", "yog'och", "ishlab chiqaruvchi", "mahsulot ishlab chiqarish",
+  ],
+  cat16: [
+    "optom", "ulgurji", "b2b", "partiya", "partiyalar", "korxona", "distribyutor",
+    "import", "eksport", "diler", "katta hajm", "wholesale", "bulk",
+  ],
+  cat17: [
+    "ishlatilgan", "eski", "b/u", "second hand", "second-hand", "podderjanniy",
+    "avval ishlatilgan", "arzon ishlatilgan",
+  ],
 };
 
 /**
  * Matnga mos keladigan kategoriyani toptiradi.
  * Qaytaradi: { categoryId, score } yoki eng kamida cat7 (xizmatlar)
  */
+export function findSpecialSubcategory(text: string): string | undefined {
+  const norm = normalizeUz(text.toLowerCase());
+  const tokens = norm.match(/[\p{L}\p{N}]+/gu) ?? [];
+  const hasLabel = (labels: string[]) => tokens.some((word, index) =>
+    labels.includes(word) && tokens[index + 1] !== "emas" && tokens[index + 1] !== "yoq" &&
+    tokens[index - 1] !== "не",
+  );
+  // Condition labels take precedence over product words such as "telefon".
+  if (hasLabel(["shikastlangan", "shkaslangan", "shikastli", "singan", "nuqsonli", "nosoz", "defektli", "поврежденный", "повреждённый", "неисправный"])) return "sub18_damaged";
+  if (hasLabel(["aksiya", "aksiyada", "aksiyadagi", "chegirma", "chegirmali", "chegirmada", "скидка", "акция", "распродажа"])) return "sub18_sale";
+  return undefined;
+}
+
 export function findBestCategory(text: string): string {
+  if (findSpecialSubcategory(text)) return "cat18";
   const norm = normalizeUz(text.toLowerCase());
   const words = norm.split(/\s+/);
 
@@ -73,7 +112,8 @@ export function findBestCategory(text: string): string {
     let score = 0;
     for (const word of words) {
       for (const kw of keywords) {
-        if (kw.includes(word) || word.includes(kw)) {
+        const normalizedKeyword = normalizeUz(kw.toLowerCase());
+        if (word && (normalizedKeyword.includes(word) || word.includes(normalizedKeyword))) {
           score += word.length >= 3 ? 2 : 1;
         }
       }
@@ -99,6 +139,7 @@ export function ensureSubcategory(
 
   // 1. Barcha subkategoriyalarda o'xshash nom bormi?
   for (const cat of categories) {
+    if (preferCategoryId && cat.id !== preferCategoryId) continue;
     for (const sub of cat.subcategories) {
       if (normalizeUz(sub.name.toLowerCase()) === norm) {
         return sub; // mavjud — qayta ishlatamiz

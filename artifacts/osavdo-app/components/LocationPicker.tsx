@@ -12,8 +12,9 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import { useColors } from '@/hooks/useColors';
-import { useGetRegions, useGetDistricts } from '@workspace/api-client-react';
+import { useGetRegions, useGetDistricts, getGetDistrictsQueryKey } from '@workspace/api-client-react';
 import { useLocation } from '@/context/LocationContext';
+import { useI18n } from '@/context/I18nContext';
 
 interface LocationPickerProps {
   visible: boolean;
@@ -22,6 +23,7 @@ interface LocationPickerProps {
 
 export function LocationPicker({ visible, onClose }: LocationPickerProps) {
   const colors = useColors();
+  const { lang } = useI18n();
   const insets = useSafeAreaInsets();
   const { setLocation, countryId } = useLocation();
   const [step, setStep] = useState<'region' | 'district'>('region');
@@ -35,7 +37,7 @@ export function LocationPicker({ visible, onClose }: LocationPickerProps) {
   );
   const { data: districtsData, isLoading: districtsLoading } = useGetDistricts(
     { regionId: selectedRegionId ?? undefined },
-    { query: { enabled: !!selectedRegionId && step === 'district' } },
+    { query: { enabled: !!selectedRegionId && step === 'district', queryKey: getGetDistrictsQueryKey({ regionId: selectedRegionId ?? undefined }) } },
   );
 
   function handleSelectRegion(id: string, name: string) {
@@ -111,7 +113,7 @@ export function LocationPicker({ visible, onClose }: LocationPickerProps) {
           </View>
         ) : (
           <FlatList
-            data={step === 'region' ? regions ?? [] : districtsData ?? []}
+            data={step === 'region' ? (regions as any[]) ?? [] : (districtsData as any[]) ?? []}
             keyExtractor={(item) => item.id}
             renderItem={({ item }) =>
               step === 'region' ? (
@@ -120,10 +122,7 @@ export function LocationPicker({ visible, onClose }: LocationPickerProps) {
                   onPress={() => handleSelectRegion(item.id, item.name)}
                 >
                   <View>
-                    <Text style={[styles.itemName, { color: colors.text }]}>{item.name}</Text>
-                    <Text style={[styles.itemNameRu, { color: colors.mutedForeground }]}>
-                      {item.nameRu}
-                    </Text>
+                    <Text style={[styles.itemName, { color: colors.text }]}>{lang === 'ru' ? item.nameRu : item.name}</Text>
                   </View>
                   <Feather name="chevron-right" size={18} color={colors.mutedForeground} />
                 </TouchableOpacity>
@@ -140,10 +139,7 @@ export function LocationPicker({ visible, onClose }: LocationPickerProps) {
                   }
                 >
                   <View>
-                    <Text style={[styles.itemName, { color: colors.text }]}>{item.name}</Text>
-                    <Text style={[styles.itemNameRu, { color: colors.mutedForeground }]}>
-                      {item.nameRu}
-                    </Text>
+                    <Text style={[styles.itemName, { color: colors.text }]}>{lang === 'ru' ? item.nameRu : item.name}</Text>
                   </View>
                   <Feather name="check" size={18} color={colors.primary} />
                 </TouchableOpacity>

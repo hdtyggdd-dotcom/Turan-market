@@ -1,4 +1,6 @@
-// O'Savdo in-memory store with full Uzbekistan seed data
+import { completeUzbekistanLocations } from "./uzbekistan-districts.js";
+// Cosmis domain model and seed data.
+import { createHmac, randomBytes, scryptSync, timingSafeEqual } from "node:crypto";
 
 export interface StoredCountry {
   id: string;        // ISO 2-letter: uz, kz, kg, ...
@@ -23,8 +25,9 @@ export interface StoredDistrict {
   name: string;
   nameRu: string;
   regionId: string;
-  lat: number;
-  lng: number;
+  lat: number | null;
+  lng: number | null;
+  selectable?: boolean;
 }
 
 export interface StoredNeighborhood {
@@ -51,6 +54,7 @@ export interface StoredCategory {
 }
 
 export interface StoredUser {
+  deleted?: boolean;
   id: string;
   phone: string;
   name: string;
@@ -105,7 +109,111 @@ export interface StoredOrder {
   createdAt: string;
 }
 
-// ─── COUNTRIES ────────────────────────────────────────────────────────────────
+export type CargoType = 'general' | 'fragile' | 'perishable' | 'livestock' | 'hazardous' | 'construction';
+export type CargoLoadStatus = 'open' | 'negotiating' | 'accepted' | 'in_transit' | 'delivered' | 'cancelled';
+export type CargoOfferStatus = 'pending' | 'countered' | 'accepted' | 'rejected' | 'withdrawn';
+
+export type CargoTrackingStage = 'accepted' | 'pickup_ready' | 'picked_up' | 'in_transit' | 'border_control' | 'delivered';
+export interface StoredVehicleType {
+  id: string;
+  name: string;
+  nameRu: string;
+  capacityKg: number;
+  capacityM3: number;
+  supportedCargoTypes: CargoType[];
+}
+
+export interface StoredDriverProfile {
+  id: string;
+  userId: string;
+  vehicleTypeId: string;
+  vehiclePlate: string;
+  availableFrom: string;
+  currentRegionId: string;
+  rating: number;
+  ratingCount: number;
+  completedTrips: number;
+  sharedLoadAvailableKg: number;
+  sharedLoadAvailableM3: number;
+  bio: string | null;
+  capacityKg?: number;
+  capacityM3?: number;
+  reviewStatus?: 'none' | 'pending' | 'approved' | 'rejected';
+  reviewReason?: string | null;
+  revision?: number;
+  documents?: StoredDriverDocument[];
+  reviewHistory?: { status: 'pending' | 'approved' | 'rejected'; reason: string; createdAt: string; reviewerId: string }[];
+  ratingHistory?: StoredDriverRating[];
+}
+
+export interface StoredDriverDocument {
+  id: string;
+  kind: 'identity' | 'license' | 'registration';
+  objectPath: string;
+  mimeType: string;
+  status: 'pending' | 'approved' | 'rejected';
+  submittedAt: string;
+  reviewedAt: string | null;
+  expiresAt?: string | null;
+  noExpiry?: boolean;
+  expiryVerified?: boolean;
+}
+
+export interface StoredDriverRating {
+  id: string;
+  loadId: string;
+  score: number;
+  comment: string | null;
+  createdAt: string;
+}
+
+export interface StoredCargoLoad {
+  id: string;
+  shipperId: string;
+  title: string;
+  description: string | null;
+  cargoType: CargoType;
+  weightKg: number;
+  volumeM3: number;
+  lengthCm: number | null;
+  widthCm: number | null;
+  heightCm: number | null;
+  pickupRegionId: string;
+  pickupDistrictId: string;
+  pickupAddress: string | null;
+  deliveryRegionId: string;
+  deliveryDistrictId: string;
+  deliveryAddress: string | null;
+  distanceKm: number | null;
+  pickupDate: string;
+  budgetUzs: number | null;
+  sharedLoadAllowed: boolean;
+  status: CargoLoadStatus;
+  createdAt: string;
+}
+
+export interface StoredCargoOffer {
+  id: string;
+  loadId: string;
+  driverId: string;
+  amountUzs: number;
+  message: string | null;
+  status: CargoOfferStatus;
+  counterAmountUzs: number | null;
+  counterMessage: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface StoredCargoTrackingUpdate {
+  id: string;
+  loadId: string;
+  stage: CargoTrackingStage;
+  note: string | null;
+  lat: number | null;
+  lng: number | null;
+  createdAt: string;
+}
 export const countries: StoredCountry[] = [
   { id: 'uz', name: "O'zbekiston",   nameRu: "Узбекистан",    flag: '🇺🇿', dialCode: '+998', currency: 'UZS' },
   { id: 'kz', name: "Qozog'iston",   nameRu: "Казахстан",     flag: '🇰🇿', dialCode: '+7',   currency: 'KZT' },
@@ -116,6 +224,7 @@ export const countries: StoredCountry[] = [
   { id: 'ru', name: "Rossiya",       nameRu: "Россия",        flag: '🇷🇺', dialCode: '+7',   currency: 'RUB' },
   { id: 'cn', name: "Xitoy",         nameRu: "Китай",         flag: '🇨🇳', dialCode: '+86',  currency: 'CNY' },
   { id: 'ir', name: "Eron",          nameRu: "Иран",          flag: '🇮🇷', dialCode: '+98',  currency: 'IRR' },
+  { id: 'tr', name: "Turkiya",       nameRu: "Турция",        flag: '🇹🇷', dialCode: '+90',  currency: 'TRY' },
 ];
 
 // ─── REGIONS ──────────────────────────────────────────────────────────────────
@@ -207,6 +316,10 @@ export const regions: StoredRegion[] = [
   { id: 'ir8',  countryId: 'ir', name: "Qum",              nameRu: "Кум",                    lat: 34.6401, lng: 50.8764 },
   { id: 'ir9',  countryId: 'ir', name: "Kirmonshoh",       nameRu: "Керманшах",              lat: 34.3277, lng: 47.0780 },
   { id: 'ir10', countryId: 'ir', name: "Urmiya",           nameRu: "Урмия",                  lat: 37.5527, lng: 45.0760 },
+  // ── Turkiya ───────────────────────────────────────────────────────────────
+  { id: 'tr1', countryId: 'tr', name: "Istanbul",           nameRu: "Стамбул",               lat: 41.0082, lng: 28.9784 },
+  { id: 'tr2', countryId: 'tr', name: "Anqara",             nameRu: "Анкара",                 lat: 39.9334, lng: 32.8597 },
+  { id: 'tr3', countryId: 'tr', name: "Izmir",              nameRu: "Измир",                 lat: 38.4237, lng: 27.1428 },
 ];
 
 // ─── DISTRICTS ────────────────────────────────────────────────────────────────
@@ -637,6 +750,8 @@ export const districts: StoredDistrict[] = [
 ];
 
 // ─── NEIGHBORHOODS ────────────────────────────────────────────────────────────
+completeUzbekistanLocations(regions, districts);
+
 export const neighborhoods: StoredNeighborhood[] = [
   { id: 'n1', name: "Yunusobod-1", nameRu: "Юнусабад-1", districtId: 'd1' },
   { id: 'n2', name: "Yunusobod-2", nameRu: "Юнусабад-2", districtId: 'd1' },
@@ -946,9 +1061,112 @@ export const categories: StoredCategory[] = [
       { id: 'sub14_07', name: "Boshqa ayrboshlash",       nameRu: "Прочий обмен",             categoryId: 'cat14' },
     ],
   },
+  {
+    id: 'cat15',
+    name: "Sanoat va ishlab chiqarish",
+    nameRu: "Промышленность и производство",
+    icon: "🏭",
+    subcategories: [
+      { id: 'sub15_01', name: "Metall mahsulotlari",          nameRu: "Металлические изделия",       categoryId: 'cat15' },
+      { id: 'sub15_02', name: "Plastmassa va polimer",        nameRu: "Пластмасса и полимеры",       categoryId: 'cat15' },
+      { id: 'sub15_03', name: "Yog'och mahsulotlari",         nameRu: "Деревянные изделия",          categoryId: 'cat15' },
+      { id: 'sub15_04', name: "Tekstil va tikuvchilik",      nameRu: "Текстиль и швейное дело",    categoryId: 'cat15' },
+      { id: 'sub15_05', name: "Oziq-ovqat ishlab chiqarish",  nameRu: "Пищевое производство",       categoryId: 'cat15' },
+      { id: 'sub15_06', name: "Uskunalar va stanoklar",       nameRu: "Оборудование и станки",       categoryId: 'cat15' },
+      { id: 'sub15_07', name: "Qadoqlash mahsulotlari",       nameRu: "Упаковочные материалы",       categoryId: 'cat15' },
+      { id: 'sub15_08', name: "Kimyo mahsulotlari",           nameRu: "Химическая продукция",       categoryId: 'cat15' },
+      { id: 'sub15_09', name: "Tayyor ishlab chiqarish",      nameRu: "Готовое производство",        categoryId: 'cat15' },
+      { id: 'sub15_10', name: "Boshqa sanoat mahsulotlari",   nameRu: "Другие промышленные товары", categoryId: 'cat15' },
+    ],
+  },
+  {
+    id: 'cat16',
+    name: "Optom savdo / B2B partiyalar",
+    nameRu: "Оптовая торговля / B2B партии",
+    icon: "📦",
+    subcategories: [
+      { id: 'sub16_01', name: "Oziq-ovqat partiyalari",       nameRu: "Партии продуктов питания",   categoryId: 'cat16' },
+      { id: 'sub16_02', name: "Qurilish materiallari optom",  nameRu: "Стройматериалы оптом",       categoryId: 'cat16' },
+      { id: 'sub16_03', name: "Kiyim-kechak ulgurji",        nameRu: "Одежда оптом",                categoryId: 'cat16' },
+      { id: 'sub16_04', name: "Texnika partiyalari",          nameRu: "Партии техники",              categoryId: 'cat16' },
+      { id: 'sub16_05', name: "Qishloq xo'jaligi mahsuloti",  nameRu: "Сельхозпродукция оптом",     categoryId: 'cat16' },
+      { id: 'sub16_06', name: "Korxona uchun xarid",         nameRu: "Закупки для предприятий",    categoryId: 'cat16' },
+      { id: 'sub16_07', name: "Import va eksport",            nameRu: "Импорт и экспорт",            categoryId: 'cat16' },
+      { id: 'sub16_08', name: "Distribyutor takliflari",      nameRu: "Предложения дистрибьюторов",  categoryId: 'cat16' },
+      { id: 'sub16_09', name: "B2B xizmatlar",                nameRu: "B2B услуги",                  categoryId: 'cat16' },
+      { id: 'sub16_10', name: "Boshqa ulgurji savdo",         nameRu: "Другие оптовые товары",       categoryId: 'cat16' },
+    ],
+  },
+  {
+    id: 'cat17',
+    name: "Ishlatilgan tovarlar",
+    nameRu: "Товары бывшего употребления",
+    icon: "♻️",
+    subcategories: [
+      { id: 'sub17_01', name: "Ishlatilgan telefonlar",        nameRu: "Бывшие в употреблении телефоны", categoryId: 'cat17' },
+      { id: 'sub17_02', name: "Ishlatilgan texnika",           nameRu: "Бывшая в употреблении техника",  categoryId: 'cat17' },
+      { id: 'sub17_03', name: "Ishlatilgan mebel",             nameRu: "Бывшая в употреблении мебель",    categoryId: 'cat17' },
+      { id: 'sub17_04', name: "Ishlatilgan avtomobillar",     nameRu: "Подержанные автомобили",          categoryId: 'cat17' },
+      { id: 'sub17_05', name: "Ishlatilgan kiyimlar",          nameRu: "Бывшая в употреблении одежда",    categoryId: 'cat17' },
+      { id: 'sub17_06', name: "Ishlatilgan asboblar",         nameRu: "Подержанные инструменты",         categoryId: 'cat17' },
+      { id: 'sub17_07', name: "Ishlatilgan agrotexnika",      nameRu: "Подержанная сельхозтехника",      categoryId: 'cat17' },
+      { id: 'sub17_08', name: "Boshqa ishlatilgan tovarlar",  nameRu: "Другие товары б/у",               categoryId: 'cat17' },
+    ],
+  },
 ];
 
 // ─── USERS ────────────────────────────────────────────────────────────────────
+// Special sale sections use the same listing/filter contract as the catalog.
+categories.push(
+  {
+    id: 'cat18',
+    name: "Shikastlangan va aksiyadagi tovarlar",
+    nameRu: "Повреждённые и акционные товары",
+    icon: "🛠️",
+    subcategories: [
+      { id: 'sub18_damaged', name: "Shikastlangan tovarlar", nameRu: "Повреждённые товары", categoryId: 'cat18' },
+      { id: 'sub18_sale', name: "Aksiyadagi tovarlar", nameRu: "Акционные товары", categoryId: 'cat18' },
+    ],
+  },
+);
+
+// cat19 remains reserved for the historical promotional-goods alias.
+categories.push(
+  {
+    id: 'cat20', name: "Oziq-ovqat", nameRu: "Продукты питания", icon: "🛒",
+    subcategories: [
+      { id: 'sub20_01', name: "Meva va sabzavotlar", nameRu: "Фрукты и овощи", categoryId: 'cat20' },
+      { id: 'sub20_02', name: "Go'sht va parranda mahsulotlari", nameRu: "Мясо и птица", categoryId: 'cat20' },
+      { id: 'sub20_03', name: "Baliq va dengiz mahsulotlari", nameRu: "Рыба и морепродукты", categoryId: 'cat20' },
+      { id: 'sub20_04', name: "Sut mahsulotlari va tuxum", nameRu: "Молочные продукты и яйца", categoryId: 'cat20' },
+      { id: 'sub20_05', name: "Non va pishiriqlar", nameRu: "Хлеб и выпечка", categoryId: 'cat20' },
+      { id: 'sub20_06', name: "Un, guruch, makaron va yormalar", nameRu: "Мука, рис, макароны и крупы", categoryId: 'cat20' },
+      { id: 'sub20_07', name: "Yog', shakar, tuz va ziravorlar", nameRu: "Масло, сахар, соль и специи", categoryId: 'cat20' },
+      { id: 'sub20_08', name: "Shirinliklar, asal va quruq mevalar", nameRu: "Сладости, мёд и сухофрукты", categoryId: 'cat20' },
+      { id: 'sub20_09', name: "Ichimliklar, choy va qahva", nameRu: "Напитки, чай и кофе", categoryId: 'cat20' },
+      { id: 'sub20_10', name: "Konservalar va muzlatilgan mahsulotlar", nameRu: "Консервы и замороженные продукты", categoryId: 'cat20' },
+      { id: 'sub20_11', name: "Tayyor taomlar va yarim tayyor mahsulotlar", nameRu: "Готовые блюда и полуфабрикаты", categoryId: 'cat20' },
+      { id: 'sub20_12', name: "Boshqa oziq-ovqat mahsulotlari", nameRu: "Другие продукты питания", categoryId: 'cat20' },
+    ],
+  },
+  {
+    id: 'cat21', name: "Kiyim-kechak", nameRu: "Одежда", icon: "👕",
+    subcategories: [
+      { id: 'sub21_01', name: "Erkaklar kiyimlari", nameRu: "Мужская одежда", categoryId: 'cat21' },
+      { id: 'sub21_02', name: "Ayollar kiyimlari", nameRu: "Женская одежда", categoryId: 'cat21' },
+      { id: 'sub21_03', name: "Bolalar kiyimlari", nameRu: "Детская одежда", categoryId: 'cat21' },
+      { id: 'sub21_04', name: "Chaqaloqlar kiyimlari", nameRu: "Одежда для новорождённых", categoryId: 'cat21' },
+      { id: 'sub21_05', name: "Maxsus va ish kiyimlari", nameRu: "Спецодежда и рабочая одежда", categoryId: 'cat21' },
+      { id: 'sub21_06', name: "Sport kiyimlari", nameRu: "Спортивная одежда", categoryId: 'cat21' },
+      { id: 'sub21_07', name: "Maktab formasi", nameRu: "Школьная форма", categoryId: 'cat21' },
+      { id: 'sub21_08', name: "Milliy va bayram kiyimlari", nameRu: "Национальная и праздничная одежда", categoryId: 'cat21' },
+      { id: 'sub21_09', name: "Poyabzallar", nameRu: "Обувь", categoryId: 'cat21' },
+      { id: 'sub21_10', name: "Bosh kiyimlar va aksessuarlar", nameRu: "Головные уборы и аксессуары", categoryId: 'cat21' },
+      { id: 'sub21_11', name: "Boshqa kiyim-kechaklar", nameRu: "Другая одежда", categoryId: 'cat21' },
+    ],
+  },
+);
+
 export const users: StoredUser[] = [
   {
     id: 'u1',
@@ -1009,6 +1227,51 @@ export const users: StoredUser[] = [
     rating: null,
     totalSales: 0,
     createdAt: '2024-03-05T11:00:00.000Z',
+  },
+  {
+    id: 'u5',
+    phone: '+998907770101',
+    name: 'Bekzod Mamatqulov',
+    password: 'test123',
+    role: 'driver',
+    sellerBadge: null,
+    verificationStatus: 'approved',
+    regionId: 'r1',
+    districtId: 'd104',
+    neighborhoodId: null,
+    rating: 4.9,
+    totalSales: 0,
+    createdAt: '2023-08-12T09:00:00.000Z',
+  },
+  {
+    id: 'u6',
+    phone: '+998907770202',
+    name: 'Sardor Ergashev',
+    password: 'test123',
+    role: 'driver',
+    sellerBadge: null,
+    verificationStatus: 'approved',
+    regionId: 'r6',
+    districtId: 'd22',
+    neighborhoodId: null,
+    rating: 4.7,
+    totalSales: 0,
+    createdAt: '2023-10-02T09:00:00.000Z',
+  },
+  {
+    id: 'u7',
+    phone: '+998907770303',
+    name: 'Umidjon Qodirov',
+    password: 'test123',
+    role: 'driver',
+    sellerBadge: null,
+    verificationStatus: 'approved',
+    regionId: 'r3',
+    districtId: 'd11',
+    neighborhoodId: null,
+    rating: 4.8,
+    totalSales: 0,
+    createdAt: '2024-01-18T09:00:00.000Z',
   },
 ];
 
@@ -2540,24 +2803,85 @@ export const orders: StoredOrder[] = [
   },
 ];
 
-// ─── HELPERS ──────────────────────────────────────────────────────────────────
+// ─── COSMIS CARGO ─────────────────────────────────────────────────────
+export const vehicleTypes: StoredVehicleType[] = [
+  { id: 'van', name: 'Yuk tashuvchi van', nameRu: 'Грузовой фургон', capacityKg: 1500, capacityM3: 12, supportedCargoTypes: ['general', 'fragile', 'perishable'] },
+  { id: 'gazelle', name: 'Gazelle', nameRu: 'Газель', capacityKg: 3000, capacityM3: 18, supportedCargoTypes: ['general', 'fragile', 'construction'] },
+  { id: 'truck', name: 'Yuk mashinasi', nameRu: 'Грузовик', capacityKg: 10000, capacityM3: 45, supportedCargoTypes: ['general', 'fragile', 'perishable', 'construction'] },
+  { id: 'livestock', name: 'Chorva tashuvchi', nameRu: 'Скотовоз', capacityKg: 7000, capacityM3: 36, supportedCargoTypes: ['livestock'] },
+  { id: 'refrigerated', name: 'Sovutgichli fura', nameRu: 'Рефрижератор', capacityKg: 12000, capacityM3: 50, supportedCargoTypes: ['perishable'] },
+];
+
+export const driverProfiles: StoredDriverProfile[] = [
+  { id: 'driver-1', userId: 'u5', vehicleTypeId: 'gazelle', vehiclePlate: '01 A 777 BA', availableFrom: '2025-01-10T06:00:00.000Z', currentRegionId: 'r1', rating: 4.9, ratingCount: 86, completedTrips: 124, sharedLoadAvailableKg: 1100, sharedLoadAvailableM3: 7, bio: 'Toshkent va vodiy yo‘nalishlarida tezkor yetkazib berish.' },
+  { id: 'driver-2', userId: 'u6', vehicleTypeId: 'truck', vehiclePlate: '30 B 555 CA', availableFrom: '2025-01-10T07:00:00.000Z', currentRegionId: 'r6', rating: 4.7, ratingCount: 61, completedTrips: 93, sharedLoadAvailableKg: 4200, sharedLoadAvailableM3: 19, bio: 'Qurilish va umumiy yuklar uchun ishonchli haydovchi.' },
+  { id: 'driver-3', userId: 'u7', vehicleTypeId: 'livestock', vehiclePlate: '60 C 333 DA', availableFrom: '2025-01-11T05:00:00.000Z', currentRegionId: 'r3', rating: 4.8, ratingCount: 44, completedTrips: 68, sharedLoadAvailableKg: 2500, sharedLoadAvailableM3: 13, bio: 'Chorva yuklarini xavfsiz tashish tajribasi.' },
+];
+
+function futureCargoDate(daysFromToday: number): string {
+  const date = new Date();
+  date.setUTCHours(0, 0, 0, 0);
+  date.setUTCDate(date.getUTCDate() + daysFromToday);
+  return date.toISOString().slice(0, 10);
+}
+
+export const cargoLoads: StoredCargoLoad[] = [
+  { id: 'cargo-1', shipperId: 'u1', title: 'Samarqandga M150 g‘isht', description: 'Palletdagi qurilish g‘ishtlari.', cargoType: 'construction', weightKg: 2800, volumeM3: 14, lengthCm: 300, widthCm: 180, heightCm: 160, pickupRegionId: 'r1', pickupDistrictId: 'd104', pickupAddress: 'Sergeli sanoat hududi', deliveryRegionId: 'r6', deliveryDistrictId: 'd22', deliveryAddress: 'Samarqand qurilish bozori', distanceKm: 310, pickupDate: futureCargoDate(14), budgetUzs: 1850000, sharedLoadAllowed: true, status: 'negotiating', createdAt: '2025-01-08T08:00:00.000Z' },
+  { id: 'cargo-2', shipperId: 'u2', title: 'Farg‘onaga sovutilgan mevalar', description: 'Sovutilgan holda tashish talab qilinadi.', cargoType: 'perishable', weightKg: 900, volumeM3: 6, lengthCm: 220, widthCm: 140, heightCm: 160, pickupRegionId: 'r1', pickupDistrictId: 'd2', pickupAddress: 'Chilonzor ulgurji bozori', deliveryRegionId: 'r4', deliveryDistrictId: 'd15', deliveryAddress: 'Farg‘ona dehqon bozori', distanceKm: 325, pickupDate: futureCargoDate(18), budgetUzs: 1600000, sharedLoadAllowed: true, status: 'open', createdAt: '2025-01-08T10:00:00.000Z' },
+  { id: 'cargo-3', shipperId: 'u3', title: 'Andijonga naslli qoramol', description: 'Ikki bosh naslli qoramol, ehtiyotkor tashish kerak.', cargoType: 'livestock', weightKg: 1300, volumeM3: 10, lengthCm: null, widthCm: null, heightCm: null, pickupRegionId: 'r6', pickupDistrictId: 'd22', pickupAddress: 'Samarqand chorva bozori', deliveryRegionId: 'r3', deliveryDistrictId: 'd11', deliveryAddress: 'Andijon tumani', distanceKm: 540, pickupDate: futureCargoDate(21), budgetUzs: 3900000, sharedLoadAllowed: false, status: 'open', createdAt: '2025-01-09T08:30:00.000Z' },
+];
+
+export const cargoOffers: StoredCargoOffer[] = [
+  { id: 'offer-1', loadId: 'cargo-1', driverId: 'driver-2', amountUzs: 1950000, message: 'Ertalab yuklab, shu kunning o‘zida yetkazaman.', status: 'countered', counterAmountUzs: 1850000, counterMessage: '1 850 000 so‘mga kelishamizmi?', createdAt: '2025-01-08T09:00:00.000Z', updatedAt: '2025-01-08T10:00:00.000Z' },
+];
+
+export const cargoTrackingUpdates: StoredCargoTrackingUpdate[] = [];
 export function generateId(): string {
   return Date.now().toString() + Math.random().toString(36).slice(2, 9);
 }
 
 export function generateToken(userId: string): string {
   const payload = { id: userId, exp: Date.now() + 86400000 * 30 };
-  return Buffer.from(JSON.stringify(payload)).toString('base64');
+  const encoded = Buffer.from(JSON.stringify(payload)).toString("base64url");
+  const signature = createHmac("sha256", process.env.SESSION_SECRET ?? "local-development-secret")
+    .update(encoded)
+    .digest("base64url");
+  return `${encoded}.${signature}`;
 }
 
 export function verifyToken(token: string): string | null {
   try {
-    const payload = JSON.parse(Buffer.from(token, 'base64').toString('utf8'));
+    const [encoded, signature] = token.split(".");
+    if (!encoded || !signature) return null;
+    const expected = createHmac("sha256", process.env.SESSION_SECRET ?? "local-development-secret")
+      .update(encoded)
+      .digest("base64url");
+    const expectedBuffer = Buffer.from(expected);
+    const actualBuffer = Buffer.from(signature);
+    if (expectedBuffer.length !== actualBuffer.length || !timingSafeEqual(expectedBuffer, actualBuffer)) {
+      return null;
+    }
+    const payload = JSON.parse(Buffer.from(encoded, "base64url").toString("utf8"));
     if (payload.exp < Date.now()) return null;
     return payload.id;
   } catch {
     return null;
   }
+}
+
+export function hashPassword(password: string): string {
+  const salt = randomBytes(16).toString("hex");
+  const hash = scryptSync(password, salt, 64).toString("hex");
+  return `scrypt$${salt}$${hash}`;
+}
+
+export function verifyPassword(password: string, stored: string): boolean {
+  if (!stored.startsWith("scrypt$")) return stored === password;
+  const [, salt, expectedHex] = stored.split("$");
+  if (!salt || !expectedHex) return false;
+  const actual = scryptSync(password, salt, 64);
+  const expected = Buffer.from(expectedHex, "hex");
+  return actual.length === expected.length && timingSafeEqual(actual, expected);
 }
 
 export function calculateDistance(lat1: number, lng1: number, lat2: number, lng2: number): number {
@@ -2737,3 +3061,17 @@ export function sanitizeUser(user: StoredUser) {
   const neighborhood = neighborhoods.find(n => n.id === user.neighborhoodId) || null;
   return { ...rest, region, district, neighborhood };
 }
+
+export interface StoredCargoNotification {
+  id: string;
+  userId: string;
+  loadId: string | null;
+  target?: 'driver_verification';
+  title: string;
+  message: string;
+  type: 'tracking' | 'offer' | 'system';
+  read: boolean;
+  createdAt: string;
+}
+
+export const cargoNotifications: StoredCargoNotification[] = [];
