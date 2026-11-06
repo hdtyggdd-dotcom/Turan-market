@@ -37,8 +37,14 @@ export function CategoryGrid({ categories, selected, onSelect }: CategoryGridPro
         const isSelected = cat.id === '__all__' ? selected === null : selected === cat.id;
         const handlePress = () => onSelect(cat.id === '__all__' ? null : (isSelected ? null : cat.id));
 
-        // short label: first word, max 8 chars
-        const label = cat.name.split(' ')[0].slice(0, 9);
+        const label =
+          cat.id === 'cat15'
+            ? 'Sanoat'
+            : cat.id === 'cat16'
+              ? 'B2B / Optom'
+              : cat.id === 'cat17'
+                ? 'Ishlatilgan'
+                : cat.name.split(' ')[0].slice(0, 9);
 
         return (
           <TouchableOpacity
