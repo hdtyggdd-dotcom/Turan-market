@@ -1,0 +1,32 @@
+import { db } from "./index";
+import {
+  categoriesTable,
+  subcategoriesTable,
+  categoryThresholdsTable,
+} from "./schema";
+
+type Sub = [slug: string, uz: string, ru: string, icon: string];
+
+type Cat = {
+  slug: string;
+  uz: string;
+  ru: string;
+  icon: string;
+  color: string;
+  descUz: string;
+  descRu: string;
+  allowWholesale: boolean;
+  subs: Sub[];
+};
+
+// Mavjud kategoriyalar (16 ta) o'chirilmaydi va o'zgarmaydi.
+// Yangilari ro'yxat oxiriga qo'shiladi.
+const START_ORDER = 100;
+
+const NEW_CATEGORIES: Cat[] = [
+  {
+    slug: "asbob-anjomlar",
+    uz: "Asbob-anjomlar",
+    ru: "Инструменты",
+    icon: "🛠️",
+    color: "#D97706",
