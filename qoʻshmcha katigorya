@@ -1,32 +1,59 @@
-import { db } from "./index";
-import {
-  categoriesTable,
-  subcategoriesTable,
-  categoryThresholdsTable,
-} from "./schema";
-
-type Sub = [slug: string, uz: string, ru: string, icon: string];
-
-type Cat = {
-  slug: string;
-  uz: string;
-  ru: string;
-  icon: string;
-  color: string;
-  descUz: string;
-  descRu: string;
-  allowWholesale: boolean;
-  subs: Sub[];
-};
-
-// Mavjud kategoriyalar (16 ta) o'chirilmaydi va o'zgarmaydi.
-// Yangilari ro'yxat oxiriga qo'shiladi.
-const START_ORDER = 100;
-
 const NEW_CATEGORIES: Cat[] = [
   {
     slug: "asbob-anjomlar",
-    uz: "Asbob-anjomlar",
-    ru: "Инструменты",
+    uz: "Asbob-uskunalar",
+    ru: "Инструменты и оборудование",
     icon: "🛠️",
     color: "#D97706",
+    descUz: "Oshxona, ustaxona va tomorqa uchun asbob-uskunalar",
+    descRu: "Инструменты для кухни, мастерской и огорода",
+    allowWholesale: true,
+    subs: [
+      ["oshxona-anjomlari", "Oshxona anjomlari", "Кухонные принадлежности", "🍳"],
+      ["ustaxona-asboblari", "Ustaxona asboblari", "Инструменты для мастерской", "🔨"],
+      ["tomorqa-bogh", "Tomorqa va bog' anjomlari", "Огород и сад", "🌱"],
+      ["elektr-asboblari", "Elektr asboblari", "Электроинструменты", "🔌"],
+      ["qurilish-asboblari", "Qurilish asboblari", "Строительные инструменты", "🏗️"],
+      ["uy-rozgor-anjomlari", "Uy-ro'zg'or anjomlari", "Бытовые принадлежности", "🏠"],
+      ["boshqa-asboblar", "Boshqa asbob-uskunalar", "Другие инструменты", "📦"],
+    ],
+  },
+  {
+    slug: "sport-fitnes",
+    uz: "Sport va fitnes",
+    ru: "Спорт и фитнес",
+    icon: "🏋️",
+    color: "#16A34A",
+    descUz: "Sport ovqatlari, kiyimlari va jihozlari",
+    descRu: "Спортивное питание, одежда и инвентарь",
+    allowWholesale: true,
+    subs: [
+      ["sport-oziq-ovqat", "Sport ovqatlari", "Спортивное питание", "🥤"],
+      ["sport-kiyimlari", "Sport kiyimlari", "Спортивная одежда", "👕"],
+      ["sport-jihozlari", "Sport jihozlari", "Спортивный инвентарь", "🏀"],
+      ["sport-poyabzallari", "Sport poyabzallari", "Спортивная обувь", "👟"],
+      ["yoga-pilates", "Yoga va pilates", "Йога и пилатес", "🧘"],
+      ["velosiped-yugurish", "Velosiped va yugurish", "Велосипед и бег", "🚴"],
+      ["boshqa-sport", "Boshqa sport tovarlari", "Другие спортивные товары", "📦"],
+    ],
+  },
+  {
+    slug: "parfyumeriya-kosmetika",
+    uz: "Parfyumeriya va kosmetika",
+    ru: "Парфюмерия и косметика",
+    icon: "💄",
+    color: "#DB2777",
+    descUz: "Atirlar, ayollar kosmetikasi va aksesuarlar",
+    descRu: "Духи, женская косметика и аксессуары",
+    allowWholesale: true,
+    subs: [
+      ["atirlar", "Atirlar", "Духи", "🧴"],
+      ["ayollar-kosmetikasi", "Ayollar kosmetikasi", "Женская косметика", "💄"],
+      ["aksesuarlar", "Aksesuarlar", "Аксессуары", "👜"],
+      ["teri-parvarishi", "Teri parvarishi", "Уход за кожей", "🧖"],
+      ["soch-parvarishi", "Soch parvarishi", "Уход за волосами", "💇"],
+      ["erkaklar-parvarishi", "Erkaklar uchun", "Для мужчин", "🧔"],
+      ["boshqa-parfyumeriya", "Boshqa mahsulotlar", "Другие товары", "📦"],
+    ],
+  },
+];
