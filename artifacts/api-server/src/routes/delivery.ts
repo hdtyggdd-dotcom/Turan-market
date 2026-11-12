@@ -59,6 +59,13 @@ router.post("/delivery/estimate", (req, res) => {
   const tLat = toLat ?? toDistrict.lat;
   const tLng = toLng ?? toDistrict.lng;
 
+  if (fLat === null || fLng === null || tLat === null || tLng === null) {
+    res.status(422).json({
+      error: "coordinates_required",
+      message: "Bu hudud uchun masofa hisoblashga aniq GPS nuqtasini belgilang.",
+    });
+    return;
+  }
   const distanceKm = calculateDistance(fLat, fLng, tLat, tLng);
   const distanceColor = getDistanceColor(distanceKm);
 

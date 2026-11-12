@@ -1,4 +1,4 @@
-modules = ["nodejs-24"]
+modules = ["nodejs-24", "python-base-3.13", "postgresql-16"]
 
 [deployment]
 router = "application"
@@ -11,6 +11,41 @@ env = { "CI" = "true" }
 [workflows]
 runButton = "Project"
 
+[[workflows.workflow]]
+name = "Project"
+mode = "parallel"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "cart-client-resilience"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "cart-server-sync"
+
+[[workflows.workflow]]
+name = "cart-client-resilience"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "pnpm --filter @workspace/osavdo-app run test:cart-resilience"
+
+[workflows.workflow.metadata]
+isValidation = true
+
+[[workflows.workflow]]
+name = "cart-server-sync"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "pnpm --filter @workspace/api-server run test:cart-sync"
+
+[workflows.workflow.metadata]
+isValidation = true
+
 [agent]
 stack = "PNPM_WORKSPACE"
 expertMode = true
@@ -18,3 +53,15 @@ expertMode = true
 [postMerge]
 path = "scripts/post-merge.sh"
 timeoutMs = 20000
+
+[nix]
+channel = "stable-25_05"
+
+[userenv]
+
+[userenv.shared]
+EXPO_PUBLIC_REVENUECAT_MODE = "test"
+EXPO_PUBLIC_REVENUECAT_TEST_API_KEY = "test_hhsWtHbJwwWQbERVaEHPGdDpDMG"
+REVENUECAT_GOOGLE_PLAY_STORE_APP_ID = "app7418a55ec3"
+REVENUECAT_PROJECT_ID = "projc1f3f985"
+REVENUECAT_TEST_STORE_APP_ID = "app4e2679c32d"

@@ -1,0 +1,24 @@
+// Configure signing only in the cloud checkout, before Android finalizes its DSL.
+// Never hardcode a password or print environment values.
+gradle.beforeProject { project ->
+    project.plugins.withId("com.android.application") {
+        project.extensions.getByName("androidComponents").finalizeDsl { android ->
+            def names = [
+                "COSMIS_UPLOAD_KEYSTORE_PATH",
+                "COSMIS_UPLOAD_STORE_PASSWORD",
+                "COSMIS_UPLOAD_KEY_PASSWORD",
+                "COSMIS_UPLOAD_KEY_ALIAS"
+            ]
+            if (names.any { !System.getenv(it) }) {
+                throw new GradleException("Missing the persistent Cosmis upload signing configuration.")
+            }
+            def signing = android.signingConfigs.maybeCreate("cosmisUpload")
+            signing.storeFile = project.file(System.getenv("COSMIS_UPLOAD_KEYSTORE_PATH"))
+            signing.storePassword = System.getenv("COSMIS_UPLOAD_STORE_PASSWORD")
+            signing.keyPassword = System.getenv("COSMIS_UPLOAD_KEY_PASSWORD")
+            signing.keyAlias = System.getenv("COSMIS_UPLOAD_KEY_ALIAS")
+            signing.storeType = "PKCS12"
+            android.buildTypes.getByName("release").signingConfig = signing
+        }
+    }
+}

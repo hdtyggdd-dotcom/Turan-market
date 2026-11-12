@@ -27,6 +27,10 @@ export function authenticateToken(
   }
 
   const user = users.find((u) => u.id === userId);
+  if (user?.deleted) {
+    res.status(410).json({ error: "account_deleted", message: "Akkaunt o‘chirilgan." });
+    return;
+  }
   if (!user) {
     res.status(401).json({ error: "unauthorized", message: "User not found" });
     return;

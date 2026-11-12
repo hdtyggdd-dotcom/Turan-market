@@ -1,6 +1,6 @@
 kind = "mobile"
 previewPath = "/"
-title = "O'Savdo"
+title = "Cosmis Market"
 version = "1.0.0"
 id = "artifacts/osavdo-app"
 router = "expo-domain"
@@ -15,7 +15,7 @@ localPort = 24490
 run = "pnpm --filter @workspace/osavdo-app run dev"
 
 [services.production]
-build = [ "pnpm", "--filter", "@workspace/osavdo-app", "run", "build" ]
+build = [ "pnpm", "--filter", "@workspace/osavdo-app", "run", "build:web" ]
 run = [ "pnpm", "--filter", "@workspace/osavdo-app", "run", "serve" ]
 
 [services.env]

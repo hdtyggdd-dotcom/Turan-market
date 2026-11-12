@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { Platform } from 'react-native';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { KeyboardProvider } from 'react-native-keyboard-controller';
@@ -13,18 +13,23 @@ import {
 } from '@expo-google-fonts/inter';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { setBaseUrl, setAuthTokenGetter } from '@workspace/api-client-react';
+import '@/services/cargo-background-location';
+import { reconcileCargoBackgroundSharing } from '@/services/cargo-background-location';
+import { AppState } from 'react-native';
 import { AuthProvider } from '@/context/AuthContext';
+import { CartProvider } from '@/context/CartContext';
 import { LocationProvider } from '@/context/LocationContext';
 import { I18nProvider } from '@/context/I18nContext';
+import { CargoBackgroundStatus } from '@/components/cargo/CargoBackgroundStatus';
+
+if (Platform.OS !== 'web') {
+  void SplashScreen.preventAutoHideAsync();
+}
+import { CargoPushListener } from '@/components/cargo/CargoNotifications';
+import React, { useEffect, useState } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { CountrySetupModal } from '@/components/CountrySetupModal';
-
-// Configure API client — generated paths already include /api prefix
-setBaseUrl(`https://${process.env.EXPO_PUBLIC_DOMAIN}`);
-setAuthTokenGetter(() => AsyncStorage.getItem('osavdo_token'));
-
-SplashScreen.preventAutoHideAsync();
+import { ENTRY_SETUP_VERSION, needsEntrySetup } from '@/services/entry-setup';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -36,9 +41,25 @@ const queryClient = new QueryClient({
 });
 
 function RootLayoutNav() {
+  useEffect(() => {
+    if (Platform.OS === 'web') return;
+    const check = () => { void reconcileCargoBackgroundSharing().catch(() => {}); };
+    check();
+    const listener = AppState.addEventListener('change', state => {
+      if (state === 'active') check();
+    });
+    const timer = setInterval(() => {
+      if (AppState.currentState === 'active') check();
+    }, 30_000);
+    return () => { listener.remove(); clearInterval(timer); };
+  }, []);
   return (
+    <>
+    <CargoPushListener />
     <Stack>
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+      <Stack.Screen name="subscription" options={{ headerShown: false }} />
+      <Stack.Screen name="admin/ai-budget" options={{ headerShown: true, title: 'AI maslahat budjeti' }} />
       <Stack.Screen
         name="auth/login"
         options={{ headerShown: false, animation: 'fade' }}
@@ -56,11 +77,12 @@ function RootLayoutNav() {
         }}
       />
     </Stack>
+    <CargoBackgroundStatus />
+    </>
   );
 }
 
 const COUNTRY_SETUP_KEY = 'osavdo_country_setup_done';
-
 export default function RootLayout() {
   const [fontsLoaded, fontError] = useFonts({
     Inter_400Regular,
@@ -68,21 +90,21 @@ export default function RootLayout() {
     Inter_600SemiBold,
     Inter_700Bold,
   });
-  const [showCountrySetup, setShowCountrySetup] = useState(false);
-
+  const [showCountrySetup, setShowCountrySetup] = useState<boolean | null>(null);
   useEffect(() => {
     if (fontsLoaded || fontError) {
-      SplashScreen.hideAsync();
-      AsyncStorage.getItem(COUNTRY_SETUP_KEY).then((done) => {
-        if (!done) setShowCountrySetup(true);
-      });
+      void SplashScreen.hideAsync();
+      AsyncStorage.multiGet([COUNTRY_SETUP_KEY, 'osavdo_location', 'osavdo_lang']).then((values) => {
+        const [[, done], [, savedLocation], [, savedLanguage]] = values;
+        setShowCountrySetup(needsEntrySetup(done, savedLocation, savedLanguage));
+      }).catch(() => setShowCountrySetup(true));
     }
   }, [fontsLoaded, fontError]);
 
-  if (!fontsLoaded && !fontError) return null;
+  if ((!fontsLoaded && !fontError) || showCountrySetup === null) return null;
 
-  function handleCountrySetupDone() {
-    AsyncStorage.setItem(COUNTRY_SETUP_KEY, '1').catch(() => {});
+  async function handleCountrySetupDone() {
+    await AsyncStorage.setItem(COUNTRY_SETUP_KEY, ENTRY_SETUP_VERSION);
     setShowCountrySetup(false);
   }
 
@@ -92,17 +114,16 @@ export default function RootLayout() {
         <QueryClientProvider client={queryClient}>
           <I18nProvider>
             <AuthProvider>
+              <CartProvider>
               <LocationProvider>
                 <GestureHandlerRootView style={{ flex: 1 }}>
                   <KeyboardProvider>
                     <RootLayoutNav />
-                    <CountrySetupModal
-                      visible={showCountrySetup}
-                      onDone={handleCountrySetupDone}
-                    />
+                    <CountrySetupModal visible={showCountrySetup} onDone={handleCountrySetupDone} />
                   </KeyboardProvider>
                 </GestureHandlerRootView>
               </LocationProvider>
+              </CartProvider>
             </AuthProvider>
           </I18nProvider>
         </QueryClientProvider>

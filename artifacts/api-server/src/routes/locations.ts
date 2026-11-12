@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { countries, regions, districts, neighborhoods } from "../data/store.js";
+import { canonicalDistrictId } from "../data/uzbekistan-districts.js";
 
 const router = Router();
 
@@ -16,7 +17,7 @@ function haversine(lat1: number, lng1: number, lat2: number, lng2: number): numb
 // ISO country_code → our country IDs
 const ISO_MAP: Record<string, string> = {
   uz: 'uz', kz: 'kz', kg: 'kg', tj: 'tj',
-  tm: 'tm', af: 'af', ru: 'ru', cn: 'cn', ir: 'ir',
+  tm: 'tm', af: 'af', ru: 'ru', cn: 'cn', ir: 'ir', tr: 'tr',
 };
 
 // GET /locations/countries
@@ -37,8 +38,8 @@ router.get("/locations/regions", (req, res) => {
 router.get("/locations/districts", (req, res) => {
   const { regionId } = req.query as { regionId?: string };
   const result = regionId
-    ? districts.filter((d) => d.regionId === regionId)
-    : districts;
+    ? districts.filter((d) => d.regionId === regionId && d.selectable !== false)
+    : districts.filter((d) => d.selectable !== false);
   res.json(result);
 });
 
@@ -46,7 +47,7 @@ router.get("/locations/districts", (req, res) => {
 router.get("/locations/neighborhoods", (req, res) => {
   const { districtId } = req.query as { districtId?: string };
   const result = districtId
-    ? neighborhoods.filter((n) => n.districtId === districtId)
+    ? neighborhoods.filter((n) => canonicalDistrictId(n.districtId) === canonicalDistrictId(districtId))
     : neighborhoods;
   res.json(result);
 });
@@ -64,7 +65,7 @@ router.post("/locations/detect", async (req, res) => {
     // Reverse geocode via Nominatim
     const nominatim = await fetch(
       `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`,
-      { headers: { 'User-Agent': 'OSavdo/1.0 (osavdo.uz)' } }
+      { headers: { 'User-Agent': 'Cosmis/1.0' } }
     );
     const geo = await nominatim.json() as { address?: { country_code?: string } };
     const isoCode = geo?.address?.country_code?.toLowerCase() ?? '';
@@ -84,6 +85,30 @@ router.post("/locations/detect", async (req, res) => {
       if (d < minDist) { minDist = d; nearest = r; }
     }
 
+    // For Uzbekistan and other countries with district data, also resolve
+    // the closest district so listing creation needs no manual selection.
+    const countryDistricts = districts.filter(d => d.regionId === nearest.id && d.selectable !== false);
+    let nearestDistrict = countryDistricts[0];
+    let districtDist = Infinity;
+    for (const d of countryDistricts) {
+      if (d.lat === null || d.lng === null) continue;
+      const distance = haversine(lat, lng, d.lat, d.lng);
+      if (distance < districtDist) {
+        districtDist = distance;
+        nearestDistrict = d;
+      }
+    }
+    // New districts without a verified reference point can still be resolved
+    // from a real reverse-geocoder address, not from invented coordinates.
+    const normalizeName = (name: string) => name.toLowerCase()
+      .replace(/\b(tumani|district|shahri|shahar)\b/g, "").replace(/[^a-zа-яё]/g, "");
+    for (const key of ["borough", "city_district", "suburb", "district", "county", "city"]) {
+      const addressName = (geo.address as Record<string, string> | undefined)?.[key];
+      if (!addressName) continue;
+      const named = countryDistricts.find(d => normalizeName(d.name) === normalizeName(addressName));
+      if (named) { nearestDistrict = named; break; }
+    }
+
     const country = countries.find(c => c.id === countryId)!;
     res.json({
       countryId,
@@ -93,6 +118,8 @@ router.post("/locations/detect", async (req, res) => {
       currency: country.currency,
       regionId: nearest.id,
       regionName: nearest.name,
+      districtId: nearestDistrict?.id,
+      districtName: nearestDistrict?.name,
       distanceKm: Math.round(minDist),
     });
   } catch {

@@ -1,3 +1,9 @@
 {
-  "installCommand": "pnpm install --no-frozen-lockfile"
+  "framework": null,
+  "installCommand": "pnpm install",
+  "buildCommand": "pnpm --filter ./artifacts/osavdo-app run build:web",
+  "outputDirectory": "artifacts/osavdo-app/web-build",
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
 }

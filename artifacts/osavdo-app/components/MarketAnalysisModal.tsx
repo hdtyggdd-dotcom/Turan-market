@@ -12,7 +12,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import { useColors } from '@/hooks/useColors';
-import { useAnalyseListingMarket } from '@workspace/api-client-react';
+import { useAnalyseListingMarket, getAnalyseListingMarketQueryKey } from '@workspace/api-client-react';
 
 interface MarketAnalysisModalProps {
   visible: boolean;
@@ -40,10 +40,15 @@ export function MarketAnalysisModal({ visible, listingId, onClose }: MarketAnaly
   const colors = useColors();
   const insets = useSafeAreaInsets();
 
-  const { data, isLoading, isError } = useAnalyseListingMarket(
+  const { data, isLoading, isError, isFetching, refetch } = useAnalyseListingMarket(
     listingId ?? '',
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    { query: { enabled: !!listingId && visible } as any },
+    { query: {
+      queryKey: getAnalyseListingMarketQueryKey(listingId ?? ''),
+      enabled: !!listingId && visible,
+      retry: false,
+      staleTime: 0,
+      refetchOnWindowFocus: false,
+    } },
   );
 
   const pos = data ? (POSITION_MAP[data.pricePosition] ?? POSITION_MAP.malumot_yoq) : null;
@@ -66,7 +71,9 @@ export function MarketAnalysisModal({ visible, listingId, onClose }: MarketAnaly
             <Text style={styles.headerIcon}>🤖</Text>
             <View>
               <Text style={[styles.headerTitle, { color: colors.text }]}>AI Bozor Tahlili</Text>
-              <Text style={[styles.headerSub, { color: colors.mutedForeground }]}>E'loningiz tahlil qilindi</Text>
+              <Text style={[styles.headerSub, { color: colors.mutedForeground }]}>
+                {isFetching ? 'AI maslahat tayyorlanmoqda' : data?.advice ? 'AI maslahat tayyor' : 'Bozor ko‘rsatkichlari'}
+              </Text>
             </View>
           </View>
           <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
@@ -89,6 +96,9 @@ export function MarketAnalysisModal({ visible, listingId, onClose }: MarketAnaly
             <Text style={[styles.loadingText, { color: colors.mutedForeground }]}>
               Tahlil yuklanmadi. Keyinroq urinib ko'ring.
             </Text>
+            <TouchableOpacity disabled={isFetching} onPress={() => { void refetch(); }} style={[styles.closeButton, { backgroundColor: colors.primary }]}>
+              <Text style={{ color: colors.primaryForeground }}>Qayta urinish</Text>
+            </TouchableOpacity>
           </View>
         ) : (
           <ScrollView contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 24 }]}>
@@ -117,7 +127,7 @@ export function MarketAnalysisModal({ visible, listingId, onClose }: MarketAnaly
               </View>
               <Text style={[styles.competitionNote, { color: colors.mutedForeground }]}>
                 {data.totalCompetitors === 0
-                  ? '🚀 Siz bu subkategoriyada dastlabki sotuvchilardansiz!'
+                  ? 'Ilovada mos narx taqqoslash uchun yetarli e’lon yo‘q.'
                   : data.totalCompetitors < 5
                   ? '✅ Raqobat kam — ajoyib imkoniyat!'
                   : data.totalCompetitors < 20
@@ -131,6 +141,17 @@ export function MarketAnalysisModal({ visible, listingId, onClose }: MarketAnaly
               <View style={[styles.card, styles.adviceCard, { backgroundColor: colors.primary + '12', borderColor: colors.primary + '30' }]}>
                 <Text style={[styles.cardTitle, { color: colors.primary }]}>💡 Maslahat</Text>
                 <Text style={[styles.adviceText, { color: colors.text }]}>{data.advice}</Text>
+              </View>
+            )}
+            <Text style={{ color: colors.mutedForeground, fontSize: 12 }}>
+              Taqqoslash faqat ilovadagi e’lonlar asosida; bu butun bozor narxi yoki sotilish kafolati emas.
+            </Text>
+            {!data.advice && (
+              <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
+                <Text style={{ color: colors.text }}>{data.adviceError ?? 'AI maslahat hozir olinmadi.'}</Text>
+                <TouchableOpacity disabled={isFetching} onPress={() => { void refetch(); }} style={[styles.closeButton, { backgroundColor: colors.primary }]}>
+                  {isFetching ? <ActivityIndicator color={colors.primaryForeground} /> : <Text style={{ color: colors.primaryForeground }}>AI maslahatni qayta olish</Text>}
+                </TouchableOpacity>
               </View>
             )}
 
