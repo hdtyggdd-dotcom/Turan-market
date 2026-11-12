@@ -12,7 +12,8 @@ export function CountrySetupModal({ visible, onDone }: { visible: boolean; onDon
   const { setLocation, countryId: savedCountryId } = useLocation();
   const { setLang } = useI18n();
   const { data: countries, isLoading, isError, refetch } = useGetCountries();
-  const [country, setCountry] = useState<string | null>(null);
+  const { data: rawCountries, isLoading, isError, refetch } = useGetCountries();
+const countries = Array.isArray(rawCountries) ? rawCountries : [];
   const [language, setLanguage] = useState<LangCode | null>(null);
   const [busy, setBusy] = useState(false);
   const [saving, setSaving] = useState(false);
