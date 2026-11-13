@@ -1165,7 +1165,42 @@ categories.push(
       { id: 'sub21_11', name: "Boshqa kiyim-kechaklar", nameRu: "Другая одежда", categoryId: 'cat21' },
     ],
   },
-);
+);  {
+    id: 'cat22', name: "Asbob-uskunalar", nameRu: "Инструменты и оборудование", icon: "🛠️",
+    subcategories: [
+      { id: 'sub22_01', name: "Oshxona anjomlari", nameRu: "Кухонные принадлежности", categoryId: 'cat22' },
+      { id: 'sub22_02', name: "Ustaxona asboblari", nameRu: "Инструменты для мастерской", categoryId: 'cat22' },
+      { id: 'sub22_03', name: "Tomorqa va bog' anjomlari", nameRu: "Огород и сад", categoryId: 'cat22' },
+      { id: 'sub22_04', name: "Elektr asboblari", nameRu: "Электроинструменты", categoryId: 'cat22' },
+      { id: 'sub22_05', name: "Qurilish asboblari", nameRu: "Строительные инструменты", categoryId: 'cat22' },
+      { id: 'sub22_06', name: "Uy-ro'zg'or anjomlari", nameRu: "Бытовые принадлежности", categoryId: 'cat22' },
+      { id: 'sub22_07', name: "Boshqa asbob-uskunalar", nameRu: "Другие инструменты", categoryId: 'cat22' },
+    ],
+  },
+  {
+    id: 'cat23', name: "Sport va fitnes", nameRu: "Спорт и фитнес", icon: "🏋️",
+    subcategories: [
+      { id: 'sub23_01', name: "Sport ovqatlari", nameRu: "Спортивное питание", categoryId: 'cat23' },
+      { id: 'sub23_02', name: "Sport kiyimlari", nameRu: "Спортивная одежда", categoryId: 'cat23' },
+      { id: 'sub23_03', name: "Sport jihozlari", nameRu: "Спортивный инвентарь", categoryId: 'cat23' },
+      { id: 'sub23_04', name: "Sport poyabzallari", nameRu: "Спортивная обувь", categoryId: 'cat23' },
+      { id: 'sub23_05', name: "Yoga va pilates", nameRu: "Йога и пилатес", categoryId: 'cat23' },
+      { id: 'sub23_06', name: "Velosiped va yugurish", nameRu: "Велосипед и бег", categoryId: 'cat23' },
+      { id: 'sub23_07', name: "Boshqa sport tovarlari", nameRu: "Другие спортивные товары", categoryId: 'cat23' },
+    ],
+  },
+  {
+    id: 'cat24', name: "Parfyumeriya va kosmetika", nameRu: "Парфюмерия и косметика", icon: "💄",
+    subcategories: [
+      { id: 'sub24_01', name: "Atirlar", nameRu: "Духи", categoryId: 'cat24' },
+      { id: 'sub24_02', name: "Ayollar kosmetikasi", nameRu: "Женская косметика", categoryId: 'cat24' },
+      { id: 'sub24_03', name: "Aksesuarlar", nameRu: "Аксессуары", categoryId: 'cat24' },
+      { id: 'sub24_04', name: "Teri parvarishi", nameRu: "Уход за кожей", categoryId: 'cat24' },
+      { id: 'sub24_05', name: "Soch parvarishi", nameRu: "Уход за волосами", categoryId: 'cat24' },
+      { id: 'sub24_06', name: "Erkaklar uchun", nameRu: "Для мужчин", categoryId: 'cat24' },
+      { id: 'sub24_07', name: "Boshqa mahsulotlar", nameRu: "Другие товары", categoryId: 'cat24' },
+    ],
+  },
 
 export const users: StoredUser[] = [
   {
