@@ -1165,7 +1165,7 @@ categories.push(
       { id: 'sub21_11', name: "Boshqa kiyim-kechaklar", nameRu: "Другая одежда", categoryId: 'cat21' },
     ],
   },
-);  {
+  {
     id: 'cat22', name: "Asbob-uskunalar", nameRu: "Инструменты и оборудование", icon: "🛠️",
     subcategories: [
       { id: 'sub22_01', name: "Oshxona anjomlari", nameRu: "Кухонные принадлежности", categoryId: 'cat22' },
@@ -1201,7 +1201,7 @@ categories.push(
       { id: 'sub24_07', name: "Boshqa mahsulotlar", nameRu: "Другие товары", categoryId: 'cat24' },
     ],
   },
-
+);
 export const users: StoredUser[] = [
   {
     id: 'u1',
